@@ -1,0 +1,13 @@
+# 固定toolchainの定期検査。稼働コンテナーの資源を圧迫しないようCPUを制限する。
+[Unit]
+Description=OimoBBS recurring security checks
+[Service]
+Type=oneshot
+WorkingDirectory=/home/patatan/OimoBBS
+ExecStart=/home/patatan/.local/bin/mise exec -- bash scripts/check-security-continuous.sh
+UMask=0077
+Nice=15
+CPUQuota=100%
+MemoryMax=2G
+TimeoutStartSec=30min
+NoNewPrivileges=true

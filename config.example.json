@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "data_dir": "./var/site",
+  "public": {
+    "listen": "127.0.0.1:9080",
+    "base_url": "http://127.0.0.1:9080",
+    "tls_cert_file": "",
+    "tls_key_file": ""
+  },
+  "admin": {
+    "listen": "",
+    "transport": "public_path",
+    "origin": "http://127.0.0.1:9080/admin/"
+  },
+  "trusted_proxies": [],
+  "cache_bytes": 268435456,
+  "egress_budget_bits_per_second": 80000000,
+  "edge": null,
+  "maintenance": null,
+  "auto_reports": null
+}

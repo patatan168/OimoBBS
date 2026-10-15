@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "delivery": {
+    "budget_bits_per_second": 80000000,
+    "burst_bytes": 32768,
+    "burst_max_bytes": 1048576,
+    "burst_min_bytes": 32768,
+    "burst_milliseconds": 2,
+    "small_reservation_bytes": 1024,
+    "head_bypass_limit": 4,
+    "body_round_milliseconds": 50,
+    "body_min_bytes": 512,
+    "chunk_bytes": 16384,
+    "wait_milliseconds": 250,
+    "subject_active_writes": 4,
+    "subject_queue": 32,
+    "global_queue": 4096,
+    "public_requests": 2048,
+    "public_ip_requests": 32,
+    "public_connections": 4096,
+    "admin_connections": 64
+  },
+  "independent_cleanup": {"key_bytes": 32, "mode": "verification_only"},
+  "control_cleanup": {"minimum_reader": 21, "per_owner_limit": 128},
+  "expiry_cases": [
+    {"expires_at_ns": "100", "committed_at_ns": "99", "removable": false},
+    {"expires_at_ns": "100", "committed_at_ns": "100", "removable": true},
+    {"expires_at_ns": "100", "committed_at_ns": "101", "removable": true}
+  ]
+}

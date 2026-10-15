@@ -1,0 +1,17 @@
+<!-- 匿名Cookieの失効。主体ID原文・署名Cookie・投稿記録を画面へ渡さない。 -->
+<!doctype html><html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>匿名Cookie — OimoBBS管理</title>{{template "admin-assets" .}}</head>
+<body class="admin">{{template "admin-header" .}}<main id="main" tabindex="-1"><h1>匿名Cookie</h1>
+{{if .Message}}<p role="alert">{{.Message}}</p>{{end}}
+{{if .State.Enabled}}<dl><dt>サイトのモード</dt><dd>{{choiceLabel "cookie" .State.Mode}}</dd><dt>世代</dt><dd>{{.State.Generation}}</dd><dt>個別失効</dt><dd>{{.State.Revocations}}件</dd></dl>
+<p>失効後は該当Cookieを匿名主体として使用できません。IP・ネットワークの投稿制限と発行履歴は維持します。再発行自体を止めるには板のIP/CIDR規制も設定してください。</p>
+<p>操作前に<a href="{{adminBase}}/reauth">再認証</a>し、この画面を読み直してください。再認証は10分間有効です。</p>
+<form class="field-grid" method="post" action="{{adminBase}}/anonymous">
+<input type="hidden" name="csrf" value="{{.Fields.Get "csrf"}}"><input type="hidden" name="revision" value="{{.Fields.Get "revision"}}"><input type="hidden" name="request_id" value="{{.Fields.Get "request_id"}}">
+<p><label>操作 <select name="operation"><option value="subject" {{if eq (.Fields.Get "operation") "subject"}}selected{{end}}>指定した匿名主体の失効</option><option value="all" {{if eq (.Fields.Get "operation") "all"}}selected{{end}}>全Cookie（全員に再発行が必要）</option></select></label></p>
+<input type="hidden" name="mode" value="required">
+<p>全投稿で匿名Cookieが必須です。板ごとの設定で解除できません。Cookieの失効と待機時間は引き続き設定できます。</p>
+<p><label>匿名主体HMAC <input name="subject_hmac" value="{{.Fields.Get "subject_hmac"}}" maxlength="64" autocomplete="off"></label></p>
+<p>個別失効では運営が把握した主体HMACを入力します。全体失効では空欄にします。Cookieの値そのものは入力しないでください。</p>
+<button type="submit">操作を保存する</button></form>
+{{else}}<p>匿名Cookie機能は無効です。停止中の管理CLIで投稿間隔制限と匿名Cookieを有効化してください。</p>{{end}}
+</main>{{template "footer" .}}</body></html>

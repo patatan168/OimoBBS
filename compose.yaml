@@ -1,0 +1,61 @@
+# patatanmc.f5.si用の検証構成。80は証明書取得用、443はアプリの直結TLS。
+name: oimobbs-validation
+services:
+  certificates:
+    image: certbot/certbot:v5.8.0
+    entrypoint: ["/bin/sh", "/deploy/certificates.sh"]
+    ports:
+      - "80:80"
+    volumes:
+      - certificates:/etc/letsencrypt
+      - tls:/tls
+      - ./deploy:/deploy:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "test -s /tls/server.pem"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 120s
+    mem_limit: 256m
+    pids_limit: 64
+    logging:
+      driver: json-file
+      options: {max-size: "5m", max-file: "2"}
+
+  bbs:
+    build: .
+    image: oimobbs-validation:local
+    command: ["validation-serve", "--config", "/etc/oimobbs/config.json", "--init-if-missing", "--board-key", "oimo", "--board-name", "検証板"]
+    depends_on:
+      certificates:
+        condition: service_healthy
+    ports:
+      - "443:8443"
+    volumes:
+      - data:/data
+      - tls:/tls:ro
+      - ./deploy/config.json:/etc/oimobbs/config.json:ro
+    read_only: true
+    tmpfs: ["/tmp:uid=10001,gid=10001,mode=0700"]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    init: true
+    restart: unless-stopped
+    stop_grace_period: 35s
+    healthcheck:
+      test: ["CMD", "oimobbs", "healthcheck", "--config", "/etc/oimobbs/config.json"]
+      interval: 15s
+      timeout: 7s
+      retries: 3
+      start_period: 30s
+    mem_limit: 512m
+    cpus: 2
+    pids_limit: 128
+    logging:
+      driver: json-file
+      options: {max-size: "5m", max-file: "2"}
+volumes:
+  certificates:
+  tls:
+  data:

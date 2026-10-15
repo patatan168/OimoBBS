@@ -1,0 +1,11 @@
+# 復元検査を通ったコピーだけをホスト側で暗号化する。
+[Unit]
+Description=OimoBBS authenticated encrypted backups
+[Service]
+Type=oneshot
+WorkingDirectory=/home/patatan/OimoBBS
+ExecStart=/usr/bin/python3 tools/seal_online_backup.py --container oimobbs-validation-bbs-1 --image oimobbs-validation:security-20261012 --source var/security/online-backup --output var/security/encrypted-backups
+UMask=0077
+Nice=15
+NoNewPrivileges=true
+TimeoutStartSec=10min

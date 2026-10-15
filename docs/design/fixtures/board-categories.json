@@ -1,0 +1,18 @@
+{
+  "feature": "board_categories",
+  "minimum_reader": 77,
+  "admin_route": "/board-categories",
+  "role": "site_admin",
+  "actions": ["add", "rename", "move", "delete", "assign"],
+  "category_storage": "site:state.category",
+  "assignment_storage": "board_directory.category_id",
+  "atomic_save": true,
+  "csrf": true,
+  "cas_conflict": 412,
+  "idempotency_conflict": 409,
+  "category_limit": 256,
+  "delete_board_on_category_delete": false,
+  "unassigned_last": true,
+  "public_outputs": ["site_index", "bbsmenu.html", "bbsmenu.json"],
+  "dat_changed": false
+}

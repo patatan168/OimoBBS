@@ -1,0 +1,9 @@
+# ホストユーザーでDocker認証ログを回収する。アプリへDocker socketを渡さない。
+[Unit]
+Description=OimoBBS authentication security monitor
+[Service]
+Type=oneshot
+WorkingDirectory=/home/patatan/OimoBBS
+ExecStart=/usr/bin/python3 tools/security_monitor.py --container oimobbs-validation-bbs-1 --output var/security/authentication
+UMask=0077
+NoNewPrivileges=true

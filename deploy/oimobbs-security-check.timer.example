@@ -1,0 +1,9 @@
+# 日次でfuzz・認証境界・公式脆弱性情報を検査する。
+[Unit]
+Description=OimoBBS recurring security checks timer
+[Timer]
+OnCalendar=*-*-* 04:20:00
+RandomizedDelaySec=15min
+Persistent=true
+[Install]
+WantedBy=timers.target

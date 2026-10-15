@@ -1,0 +1,231 @@
+{
+  "schema": "cookie-rule-settings-v1",
+  "cookie_cases": [
+    {
+      "settings": {
+        "cookie_mode": "off",
+        "token_wait_seconds": 0
+      },
+      "valid": false
+    },
+    {
+      "settings": {
+        "cookie_mode": "optional",
+        "token_wait_seconds": 0
+      },
+      "valid": false
+    },
+    {
+      "settings": {
+        "cookie_mode": "required",
+        "token_wait_seconds": 0
+      },
+      "valid": true
+    },
+    {
+      "settings": {
+        "cookie_mode": "required",
+        "token_wait_seconds": 3600
+      },
+      "valid": true
+    },
+    {
+      "settings": {
+        "cookie_mode": "required",
+        "token_wait_seconds": 3601
+      },
+      "valid": false
+    },
+    {
+      "settings": {
+        "cookie_mode": "off",
+        "token_wait_seconds": 1
+      },
+      "valid": false
+    },
+    {
+      "settings": {
+        "cookie_mode": "optional",
+        "token_wait_seconds": 1
+      },
+      "valid": false
+    },
+    {
+      "settings": {
+        "cookie_mode": "bad",
+        "token_wait_seconds": 0
+      },
+      "valid": false
+    }
+  ],
+  "rule_cases": [
+    {
+      "input": {
+        "target": "192.0.2.1",
+        "operations": [
+          "reply"
+        ],
+        "duration_minutes": 60,
+        "reason_code": "spam",
+        "match": null,
+        "extra_conditions": [],
+        "allow_rule_ids": [],
+        "rate_override": null
+      },
+      "valid": true
+    },
+    {
+      "input": {
+        "target": "192.0.2.0/24",
+        "operations": [
+          "create",
+          "reply"
+        ],
+        "duration_minutes": 43200,
+        "reason_code": "abuse",
+        "match": {
+          "field": "network",
+          "operator": "cidr",
+          "effect": "require_token"
+        },
+        "extra_conditions": [],
+        "allow_rule_ids": [],
+        "rate_override": null
+      },
+      "valid": true
+    },
+    {
+      "input": {
+        "target": "(?m)^禁止[0-9]+$",
+        "operations": [
+          "reply"
+        ],
+        "duration_minutes": 60,
+        "reason_code": "spam",
+        "match": {
+          "field": "body",
+          "operator": "regexp",
+          "effect": "deny"
+        },
+        "extra_conditions": [],
+        "allow_rule_ids": [],
+        "rate_override": null
+      },
+      "valid": true
+    },
+    {
+      "input": {
+        "target": "192.0.2.1",
+        "operations": [
+          "reply"
+        ],
+        "duration_minutes": 1,
+        "reason_code": "spam",
+        "match": {
+          "field": "domain",
+          "operator": "exact",
+          "effect": "deny"
+        },
+        "extra_conditions": [],
+        "allow_rule_ids": [],
+        "rate_override": null
+      },
+      "valid": true
+    },
+    {
+      "input": {
+        "target": "[",
+        "operations": [
+          "reply"
+        ],
+        "duration_minutes": 1,
+        "reason_code": "spam",
+        "match": {
+          "field": "body",
+          "operator": "regexp",
+          "effect": "deny"
+        },
+        "extra_conditions": [],
+        "allow_rule_ids": [],
+        "rate_override": null
+      },
+      "valid": false
+    },
+    {
+      "input": {
+        "target": "Example.test",
+        "operations": [
+          "reply"
+        ],
+        "duration_minutes": 1,
+        "reason_code": "spam",
+        "match": {
+          "field": "domain",
+          "operator": "suffix",
+          "effect": "deny"
+        },
+        "extra_conditions": [],
+        "allow_rule_ids": [],
+        "rate_override": null
+      },
+      "valid": false
+    },
+    {
+      "input": {
+        "target": "example.test",
+        "operations": [
+          "reply"
+        ],
+        "duration_minutes": 1,
+        "reason_code": "spam",
+        "match": {
+          "field": "domain",
+          "operator": "contains",
+          "effect": "deny"
+        },
+        "extra_conditions": [],
+        "allow_rule_ids": [],
+        "rate_override": null
+      },
+      "valid": false
+    },
+    {
+      "input": {
+        "target": "192.0.2.1",
+        "operations": [
+          "reply"
+        ],
+        "duration_minutes": 1,
+        "reason_code": "spam",
+        "match": {
+          "field": "domain",
+          "operator": "suffix",
+          "effect": "deny"
+        },
+        "extra_conditions": [],
+        "allow_rule_ids": [],
+        "rate_override": null
+      },
+      "valid": false
+    },
+    {
+      "input": {
+        "target": "secret",
+        "operations": [
+          "reply"
+        ],
+        "duration_minutes": 1,
+        "reason_code": "spam",
+        "match": {
+          "field": "password",
+          "operator": "exact",
+          "effect": "deny"
+        },
+        "extra_conditions": [],
+        "allow_rule_ids": [],
+        "rate_override": null
+      },
+      "valid": false
+    }
+  ]
+}

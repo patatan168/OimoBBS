@@ -1,0 +1,27 @@
+<!-- 稼働中に変更できる運用設定。保存済み設定は再起動後も優先する。 -->
+<!doctype html><html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>運用設定 — OimoBBS管理</title>{{template "admin-assets" .}}</head>
+<body class="admin">{{template "admin-header" .}}<main id="main" tabindex="-1"><h1>運用設定</h1>
+<p>保存すると稼働中の処理に反映され、再起動後も引き継ぎます。実行中の整理は終了まで継続し、次の処理から新しい上限を使います。</p>
+<p><a href="{{adminBase}}/waf">WAFのON/OFFと検査範囲</a></p>
+<form method="post" action="{{adminBase}}/operations">
+<input type="hidden" name="csrf" value="{{.CSRF}}"><input type="hidden" name="request_id" value="{{.RequestID}}"><input type="hidden" name="revision" value="{{.State.ETag}}">
+<section class="card"><h2>保存の自動整理</h2><div class="field-grid">
+<p><label>自動実行 <select name="maintenance_enabled"><option value="true" {{if .State.Settings.Maintenance.Enabled}}selected{{end}}>有効</option><option value="false" {{if not .State.Settings.Maintenance.Enabled}}selected{{end}}>無効</option></select></label></p>
+<p><label>実行間隔（秒）<input type="number" name="interval_seconds" min="60" max="86400" value="{{.State.Settings.Maintenance.IntervalSeconds}}" required></label></p>
+<p><label>1回に調べるスレッド数 <input type="number" name="max_threads" min="1" max="1000" value="{{.State.Settings.Maintenance.MaxThreads}}" required></label></p>
+<p><label>1回の処理時間上限（秒）<input type="number" name="max_seconds" min="1" max="300" value="{{.State.Settings.Maintenance.MaxSeconds}}" required></label></p>
+</div><p>時間上限はスレッド間で判定します。処理中のスレッドは完了まで続けます。</p></section>
+<section class="card"><h2>通報による自動停止</h2>{{if .State.ReportBoard}}<p>通報受付板：{{.State.ReportBoard}}</p>{{else}}<p>自動通報は起動設定で無効になっています。以下の条件は有効化後に使います。</p>{{end}}<div class="field-grid">
+<p><label>通報を集計する期間（分）<input type="number" name="window_minutes" min="1" max="10080" value="{{.State.Settings.Reports.WindowMinutes}}" required></label></p>
+<p><label>停止に必要な票数 <input type="number" name="quorum" min="1" max="20" value="{{.State.Settings.Reports.Quorum}}" required></label></p>
+<p><label>自動停止の期間（分）<input type="number" name="stop_minutes" min="1" max="1440" value="{{.State.Settings.Reports.StopMinutes}}" required></label></p>
+</div><p>異なる匿名ID・IPからの票を集計します。条件を変更すると集計を開始し直します。通報履歴と現在の停止期限は保持します。保存すると、各板の通報受付スレッドの案内も新しい期間・票数・停止期間に自動で変わります。閲覧中のスレッドは再読み込みすると反映されます。</p></section>
+<section class="card"><h2>配信の帯域・キャッシュ</h2><div class="field-grid">
+<p><label>公開・管理の合計送信予算（Mbps）<input type="number" name="egress_mbps" min="1" max="1000" value="{{.State.Settings.EgressMbps}}" required></label></p>
+<p><label>公開本文・圧縮結果の保持上限（MiB）<input type="number" name="cache_mib" min="0" max="128" value="{{.State.Settings.CacheMiB}}" required></label></p>
+<p><label>HTML生成・圧縮の同時処理数 <input type="number" name="cache_workers" min="1" max="8" value="{{.State.Settings.CacheWorkers}}" required></label></p>
+</div><p>送信予算には通信ヘッダ分の見積もりを含みます。本文に使える帯域は応答サイズによって変わります。再送や他のサービスの通信を含む回線全体の上限は保証しません。</p><p>キャッシュ容量を0にすると保持を止めます。容量を減らすと古い版から解放します。同時処理数を減らしても実行中の生成は完了まで続けます。</p></section>
+<button type="submit">運用設定を保存する</button> <a href="{{adminBase}}/operations">最新の設定を読み直す</a>
+</form>
+<section class="card"><h2>ほかの設定</h2><p><a href="{{adminBase}}/boards">板の投稿条件・表示・規制</a>、<a href="{{adminBase}}/anonymous">匿名Cookie</a>、<a href="{{adminBase}}/networks">回線分類</a>は各管理画面で調整できます。</p><p>待受アドレス・公開URL・TLS証明書・保存先・通報受付板の指定は起動設定です。変更にはサーバーの再起動が必要です。CPU・メモリの割当はコンテナ設定で管理します。</p></section>
+<p><a href="{{adminBase}}/maintenance">稼働状況を確認する</a></p></main>{{template "footer" .}}</body></html>

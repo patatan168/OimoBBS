@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "data_dir": "./var/site",
+  "public": {
+    "listen": "0.0.0.0:8443",
+    "base_url": "https://bbs.example.com:8443",
+    "tls_cert_file": "./tls/fullchain.pem",
+    "tls_key_file": "./tls/privkey.pem"
+  },
+  "admin": {
+    "listen": "",
+    "transport": "public_path",
+    "origin": "https://bbs.example.com:8443/admin/"
+  },
+  "trusted_proxies": [],
+  "cache_bytes": 268435456,
+  "egress_budget_bits_per_second": 80000000,
+  "edge": null,
+  "maintenance": null,
+  "auto_reports": null
+}

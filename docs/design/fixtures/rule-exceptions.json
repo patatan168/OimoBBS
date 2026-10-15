@@ -1,0 +1,142 @@
+{
+  "schema": 1,
+  "reader": 23,
+  "cases": [
+    {
+      "name": "current_deny",
+      "effect": {
+        "type": "deny",
+        "rate": null,
+        "revoked_at_ns": null,
+        "ids": []
+      },
+      "valid": true
+    },
+    {
+      "name": "current_required",
+      "effect": {
+        "type": "require_token",
+        "rate": null,
+        "revoked_at_ns": null,
+        "ids": []
+      },
+      "valid": true
+    },
+    {
+      "name": "allow_one",
+      "effect": {
+        "type": "allow_rule_ids",
+        "ids": [
+          "11111111111111111111111111111111"
+        ],
+        "rate": null,
+        "revoked_at_ns": null
+      },
+      "valid": true
+    },
+    {
+      "name": "allow_two",
+      "effect": {
+        "type": "allow_rule_ids",
+        "ids": [
+          "11111111111111111111111111111111",
+          "22222222222222222222222222222222"
+        ],
+        "rate": null,
+        "revoked_at_ns": null
+      },
+      "valid": true
+    },
+    {
+      "name": "missing_ids",
+      "effect": {
+        "type": "allow_rule_ids",
+        "rate": null,
+        "revoked_at_ns": null
+      },
+      "valid": false
+    },
+    {
+      "name": "empty_ids",
+      "effect": {
+        "type": "allow_rule_ids",
+        "ids": [],
+        "rate": null,
+        "revoked_at_ns": null
+      },
+      "valid": false
+    },
+    {
+      "name": "null_ids",
+      "effect": {
+        "type": "allow_rule_ids",
+        "ids": null,
+        "rate": null,
+        "revoked_at_ns": null
+      },
+      "valid": false
+    },
+    {
+      "name": "duplicate_ids",
+      "effect": {
+        "type": "allow_rule_ids",
+        "ids": [
+          "11111111111111111111111111111111",
+          "11111111111111111111111111111111"
+        ],
+        "rate": null,
+        "revoked_at_ns": null
+      },
+      "valid": false
+    },
+    {
+      "name": "unsorted_ids",
+      "effect": {
+        "type": "allow_rule_ids",
+        "ids": [
+          "22222222222222222222222222222222",
+          "11111111111111111111111111111111"
+        ],
+        "rate": null,
+        "revoked_at_ns": null
+      },
+      "valid": false
+    },
+    {
+      "name": "deny_with_ids",
+      "effect": {
+        "type": "deny",
+        "ids": [
+          "11111111111111111111111111111111"
+        ],
+        "rate": null,
+        "revoked_at_ns": null
+      },
+      "valid": false
+    },
+    {
+      "name": "unknown_field",
+      "effect": {
+        "type": "deny",
+        "ids_extra": [
+          "11111111111111111111111111111111"
+        ],
+        "rate": null,
+        "revoked_at_ns": null
+      },
+      "valid": false
+    },
+    {
+      "name": "zero_id",
+      "effect": {
+        "type": "allow_rule_ids",
+        "ids": [
+          "00000000000000000000000000000000"
+        ],
+        "rate": null,
+        "revoked_at_ns": null
+      },
+      "valid": false
+    }
+  ]
+}

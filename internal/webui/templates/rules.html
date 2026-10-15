@@ -1,0 +1,85 @@
+<!-- 管理画面。動的な値はhtml/templateでエスケープする。 -->
+<!doctype html>
+<html lang="ja">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>投稿規制 — OimoBBS管理</title>{{template "admin-assets" .}}
+</head>
+<body class="admin">{{template "admin-header" .}}
+<main id="main" tabindex="-1">
+<h1>投稿規制：{{.Name}}
+</h1>
+<nav><a href="{{adminBase}}/boards">板一覧</a> <a href="{{adminURL (.ThreadsAction)}}">管理人用スレッド閲覧</a> <a href="{{adminURL (.Action)}}">最新の規制を読み直す</a>
+</nav>{{if .Message}}
+<p role="alert">{{.Message}}
+</p>{{end}}
+{{if .RetryAction}}
+<form class="field-grid" method="post" action="{{adminURL (.RetryAction)}}">{{range $k,$values:=.RetryFields}}
+<input type="hidden" name="{{$k}}" value="{{index $values 0}}">{{end}}
+<button type="submit">同じ要求で解除結果を確認</button>
+</form>{{end}}
+
+<section class="policy-guide"><h2>板全体の回線・国の許可</h2><p>固定回線・携帯・MVNO・VPNや国ごとの許可は、チェックボックスでまとめて設定できます。</p><a class="tonal-link" href="{{adminURL (.SettingsAction)}}#network-permissions">板全体の投稿許可を設定</a></section>
+<h2>個別・期限付きの規制を登録
+</h2>
+<p>特定のIP範囲、本文、User-Agentなどを対象に、一時的な拒否や追加条件を設定します。板全体の許可設定とは別に適用し、個別規制の除外で板全体の拒否を解除することはできません。受理済み投稿の再送結果と投稿履歴は維持します。
+</p>
+<form class="field-grid" method="post" action="{{adminURL (.Action)}}">
+
+<input type="hidden" name="csrf" value="{{.Fields.Get "csrf"}}">
+<input type="hidden" name="revision" value="{{.Fields.Get "revision"}}">
+<input type="hidden" name="request_id" value="{{.Fields.Get "request_id"}}">
+
+<p><label>規制する項目 <select name="field">{{range $value := .Conditions}}<option value="{{$value.Value}}" {{if eq ($.Fields.Get "field") $value.Value}}selected{{end}}>{{$value.Label}}</option>{{end}}</select></label></p>
+<p><label data-rule-text="field"><span data-rule-target-label>規制する値</span>
+<input name="target" value="{{.Fields.Get "target"}}" maxlength="1024"></label>
+<label data-rule-line="field">回線種別の条件値<select name="line_target">{{range choices "rule_network"}}<option value="{{.Value}}" {{if eq ($.Fields.Get "target") .Value}}selected{{end}}>{{.Label}}</option>{{end}}</select></label>
+</p>
+<p class="field-hint" data-rule-target-hint>IPは例：192.0.2.10、範囲は192.0.2.0/24。管理人用スレッド閲覧から選ぶと自動入力できます。</p>
+<p><label>照合 <select name="operator"><option value="exact" {{if eq (.Fields.Get "operator") "exact"}}selected{{end}}>完全一致</option><option value="contains" {{if eq (.Fields.Get "operator") "contains"}}selected{{end}}>部分一致</option><option value="compact_exact" {{if eq (.Fields.Get "operator") "compact_exact"}}selected{{end}}>空白・改行を無視した本文の完全一致</option><option value="regexp" {{if eq (.Fields.Get "operator") "regexp"}}selected{{end}}>正規表現</option><option value="suffix" {{if eq (.Fields.Get "operator") "suffix"}}selected{{end}}>ドメインとそのサブドメイン</option></select></label></p>
+<p class="field-hint">空白・改行を無視した一致は本文専用です。文字の置換や大小文字は同一視せず、短い定型文を対象にします。保存後は生成した正規表現として表示します。</p>
+<p class="field-hint">ホストは例：customer.example.jp。「ドメインとそのサブドメイン」ならexample.jpも指定できます。確認済みの投稿元ホストが対象です。未確認の接続はホスト規制に一致しません。ホスト・回線種別は拒否のみ対応します。</p>
+<p class="field-hint">UAはUser-Agentの文字列をそのまま入力します（例：ExampleBrowser/1.0）。利用者自身が変更できるため補助条件として使ってください。内部IDは匿名主体HMACの64桁の小文字16進数で、公開IDやIPのHMACとは別です。管理人用閲覧からの選択を推奨します。</p>
+<p><label>対象操作 <select name="operation"><option value="both" {{if eq (.Fields.Get "operation") "both"}}selected{{end}}>スレ立てと返信</option><option value="create" {{if eq (.Fields.Get "operation") "create"}}selected{{end}}>スレ立て</option><option value="reply" {{if eq (.Fields.Get "operation") "reply"}}selected{{end}}>返信</option></select></label>
+</p>
+
+<p><label>有効期間（分、最大30日） 
+<input type="number" name="duration_minutes" value="{{.Fields.Get "duration_minutes"}}" min="1" max="43200" required></label>
+</p>
+
+<p><label>理由 <select name="reason_code"><option value="manual" {{if eq (.Fields.Get "reason_code") "manual"}}selected{{end}}>運営判断</option><option value="spam" {{if eq (.Fields.Get "reason_code") "spam"}}selected{{end}}>スパム</option><option value="abuse" {{if eq (.Fields.Get "reason_code") "abuse"}}selected{{end}}>荒らし</option></select></label>
+</p>
+<details><summary>詳細設定（追加条件・Cookie必須・除外・投稿枠）</summary><p><label>効果 <select name="effect"><option value="deny" {{if eq (.Fields.Get "effect") "deny"}}selected{{end}}>投稿を拒否</option><option value="require_token" {{if eq (.Fields.Get "effect") "require_token"}}selected{{end}}>匿名Cookieを必須にする</option><option value="allow_rule_ids" {{if eq (.Fields.Get "effect") "allow_rule_ids"}}selected{{end}}>指定した規制だけを除外</option><option value="rate_override" {{if eq (.Fields.Get "effect") "rate_override"}}selected{{end}}>条件一致時の投稿枠を追加</option></select></label></p>
+<p><label>除外する規制ID（許可効果のときだけ、空白区切り）<input name="allow_rule_ids" value="{{.Fields.Get "allow_rule_ids"}}"></label></p>
+<fieldset><legend>追加投稿枠（追加枠効果のときだけ入力）</legend><p>通常枠と合わせて制限します。補充間隔×連投許容量は最大3600秒。同時に適用する追加枠は最大12件です。</p><p><label>1投稿分の補充間隔（秒）<input type="number" name="refill_seconds" min="1" max="3600" value="{{.Fields.Get "refill_seconds"}}"></label></p><p><label>連投許容量<input type="number" name="burst" min="1" max="3600" value="{{.Fields.Get "burst"}}"></label></p><p><label>現在分と過去60分の上限（0は長期窓なし）<input type="number" name="window_limit" min="0" max="1000000" value="{{.Fields.Get "window_limit"}}"></label></p></fieldset>
+<fieldset><legend>追加条件（任意）</legend>
+<p>追加すると、上の条件と追加条件の両方に一致した投稿だけへ適用します。</p>
+<p><label>条件 <select name="extra_field"><option value="none">追加しない</option><option value="ip" {{if eq (.Fields.Get "extra_field") "ip"}}selected{{end}}>IP</option><option value="network" {{if eq (.Fields.Get "extra_field") "network"}}selected{{end}}>CIDR</option>{{range $value := .Conditions}}{{if ne $value.Value "auto"}}<option value="{{$value.Value}}" {{if eq ($.Fields.Get "extra_field") $value.Value}}selected{{end}}>{{$value.Label}}</option>{{end}}{{end}}</select></label></p>
+<p><label>照合 <select name="extra_operator"><option value="exact" {{if eq (.Fields.Get "extra_operator") "exact"}}selected{{end}}>完全一致</option><option value="cidr" {{if eq (.Fields.Get "extra_operator") "cidr"}}selected{{end}}>ネットワーク範囲</option><option value="contains" {{if eq (.Fields.Get "extra_operator") "contains"}}selected{{end}}>部分一致</option><option value="regexp" {{if eq (.Fields.Get "extra_operator") "regexp"}}selected{{end}}>正規表現</option><option value="suffix" {{if eq (.Fields.Get "extra_operator") "suffix"}}selected{{end}}>ドメインとそのサブドメイン</option></select></label></p>
+<p><label data-rule-text="extra_field">回線種別以外の条件値 <input name="extra_value" value="{{.Fields.Get "extra_value"}}" maxlength="1024"></label><label data-rule-line="extra_field">回線種別の条件値<select name="line_extra">{{range choices "rule_network"}}<option value="{{.Value}}" {{if eq ($.Fields.Get "extra_value") .Value}}selected{{end}}>{{.Label}}</option>{{end}}</select></label></p>
+</fieldset>
+
+</details>
+<button type="submit">期限付き規制を登録する</button>
+</form>
+
+<h2>登録済みの規制
+</h2>
+<p>日時はUTCです。期限に達すると自動で適用を終了します。
+</p>
+<ul>{{range .Rows}}
+<li>
+<dl><dt>条件</dt><dd>{{choiceLabel "rule_field" .Rule.Match.Field}}（{{choiceLabel "rule_operator" .Rule.Match.Operator}}） {{if eq .Rule.Match.Field "line"}}{{choiceLabel "rule_network" .Rule.Target}}{{else}}{{.Rule.Target}}{{end}}</dd><dt>動作</dt><dd>{{if eq .Rule.Match.Effect "require_token"}}Cookie必須{{else if eq .Rule.Match.Effect "allow_rule_ids"}}指定規制の除外{{else if eq .Rule.Match.Effect "rate_override"}}追加投稿枠{{else}}拒否{{end}}</dd><dt>対象操作</dt><dd>{{range .Rule.Operations}}{{if eq . "create"}}スレ立て {{else}}返信 {{end}}{{end}}</dd><dt>状態</dt><dd>{{.State}}</dd><dt>規制ID</dt><dd>{{.Rule.ID}}</dd>{{if .Rule.Allowed}}<dt>除外対象</dt><dd>{{range .Rule.Allowed}}{{.}} {{end}}</dd>{{end}}{{if .Rule.Rate}}<dt>補充間隔</dt><dd>{{.Rule.Rate.RefillSeconds}}秒</dd><dt>瞬間上限</dt><dd>{{.Rule.Rate.Burst}}</dd><dt>61分上限</dt><dd>{{.Rule.Rate.WindowLimit}}</dd>{{end}}<dt>開始</dt><dd>{{.Rule.Starts}}</dd><dt>期限</dt><dd>{{if .Rule.Permanent}}永久（管理者が解除するまで）{{else}}{{.Rule.Expires}}{{end}}</dd><dt>理由</dt><dd>{{choiceLabel "reason" .Rule.Reason}}</dd></dl>{{if .Rule.Extra}}<ul>{{range .Rule.Extra}}<li>追加条件：{{choiceLabel "rule_field" .Field}}（{{choiceLabel "rule_operator" .Operator}}） {{if eq .Field "line"}}{{choiceLabel "rule_network" .Value}}{{else}}{{.Value}}{{end}}</li>{{end}}</ul>{{end}}<p>
+</p>{{if .Rule.Enabled}}
+<form class="field-grid" method="post" action="{{adminURL ($.Action)}}/{{.Rule.ID}}/revoke">
+<input type="hidden" name="csrf" value="{{.CSRF}}">
+<input type="hidden" name="revision" value="{{.Rule.ETag}}">
+<input type="hidden" name="request_id" value="{{.RequestID}}">
+<button type="submit">解除する</button>
+</form>{{end}}
+</li>{{else}}
+<li>規制は登録されていません。
+</li>{{end}}
+</ul>
+{{if .Next}}<p><a href="{{adminURL (.Next)}}">次のページ</a></p>{{end}}
+</main>{{template "footer" .}}
+</body>
+</html>

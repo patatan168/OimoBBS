@@ -1,0 +1,110 @@
+{
+  "description": "create操作の設計例。IP・ID・HMACは架空値。ID非表示設定の板を想定。外枠と操作JSONを分けて示す。",
+  "schema": "oimobbs-wal-v1-create-example",
+  "board_id_hex": "00112233445566778899aabbccddeeff",
+  "thread_key": "1700000000",
+  "operation_id_hex": "102132435465768798a9bacbdcedfe0f",
+  "first_seq": "1",
+  "operation": {
+    "type": "create",
+    "revision": "1",
+    "committed_at_ns": "1700000000000000000",
+    "policy_versions": {
+      "site": "1",
+      "board": "1",
+      "thread": "0",
+      "cap": null
+    },
+    "actor": {
+      "kind": "anonymous",
+      "id": null,
+      "reason_code": "user_post",
+      "request_hmac": null,
+      "idempotency_hmac": null,
+      "key_id": null
+    },
+    "after": {
+      "state": "active",
+      "user_count": 1,
+      "post_count": 1,
+      "dat_bytes": "57",
+      "dat_generation": "1",
+      "legacy_range_disabled": false,
+      "last_user_at_ns": "1700000000000000000",
+      "bump_kind": "normal",
+      "bump_value": "1700000000000000000",
+      "end_reason": null
+    },
+    "dedup": {
+      "mode": "explicit",
+      "key_id": 1,
+      "subject_hmac": "1111111111111111111111111111111111111111111111111111111111111111",
+      "request_id_hmac": "2222222222222222222222222222222222222222222222222222222222222222",
+      "request_hmac": "3333333333333333333333333333333333333333333333333333333333333333",
+      "expires_at_ns": "1700086400000000000",
+      "post_number": 1
+    },
+    "payload": {
+      "title": "example",
+      "created_at_ns": "1700000000000000000",
+      "expires_at_ns": "1715724800000000000",
+      "policy": {
+        "version": "1",
+        "id_mode": "hidden",
+        "slip_mode": "none",
+        "require_id": false,
+        "require_slip_hash": false,
+        "require_public_ip": false,
+        "user_post_limit": 1000,
+        "dat_user_limit": "524288",
+        "allowed_commands": [
+          "extend",
+          "id",
+          "slip",
+          "status",
+          "chkbbx"
+        ],
+        "auto_next": false,
+        "pinned": false
+      },
+      "posts": [
+        {
+          "number": 1,
+          "kind": "user",
+          "visibility": "visible",
+          "created_at_ns": "1700000000000000000",
+          "name": "anonymous",
+          "mail": "",
+          "body": "hello",
+          "identity": {
+            "trip": "",
+            "cap": "",
+            "id": "",
+            "slip": "",
+            "public_ip": "",
+            "host": "",
+            "region": "",
+            "suffix": "",
+            "date_text": "2023/11/15(水) 07:13:20.000"
+          },
+          "private": {
+            "source_ip": "192.0.2.1",
+            "cap_id": null,
+            "rate_keys": [
+              {
+                "rule_id": "aabbccddeeff00112233445566778899",
+                "key_id": 1,
+                "subject_hmac": "1111111111111111111111111111111111111111111111111111111111111111",
+                "cost": 1
+              }
+            ]
+          },
+          "dat_offset": 0,
+          "dat_length": 57
+        }
+      ]
+    }
+  },
+  "dat_hex": "616e6f6e796d6f75733c3e3c3e323032332f31312f3135289085292030373a31333a32302e3030303c3e68656c6c6f3c3e6578616d706c650a",
+  "dat_preview": "anonymous<><>2023/11/15(水) 07:13:20.000<>hello<>example\n"
+}

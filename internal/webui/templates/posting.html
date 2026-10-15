@@ -1,0 +1,60 @@
+<!-- 公開画面。動的な値はhtml/templateでエスケープする。 -->
+<!doctype html>
+<html lang="ja">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>{{.Heading}}</title>{{template "assets" .}}
+</head>
+<body class="public">{{template "public-header" .}}
+<main id="main" tabindex="-1">
+<div class="page-heading"><div><span class="eyebrow">書き込み</span><h1>{{.Heading}}</h1></div><a class="tonal-link" href="/{{.Board}}/subback.html">スレッド一覧へ</a></div>{{if .Message}}
+<p role="alert">{{.Message}}
+</p>{{end}}
+<p>投稿内容と接続情報は非公開の記録としても保存します。<a href="#record-retention">記録と保存期限について</a></p>
+{{if .Confirmation}}{{if .Confirmation.Management}}<p><strong>CAP管理コマンドの確認です。本文は公開せず、管理操作として記録します。</strong></p>{{end}}{{if .Confirmation.NoReprint}}<section aria-label="無断転載禁止の案内"><h2>無断転載禁止</h2>{{range .Confirmation.ReprintNotice}}<p>{{.Text}}</p>{{end}}</section>{{end}}
+{{if .Confirmation.CapOnly}}<p>このスレッドはCAP専用です。返信には、この板で投稿権限を持つCAPが必要です。</p>{{end}}
+<p>規約版：{{.Confirmation.Terms}}
+</p>
+<p>名前：{{if .Confirmation.Preview.Cap}}{{.Confirmation.Preview.Cap}} ★{{else}}{{.Confirmation.Preview.Name}} {{if .Confirmation.Preview.Trip}}◆{{.Confirmation.Preview.Trip}}{{end}}{{end}}
+</p>
+<p>メール：{{.Confirmation.Preview.Mail}}
+</p>
+<h2>{{.Confirmation.Preview.Title}}
+</h2><pre>{{.Confirmation.Preview.Body}}</pre>
+<dl><dt>ID表示</dt><dd>{{if .Confirmation.RequireID}}常にIDを表示{{else}}{{choiceLabel "id" .Confirmation.IDMode}}{{end}}</dd><dt>回線表示</dt><dd>{{choiceLabel "slip" .Confirmation.SlipMode}}{{if .Confirmation.RequireSlipHash}}（ワッチョイの追加表示あり）{{end}}</dd><dt>IP公開</dt><dd>{{if .Confirmation.PublicIP}}あり{{else}}なし{{end}}</dd></dl>{{end}}
+{{if or .Confirmation .Retry}}
+<form class="composer" method="post" action="/web/post?bbs={{.Board}}" accept-charset="UTF-8">
+<p hidden><label>この欄は空欄のままにしてください。<input type="text" name="oimo_contact" value="" tabindex="-1" autocomplete="off"></label></p>{{range $k,$v:=.Fields}}
+<input type="hidden" name="{{$k}}" value="{{$v}}">{{end}}
+<button type="submit">{{if .Retry}}同じ内容で結果を確認{{else if and .Confirmation .Confirmation.Management}}この管理操作を実行{{else if and .Confirmation .Confirmation.NoReprint}}案内に同意して書き込む{{else}}この内容で書き込む{{end}}</button>
+</form>
+<p>内容を修正する場合は<a href="/web/post?bbs={{.Board}}&amp;key={{index .Fields "key"}}{{if eq (index .Fields "oimo_cap_only") "1"}}&amp;oimo_cap_only=1{{end}}">投稿フォーム</a>から入力し直してください。
+</p>
+{{else if .CSRF}}
+{{if eq .PostingPolicy "command_only"}}<p>通常の返信は停止中です。担当板の投稿権限があるCAPは管理コマンドだけ送信できます。コマンド本文は公開しません。</p>{{end}}
+{{if eq .PostingPolicy "cap_only"}}<p>この投稿にはキャップの資格が必要です。</p>{{end}}
+<p class="field-hint">タイトルは{{.Input.TitleBytes}}バイト、名前は{{.Input.NameBytes}}バイト、メールは{{.Input.MailBytes}}バイトまで。本文は{{.Input.BodyBytes}}バイト・{{.Input.BodyLines}}行までです。日本語は通常1文字で2バイトを使います。</p>
+{{if .Input.ForceNoname}}<p>名前は「{{.Input.Noname}}」に統一して表示します。</p>{{end}}
+{{if .Input.HideMail}}<p>メール欄の内容は公開表示しません。</p>{{end}}
+<form class="composer" method="post" action="/web/post?bbs={{.Board}}" accept-charset="UTF-8">
+<p hidden><label>この欄は空欄のままにしてください。<input type="text" name="oimo_contact" value="" tabindex="-1" autocomplete="off"></label></p>
+<input type="hidden" name="bbs" value="{{.Board}}">
+<input type="hidden" name="key" value="{{.Key}}">
+<input type="hidden" name="csrf" value="{{.CSRF}}">
+<input type="hidden" name="oimo_request_id" value="{{.RequestID}}">
+{{if not .Key}}
+<p><label>スレッドタイトル 
+<input name="subject" value="{{.Title}}" required></label>
+</p>
+{{if .CapOnly}}<input type="hidden" name="oimo_cap_only" value="1">{{end}}{{end}}
+<p><label>名前（{{if .Input.NameRequired}}必須{{else}}任意{{end}}）
+<input name="FROM" autocomplete="off"{{if .Input.NameRequired}} required{{end}}><span class="field-hint">トリップを使う場合は、名前の後に # と秘密を入力してください。</span></label>
+</p>
+<p><label>メール（任意） 
+<input name="mail" autocomplete="off"><span class="field-hint">CAPを使う場合は #cap:ID:秘密 を入力してください。sageとの併用もできます。</span></label>
+</p>
+<p><label>本文 <textarea name="MESSAGE" rows="8" cols="48" required>{{.Body}}</textarea></label>
+</p>
+<button type="submit">内容を確認</button>
+</form>{{end}}
+</main>{{template "footer" .}}
+</body>
+</html>

@@ -1,0 +1,27 @@
+<!-- WAFの有効状態と検査範囲を確認し、再認証後に通常フォームで切り替える。 -->
+<!doctype html><html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>WAF — OimoBBS管理</title>{{template "admin-assets" .}}</head>
+<body class="admin">{{template "admin-header" .}}<main id="main" tabindex="-1"><h1>WAF</h1>
+<section class="card"><h2>要求の検査</h2><p>現在：<strong>{{if .State.Settings.Enabled}}ON{{else}}OFF{{end}}</strong>。公開HTTP受付と管理画面で、URLやヘッダーの明確な攻撃パターンを処理前に拒否します。</p>
+<form method="post" action="{{adminBase}}/waf"><input type="hidden" name="csrf" value="{{.CSRF}}"><input type="hidden" name="revision" value="{{.State.ETag}}"><input type="hidden" name="request_id" value="{{.RequestID}}">
+<p><label>WAF <select name="enabled"><option value="false" {{if not .State.Settings.Enabled}}selected{{end}}>OFF</option><option value="true" {{if .State.Settings.Enabled}}selected{{end}}>ON</option></select></label></p>
+<fieldset><legend>大量アクセス制限（WAFがONのときに適用）</legend>
+<p><label>大量アクセス制限 <select name="traffic_enabled"><option value="true" {{if .State.Settings.Traffic.Enabled}}selected{{end}}>ON</option><option value="false" {{if not .State.Settings.Traffic.Enabled}}selected{{end}}>OFF</option></select></label></p>
+<p>初期値は共有回線や巡回に余裕を持たせています。瞬間要求数は短時間にまとめて許可する件数です。全体枠は同一回線枠以上、瞬間枠は毎秒枠以上にしてください。検索の枠は通常要求の枠内で適用します。</p>
+<p><label>同一回線の毎秒要求数 <input type="number" name="client_rate" min="1" max="10000" required value="{{.State.Settings.Traffic.ClientRate}}"></label></p>
+<p><label>同一回線の瞬間要求数 <input type="number" name="client_burst" min="1" max="100000" required value="{{.State.Settings.Traffic.ClientBurst}}"></label></p>
+<p><label>全体の毎秒要求数 <input type="number" name="global_rate" min="1" max="100000" required value="{{.State.Settings.Traffic.GlobalRate}}"></label></p>
+<p><label>全体の瞬間要求数 <input type="number" name="global_burst" min="1" max="200000" required value="{{.State.Settings.Traffic.GlobalBurst}}"></label></p>
+<p><label>同一回線の同時処理数 <input type="number" name="client_concurrent" min="1" max="128" required value="{{.State.Settings.Traffic.ClientConcurrent}}"></label></p>
+<p><label>全体の同時処理数 <input type="number" name="global_concurrent" min="1" max="2048" required value="{{.State.Settings.Traffic.GlobalConcurrent}}"></label></p>
+<p><label>同一回線の検索毎秒件数 <input type="number" name="search_rate" min="1" max="10000" required value="{{.State.Settings.Traffic.SearchRate}}"></label></p>
+<p><label>同一回線の検索瞬間件数 <input type="number" name="search_burst" min="1" max="100000" required value="{{.State.Settings.Traffic.SearchBurst}}"></label></p>
+<p><label>全体の検索毎秒件数 <input type="number" name="search_global_rate" min="1" max="100000" required value="{{.State.Settings.Traffic.SearchGlobalRate}}"></label></p>
+<p><label>全体の検索瞬間件数 <input type="number" name="search_global_burst" min="1" max="200000" required value="{{.State.Settings.Traffic.SearchGlobalBurst}}"></label></p>
+<p><label>全体の検索同時処理数 <input type="number" name="search_concurrent" min="1" max="2048" required value="{{.State.Settings.Traffic.SearchConcurrent}}"></label></p>
+</fieldset>
+{{if .Fresh}}<button type="submit">WAFの設定を保存する</button>{{else}}<p><a href="{{adminBase}}/reauth?return_to=%2Fwaf">パスワードを再確認して変更する</a></p>{{end}}</form>
+<p>保存後すぐに反映し、再起動後も引き継ぎます。初期状態はOFFです。OFFでも認証、投稿規制、回線制限、通信量や同時処理の上限は有効です。</p>
+<dl><dt>起動後のWAF遮断件数</dt><dd>{{.State.Blocked}}件</dd></dl><p>件数は再起動で0に戻ります。WAF専用のIP・Cookie・本文・攻撃文字列の記録は追加しません。</p></section>
+<section class="card"><h2>大量アクセスの集計</h2><p>公開側：要求頻度の制限 {{.State.PublicTraffic.RateLimited}}件、全体の混雑 {{.State.PublicTraffic.Overloaded}}件、処理中 {{.State.PublicTraffic.Active}}件（検索 {{.State.PublicTraffic.SearchActive}}件）。管理側：要求頻度の制限 {{.State.AdminTraffic.RateLimited}}件、全体の混雑 {{.State.AdminTraffic.Overloaded}}件。</p><p>同一回線はIPv4の1アドレス、IPv6の/64単位です。超過時は429または503と再試行待ち秒数を返します。永久BANは行いません。公開側と管理側の枠は別です。回線帯域が埋まる規模の攻撃は上流側の対策が必要です。</p></section>
+<section class="card"><h2>検査の範囲</h2><ul><li>パストラバーサルと秘密ファイルの探索</li><li>TRACE・CONNECTなど未使用のHTTPメソッド</li><li>URL内の既知のSQL・スクリプト・コマンド注入パターン</li><li>ヘッダー内のJNDI参照パターン、検査量の上限超過</li></ul><p>投稿本文・JSON本文・Cookie・認証情報は文字列検査しません。検索ページの検索語も除外します。技術的な説明やコードの引用を投稿できます。攻撃全般の検出や大規模な通信攻撃の防止を保証する機能ではありません。</p></section>
+<p><a href="{{adminBase}}/operations">運用設定</a></p></main></body></html>

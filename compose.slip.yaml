@@ -1,0 +1,60 @@
+# 保存形式2の稼働領域。公開入口はデータを持たず、保存サーバーをmTLSで認証する。
+services:
+  bbs:
+    image: oimobbs-validation:waf-traffic-20261016
+    command: ["validation-serve", "--config", "/etc/oimobbs/config.json", "--admin"]
+    ports: !override []
+    volumes:
+      - ./var/security/edge-client/ca.pem:/edge/ca.pem:ro
+      - ./var/security/online-backup:/backup
+    networks:
+      default: {}
+      private_backend:
+        ipv4_address: 10.203.94.3
+  public-edge:
+    build:
+      context: .
+      target: public-edge
+    image: oimobbs-public-edge:plain-admin-20261012
+    command: ["serve", "--origin", "https://patatanmc.f5.si", "--upstream", "https://10.203.94.3:8443", "--admin-path", "/admin"]
+    depends_on:
+      bbs:
+        condition: service_started
+    ports:
+      - "443:8443"
+    volumes:
+      - tls:/tls:ro
+      - ./var/security/edge-client:/edge:ro
+    networks:
+      public_ingress: {}
+      private_backend:
+        ipv4_address: 10.203.94.2
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    init: true
+    restart: unless-stopped
+    stop_grace_period: 35s
+    mem_limit: 256m
+    cpus: 1
+    pids_limit: 64
+    healthcheck:
+      test: ["CMD", "oimoedge", "probe", "--origin", "https://patatanmc.f5.si"]
+      interval: 15s
+      timeout: 7s
+      retries: 3
+      start_period: 30s
+    logging:
+      driver: json-file
+      options: {max-size: "5m", max-file: "2"}
+volumes:
+  data:
+    external: true
+    name: oimobbs-validation_slip_20261010
+networks:
+  public_ingress: {}
+  private_backend:
+    internal: true
+    ipam:
+      config:
+        - subnet: 10.203.94.0/29

@@ -1,0 +1,54 @@
+<!-- 管理画面。動的な値はhtml/templateでエスケープする。 -->
+<!doctype html>
+<html lang="ja">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>管理操作の記録 — OimoBBS</title>{{template "admin-assets" .}}
+</head>
+<body class="admin">{{template "admin-header" .}}
+<main id="main" tabindex="-1">
+<h1>管理操作の記録
+</h1>
+<nav><a href="{{adminBase}}/">サイト設定</a> <a href="{{adminBase}}/boards">板一覧</a> <a href="{{adminBase}}/audit">直近24時間を再取得</a>
+</nav>
+<p>保存が確定した管理変更を表示します。ログイン履歴・未保存の失敗・投稿内容は含みません。日時はUTCです。
+</p>
+
+<form class="field-grid" method="get" action="{{adminBase}}/audit">
+<p><label>開始日時（含む） 
+<input name="from" value="{{.Values.Get "from"}}" placeholder="2026-09-29T00:00:00Z"></label>
+</p>
+<p><label>終了日時（含まない） 
+<input name="to" value="{{.Values.Get "to"}}"></label>
+</p>
+<fieldset><legend>板で絞り込む</legend><div class="permission-grid">{{range .Boards}}<label class="check-option"><input type="checkbox" name="board" value="{{.ID}}" {{if .Checked}}checked{{end}}><span>{{.Name}}（{{.Key}}）</span></label>{{else}}<p>担当板がありません。</p>{{end}}</div><small>未選択ならすべての板。複数の板を選べます。</small></fieldset>
+<p><label>操作者ID（管理者・CAP）
+<input name="actor" value="{{.Values.Get "actor"}}" maxlength="32"></label>
+</p>
+<p><label>操作 <select name="action"><option value="">すべて</option>{{range .Options}}<option value="{{.Code}}" {{if eq ($.Values.Get "action") .Code}}selected{{end}}>{{.Label}}</option>{{end}}</select></label>
+</p>
+<p><label>1ページの件数 
+<input name="limit" type="number" min="1" max="200" value="{{if .Values.Get "limit"}}{{.Values.Get "limit"}}{{else}}50{{end}}"></label>
+</p>
+<button type="submit">絞り込む</button>
+</form>
+
+<p>{{.Page.From}} から {{.Page.To}} まで：取得時点で{{.Page.Total}}件
+</p>
+<ol>{{range .Rows}}
+<li>
+<p><time>{{.Entry.Committed}}</time><br><strong>{{.Label}}</strong>{{if .Entry.Command}}<br>スレッド {{.Entry.Command.Thread}} / レス {{.Entry.Command.Post}} / {{.Entry.Command.Duration}} / {{.Entry.Command.Phase}}{{end}}
+</p>
+<p>{{if .Entry.ActorID}}{{if eq .Entry.ActorKind "cap"}}CAP ID{{else}}管理者ID{{end}}：{{.Entry.ActorID}}{{else}}ローカル操作／システム{{end}}
+</p>
+<p>{{if .Entry.Board}}板ID：{{.Entry.Board}}{{else}}サイト操作{{end}}</p><p>操作ID：{{.Entry.ID}}
+</p>
+<p>対象ID：{{range .Entry.Targets}}{{.}} {{else}}なし{{end}}
+</p>
+</li>{{else}}
+<li>該当する管理操作はありません。
+</li>{{end}}
+</ol>{{if .Next}}<a href="{{adminURL (.Next)}}">次のページ</a>{{end}}
+<p>ページ送りは取得時点の一覧を10分間保持します。最新の操作を見るには再取得してください。
+</p>
+</main>{{template "footer" .}}
+</body>
+</html>

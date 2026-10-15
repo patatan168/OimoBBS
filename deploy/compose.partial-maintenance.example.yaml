@@ -1,0 +1,54 @@
+# 未完成本文/鍵束の独立巡回。最終絶対pathとUID 10001所有0700親を用意する。
+name: oimobbs-partial-maintenance
+x-partial-base: &partial-base
+  build:
+    context: ..
+  image: oimobbs-partial-maintenance:local
+  network_mode: none
+  read_only: true
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+  init: true
+  restart: "no"
+  stop_grace_period: 35s
+  mem_limit: 256m
+  cpus: 1
+  pids_limit: 64
+  logging:
+    driver: json-file
+    options: {max-size: "2m", max-file: "2"}
+services:
+  partial-body-maintenance:
+    <<: *partial-base
+    command: ["backup", "watch-partial", "--kind", "body", "--root-parent", "/private/copies", "--plan-parent", "/private/partial-plans", "--trust-instance", "/private/trust/site-instance.json", "--limit", "16", "--interval", "1m", "--budget", "30s"]
+    volumes:
+      - type: bind
+        source: /private/copies
+        target: /private/copies
+        bind: {create_host_path: false}
+      - type: bind
+        source: /private/partial-plans
+        target: /private/partial-plans
+        bind: {create_host_path: false}
+      - type: bind
+        source: /private/trust
+        target: /private/trust
+        read_only: true
+        bind: {create_host_path: false}
+  partial-key-maintenance:
+    <<: *partial-base
+    command: ["backup", "watch-partial", "--kind", "keys", "--root-parent", "/private/key-bundles", "--plan-parent", "/private/partial-key-plans", "--trust-instance", "/private/trust/site-instance.json", "--limit", "16", "--interval", "1m", "--budget", "30s"]
+    volumes:
+      - type: bind
+        source: /private/key-bundles
+        target: /private/key-bundles
+        bind: {create_host_path: false}
+      - type: bind
+        source: /private/partial-key-plans
+        target: /private/partial-key-plans
+        bind: {create_host_path: false}
+      - type: bind
+        source: /private/trust
+        target: /private/trust
+        read_only: true
+        bind: {create_host_path: false}

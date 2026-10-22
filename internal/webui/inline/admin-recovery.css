@@ -1,0 +1,2 @@
+/* 外部CSSが認証切れで拒否されても、ログインへ戻るまで文字とアイコンを読める大きさに保つ。 */
+svg{width:1.25em;height:1.25em;vertical-align:middle}body{margin:0;font-family:system-ui,sans-serif}main{max-width:72rem;margin:auto;padding:1rem}input,button,select{font:inherit}a{overflow-wrap:anywhere}

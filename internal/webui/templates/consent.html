@@ -1,0 +1,10 @@
+<!-- Cookie説明と利用規約の管理。入力は平文としてエスケープする。 -->
+<!doctype html><html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>利用規約・Cookie</title>{{template "admin-assets" .}}</head>
+<body class="admin">{{template "admin-header" .}}<main id="main" tabindex="-1"><h1>利用規約・Cookie</h1>
+{{if .Message}}<p role="alert">{{.Message}}</p>{{end}}
+<p>規約版：{{.State.Terms}} · 変更日：{{.State.Consent.ChangedDate}}（JST）</p>
+<p>Cookieの説明または利用規約を変更すると、変更日をJSTで自動更新し、専ブラ・Webともに次の書き込みで再同意を求めます。同じ文章を保存しても変更日と同意状態は変わりません。</p>
+<form method="post" action="{{adminBase}}/terms"><input type="hidden" name="csrf" value="{{.CSRF}}"><input type="hidden" name="revision" value="{{.State.ETag}}"><input type="hidden" name="request_id" value="{{.RequestID}}">
+<p><label>Cookieの使用について<textarea name="cookie_notice" rows="6" cols="60" required>{{.State.Consent.CookieNotice}}</textarea></label></p>
+<p><label>利用規約<textarea name="terms_text" rows="18" cols="60" required>{{.State.Consent.TermsText}}</textarea></label></p>
+<p>HTMLは使えません。Cookie説明は4KiB、利用規約は24KiBまでです。変更日は自動で設定します。</p><button type="submit">保存</button></form><p><a href="{{adminBase}}/">サイト設定に戻る</a></p></main>{{template "footer" .}}</body></html>

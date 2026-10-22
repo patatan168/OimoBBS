@@ -1,0 +1,87 @@
+/** 実際の管理案件を検索・並べ替え・ページ送りし、表示幅ごとの一覧性を確認する。 */
+import assert from 'node:assert/strict';
+import {createRequire} from 'node:module';
+import {mkdir} from 'node:fs/promises';
+const {chromium}=createRequire(import.meta.url)(process.env.OIMO_PLAYWRIGHT);
+const browser=await chromium.launch({headless:true,executablePath:process.env.OIMO_CHROMIUM,args:['--no-sandbox']});
+try {
+ const context=await browser.newContext({javaScriptEnabled:false});
+ const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ const base=process.env.OIMO_EVIDENCE_URL;
+ await page.goto(base+'/login');
+ await page.locator('input[name="login"]').fill('case.reader');
+ await page.locator('input[name="password"]').fill(process.env.OIMO_TEST_PASSWORD);
+ await Promise.all([page.waitForNavigation(),page.locator('button[type="submit"]').click()]);
+ await page.goto(base+'/reauth?return_to=%2Fevidence');
+ await page.locator('input[name="password"]').fill(process.env.OIMO_TEST_PASSWORD);
+ await Promise.all([page.waitForNavigation(),page.locator('form[action*="/reauth"] button[type="submit"]').click()]);
+ assert.equal(await page.locator('.evidence-case-title strong').first().textContent(),'CASE050');
+ assert.match(await page.locator('.evidence-case-created').first().textContent(),/作成 \d{4}-/);
+ await page.locator('input[name=q]').fill('担当板 CASE007');
+ await Promise.all([page.waitForNavigation(),page.getByRole('button',{name:'検索',exact:true}).click()]);
+ assert.equal(await page.locator('.evidence-case').count(),1);
+ assert.equal(await page.locator('.evidence-case-title strong').textContent(),'CASE007');
+ await page.locator('input[name=q]').fill('CASE');
+ await page.locator('select[name=state]').selectOption('draft');
+ await page.locator('select[name=sort]').selectOption('oldest');
+ await Promise.all([page.waitForNavigation(),page.getByRole('button',{name:'検索',exact:true}).click()]);
+ assert.equal(await page.locator('.evidence-case-title strong').first().textContent(),'CASE000');
+ await Promise.all([page.waitForNavigation(),page.getByRole('link',{name:'次の案件',exact:true}).click()]);
+ assert.equal(await page.locator('.evidence-case-title strong').textContent(),'CASE050');
+ assert.equal(await page.locator('input[name=q]').inputValue(),'CASE');
+ assert.equal(await page.locator('select[name=state]').inputValue(),'draft');
+ assert.equal(await page.locator('select[name=sort]').inputValue(),'oldest');
+ assert.match(await page.locator('.evidence-list-heading').textContent(),/51件中 51–51件/);
+ await page.locator('select[name=state]').selectOption('active');
+ await Promise.all([page.waitForNavigation(),page.getByRole('button',{name:'検索',exact:true}).click()]);
+ assert.equal(await page.locator('.evidence-case').count(),0);
+ assert.match(await page.locator('.evidence-empty').textContent(),/条件に一致する案件はありません/);
+ assert.equal(await page.locator('#new-case').getAttribute('open'),null);
+ await Promise.all([page.waitForNavigation(),page.getByRole('link',{name:'条件をクリア',exact:true}).click()]);
+ assert.equal(await page.locator('input[name=q]').inputValue(),'');
+ assert.equal(await page.locator('select[name=state]').inputValue(),'');
+ assert.equal(await page.locator('select[name=sort]').inputValue(),'newest');
+ assert.equal(await page.locator('.evidence-case-title strong').first().textContent(),'CASE050');
+ if(process.env.OIMO_EVIDENCE_SCREENSHOTS)await mkdir(process.env.OIMO_EVIDENCE_SCREENSHOTS,{recursive:true});
+ for(const width of [320,390,800,1280]) {
+  await page.setViewportSize({width,height:1000});
+  assert.equal(await page.locator('.evidence-case[open]').count(),0);
+  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'list overflow '+width);
+  assert.equal(await page.getByRole('button',{name:'検索',exact:true}).isVisible(),true);
+  const top=await page.locator('.evidence-case').first().evaluate(e=>e.getBoundingClientRect().top+scrollY);
+  assert.ok(top<900,'cases below initial viewport '+width+': '+top);
+  await page.locator('.evidence-case > summary').first().focus();await page.keyboard.press('Enter');
+  assert.equal(await page.locator('.evidence-case[open]').count(),1);
+  const detail=page.locator('.evidence-case[open]');
+  assert.equal(await detail.getByRole('button',{name:'ZIPを作成してダウンロード',exact:true}).isVisible(),true);
+  assert.equal(await detail.getByRole('button',{name:'記録を照会',exact:true}).count(),0);
+  assert.equal(await detail.getByRole('button',{name:'対象を保全',exact:true}).count(),0);
+  assert.equal(await detail.getByRole('button',{name:'提出ZIPを作成',exact:true}).count(),0);
+  assert.match(await detail.locator('.evidence-storage').textContent(),/対象は未確定/);
+
+  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'detail overflow '+width);
+  await page.locator('.evidence-case > summary').first().click();
+  await page.evaluate(()=>scrollTo(0,0));
+  if(process.env.OIMO_EVIDENCE_SCREENSHOTS)await page.screenshot({path:process.env.OIMO_EVIDENCE_SCREENSHOTS+'/cases-'+width+'.png'});
+  await page.locator('.evidence-case > summary').first().click();
+  if(process.env.OIMO_EVIDENCE_SCREENSHOTS)await page.locator('.evidence-case[open]').screenshot({path:process.env.OIMO_EVIDENCE_SCREENSHOTS+'/details-'+width+'.png'});
+  await page.locator('.evidence-case > summary').first().click();
+ }
+
+ await page.locator('.evidence-kinds').getByRole('link',{name:'未受理・閲覧ログ',exact:true}).click();
+ assert.equal(new URL(page.url()).searchParams.get('kind'),'other');
+ await page.locator('#new-case > summary').click();
+ const create=page.locator('form[action$="/evidence/other-cases"]');
+ await create.locator('textarea[name=reason]').fill('別入口の作成確認');
+ await Promise.all([page.waitForNavigation(),create.getByRole('button',{name:'対象を登録',exact:true}).click()]);
+ assert.equal(new URL(page.url()).searchParams.get('kind'),'other');
+ await page.locator('input[name=q]').fill('別入口の作成確認');
+ await Promise.all([page.waitForNavigation(),page.getByRole('button',{name:'検索',exact:true}).click()]);
+ assert.equal(await page.locator('.evidence-case').count(),1);
+ await page.locator('.evidence-case > summary').click();
+ assert.equal(await page.getByRole('button',{name:'未受理ログのZIPを取得',exact:true}).isVisible(),true);
+ assert.equal(await page.getByRole('button',{name:'受付前拒否・閲覧のZIPを取得',exact:true}).isVisible(),true);
+ assert.equal(await page.getByRole('button',{name:'ZIPを作成してダウンロード',exact:true}).count(),0);
+ assert.deepEqual(errors,[]);
+ console.log(JSON.stringify({search:true,state:true,sort:true,pagination:true,reset:true,simpleDetails:true,separateOtherEntry:true,noJavaScript:true,widths:[320,390,800,1280]}));
+}finally{await browser.close()}

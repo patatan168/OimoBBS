@@ -1,0 +1,25 @@
+/* 公開スレッドの本文・レス番号・移動フォーム。 */
+.thread-toolbar { display:flex; flex-wrap:wrap; align-items:center; gap:8px; padding:12px; border:1px solid var(--line); border-radius:10px; background:var(--paper); margin:16px 0; }
+.thread-toolbar a { min-height:44px; }
+.thread-toolbar .count { margin-right:auto; }
+.response-list { border:1px solid var(--line); border-radius:10px; background:var(--paper); }
+.response-list article { border:0; border-bottom:1px solid var(--line); border-left:3px solid var(--line); border-radius:0; margin:0; padding:16px; scroll-margin-top:80px; }
+.response-list article:last-child { border-bottom:0; }
+.response-list article:target { background:var(--tonal); border-left-color:var(--accent); }
+.response-heading { display:flex; flex-wrap:wrap; align-items:baseline; gap:8px; }
+.response-number { color:var(--link); font-size:14px; font-weight:700; text-decoration:none; min-width:24px; }
+.response-heading h2 { flex:1; color:var(--link); font-size:13px; font-weight:650; }
+.response-meta { display:flex; flex-wrap:wrap; gap:6px 12px; color:var(--muted); font-size:12px; margin:4px 0 10px; }
+.response-body { line-height:1.75; margin:0; font-size:15px; }
+.response-body a { font-weight:600; }
+.reader-tools { display:flex; flex-wrap:wrap; align-items:end; gap:12px; }
+.reader-tools label { flex:1; }
+.reader-tools input { margin-top:4px; }
+.reader-tools button { margin:0; }
+@media (max-width:700px) {
+ .response-list article { padding:12px; }
+ .reader-tools { align-items:end; }
+ .reader-tools label { flex:1 1 140px; }
+}
+
+.response-report { font-size:12px; min-height:44px; display:inline-flex; align-items:center; }

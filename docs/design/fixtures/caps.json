@@ -1,0 +1,18 @@
+{
+ "schema": 1,
+ "reader": 35,
+ "secret_bytes": 32,
+ "cases": [
+  {"name":"post-only","display":"運営","days":1,"boards":1,"permissions":["post"],"valid":true},
+  {"name":"maximum","display":"運営","days":180,"boards":128,"permissions":["create","post"],"valid":true},
+  {"name":"expired","display":"運営","days":0,"boards":1,"permissions":["post"],"valid":false},
+  {"name":"long-term","display":"運営","days":181,"boards":1,"permissions":["post"],"valid":true},
+  {"name":"no-boards","display":"運営","days":1,"boards":0,"permissions":["post"],"valid":false},
+  {"name":"too-many-boards","display":"運営","days":1,"boards":129,"permissions":["post"],"valid":false},
+  {"name":"empty-name","display":"","days":1,"boards":1,"permissions":["post"],"valid":false},
+  {"name":"input-marker","display":"運営 ★","days":1,"boards":1,"permissions":["post"],"valid":false},
+  {"name":"unknown-permission","display":"運営","days":1,"boards":1,"permissions":["admin"],"valid":false},
+  {"name":"unconnected-command","display":"運営","days":1,"boards":1,"permissions":["rebuild"],"valid":false},
+  {"name":"duplicate-permission","display":"運営","days":1,"boards":1,"permissions":["post","post"],"valid":false}
+ ]
+}

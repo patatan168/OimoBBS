@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "data_dir": "/data/site",
+  "public": {
+    "listen": "0.0.0.0:8443",
+    "base_url": "https://patatanmc.f5.si",
+    "tls_cert_file": "/tls/server.pem",
+    "tls_key_file": "/tls/server.pem"
+  },
+  "admin": {
+    "listen": "",
+    "transport": "public_path",
+    "origin": "https://patatanmc.f5.si/admin/"
+  },
+  "trusted_proxies": [
+    "10.203.94.2/32"
+  ],
+  "egress_budget_bits_per_second": 100000000,
+  "auto_reports": {
+    "board_key": "report",
+    "since": "2026-10-10T04:04:03Z"
+  },
+  "maintenance": {
+    "enabled": true,
+    "max_seconds": 5,
+    "interval_seconds": 300,
+    "max_threads": 5
+  },
+  "edge": {
+    "id": "public-edge",
+    "revision": 1,
+    "client_ca_file": "/edge/ca.pem",
+    "client_certificate_sha256": "1cc1e3d1fa9fe5e0af72e352a1087c01d4026bd29da37ad62b3e9cf254a4040e"
+  }
+}

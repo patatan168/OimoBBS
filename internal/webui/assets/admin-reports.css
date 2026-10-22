@@ -1,0 +1,13 @@
+/* 自動通報の対象本文と個別の通報理由。 */
+/* 通報対象の本文を読みやすい幅・行間で表示し、個別の通報理由と区別する。 */
+.admin .report-review { margin:24px 0; padding:20px; background:var(--paper); border:1px solid var(--line); border-radius:12px; }
+.admin .report-review-header { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px; }
+.admin .report-review-header h2 { margin:0; }
+.admin .report-target-body { max-width:46rem; padding:16px; border-left:3px solid var(--accent); border-radius:6px; background:var(--surface); font-size:17px; line-height:1.9; }
+.admin .report-review > h3 { margin:24px 0 12px; }
+.admin .report-review-meta { margin:0 0 12px; color:var(--muted); font-size:13px; line-height:1.6; font-weight:500; }
+.admin .report-reason-body { max-width:46rem; font-size:15px; line-height:1.8; }
+@media (max-width:640px) {
+ .admin .report-review { padding:16px; }
+ .admin .report-review article { padding:16px; }
+}

@@ -1,0 +1,1298 @@
+{
+  "date": "2026-10-18",
+  "before_commit": "64344ed7f2b3d1b3b26e23e4e12e2418c687646f",
+  "scope": "隔離loopbackの実TLS HTTP/1.1・専ブラ80%/Web20%・実Sync・合成投稿。公開稼働側は未変更。",
+  "changes": [
+    "旧来のサイト全体200投稿/秒・ネットワーク60投稿/秒の固定枠を、公開受付開始時に保存した境界以降で撤去。WAF・受付列・メモリ・容量予約を維持。境界前の投稿は従来条件で復旧検査。reader90。",
+    "WAFの同一ネットワーク制限client_enabledを独立ON/OFF化。OFFでも全体・処理別の全体枠と攻撃検査を維持。旧保存値はON、旧API省略は現状維持。保存後reader91。",
+    "投稿の独立payload検証をGOMAXPROCS以内で並列化。元byte保持は合計8MiB以下。生成callback・署名連鎖・保存順序を維持。",
+    "新規capture構築で復号済みframeを共有し、匿名情報結合で同一呼出し内の型検証結果を共有。外部入力・復旧時の厳密検査は維持。",
+    "Webスレッド閲覧を対象板の直接解決へ変更し、サイトJSONと全板一覧の毎回生成を省く。",
+    "送信予算の設定可能範囲を最大1Gbpsから100Gbpsへ拡張。既定値・現行保存値は維持。100Gbps実測ではない。"
+  ],
+  "findings": [
+    "最終版の同条件500予定投稿/秒・10秒・160主体・16スレッドで、1CPUは134.3完了/秒、4CPUは246.8完了/秒。4CPUのCPU使用は平均1.81core。500投稿/秒を受理できたという意味ではなく、503等の拒否と未発行を含む過負荷試験。",
+    "4CPUの境界変更版2試行は246.3/246.8完了/秒、ACK2637/2632件。後者はWAF個別スイッチ追加後の最終イメージ。両方で全16DAT本文・ETagが正常再起動後も一致。",
+    "投稿100件/秒と閲覧80件/秒の最終版併用試験は投稿1000/1000・閲覧800/800・回復100/100成功。ただし投稿予定時刻基準p95は493.9ms、回復p95は5541.5msで安定条件を満たさない。比較元は42.1/20.9ms。実I/O待ちの変動があり、安定した遅延改善を主張しない。",
+    "4CPUの合成64payload検証は中央値1.336msから0.795msへ約40.5%短縮。元byte保持を両方式へ含めた単体比較。署名・保存・HTTPは含まない。",
+    "全完了試行でACKとDATが一致し、OOMは0。全体の最大能力、WAN/NIC、長期安定性能を保証しない。"
+  ],
+  "trials": [
+    {
+      "name": "after-4c-r1",
+      "phase": "cpu-prototype-before-fixed-cap-removal",
+      "raw": "var/scaling-20261018/after-4c-r1.json",
+      "image": "sha256:a9d6f07f5979d46ee7fb4fc09ab9b01e43a8226226627201b8bda102142c3c3f",
+      "cpu_max": "400000 100000",
+      "memory_max": "2147483648",
+      "egress_budget_bits_per_second": 1000000000,
+      "rate": 500,
+      "seconds": 10,
+      "workers": 80,
+      "thread_count": 16,
+      "board_count": 1,
+      "planned_reads_per_second": 0,
+      "summary": {
+        "planned": 5000,
+        "sent": 1235,
+        "success": 1235,
+        "acknowledged": 1235,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 3765,
+        "http_p95_ms": 1222.1932366956025,
+        "scheduled_p95_ms": 1279.1033070534468,
+        "issuance_wait_p95_ms": 150.78784385696054
+      },
+      "completed_per_second": 115.5,
+      "stable_at_tested_rate": false,
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 119.1362941171974,
+        "scheduled_p95_ms": 2300.0802320893854,
+        "issuance_wait_p95_ms": null
+      },
+      "resources": {
+        "cpu_cores_average": 0.8604205957994017,
+        "generator_cpu_seconds": 2.0617813010000003,
+        "wbytes_delta": 11091968,
+        "wios_delta": 1207,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 0,
+        "io_some_usec_delta": 1145618
+      },
+      "memory_peak_bytes": 276299776,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "integrity": {
+        "ok": true,
+        "threads": 16,
+        "unavailable_threads": 0
+      },
+      "restart": null
+    },
+    {
+      "name": "after-4c-r2",
+      "phase": "cpu-prototype-before-fixed-cap-removal",
+      "raw": "var/scaling-20261018/after-4c-r2.json",
+      "image": "sha256:a9d6f07f5979d46ee7fb4fc09ab9b01e43a8226226627201b8bda102142c3c3f",
+      "cpu_max": "400000 100000",
+      "memory_max": "2147483648",
+      "egress_budget_bits_per_second": 1000000000,
+      "rate": 500,
+      "seconds": 10,
+      "workers": 80,
+      "thread_count": 16,
+      "board_count": 1,
+      "planned_reads_per_second": 0,
+      "summary": {
+        "planned": 5000,
+        "sent": 2878,
+        "success": 2442,
+        "acknowledged": 2442,
+        "completion_errors_after_ack": 0,
+        "errors": 436,
+        "skipped": 2122,
+        "http_p95_ms": 452.91668991558254,
+        "scheduled_p95_ms": 516.9172820169479,
+        "issuance_wait_p95_ms": 150.8945699315518
+      },
+      "completed_per_second": 237.7,
+      "stable_at_tested_rate": false,
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 120.30617287382483,
+        "scheduled_p95_ms": 3132.0195849984884,
+        "issuance_wait_p95_ms": null
+      },
+      "resources": {
+        "cpu_cores_average": 1.7337427726150234,
+        "generator_cpu_seconds": 4.5815691450000005,
+        "wbytes_delta": 22683648,
+        "wios_delta": 2614,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 0,
+        "io_some_usec_delta": 127108
+      },
+      "memory_peak_bytes": 394383360,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "integrity": {
+        "ok": true,
+        "threads": 16,
+        "unavailable_threads": 0
+      },
+      "restart": null
+    },
+    {
+      "name": "before-160-r1",
+      "phase": "baseline",
+      "raw": "var/scaling-20261018/before-160-r1.json",
+      "image": "sha256:b6f4c65eef83bd424db691381144b6fc38add7f991ee740f92b74ab8ada35072",
+      "cpu_max": "400000 100000",
+      "memory_max": "2147483648",
+      "egress_budget_bits_per_second": 1000000000,
+      "rate": 500,
+      "seconds": 10,
+      "workers": 160,
+      "thread_count": 16,
+      "board_count": 1,
+      "planned_reads_per_second": 0,
+      "summary": {
+        "planned": 5000,
+        "sent": 3571,
+        "success": 2375,
+        "acknowledged": 2375,
+        "completion_errors_after_ack": 0,
+        "errors": 1196,
+        "skipped": 1429,
+        "http_p95_ms": 775.7588550448418,
+        "scheduled_p95_ms": 849.1233959794044,
+        "issuance_wait_p95_ms": 292.2737991902977
+      },
+      "completed_per_second": 220.2,
+      "stable_at_tested_rate": false,
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 137.17665988951921,
+        "scheduled_p95_ms": 4151.129966136068,
+        "issuance_wait_p95_ms": null
+      },
+      "resources": {
+        "cpu_cores_average": 1.6753879270624468,
+        "generator_cpu_seconds": 4.6225769979999995,
+        "wbytes_delta": 21127168,
+        "wios_delta": 2268,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 0,
+        "io_some_usec_delta": 112699
+      },
+      "memory_peak_bytes": 399544320,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "integrity": {
+        "ok": true,
+        "threads": 16,
+        "unavailable_threads": 0
+      },
+      "restart": null
+    },
+    {
+      "name": "before-4c-r1",
+      "phase": "baseline",
+      "raw": "var/scaling-20261018/before-4c-r1.json",
+      "image": "sha256:b6f4c65eef83bd424db691381144b6fc38add7f991ee740f92b74ab8ada35072",
+      "cpu_max": "400000 100000",
+      "memory_max": "2147483648",
+      "egress_budget_bits_per_second": 1000000000,
+      "rate": 500,
+      "seconds": 10,
+      "workers": 80,
+      "thread_count": 16,
+      "board_count": 1,
+      "planned_reads_per_second": 0,
+      "summary": {
+        "planned": 5000,
+        "sent": 2455,
+        "success": 2454,
+        "acknowledged": 2454,
+        "completion_errors_after_ack": 0,
+        "errors": 1,
+        "skipped": 2545,
+        "http_p95_ms": 500.57419715449214,
+        "scheduled_p95_ms": 591.6651149746031,
+        "issuance_wait_p95_ms": 152.52515394240618
+      },
+      "completed_per_second": 235.9,
+      "stable_at_tested_rate": false,
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 19.311622017994523,
+        "scheduled_p95_ms": 19.43656918592751,
+        "issuance_wait_p95_ms": null
+      },
+      "resources": {
+        "cpu_cores_average": 1.5470107660342878,
+        "generator_cpu_seconds": 3.8236422279999998,
+        "wbytes_delta": 21057536,
+        "wios_delta": 2352,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 0,
+        "io_some_usec_delta": 125101
+      },
+      "memory_peak_bytes": 388853760,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "integrity": {
+        "ok": true,
+        "threads": 16,
+        "unavailable_threads": 0
+      },
+      "restart": null
+    },
+    {
+      "name": "before-4c-r2",
+      "phase": "baseline",
+      "raw": "var/scaling-20261018/before-4c-r2.json",
+      "image": "sha256:b6f4c65eef83bd424db691381144b6fc38add7f991ee740f92b74ab8ada35072",
+      "cpu_max": "400000 100000",
+      "memory_max": "2147483648",
+      "egress_budget_bits_per_second": 1000000000,
+      "rate": 500,
+      "seconds": 10,
+      "workers": 80,
+      "thread_count": 16,
+      "board_count": 1,
+      "planned_reads_per_second": 0,
+      "summary": {
+        "planned": 5000,
+        "sent": 1459,
+        "success": 1459,
+        "acknowledged": 1459,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 3541,
+        "http_p95_ms": 970.1348301023245,
+        "scheduled_p95_ms": 1052.0444037392735,
+        "issuance_wait_p95_ms": 152.71436283364892
+      },
+      "completed_per_second": 136.7,
+      "stable_at_tested_rate": false,
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 21.085369866341352,
+        "scheduled_p95_ms": 21.463758079335093,
+        "issuance_wait_p95_ms": null
+      },
+      "resources": {
+        "cpu_cores_average": 0.9250037565214431,
+        "generator_cpu_seconds": 2.370913789,
+        "wbytes_delta": 12304384,
+        "wios_delta": 1386,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 0,
+        "io_some_usec_delta": 673471
+      },
+      "memory_peak_bytes": 286887936,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "integrity": {
+        "ok": true,
+        "threads": 16,
+        "unavailable_threads": 0
+      },
+      "restart": null
+    },
+    {
+      "name": "before-mixed",
+      "phase": "baseline",
+      "raw": "var/scaling-20261018/before-mixed.json",
+      "image": "sha256:b6f4c65eef83bd424db691381144b6fc38add7f991ee740f92b74ab8ada35072",
+      "cpu_max": "400000 100000",
+      "memory_max": "2147483648",
+      "egress_budget_bits_per_second": 1000000000,
+      "rate": 100,
+      "seconds": 10,
+      "workers": 40,
+      "thread_count": 8,
+      "board_count": 1,
+      "planned_reads_per_second": 80,
+      "summary": {
+        "planned": 1000,
+        "sent": 1000,
+        "success": 1000,
+        "acknowledged": 1000,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 41.785622015595436,
+        "scheduled_p95_ms": 42.05023101530969,
+        "issuance_wait_p95_ms": 0.47653703950345516
+      },
+      "completed_per_second": 99.8,
+      "stable_at_tested_rate": true,
+      "read_summary": {
+        "planned": 800,
+        "sent": 800,
+        "success": 800,
+        "acknowledged": 800,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 5.621998803690076,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 234.557824
+      },
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 20.764887798577547,
+        "scheduled_p95_ms": 20.887616090476513,
+        "issuance_wait_p95_ms": null
+      },
+      "resources": {
+        "cpu_cores_average": 0.9640124375714948,
+        "generator_cpu_seconds": 2.9086333390000005,
+        "wbytes_delta": 20934656,
+        "wios_delta": 3701,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 0,
+        "io_some_usec_delta": 56853
+      },
+      "memory_peak_bytes": 351039488,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "integrity": {
+        "ok": true,
+        "threads": 8,
+        "unavailable_threads": 0
+      },
+      "restart": null
+    },
+    {
+      "name": "final-160-r1",
+      "phase": "resource-policy-before-waf-switch",
+      "raw": "var/scaling-20261018/final-160-r1.json",
+      "image": "sha256:c608f202824d874e6f91edfa476297d74bce258c63634ebf90eacfb101e2c70c",
+      "cpu_max": "400000 100000",
+      "memory_max": "2147483648",
+      "egress_budget_bits_per_second": 1000000000,
+      "rate": 500,
+      "seconds": 10,
+      "workers": 160,
+      "thread_count": 16,
+      "board_count": 1,
+      "planned_reads_per_second": 0,
+      "summary": {
+        "planned": 5000,
+        "sent": 3890,
+        "success": 2637,
+        "acknowledged": 2637,
+        "completion_errors_after_ack": 0,
+        "errors": 1253,
+        "skipped": 1110,
+        "http_p95_ms": 688.658107072115,
+        "scheduled_p95_ms": 783.1962648779154,
+        "issuance_wait_p95_ms": 290.4501131270081
+      },
+      "completed_per_second": 246.3,
+      "stable_at_tested_rate": false,
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 19.586718874052167,
+        "scheduled_p95_ms": 19.785280106589198,
+        "issuance_wait_p95_ms": null
+      },
+      "resources": {
+        "cpu_cores_average": 1.8148929875016797,
+        "generator_cpu_seconds": 4.980935672,
+        "wbytes_delta": 23891968,
+        "wios_delta": 2601,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 0,
+        "io_some_usec_delta": 132019
+      },
+      "memory_peak_bytes": 432508928,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "integrity": {
+        "ok": true,
+        "threads": 16,
+        "unavailable_threads": 0
+      },
+      "restart": {
+        "ok": true,
+        "mode": "graceful container restart on the same data volume",
+        "ready": true,
+        "ready_seconds": 16.716954645933583,
+        "verification_seconds": 16.72711274283938,
+        "threads": [
+          {
+            "key": "1792294903",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1792294904",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1792294905",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1792294906",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1792294907",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1792294908",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1792294909",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1792294910",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1792294911",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1792294912",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1792294913",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1792294914",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1792294915",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1792294916",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1792294917",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1792294918",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "final-160-r2",
+      "phase": "final",
+      "raw": "var/scaling-20261018/final-160-r2.json",
+      "image": "sha256:75943a137659a0d8c80d72037839335a7252d3acb9fdeb94eae156fb03b83c36",
+      "cpu_max": "400000 100000",
+      "memory_max": "2147483648",
+      "egress_budget_bits_per_second": 1000000000,
+      "rate": 500,
+      "seconds": 10,
+      "workers": 160,
+      "thread_count": 16,
+      "board_count": 1,
+      "planned_reads_per_second": 0,
+      "summary": {
+        "planned": 5000,
+        "sent": 3837,
+        "success": 2632,
+        "acknowledged": 2632,
+        "completion_errors_after_ack": 0,
+        "errors": 1205,
+        "skipped": 1163,
+        "http_p95_ms": 696.6860841494054,
+        "scheduled_p95_ms": 785.5412450153381,
+        "issuance_wait_p95_ms": 292.90360398590565
+      },
+      "completed_per_second": 246.8,
+      "stable_at_tested_rate": false,
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 20.009223837405443,
+        "scheduled_p95_ms": 20.137218991294503,
+        "issuance_wait_p95_ms": null
+      },
+      "resources": {
+        "cpu_cores_average": 1.80620319600031,
+        "generator_cpu_seconds": 5.012222783,
+        "wbytes_delta": 23470080,
+        "wios_delta": 2530,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 0,
+        "io_some_usec_delta": 115329
+      },
+      "memory_peak_bytes": 425791488,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "integrity": {
+        "ok": true,
+        "threads": 16,
+        "unavailable_threads": 0
+      },
+      "restart": {
+        "ok": true,
+        "mode": "graceful container restart on the same data volume",
+        "ready": true,
+        "ready_seconds": 16.406940458808094,
+        "verification_seconds": 16.41641175886616,
+        "threads": [
+          {
+            "key": "1792295404",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1792295405",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1792295406",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1792295407",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1792295408",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1792295409",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1792295410",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1792295411",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1792295412",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1792295413",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1792295414",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1792295415",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1792295416",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1792295417",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1792295418",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1792295419",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "final-1c",
+      "phase": "final",
+      "raw": "var/scaling-20261018/final-1c.json",
+      "image": "sha256:75943a137659a0d8c80d72037839335a7252d3acb9fdeb94eae156fb03b83c36",
+      "cpu_max": "100000 100000",
+      "memory_max": "2147483648",
+      "egress_budget_bits_per_second": 1000000000,
+      "rate": 500,
+      "seconds": 10,
+      "workers": 160,
+      "thread_count": 16,
+      "board_count": 1,
+      "planned_reads_per_second": 0,
+      "summary": {
+        "planned": 5000,
+        "sent": 2935,
+        "success": 1486,
+        "acknowledged": 1486,
+        "completion_errors_after_ack": 0,
+        "errors": 1449,
+        "skipped": 2065,
+        "http_p95_ms": 1199.927455978468,
+        "scheduled_p95_ms": 1139.8381039034575,
+        "issuance_wait_p95_ms": 288.60289603471756
+      },
+      "completed_per_second": 134.3,
+      "stable_at_tested_rate": false,
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 19.081385107710958,
+        "scheduled_p95_ms": 19.17823893018067,
+        "issuance_wait_p95_ms": null
+      },
+      "resources": {
+        "cpu_cores_average": 1.0002159254854777,
+        "generator_cpu_seconds": 3.3533134399999995,
+        "wbytes_delta": 14258176,
+        "wios_delta": 1554,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 7941898,
+        "io_some_usec_delta": 115594
+      },
+      "memory_peak_bytes": 326148096,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "integrity": {
+        "ok": true,
+        "threads": 16,
+        "unavailable_threads": 0
+      },
+      "restart": null
+    },
+    {
+      "name": "final-mixed",
+      "phase": "final",
+      "raw": "var/scaling-20261018/final-mixed.json",
+      "image": "sha256:75943a137659a0d8c80d72037839335a7252d3acb9fdeb94eae156fb03b83c36",
+      "cpu_max": "400000 100000",
+      "memory_max": "2147483648",
+      "egress_budget_bits_per_second": 1000000000,
+      "rate": 100,
+      "seconds": 10,
+      "workers": 40,
+      "thread_count": 8,
+      "board_count": 1,
+      "planned_reads_per_second": 80,
+      "summary": {
+        "planned": 1000,
+        "sent": 1000,
+        "success": 1000,
+        "acknowledged": 1000,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 468.70244294404984,
+        "scheduled_p95_ms": 493.8881411217153,
+        "issuance_wait_p95_ms": 91.63077594712377
+      },
+      "completed_per_second": 95.7,
+      "stable_at_tested_rate": false,
+      "read_summary": {
+        "planned": 800,
+        "sent": 800,
+        "success": 800,
+        "acknowledged": 800,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 6.084453081712127,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 234.551936
+      },
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 151.6311129089445,
+        "scheduled_p95_ms": 5541.517436271533,
+        "issuance_wait_p95_ms": null
+      },
+      "resources": {
+        "cpu_cores_average": 0.8558145632342467,
+        "generator_cpu_seconds": 2.814342974,
+        "wbytes_delta": 15831040,
+        "wios_delta": 2577,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 0,
+        "io_some_usec_delta": 395654
+      },
+      "memory_peak_bytes": 354242560,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "integrity": {
+        "ok": true,
+        "threads": 8,
+        "unavailable_threads": 0
+      },
+      "restart": {
+        "ok": true,
+        "mode": "graceful container restart on the same data volume",
+        "ready": true,
+        "ready_seconds": 11.472705750027671,
+        "verification_seconds": 11.4766820310615,
+        "threads": [
+          {
+            "key": "1792295298",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1792295299",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1792295300",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1792295301",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1792295302",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1792295303",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1792295304",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1792295305",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          }
+        ]
+      }
+    }
+  ],
+  "microbenchmark": {
+    "raw": "var/scaling-20261018/micro-preserved.txt",
+    "rows": [
+      {
+        "name": "BenchmarkBatchPayloadValidation/serial",
+        "gomaxprocs": 2,
+        "ns_per_op": 1353653,
+        "bytes_per_op": 460535,
+        "allocs_per_op": 578
+      },
+      {
+        "name": "BenchmarkBatchPayloadValidation/serial",
+        "gomaxprocs": 2,
+        "ns_per_op": 1353306,
+        "bytes_per_op": 459897,
+        "allocs_per_op": 578
+      },
+      {
+        "name": "BenchmarkBatchPayloadValidation/serial",
+        "gomaxprocs": 4,
+        "ns_per_op": 1342870,
+        "bytes_per_op": 460276,
+        "allocs_per_op": 578
+      },
+      {
+        "name": "BenchmarkBatchPayloadValidation/serial",
+        "gomaxprocs": 4,
+        "ns_per_op": 1329219,
+        "bytes_per_op": 460302,
+        "allocs_per_op": 578
+      },
+      {
+        "name": "BenchmarkBatchPayloadValidation/serial",
+        "gomaxprocs": 8,
+        "ns_per_op": 1385240,
+        "bytes_per_op": 460616,
+        "allocs_per_op": 578
+      },
+      {
+        "name": "BenchmarkBatchPayloadValidation/serial",
+        "gomaxprocs": 8,
+        "ns_per_op": 1332431,
+        "bytes_per_op": 460591,
+        "allocs_per_op": 578
+      },
+      {
+        "name": "BenchmarkBatchPayloadValidation/concurrent",
+        "gomaxprocs": 2,
+        "ns_per_op": 781485,
+        "bytes_per_op": 467000,
+        "allocs_per_op": 602
+      },
+      {
+        "name": "BenchmarkBatchPayloadValidation/concurrent",
+        "gomaxprocs": 2,
+        "ns_per_op": 958643,
+        "bytes_per_op": 463734,
+        "allocs_per_op": 587
+      },
+      {
+        "name": "BenchmarkBatchPayloadValidation/concurrent",
+        "gomaxprocs": 4,
+        "ns_per_op": 812044,
+        "bytes_per_op": 464532,
+        "allocs_per_op": 592
+      },
+      {
+        "name": "BenchmarkBatchPayloadValidation/concurrent",
+        "gomaxprocs": 4,
+        "ns_per_op": 777944,
+        "bytes_per_op": 464533,
+        "allocs_per_op": 592
+      },
+      {
+        "name": "BenchmarkBatchPayloadValidation/concurrent",
+        "gomaxprocs": 8,
+        "ns_per_op": 765803,
+        "bytes_per_op": 466626,
+        "allocs_per_op": 602
+      },
+      {
+        "name": "BenchmarkBatchPayloadValidation/concurrent",
+        "gomaxprocs": 8,
+        "ns_per_op": 773525,
+        "bytes_per_op": 467038,
+        "allocs_per_op": 602
+      },
+      {
+        "name": "BenchmarkPreparedAnonymous/roundtrip",
+        "gomaxprocs": 2,
+        "ns_per_op": 337889,
+        "bytes_per_op": 49056,
+        "allocs_per_op": 231
+      },
+      {
+        "name": "BenchmarkPreparedAnonymous/roundtrip",
+        "gomaxprocs": 2,
+        "ns_per_op": 339218,
+        "bytes_per_op": 48830,
+        "allocs_per_op": 230
+      },
+      {
+        "name": "BenchmarkPreparedAnonymous/roundtrip",
+        "gomaxprocs": 4,
+        "ns_per_op": 330081,
+        "bytes_per_op": 48970,
+        "allocs_per_op": 230
+      },
+      {
+        "name": "BenchmarkPreparedAnonymous/roundtrip",
+        "gomaxprocs": 4,
+        "ns_per_op": 320896,
+        "bytes_per_op": 48969,
+        "allocs_per_op": 230
+      },
+      {
+        "name": "BenchmarkPreparedAnonymous/roundtrip",
+        "gomaxprocs": 8,
+        "ns_per_op": 366782,
+        "bytes_per_op": 49092,
+        "allocs_per_op": 231
+      },
+      {
+        "name": "BenchmarkPreparedAnonymous/roundtrip",
+        "gomaxprocs": 8,
+        "ns_per_op": 349405,
+        "bytes_per_op": 49118,
+        "allocs_per_op": 231
+      },
+      {
+        "name": "BenchmarkPreparedAnonymous/prepared",
+        "gomaxprocs": 2,
+        "ns_per_op": 253478,
+        "bytes_per_op": 43564,
+        "allocs_per_op": 200
+      },
+      {
+        "name": "BenchmarkPreparedAnonymous/prepared",
+        "gomaxprocs": 2,
+        "ns_per_op": 255009,
+        "bytes_per_op": 43398,
+        "allocs_per_op": 200
+      },
+      {
+        "name": "BenchmarkPreparedAnonymous/prepared",
+        "gomaxprocs": 4,
+        "ns_per_op": 258603,
+        "bytes_per_op": 43497,
+        "allocs_per_op": 200
+      },
+      {
+        "name": "BenchmarkPreparedAnonymous/prepared",
+        "gomaxprocs": 4,
+        "ns_per_op": 251855,
+        "bytes_per_op": 43470,
+        "allocs_per_op": 200
+      },
+      {
+        "name": "BenchmarkPreparedAnonymous/prepared",
+        "gomaxprocs": 8,
+        "ns_per_op": 260845,
+        "bytes_per_op": 43618,
+        "allocs_per_op": 200
+      },
+      {
+        "name": "BenchmarkPreparedAnonymous/prepared",
+        "gomaxprocs": 8,
+        "ns_per_op": 253335,
+        "bytes_per_op": 43591,
+        "allocs_per_op": 201
+      }
+    ],
+    "note": "micro-final.txtのpayload serialは保持コピーを含めないため、割当量比較には使わない。micro-preserved.txtでは双方に保持コピーを含めた。"
+  },
+  "checks": {
+    "evidence_full_tests": "passed before final WAF-only changes; final parallel payload boundaries also passed race tests",
+    "app_batch_and_multithread_process_crash_race": "passed",
+    "delivery_store_postcapture_full_race": "passed",
+    "postcapture_equivalence_fuzz": "passed 16 seconds / 86328 executions",
+    "bootstrap_final_regression_race": "passed: WAF, traffic, resource boundary, operations, admission, site routing, hidden board, reading restrictions, posting batch/capture and publication; 25.292 seconds",
+    "waf_switch_http_persistence_and_race": "passed",
+    "python_probe_tests": 8,
+    "vet": "passed for bootstrap, delivery, evidence, app, postcapture, store and waf",
+    "designcheck": "passed including this measurement document",
+    "full_go_suite": "not run"
+  },
+  "limitations": [
+    "共有ホストのI/Oは制御していない。遅い試行・拒否・未発行を除外していない。",
+    "板ごとの所有順序と3つの耐久境界は残る。CPU数を増やしても全CPUを使い切る保証はない。",
+    "1CPUと4CPUの比較は同じCPUのcgroup quota比較であり、CPUモデルやSSDを変えた比較ではない。",
+    "WAFをOFFにしてもIP別の投稿試行10要求/秒など利用者向け制限は維持する。固定全体枠の撤去と区別する。",
+    "正常コンテナ再起動の照合はSIGKILL・電源断・媒体故障の証明ではない。再起動時間は停止・起動・準備待ちを含む。",
+    "100Gbpsは設定境界と送信制御のテストであり、実回線の100Gbps配信実証ではない。"
+  ],
+  "discarded_or_failed_attempts": [
+    {
+      "raw": null,
+      "note": "最初は廃止済みの--cache-bytesを指定して起動前に中断。同じ出力先で修正後の試験を実施したため、初回のCLIエラー出力は未保存。測定開始前の失敗で性能値には含めない。"
+    },
+    {
+      "raw": "var/scaling-20261018/payload-bench-overlapped-invalid.txt",
+      "note": "ビルド・試験と重なったため中断。性能比較に使用しない。"
+    },
+    {
+      "raw": "var/scaling-20261018/designcheck.log",
+      "note": "初回はmise外の古いGoで失敗。固定toolchainからの再実行は成功。"
+    },
+    {
+      "raw": "var/scaling-20261018/resource-boundary.log",
+      "note": "新しい制御collectionを保存層へ未登録で初回検査が失敗。登録後に保存・reader・再起動検査成功。"
+    },
+    {
+      "raw": "var/scaling-20261018/race-waf-switch.log",
+      "note": "フォーム試験helperがselectを抽出しておらず失敗。選択値を抽出するよう修正。"
+    },
+    {
+      "raw": "var/scaling-20261018/race-waf-switch-final.log",
+      "note": "管理画面fixtureの旧20項目期待値が失敗。23項目とclient_enabledを検査するよう更新。"
+    }
+  ],
+  "source_sha256": {
+    "internal/app/posting_batch.go": "48c5d07943754880eaa95484ea6d492f9b0a3a8f3c5e7b4de28896249ef3ddad",
+    "internal/app/posting_evidence.go": "88fcf1b8ff68ab33a54d9ca63c6233b46527da46d4d0f21d93ebbd54ab1d1d12",
+    "internal/bootstrap/admin_audit.go": "d125cdafa3ecd45685a2618b0d4e30e3669dc9d20824c5e4ca7f75efd93723f6",
+    "internal/bootstrap/admin_audit_http.go": "8247aa688508770b15a34e15b3dce0c2ff8922786848d049b95f364824df6545",
+    "internal/bootstrap/admin_waf_http.go": "27ca2d11c78af148a849047ee213e0ce90a9aa6b56ffadeaa78b885f62ea0e95",
+    "internal/bootstrap/admission.go": "ba8b6b0c9d2008166915c13e290af2bbcf6255cbdea489db76b83c937914b16c",
+    "internal/bootstrap/admission_policy.go": "304d33fabf86763594169d6c6f77629d753a98527b3d9888ba3db5bc092c2de9",
+    "internal/bootstrap/bootstrap.go": "9369d720a48699411a74726fffd702879883168363f02bac3db3eeff50a43bd2",
+    "internal/bootstrap/config_budget_test.go": "473bb41ec3921eaf01521ebe00e3e2caa5a2a79c54786d752529ac2109457779",
+    "internal/bootstrap/operations.go": "af82fd037be00f115c78d02ad3b9515d49cb8ba9c8aafe45599b1c13c75bf1e0",
+    "internal/bootstrap/operations_test.go": "e2b14de1e277cb3c617cb86c5d4ca7543499a1eff59913bc15466dcce1561f92",
+    "internal/bootstrap/posting_resources.go": "bf95fa14ff84522036b2881c31fe47f80ef71ea318baa620f76d2debc9b545a7",
+    "internal/bootstrap/posting_resources_test.go": "a24291eb46859bb0d2bd4a338fa1847f464d064c5ea42a31a65a84a4b2b9a692",
+    "internal/bootstrap/site_web.go": "67fb8da1f0816efc10c35d9fccaef25f02b10ed55d2ad98f150624eaeb0df152",
+    "internal/bootstrap/state.go": "ea032aa971268b7c749452c5f69878b8186dc17a0df647faa472b317d845309b",
+    "internal/bootstrap/validation_server.go": "5f3505f46678f9cc1071c18b8c7250699279d1fc7158c1f7f78a549b54b1ec22",
+    "internal/bootstrap/waf.go": "1c68a5be79eee4e7d5035894e7b9a4dd6ec02bc17633ad3eb9948de107a31b40",
+    "internal/bootstrap/waf_query_limit_test.go": "fcedb48e052df40d87365de191fd0f105251aff5fa7e4578a61505a40fc3eee9",
+    "internal/bootstrap/waf_test.go": "a4b54d459bccc606f96e8df245f1b86134e9193fb1467efe00a2e93f70063910",
+    "internal/bootstrap/waf_traffic_test.go": "335fb43ddceef0f6de83023a28ee64214cb23ba30dd978995f90a6219a3354ad",
+    "internal/delivery/scheduler.go": "72876a3450a3b7febd68a612b25083823330eb3614e47c2c1246cac4185f4b7d",
+    "internal/evidence/required_batch.go": "1f825417f0ec89f50813d78581b8c3ae62bf1a040e7143d3f65b614713fca041",
+    "internal/evidence/required_batch_concurrent_test.go": "65c9fadcbffa50926b3a8cbb04e108fa03782d06820618efd109a3323b17d1c0",
+    "internal/postcapture/capture.go": "187f6e637ce01b92ed9529190222e5917d256fb7d93397869471bcd18b410bf3",
+    "internal/postcapture/prepared_test.go": "939862f8e5ccdc6816765b93b327cc4ea8f56d08b429932412354d365c5a9b52",
+    "internal/store/control.go": "75b571f7c5c495a77d11db42fdfe0a24e26004108d6edc84ccca7dc80050752b",
+    "internal/waf/posting_settings.go": "9e896c58201dfe0f0c8771bf45364379ad5f8c081788547738be679d12d93440",
+    "internal/waf/traffic.go": "ad11c4922ca615508e45f840d805026cec893cfb1e7586cb69bc8c49565bed68",
+    "internal/waf/traffic_client_toggle_test.go": "f71d3041d19c192c412148285b12dd85213a1b9bfa915b0e125dd0e80f95be92",
+    "internal/waf/traffic_settings.go": "12aa89a91c91a2f93981b17e6baf484ffcd4b890eb4847554477168b0fcff2b3",
+    "internal/webui/templates/operations.html": "5d2c9d64fe022829f33ff8c301097bbd9d9372d35e3dac879285bac5d84e23b3",
+    "internal/webui/templates/waf.html": "88dafabdd07d147b2e32b4c591fd977f375515935b02ad279cb357bc75a08d26",
+    "scripts/probe-thread-resources.py": "1f1175014be81d672e545ebba0faabec9a2e2668b046243dbc5d387957bf8aa1",
+    "scripts/probe_posting_capacity.py": "200b03530c52bd4627716e5be5f2a71a7a193b55249bb0a78709328fa9ae1332",
+    "scripts/test_probe_posting_capacity.py": "fb805a9f936138d319b52b5b10a94b28d86fa199a71e5fa5f7d92cf1846db4ab"
+  },
+  "reproduce": {
+    "overload": "PYTHONDONTWRITEBYTECODE=1 mise exec -- python3 scripts/probe-thread-resources.py --image oimobbs-validation:scaling-complete-20261018 --cpus 4 --memory 2g --egress-bps 1000000000 --posting-capacity-rate 500 --posting-capacity-seconds 10 --posting-capacity-workers 160 --posting-capacity-threads 16 --posting-capacity-restart --output var/scaling-repeat.json",
+    "mixed": "同じimage/cpus/memory/egressで --posting-capacity-rate 100 --posting-capacity-workers 40 --posting-capacity-threads 8 --posting-capacity-reads 80。",
+    "micro": "mise exec -- go test ./internal/evidence ./internal/postcapture -run '^$' -bench 'Benchmark(BatchPayloadValidation|PreparedAnonymous)$' -benchtime=500ms -cpu 2,4,8 -count=2"
+  }
+}

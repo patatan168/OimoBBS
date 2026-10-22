@@ -1,0 +1,14 @@
+/* 国名と国コードを整列し、国別のチェックを読みやすくする。 */
+.country-options { max-height:360px; overflow-y:auto; padding:4px; }
+/* 国名を主に、2文字のコードを揃えた補助表示にし、確認と選択で同じ並びを使う。 */
+.country-guide > .field-hint { margin:12px 0; }
+.country-reference { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr)); gap:8px; list-style:none; margin:12px 0; }
+.country-reference > li { display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:48px; padding:10px 12px; border:1px solid var(--line); border-radius:8px; background:var(--canvas); }
+.country-name { font-size:14px; font-weight:550; overflow-wrap:anywhere; }
+.country-code { flex:0 0 auto; display:inline-block; min-width:38px; padding:2px 6px; border:1px solid var(--line); border-radius:5px; background:var(--paper); color:var(--muted); text-align:center; font-size:12px; font-weight:600; }
+.country-label { display:flex; align-items:center; justify-content:space-between; gap:10px; flex:1; }
+.country-permissions { grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr)); }
+.country-permissions .check-option { gap:10px; }
+.country-guide .filter-tools { margin-top:12px; }
+.country-guide .filter-field { margin:0; }
+@media (max-width:700px) { .country-permissions { grid-template-columns:minmax(0,1fr); } }

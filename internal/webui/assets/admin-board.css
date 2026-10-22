@@ -1,0 +1,5 @@
+/* 板設定の回線上書き欄。 */
+/* 行の削除と一覧への追加を離し、追加した行にも同じ間隔を適用する。 */
+[data-board-network-rows], [data-network-rows] { display:grid; gap:20px; }
+[data-board-network-rows] > button { justify-self:start; }
+[data-network-row] + [data-network-row] { border-top:1px solid var(--line); padding-top:20px; }

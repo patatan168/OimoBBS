@@ -1,0 +1,6 @@
+/bin/
+/var/
+/coverage.out
+/compose.slip.yaml
+
+__pycache__/

@@ -1,0 +1,54 @@
+/* 管理操作の記録と、狭い画面での記録カード。 */
+/* 管理操作の要約を揃え、狭い画面では見出し付きの記録カードへ切り替える。 */
+.audit-filters .field-hint { margin:0; font-size:13px; }
+.audit-filter-actions { display:flex; flex-wrap:wrap; align-items:center; align-self:end; gap:12px; }
+.audit-results-heading { display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-top:28px; }
+.audit-results-heading h2 { margin:0; }
+.audit-results-heading > span { color:var(--muted); font-size:13px; }
+.audit-table { display:table; table-layout:fixed; font-size:14px; }
+.audit-table th:nth-child(1) { width:17%; }
+.audit-table th:nth-child(2) { width:43%; }
+.audit-table th:nth-child(3) { width:23%; }
+.audit-table th:nth-child(4) { width:17%; }
+.audit-table td { vertical-align:top; }
+.audit-table time { font-variant-numeric:tabular-nums; }
+.audit-table code { font-size:12px; overflow-wrap:anywhere; }
+.audit-table tbody tr:nth-child(even) { background:var(--canvas); }
+.audit-secondary { display:block; color:var(--muted); font-size:13px; margin-top:4px; }
+.audit-phase { display:inline-block; margin-top:8px; padding:2px 8px; border:1px solid var(--line); border-radius:6px; background:var(--surface); font-size:12px; }
+.audit-table summary { padding:8px; font-size:13px; }
+.audit-details { display:block; margin:12px 0 0; font-size:12px; }
+.audit-details dt { padding:8px 0 0; border:0; background:none; }
+.audit-details dd { padding:2px 0 8px; margin:0; border:0; }
+.audit-details dd code { display:block; }
+@media (max-width:700px) {
+ .audit-table,.audit-table tbody { display:block; }
+ .audit-table caption { display:block; padding:12px 0; }
+ .audit-table thead { display:none; }
+ .audit-table tr { display:block; border:1px solid var(--line); border-radius:10px; margin-bottom:12px; padding:8px 14px; background:var(--paper); }
+ .audit-table td { display:block; padding:10px 0; border:0; }
+ .audit-table td + td { border-top:1px solid var(--line); }
+ .audit-table td::before { content:attr(data-label); display:block; margin-bottom:4px; color:var(--muted); font-size:12px; font-weight:650; }
+}
+
+
+.audit-action { display:block; font-size:15px; line-height:1.6; }
+.audit-description { margin:6px 0 10px; color:var(--muted); font-size:13px; line-height:1.7; }
+.audit-target { display:inline-block; padding:4px 8px; border-radius:6px; background:var(--tonal); font-size:12px; overflow-wrap:anywhere; }
+.audit-actor { display:block; overflow-wrap:anywhere; }
+.audit-field-list { padding-left:20px; margin:0 0 8px; }
+
+.audit-action-picker { min-width:0; }
+.audit-action-picker > span { display:block; margin-bottom:6px; }
+.audit-action-picker details { margin:0; padding:0; border:1px solid var(--line); border-radius:8px; background:var(--surface); }
+.audit-action-picker summary { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:10px 12px; overflow-wrap:anywhere; }
+.audit-picker-change { flex-shrink:0; color:var(--accent); font-size:12px; }
+.audit-action-panel { padding:0 12px 12px; }
+.audit-action-search { display:block; margin-bottom:10px; }
+.audit-action-options { max-height:240px; overflow:auto; overscroll-behavior:contain; margin:0 0 8px; padding:0; border:0; }
+.audit-action-options legend { font-size:12px; color:var(--muted); padding:0 0 6px; }
+.audit-action-option { display:flex; align-items:center; gap:10px; padding:10px 8px; border-radius:6px; cursor:pointer; line-height:1.5; }
+.audit-action-option:hover,.audit-action-option:focus-within { background:var(--tonal); }
+.audit-action-option:has(input:checked) { background:var(--tonal); font-weight:650; }
+.audit-action-option input { flex:0 0 auto; width:18px; height:18px; margin:0; }
+.audit-action-option[hidden],.audit-action-search[hidden] { display:none; }

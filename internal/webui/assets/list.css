@@ -1,0 +1,23 @@
+/* ページ内検索と一覧のページ切替。 */
+.filter-tools { display:flex; align-items:end; gap:16px; flex-wrap:wrap; }
+.filter-tools > label { flex:1 1 200px; margin-bottom:0; }
+.filter-tools > label:first-child { flex:3 1 260px; }
+.filter-tools + .field-hint { margin:12px 0 16px; }
+
+/* ページ切替でも外側の高さを保ち、長い一覧と編集フォームは内側でスクロールする。 */
+.filter-viewport { block-size:clamp(240px,55vh,560px); overflow:auto; scrollbar-gutter:stable; overscroll-behavior:contain; border:1px solid var(--line); border-radius:12px; background:var(--paper); }
+.filter-viewport > .network-list { border:0; border-radius:0; }
+.filter-viewport:focus-visible { outline:2px solid var(--link); outline-offset:3px; }
+.filter-pager { display:flex; flex-wrap:wrap; align-items:end; gap:12px; padding:12px; margin:0 0 12px; border:1px solid var(--line); border-radius:10px; background:var(--paper); }
+.filter-pager > label { display:grid; gap:4px; margin:0; font-size:13px; }
+.filter-pager select { min-width:100px; margin:0; }
+.filter-pager button { margin:0; }
+@media (max-width:480px) {
+ .filter-pager { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.4fr) minmax(0,1fr); gap:8px; }
+ .filter-pager > label { min-width:0; }
+ .filter-pager select { width:100%; min-width:0; }
+ .filter-pager > :last-child { grid-column:1 / -1; }
+ .filter-pager button { padding-inline:8px; min-width:0; }
+}
+
+.filter-viewport-small { block-size:auto; max-block-size:55vh; }

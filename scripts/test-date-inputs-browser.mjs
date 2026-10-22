@@ -1,0 +1,98 @@
+/** 実フォームで、日本時間・期間選択・日時精度・期限更新・JSなしの入力を検証する。 */
+import assert from "node:assert/strict";
+import {createRequire} from "node:module";
+import {mkdir} from "node:fs/promises";
+const {chromium,firefox}=createRequire(import.meta.url)(process.env.OIMO_PLAYWRIGHT);
+const browser=await (process.env.OIMO_FIREFOX ? firefox.launch({headless:true}) : chromium.launch({headless:true,executablePath:process.env.OIMO_CHROMIUM,args:["--no-sandbox"]}));
+const DAY=86400000,JST=32400000;
+const local=date=>new Date(date.getTime()+JST).toISOString().slice(0,19);
+const stamp=raw=>Date.parse(/[Zz]$|[+-]\d\d:\d\d$/.test(raw)?raw:raw+"+09:00");
+try {
+ const context=await browser.newContext({timezoneId:"America/New_York",locale:"ja-JP"});
+ await context.addInitScript(()=>{const RealDate=Date;window.Date=class extends RealDate {constructor(...args){super(...(args.length?args:[946684800000]));}static now(){return 946684800000;}};});
+ const page=await context.newPage();const errors=[];page.on("pageerror",e=>errors.push(e.message));
+ page.on("response",r=>{if(["script","stylesheet"].includes(r.request().resourceType())&&r.status()>=400)errors.push(`${r.status()} ${r.url()}`);});
+ const base=process.env.OIMO_LAYOUT_URL,publicBase=process.env.OIMO_ASSETS_PUBLIC_URL;
+ const board=process.env.OIMO_LAYOUT_BOARD,thread=process.env.OIMO_ASSETS_THREAD;
+ const navigate=async route=>{const r=await page.goto(base+route);assert.equal(r.status(),200,route);};
+ const save=async button=>{const pending=page.waitForNavigation();await button.click();const r=await pending;assert.equal(r.status(),200,await r.text());};
+ await navigate("/login");await page.locator('[name="login"]').fill("owner");await page.locator('[name="password"]').fill(process.env.OIMO_TEST_PASSWORD);
+ await save(page.locator('form[action$="/login"] button[type="submit"]'));
+ await navigate("/reauth?return_to=%2Fcaps");await page.locator('[name="password"]').fill(process.env.OIMO_TEST_PASSWORD);
+ await save(page.locator('form[action*="/reauth"] button[type="submit"]'));
+ await navigate("/audit");
+ const form=page.locator('form[aria-label="記録の絞り込み"]');
+ const from=form.locator('[name="from"]'),to=form.locator('[name="to"]');
+ const exact={from:await from.inputValue(),to:await to.inputValue()};
+ const display=form.locator('[data-date-control="from"]');
+ assert.equal(await display.getAttribute("type"),"datetime-local");
+ assert.equal(stamp(await display.inputValue()),Math.floor(stamp(exact.from)/1000)*1000,"calendar must show JST independently of device timezone");
+ await save(form.getByRole("button",{name:"絞り込む",exact:true}));
+ assert.equal(new URL(page.url()).searchParams.get("from"),exact.from,"untouched nanoseconds lost");assert.equal(new URL(page.url()).searchParams.get("to"),exact.to);
+ const toolbar=form.locator("[data-date-range]");
+ const anchor=Date.parse(await toolbar.getAttribute("data-date-now"));
+ const date=new Date(anchor+JST);const midnight=Date.UTC(date.getUTCFullYear(),date.getUTCMonth(),date.getUTCDate())-JST;
+ await toolbar.getByRole("button",{name:"今日",exact:true}).click();assert.equal(stamp(await from.inputValue()),midnight);assert.ok(stamp(await to.inputValue())>=anchor);
+ await toolbar.getByRole("button",{name:"昨日",exact:true}).click();assert.equal(stamp(await from.inputValue()),midnight-DAY);assert.equal(stamp(await to.inputValue()),midnight);
+ await toolbar.getByRole("button",{name:"直近7日",exact:true}).click();assert.equal(stamp(await to.inputValue())-stamp(await from.inputValue()),7*DAY);
+ await toolbar.getByRole("button",{name:"直近30日",exact:true}).click();assert.equal(stamp(await to.inputValue())-stamp(await from.inputValue()),30*DAY);
+ const edited=local(new Date(anchor-3600000));await display.fill(edited);assert.equal(stamp(await from.inputValue()),stamp(edited));
+ await save(form.getByRole("button",{name:"絞り込む",exact:true}));
+ assert.equal(stamp(new URL(page.url()).searchParams.get("from")),stamp(edited));
+ if(process.env.OIMO_DATE_SCREENSHOTS)await mkdir(process.env.OIMO_DATE_SCREENSHOTS,{recursive:true});
+ for(const width of [320,390,1024]) {
+  await page.setViewportSize({width,height:1000});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`audit overflow ${width}`);
+  if(process.env.OIMO_DATE_SCREENSHOTS)await page.screenshot({path:`${process.env.OIMO_DATE_SCREENSHOTS}/audit-${width}.png`,fullPage:true});
+ }
+ const clear=toolbar.locator('[data-date-period="clear"]');await clear.click();assert.equal(await from.inputValue(),"");assert.equal(await to.inputValue(),"");
+ assert.equal((await page.goto(publicBase+"/search")).status(),200);await page.locator(".search-options summary").click();
+ await page.getByRole("button",{name:"昨日",exact:true}).click();await save(page.getByRole("button",{name:"検索",exact:true}));
+ assert.equal(stamp(new URL(page.url()).searchParams.get("until"))-stamp(new URL(page.url()).searchParams.get("from")),DAY);
+ assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),"search overflow");
+ await navigate("/caps");await page.getByText("新しいキャップを発行",{exact:true}).click();
+ const capForm=page.locator(`form[action="${new URL(base).pathname}/caps"]`);
+ await capForm.getByRole("button",{name:"7日後",exact:true}).click();
+ const expiry=capForm.locator('[name="expires_at"]');const capAnchor=stamp(await expiry.getAttribute("data-date-now"));
+ assert.ok(Math.abs(stamp(await expiry.inputValue())-capAnchor-7*DAY)<5000);
+ await capForm.getByRole("button",{name:"期限なし",exact:true}).click();assert.equal(await expiry.inputValue(),"");
+ await capForm.getByRole("button",{name:"30日後",exact:true}).click();
+ await capForm.locator('[name="display_name"]').fill("日付UIで発行");await capForm.locator(`[name="board_ids"][value="${board}"]`).check();
+ await save(capForm.getByRole("button",{name:"発行",exact:true}));
+ const capAPI=await page.request.get(base+"/api/v1/caps");assert.equal(capAPI.status(),200);const caps=(await capAPI.json()).data;
+ assert.ok(caps.some(c=>c.display_name==="日付UIで発行"&&c.expires_at));
+ // 秒未満の期限を持つ実CAPを作成し、表示名の変更で期限を丸めないことを確認する。
+ const precise=new Date(anchor+60*DAY).toISOString().replace(/\.\d{3}Z$/,".123456789Z");
+ const preciseCreate=await page.request.post(base+"/api/v1/caps",{headers:{"Origin":new URL(base).origin,"If-Match":capAPI.headers()["etag"],"X-CSRF-Token":capAPI.headers()["x-csrf-token"],"Idempotency-Key":"date-precision-cap-create"},data:{display_name:"精度を維持",board_ids:[board],permissions:["post"],expires_at:precise}});
+ assert.equal(preciseCreate.status(),200,await preciseCreate.text());
+ await navigate("/caps");const preciseCard=page.locator("article").filter({has:page.getByRole("heading",{name:"精度を維持",exact:true})});
+ await preciseCard.getByText("担当板・許可・期限を変更",{exact:true}).click();
+ const update=preciseCard.locator('form[action$="/update"]');
+ assert.ok((await update.locator('[name="expires_at"]').inputValue()).endsWith(".123456789"));
+ assert.ok(await update.locator('[data-date-control="expires_at"]').inputValue(),"precise expiry must not disappear in browser");
+ await update.locator('[name="display_name"]').fill("精度を維持して更新");await save(update.getByRole("button",{name:"変更して鍵を再発行",exact:true}));
+ const updated=(await (await page.request.get(base+"/api/v1/caps")).json()).data.find(c=>c.display_name==="精度を維持して更新");assert.equal(updated.expires_at,precise);
+ await navigate("/evidence");await page.locator("#new-case > summary").click();const create=page.locator('form[action$="/evidence/cases"]');
+ await create.getByRole("button",{name:"直近7日",exact:true}).click();assert.equal(await create.locator('[data-date-period="clear"]').isVisible(),false);
+ await create.locator('[name="thread_key"]').fill(thread);await create.locator('[name="reason"]').fill("日付入力の実HTTP検証");await create.locator('[name="board_id"]').selectOption(board);
+ await create.getByText("案件番号・依頼先・保全期限を指定",{exact:true}).click();await create.locator('[name="case_number"]').fill("DATE-UI-CREATE");
+ await create.getByRole("button",{name:"30日後",exact:true}).click();await save(create.getByRole("button",{name:"対象を登録",exact:true}));
+ const caseCard=()=>page.locator("details.evidence-case").filter({has:page.locator("strong").filter({hasText:/^DATE-UI-CREATE$/})});
+ await caseCard().locator(":scope > summary").click();
+ const extract=caseCard().locator('form[action$="/extract"]');await extract.locator('[name="reason"]').fill("保全と期限入力の検証");
+ const downloaded=page.waitForEvent("download");await extract.getByRole("button",{name:"ZIPを作成してダウンロード",exact:true}).click();const file=await downloaded;await file.path();assert.equal(await file.failure(),null);
+ await navigate("/evidence");await caseCard().locator(":scope > summary").click();
+ await caseCard().getByText("保全期限・終了",{exact:true}).click();
+ const extend=caseCard().locator('form[action$="/extend"]');const deadline=extend.locator('[name="hold_until"]');const oldUntil=stamp(await deadline.getAttribute("data-date-base"));
+ assert.equal(await extend.getByRole("button",{name:"180日延長",exact:true}).isDisabled(),true);
+ await extend.getByRole("button",{name:"7日延長",exact:true}).click();const newUntil=stamp(await deadline.inputValue());assert.ok(Math.abs(newUntil-oldUntil-7*DAY)<1000);
+ await extend.locator('[name="reason"]').fill("7日の延長を保存");await save(extend.getByRole("button",{name:"保全期限を延長",exact:true}));
+ assert.equal(stamp(await caseCard().locator('form[action$="/extend"] [name="hold_until"]').getAttribute("data-date-base")),newUntil);
+
+ for(const width of [320,390,1024]) {await page.setViewportSize({width,height:1000});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`evidence overflow ${width}`);}
+ const plainContext=await browser.newContext({javaScriptEnabled:false,timezoneId:"America/New_York",locale:"ja-JP"});await plainContext.addCookies(await context.cookies());
+ const plain=await plainContext.newPage();assert.equal((await plain.goto(base+"/audit")).status(),200);
+ assert.equal(await plain.locator('[name="from"]').isVisible(),true);assert.equal(await plain.locator('[data-date-range]').isVisible(),false);
+ await plain.locator('[name="limit"]').fill("1");const fallback=plain.waitForNavigation();await plain.getByRole("button",{name:"絞り込む",exact:true}).click();assert.equal((await fallback).status(),200);
+ await plainContext.close();assert.deepEqual(errors,[]);
+ console.log("PASS: server clock, JST in New York timezone, native calendar, today/yesterday/7/30-day ranges, nanosecond preservation, CAP issue/update, evidence creation/ZIP/extension, 320/390/1024px and no-JS submit");
+} finally {await browser.close();}

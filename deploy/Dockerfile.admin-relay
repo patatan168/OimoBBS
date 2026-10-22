@@ -1,0 +1,5 @@
+# 管理リスナーのloopbackを共有し、ホストlocalhost用の転送口だけを提供する。
+FROM alpine:3.23
+RUN apk add --no-cache socat
+USER 10001:10001
+ENTRYPOINT ["socat", "TCP4-LISTEN:19081,bind=0.0.0.0,reuseaddr,fork,max-children=16", "TCP4:127.0.0.1:9081"]

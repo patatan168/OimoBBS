@@ -1,0 +1,2 @@
+<!-- 公開するCookie説明と利用規約。動的本文は平文として表示する。 -->
+<!doctype html><html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>利用規約・Cookie</title>{{template "assets" .}}</head><body class="public">{{template "public-header" .}}<main id="main" tabindex="-1"><h1>利用規約・Cookie</h1><h2>Cookieの使用</h2><pre>{{.Consent.CookieNotice}}</pre><h2>利用規約</h2><p>規約版：{{.Terms}} · 変更日：{{.Consent.ChangedDate}}（JST）</p><pre>{{.Consent.TermsText}}</pre></main>{{template "footer" .}}</body></html>

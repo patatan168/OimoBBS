@@ -1,0 +1,44 @@
+/* 公開画面のナビゲーションと板・検索・投稿画面の配置。 */
+/* 公開画面は読み物と一覧を中心にした専ブラ構成。 */
+.public .site-header { position:sticky; top:0; z-index:4; }
+.public .header-inner { max-width:none; }
+.reader-context { color:var(--muted); font-size:13px; }
+.public .site-header nav { position:fixed; top:65px; left:0; bottom:0; width:208px; display:flex; flex-direction:column; align-items:stretch; justify-content:flex-start; gap:6px; padding:24px 12px; border-right:1px solid var(--line); background:var(--paper); }
+.public .site-header nav a { justify-content:flex-start; min-height:48px; }
+.public main { width:min(calc(100% - 256px),960px); margin:28px auto 28px calc(208px + (100% - 208px - min(100% - 256px,960px))/2); }
+.public .site-footer { margin-left:208px; }
+.page-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:20px; }
+.page-heading h1 { margin:4px 0; }
+.eyebrow { display:block; color:var(--muted); font-size:12px; font-weight:700; letter-spacing:.06em; }
+.page-heading .action-button { flex-shrink:0; }
+.public .card-list > li { padding:0; }
+.public .card-list a { display:flex; align-items:center; width:100%; gap:12px; padding:14px 16px; min-height:68px; text-decoration:none; }
+.public .card-list a:where(:not(.action-button)):hover { background:var(--tonal); }
+.row-number { flex:0 0 28px; color:var(--muted); font-size:12px; font-variant-numeric:tabular-nums; }
+.row-copy { flex:1; min-width:0; display:flex; flex-direction:column; gap:4px; }
+.thread-title { font-size:15px; font-weight:650; color:var(--ink); }
+.row-description { color:var(--muted); font-size:12px; }
+.count { padding:3px 8px; border:1px solid var(--line); border-radius:6px; background:var(--surface); font-size:12px; font-variant-numeric:tabular-nums; flex-shrink:0; }
+.empty-state { padding:32px 20px!important; color:var(--muted); text-align:center; }
+.public .composer { max-width:800px; }
+.composer textarea { min-height:240px; font-family:inherit; }
+.pagination { justify-content:flex-end; }
+.search-options { grid-column:1 / -1; }
+.search-options .field-grid { padding-top:12px; }
+@media (max-width:1050px) {
+ .public .site-header nav { width:176px; }
+ .public main { width:calc(100% - 208px); margin:24px 16px 24px 192px; }
+ .public .site-footer { margin-left:176px; }
+}
+@media (max-width:700px) {
+ main,.public main { width:calc(100% - 24px); margin:20px 12px; }
+ .public { padding-bottom:calc(76px + env(safe-area-inset-bottom)); }
+ .public .site-header nav { position:fixed; top:auto; bottom:0; left:0; width:100%; height:auto; flex-direction:row; justify-content:space-around; align-items:stretch; border-right:0; border-top:1px solid var(--line); padding:6px 4px calc(6px + env(safe-area-inset-bottom)); gap:4px; }
+ .public .site-header nav a { flex:1 1 0; flex-direction:column; justify-content:center; font-size:11px; gap:2px; min-height:56px; padding:6px 2px; }
+ .public:has(input:focus,textarea:focus,select:focus) .site-header nav { display:none; }
+ .public .site-footer { margin:0 12px; }
+ .page-heading { flex-wrap:wrap; gap:12px; }
+ .page-heading .action-button { flex-shrink:1; }
+ .reader-context { margin-left:auto; max-width:45%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+ .public .card-list a { padding:12px; gap:8px; }
+}

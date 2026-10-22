@@ -1,0 +1,21 @@
+{
+ "schema":"body-reclamation-v1",
+ "cases":[
+  {"name":"signed_source","change":"none","valid":true},
+  {"name":"wrong_owner","change":"owner","valid":false},
+  {"name":"wrong_thread","change":"thread","valid":false},
+  {"name":"wrong_deletion","change":"deletion","valid":false},
+  {"name":"wrong_seq","change":"sequence","valid":false},
+  {"name":"changed_time","change":"time","valid":false},
+  {"name":"changed_floor","change":"floor","valid":false},
+  {"name":"changed_records","change":"records","valid":false},
+  {"name":"changed_dedup","change":"dedup","valid":false},
+  {"name":"changed_rate","change":"rate","valid":false},
+  {"name":"changed_policy","change":"policy","valid":false},
+  {"name":"changed_bump","change":"bump","valid":false},
+  {"name":"changed_length","change":"length","valid":false},
+  {"name":"changed_file_hash","change":"file_hash","valid":false},
+  {"name":"arbitrary_path","change":"path","valid":false},
+  {"name":"bad_signature","change":"signature","valid":false}
+ ]
+}

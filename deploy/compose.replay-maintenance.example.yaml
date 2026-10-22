@@ -1,0 +1,33 @@
+# 独立した定期回収の例。検証時と同じ絶対path、UID、実在する親・鍵を指定する。
+name: oimobbs-replay-maintenance
+services:
+  replay-maintenance:
+    build:
+      context: ..
+    image: oimobbs-replay-maintenance:local
+    command: ["backup", "watch-replay", "--work-parent", "/private/replay-work/copy-001", "--keys", "/private/key-bundles/copy-001", "--limit", "16", "--interval", "1m", "--budget", "30s"]
+    volumes:
+      - type: bind
+        source: /private/replay-work/copy-001
+        target: /private/replay-work/copy-001
+        bind:
+          create_host_path: false
+      - type: bind
+        source: /private/key-bundles/copy-001
+        target: /private/key-bundles/copy-001
+        read_only: true
+        bind:
+          create_host_path: false
+    network_mode: none
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    init: true
+    restart: "no"
+    stop_grace_period: 35s
+    mem_limit: 256m
+    cpus: 1
+    pids_limit: 64
+    logging:
+      driver: json-file
+      options: {max-size: "2m", max-file: "2"}

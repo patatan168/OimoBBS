@@ -1,0 +1,8 @@
+/* 日時と期間をカレンダー・短い選択肢で指定する共通UI。 */
+.date-shortcuts { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:8px 0 12px; min-width:0; }
+.date-shortcuts button { margin:0; min-height:44px; padding:8px 12px; font-size:13px; border:1px solid var(--line); background:var(--paper); color:var(--link); box-shadow:none; }
+.date-shortcuts button:hover,.date-shortcuts button[aria-pressed="true"] { background:var(--tonal); border-color:var(--accent); }
+.date-shortcuts button:disabled { opacity:.5; cursor:not-allowed; }
+.date-shortcuts .field-hint { flex-basis:100%; margin:0; }
+.date-range-shortcuts { grid-column:1/-1; }
+input[type="datetime-local"] { min-width:0; max-width:100%; font-variant-numeric:tabular-nums; }

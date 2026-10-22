@@ -1,0 +1,47 @@
+<!-- 管理操作の記録。検索条件と要約を表示し、識別用の詳細は開いて確認する。 -->
+<!doctype html>
+<html lang="ja">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>管理操作の記録 — OimoBBS</title>{{template "admin-assets" .}}</head>
+<body class="admin">{{template "admin-header" .}}
+<main id="main" tabindex="-1">
+<h1>管理操作の記録</h1>
+<nav aria-label="関連する管理画面"><a href="{{adminBase}}/">サイト設定</a><a href="{{adminBase}}/boards">板一覧</a><a href="{{adminBase}}/audit">直近24時間を再取得</a></nav>
+<p>保存が確定した管理変更、自動整理・保存形式の更新、CAPコマンドの開始・完了を、新しい順に表示します。記録された認証操作も含みますが、すべてのログイン試行や失敗を網羅する一覧ではありません。投稿本文は含みません。</p>
+<form class="field-grid audit-filters" method="get" action="{{adminBase}}/audit" aria-label="記録の絞り込み">
+{{template "date-range-shortcuts" "to"}}
+<p><label>開始日時（含む）<input data-date-format="rfc3339" name="from" value="{{.Values.Get "from"}}" placeholder="2026-10-19T00:00:00Z" aria-describedby="audit-date-hint"></label></p>
+<p><label>終了日時（含まない）<input data-date-format="rfc3339" name="to" value="{{.Values.Get "to"}}" aria-describedby="audit-date-hint"></label></p>
+<p class="field-hint full-width" id="audit-date-hint"><span data-date-guidance hidden>期間ボタンかカレンダーで指定し、「絞り込む」を押してください。</span><noscript>日時はタイムゾーン付きのISO形式で指定してください（例：2026-10-19T00:00:00+09:00）。</noscript></p>
+<p><label>操作者（管理者・CAP）<select name="actor" aria-describedby="audit-actor-hint"><option value="">すべての操作者</option>{{range .Actors}}<option value="{{.Code}}" {{if eq ($.Values.Get "actor") .Code}}selected{{end}}>{{.Label}}</option>{{end}}</select></label><small id="audit-actor-hint">指定期間・板の記録に登場する操作者から選べます。名前は現在の登録情報です。</small></p>
+<div class="audit-action-picker" data-audit-action-picker>
+<span id="audit-action-heading">操作</span>
+<details><summary aria-labelledby="audit-action-heading audit-selected-action"><span id="audit-selected-action" data-audit-selected>{{if .Values.Get "action"}}{{range .Options}}{{if eq ($.Values.Get "action") .Code}}{{.Label}}{{end}}{{end}}{{else}}すべての操作{{end}}</span><span class="audit-picker-change">変更</span></summary>
+<div class="audit-action-panel">
+<label class="audit-action-search" data-audit-search-label hidden>操作名を検索<input type="search" data-audit-search autocomplete="off" placeholder="例：パスキー、回線、規制" aria-controls="audit-action-options"></label>
+<fieldset class="audit-action-options" id="audit-action-options"><legend>操作を選択</legend>
+<label class="audit-action-option"><input type="radio" name="action" value="" {{if not (.Values.Get "action")}}checked{{end}}><span>すべての操作</span></label>
+{{range .Options}}<label class="audit-action-option"><input type="radio" name="action" value="{{.Code}}" {{if eq ($.Values.Get "action") .Code}}checked{{end}}><span>{{.Label}}</span></label>{{end}}
+</fieldset>
+<p class="field-hint" data-audit-search-status role="status" aria-live="polite"></p>
+</div></details>
+<small>操作を選び、「絞り込む」を押してください。</small>
+</div>
+<fieldset><legend>板で絞り込む</legend><div class="permission-grid">{{range .Boards}}<label class="check-option"><input type="checkbox" name="board" value="{{.ID}}" {{if .Checked}}checked{{end}}><span>{{.Name}}（{{.Key}}）</span></label>{{else}}<p>担当板がありません。</p>{{end}}</div><small>未選択ならすべての板。複数の板を選べます。</small></fieldset>
+<p><label>1ページの件数<input name="limit" type="number" min="1" max="200" value="{{.Values.Get "limit"}}"></label></p>
+<div class="audit-filter-actions"><button type="submit">絞り込む</button><a class="tonal-link" href="{{adminBase}}/audit">条件をリセット</a></div>
+</form>
+<section aria-labelledby="audit-results-heading">
+<div class="audit-results-heading"><h2 id="audit-results-heading">検索結果 <span class="count">全{{.Page.Total}}件</span></h2><span>このページは{{len .Rows}}件・新しい順</span></div>
+<p class="field-hint">{{.FromLabel}} 以上 〜 {{.ToLabel}} 未満（日本時間）</p>
+{{if .Rows}}<table class="audit-table"><caption >管理操作の記録一覧（日時は日本時間）</caption><thead><tr><th scope="col">日時（日本時間）</th><th scope="col">何をしたか・対象</th><th scope="col">操作者</th><th scope="col">詳細</th></tr></thead><tbody>{{range .Rows}}
+<tr><td data-label="日時（日本時間）"><time datetime="{{.Entry.Committed}}">{{.TimeLabel}}</time></td>
+<td data-label="何をしたか・対象"><strong class="audit-action">{{.Label}}</strong><p class="audit-description">{{.Description}}</p><span class="audit-target">対象：{{.BoardLabel}}</span>{{if .Entry.Command}}<span class="audit-phase">{{.PhaseLabel}}</span>{{if .DurationLabel}}<span class="audit-secondary">規制期間：{{.DurationLabel}}</span>{{end}}{{end}}</td>
+<td data-label="操作者"><strong class="audit-actor">{{.ActorLabel}}</strong>{{if .Entry.ActorID}}<code class="audit-secondary" title="{{.Entry.ActorID}}">ID {{.ActorShortID}}</code>{{end}}</td>
+<td data-label="詳細"><details><summary>記録の詳細</summary><dl class="audit-details">{{if .FieldLabels}}<dt>操作が扱う項目</dt><dd><ul class="audit-field-list">{{range .FieldLabels}}<li>{{.}}</li>{{end}}</ul><small>項目ごとの変更前後の値は、この記録には保存していません。</small></dd>{{end}}{{if .Entry.ActorID}}<dt>操作者ID</dt><dd><code>{{.Entry.ActorID}}</code></dd>{{end}}<dt>操作ID</dt><dd><code>{{.Entry.ID}}</code></dd><dt>対象ID</dt><dd>{{range .Entry.Targets}}<code>{{.}}</code>{{else}}なし{{end}}</dd>{{if .Entry.Board}}<dt>板ID</dt><dd><code>{{.Entry.Board}}</code></dd>{{end}}<dt>操作コード</dt><dd><code>{{.Entry.Action}}</code></dd><dt>確定日時（UTC）</dt><dd>{{.Entry.Committed}}</dd></dl></details></td></tr>
+{{end}}</tbody></table>{{else}}<p class="empty-state">該当する管理操作はありません。期間や絞り込み条件を変更してください。</p>{{end}}
+{{if .Next}}<nav aria-label="記録のページ送り"><a href="{{adminURL (.Next)}}">次のページ</a></nav>{{end}}
+<p class="field-hint">ページ送りは取得時点の一覧を10分間保持します。最新の操作を見るには再取得してください。CAPコマンドの「開始」は完了を示しません。</p>
+</section>
+</main>{{template "footer" .}}</body></html>
+
+{{define "page-assets"}}{{template "stylesheet" "admin-audit.css"}}{{template "javascript" "admin-audit.js"}}{{template "date-assets" .}}{{end}}

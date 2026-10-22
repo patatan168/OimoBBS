@@ -1,0 +1,115 @@
+/* 公開・管理の文字、フォーム、基本部品とテーマ。ページ専用の規則は含めない。 */
+:root {
+ color-scheme: light;
+ --ink:#172033; --muted:#526174; --accent:#2563eb; --link:#1d4ed8;
+ --button:#2563eb; --button-hover:#1d4ed8; --on-accent:#fff; --tonal:#e8efff; --on-tonal:#163e97;
+ --line:#cbd5e1; --paper:#fff; --surface:#f1f5f9; --canvas:#f8fafc; --focus:#a85b00;
+ --error:#a52c20; --error-bg:#fff0ed;
+ font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+* { box-sizing:border-box; }
+html { scroll-padding-block:6rem 7rem; }
+body { margin:0; background:var(--canvas); color:var(--ink); line-height:1.65; }
+a { color:var(--link); text-underline-offset:.2em; overflow-wrap:anywhere; }
+:focus-visible { outline:3px solid var(--focus); outline-offset:3px; }
+[hidden] { display:none!important; }
+svg { width:22px; height:22px; flex-shrink:0; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+.site-header { background:var(--paper); border-bottom:1px solid var(--line); }
+.header-inner { max-width:1440px; margin:auto; padding:12px 24px; display:flex; align-items:center; gap:16px; min-height:64px; }
+.brand { display:flex; align-items:center; gap:10px; color:var(--ink); text-decoration:none; font-size:20px; font-weight:800; white-space:nowrap; }
+.brand span { color:var(--muted); font-size:12px; font-weight:600; }
+nav { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-block:16px; }
+nav a,.tonal-link { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:44px; padding:10px 14px; border:1px solid var(--line); border-radius:8px; background:var(--paper); text-decoration:none; font-size:14px; font-weight:600; }
+nav a:where(:not(.action-button)):hover,.tonal-link:where(:not(.action-button)):hover { background:var(--tonal); }
+.site-header nav { margin:0; flex:1; justify-content:flex-end; }
+.site-header nav a { border:0; color:var(--muted); }
+nav a[aria-current="page"] { background:var(--tonal); color:var(--on-tonal); }
+main { width:min(calc(100% - 48px),1120px); margin:28px auto; min-height:65vh; overflow-wrap:anywhere; }
+main,main * { min-width:0; }
+h1 { font-size:clamp(22px,3vw,30px); line-height:1.4; font-weight:750; margin:0 0 20px; }
+h2 { font-size:18px; margin:28px 0 12px; }
+h3 { font-size:16px; margin:0 0 12px; }
+p { margin:12px 0; }
+main > p,.field-hint,small { color:var(--muted); }
+form { background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:24px; margin:16px 0; }
+form p { margin:0; }
+form > p + p,form > label + label { margin-top:16px; }
+form > button,form > a { margin-top:20px; }
+label { display:block; font-size:14px; font-weight:650; }
+input,select,textarea,button { font:inherit; }
+input:not([type="hidden"]),select,textarea { display:block; width:100%; min-height:48px; max-width:100%; margin-top:6px; padding:10px 12px; border:1px solid var(--line); border-radius:8px; color:var(--ink); background:var(--paper); font-size:16px; font-weight:400; line-height:1.5; }
+input::placeholder,textarea::placeholder { color:var(--muted); opacity:1; }
+textarea { resize:vertical; min-height:120px; }
+button,.action-button { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:44px; max-width:100%; padding:10px 18px; border:1px solid transparent; border-radius:8px; background:var(--button); color:var(--on-accent); text-decoration:none; font-size:14px; font-weight:650; white-space:normal; overflow-wrap:anywhere; cursor:pointer; }
+/* 背景と文字を明るくするfilterは使わず、白文字を読める濃さを保つ。 */
+button:where(:not(:disabled)):hover,.action-button:hover { background:var(--button-hover); }
+button:disabled { opacity:.6; cursor:wait; }
+fieldset { min-width:0; padding:18px; border:1px solid var(--line); border-radius:10px; margin:0; }
+legend { max-width:100%; padding:0 6px; font-weight:650; }
+fieldset p + p { margin-top:16px; }
+.field-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; align-items:start; }
+.field-grid > p + p { margin-top:0; }
+.field-grid > button,.field-grid > a { margin:0; justify-self:start; }
+.full-width,.field-grid > p:not(:has(label)),.field-grid > fieldset { grid-column:1 / -1; }
+.login-form { max-width:480px; }
+ul,ol { padding-left:24px; }
+.card-list { list-style:none; padding:0; border:1px solid var(--line); border-radius:12px; background:var(--paper); }
+.card-list > li { padding:16px; }
+.card-list > li + li { border-top:1px solid var(--line); }
+.card-list a { display:inline-flex; align-items:center; min-height:44px; }
+article,main > ol > li,main > ul:not(.card-list) > li { background:var(--paper); padding:20px; border:1px solid var(--line); border-radius:12px; margin:12px 0; }
+article h2 { margin:0; }
+article > p { color:var(--muted); font-size:14px; }
+pre { white-space:pre-wrap; overflow-wrap:anywhere; font:inherit; max-width:100%; }
+[role="alert"] { padding:14px 16px; background:var(--error-bg); color:var(--error); border:1px solid var(--error); border-radius:8px; }
+.filter-field { margin:16px 0; }
+.filter-field input { background:var(--paper); }
+.field-hint { display:block; font-size:12px; font-weight:400; margin-top:6px; }
+.site-footer { max-width:1120px; padding:20px 24px; margin:auto; color:var(--muted); font-size:12px; }
+.skip-link { position:fixed; top:-100px; left:12px; z-index:10; padding:8px 16px; background:var(--paper); }
+.skip-link:focus { top:8px; }
+/* 操作と値を分け、長いIDや説明も自分の領域で折り返す。 */
+dl { display:grid; grid-template-columns:minmax(120px,1fr) minmax(0,3fr); border:1px solid var(--line); border-radius:10px; background:var(--paper); overflow:hidden; }
+dt,dd { padding:12px 16px; margin:0; border-bottom:1px solid var(--line); }
+dt { color:var(--muted); background:var(--surface); font-size:13px; }
+dd { overflow-wrap:anywhere; }
+dl > :nth-last-child(-n+2) { border-bottom:0; }
+.meta-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.meta-grid > div { padding:12px 16px; border-bottom:1px solid var(--line); }
+.meta-grid dt,.meta-grid dd { padding:0; border:0; background:none; }
+.meta-grid dd { margin-top:4px; }
+.action-group { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+.action-group a { display:inline-flex; min-height:44px; align-items:center; padding:8px 12px; border:1px solid var(--line); border-radius:8px; text-decoration:none; }
+.action-group .row-primary { flex:1 1 100%; font-weight:700; font-size:16px; border:0; padding:0; }
+details { margin:12px 0; }
+summary { min-height:44px; padding:10px 12px; cursor:pointer; font-weight:650; background:var(--surface); border-radius:8px; }
+details[open] > summary { margin-bottom:12px; }
+section + section { margin-top:32px; }
+/* 大きな参照表だけを横スクロールさせ、編集フォームは表から分離する。 */
+table { display:block; width:100%; max-width:100%; overflow-x:auto; border-collapse:collapse; background:var(--paper); margin:16px 0; }
+caption { text-align:left; font-weight:650; padding:12px; }
+th,td { text-align:left; vertical-align:top; padding:12px; border-bottom:1px solid var(--line); overflow-wrap:anywhere; }
+th { color:var(--muted); background:var(--surface); font-size:13px; }
+@media (max-width:700px) {
+ html { scroll-padding-block:80px 100px; }
+ .header-inner { padding:12px 16px; min-height:60px; gap:8px; }
+ main { width:calc(100% - 24px); margin:20px 12px; }
+ .field-grid { grid-template-columns:minmax(0,1fr); gap:16px; }
+ form { padding:16px; }
+ fieldset { padding:14px; }
+ dl { grid-template-columns:minmax(88px,1fr) minmax(0,2fr); }
+ dt,dd { padding:10px; }
+ .meta-grid { grid-template-columns:minmax(0,1fr); }
+ .meta-grid > div:last-child { border-bottom:0; }
+ article { padding:16px; }
+}
+@media (prefers-color-scheme:dark) {
+ :root { color-scheme:dark; --ink:#f1f5f9; --muted:#a8b3c4; --accent:#60a5fa; --link:#93c5fd; --button:#2563eb; --button-hover:#1d4ed8; --on-accent:#fff; --tonal:#1d304d; --on-tonal:#bfdbfe; --line:#374151; --paper:#11161f; --surface:#1b2330; --canvas:#0b0f16; --focus:#ffc45c; --error:#ff9985; --error-bg:#442620; }
+}
+@media (prefers-reduced-motion:no-preference) { button,a { transition:background-color .12s; } }
+@media print {
+ .site-header,.site-footer,form,.filter-field,.skip-link,.page-actions,.thread-toolbar { display:none; }
+ body,.public { padding:0; background:#fff; color:#000; }
+ main,.public main { margin:0; width:100%; }
+ article { break-inside:avoid; }
+}

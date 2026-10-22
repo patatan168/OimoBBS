@@ -1,0 +1,3146 @@
+{
+  "measured_at": "2026-10-17T15:03:43.095261+00:00",
+  "source_commit": "555e0caa46c3f0154fb353a4d9dbf244516af47c",
+  "product_sources_identical_to_throughput_current_commit": "12cf61acd954d819f138f0171065836ccdfda3a4",
+  "diagnostic_image_id": "sha256:4190d7d44cf63574cf1eb6fdb223db0b649c71cba75faf68252d65d69a5a787e",
+  "binary_sha256": "54ce901d3ae5af9d1c203608dfd805c9d259a4fc960f1d0668eed9e563b63d02",
+  "conclusion": "今回の1板条件の頭打ちは、板ごとの単一所有goroutineが検査・投稿準備と耐久確定で約99.4%占有されることが主因。検査・準備のwall時間は約56..57%、proposal/thread WAL/decisionの確定は合計約42%。全CPUの約40%はstrictjson.Decodeを通る。Zstd展開はCPUサンプルで検出されず。",
+  "method": {
+    "scope": "2 CPU/512MiB/cache256MiB/帯域予算400Mbps、WAF有効(global投稿1000要求/s、同時128)、1板16thread、80主体(専ブラ64/Web16)、400予定投稿/sを20秒。隔離loopback実TLS HTTP/1.1、fsync維持。並行閲覧・強制I/O競合・SIGKILLなし。稼働側未変更。",
+    "diagnostics": "CPU/block/mutex profile、3秒間隔goroutine集計、板の投入→invoke待ち・invoke実行・execute全体・応答まで、posting Commitのproposal/thread/decision区間、Writerの実Sync呼出を追加計測。Go overlayと一時driverだけを使用し製品treeは未変更。",
+    "window": "主負荷直前にdriverが専用markerを送信し、profiler ready後にload開始。drain完了直後にstop markerを送信しprofile完了後に回復投稿を開始。20秒にdrain・marker処理の小さい差がある。",
+    "performance_boundary": "診断のタイマー・profiler・goroutine採取は負荷があるため、前回の非計測版との性能優劣比較には使わない。2回繰返しでボトルネックの構造を確認。",
+    "timing_semantics": "board executeは同一所有goroutineのwall時間。queue/submit_totalのTotalNSは並行要求の合算でありwall時間割合に使わない。Syncは独立threadで並列になり得るので、その合計とcommit wall時間を同一視しない。CPUの累積割合は親子関数が重なるため加算しない。runtime memory/heap/allocsはprocess起動以来の情報も含む。"
+  },
+  "findings": [
+    {
+      "finding": "単一板の所有列が飽和",
+      "evidence": "20.55/20.56秒の窓でexecute約20.43/20.45秒。invoke待ちは平均127.17/126.82ms。CPUは約1.3coreでも、板内の処理は単一goroutineのため空いたcoreだけでは並列化されない。",
+      "scope": "サイト全体・複数板の上限を示すものではない。"
+    },
+    {
+      "finding": "所有列内の検査・準備が最大の時間要因",
+      "evidence": "invoke wall 11.53/11.73秒=56.07/57.07%。CPU strictjson.Decode累積10.40/10.64秒、全CPUの39.71/40.27%。投稿収集情報、投稿operation、HTTP観測等の解析・構造検査が含まれる。postcapture.decodeのcallerにValidateFrame/Validate/ValidateKeyAndMetadata/OverrideMetadata/WithAnonymousが現れる。",
+      "scope": "全ての検証が不要な重複という意味ではない。意味を保った結果共有の可否は個別確認が必要。"
+    },
+    {
+      "finding": "durable確定も所有列を占有",
+      "evidence": "131commitずつ、proposal平均37.09/37.94ms、thread WAL平均22.01/19.73ms、decision平均7.53/7.56ms。JSON符号化・検証・署名・圧縮・lock・Write/Syncを含むため、全時間がディスク待ちという意味ではない。Syncはthreadで平均数ms、共有証跡でも数ms。",
+      "scope": "proposal→全thread WAL→decision→公開/ACKという既存の耐久順序を維持。"
+    },
+    {
+      "finding": "投稿負荷の主要経路にZstd展開がない",
+      "evidence": "2回ともzstddecodeでfocusしたCPUサンプルは0。圧縮encodeは少量観測される。",
+      "scope": "サンプル0はあらゆる呼出が絶対に0という証明ではない。保存再生・起動・pack/snapshot読込への効果は別。"
+    },
+    {
+      "finding": "未発行の直接要因は有界actorの予定超過",
+      "evidence": "400/sでは各主体の枠は80/400=200ms周期。直近非診断current400-r2の平均HTTP時間は専ブラ373.08ms/Web578.18msで、一要求ずつの80主体が次予定を過ぎ、driverが未発行にする。",
+      "scope": "HTTP拒否やACK済み保存欠落ではない。actorを増やすだけで飽和した板所有列の処理能力が増えるとは言えない。"
+    },
+    {
+      "finding": "回復p95 5.21秒の意味",
+      "evidence": "非診断current400-r1では回復HTTP平均93.66ms、最大195.70ms。20/s(50ms周期)で一件ずつ順次送るため予定からの遅れが蓄積した。",
+      "scope": "1要求が5.21秒かかったという意味ではない。回復が予定に追いつかないという実際の問題は残る。その試行のHTTP遅延原因までは今回の飽和profileから断定できない。"
+    }
+  ],
+  "priority": "まず板所有列内で繰返すJSON検証・解析の経路を調べ、同じ検証結果を安全に共有できる範囲を特定する。次に証跡proposal/decisionとthread WALの確定処理を短縮する。今回改善実装は行っていない。",
+  "checks": {
+    "trials": 2,
+    "all_integrity_ok": true,
+    "post_errors": 0,
+    "optional_saved": 34984,
+    "optional_losses": 0,
+    "oom_kills": 0,
+    "product_tree_modified": false,
+    "live_deployed": false,
+    "documentation_validation": "PASS: 15 Markdown files, 37 JSON files, current documents, links/fences and strict JSON\nPASS: standard Go CRC32C, header/frame offsets, dedup section, create DAT lengths and sample expiry\nPASS: pack offsets/CRC/SHA, raw+gzip blocks, compressed audit, 5 DAT ranges, current/prefix stability through seq=4, 4 invalid gzip samples\nPASS: control frame/snapshot/current bytes, CRC/SHA, JSON equality, 4 invalid control examples\nPASS: 26 HTTP decision examples (not a live HTTP server)\nPASS: independent HMAC ID/token vector, token tamper, 3 six-calendar-month boundaries\nPASS: design checks only; application, crash, device and load tests NOT RUN\n"
+  },
+  "instrumentation_patches": {
+    "internal/board/worker.go": "--- product/worker.go\n+++ diagnostic/worker.go\n@@ -5,6 +5,8 @@\n \t\"context\"\n \t\"errors\"\n \t\"sync\"\n+\"sync/atomic\"\n+\"time\"\n )\n \n var ErrBusy = errors.New(\"board queue full\")\n@@ -20,6 +22,7 @@\n \tdone  chan result\n \tbatch *Batch\n \tkey   uint64\n+ probeAt time.Time\n }\n \n // Worker は最大128件の未開始操作を保持する。一度開始した操作は取消しない。\n@@ -58,7 +61,7 @@\n \tif e := ctx.Err(); e != nil {\n \t\treturn nil, e\n \t}\n-\tt := task{ctx: ctx, run: run, done: make(chan result, 1), batch: batch, key: key}\n+\tt := task{probeAt:probeStart(),ctx: ctx, run: run, done: make(chan result, 1), batch: batch, key: key}\n \tw.mu.Lock()\n \tif w.closed {\n \t\tw.mu.Unlock()\n@@ -84,6 +87,7 @@\n \t\treturn nil, ErrBusy\n \t}\n \tr := <-t.done\n+ probeEnd(\"submit_total\",t.probeAt)\n \treturn r.Value, r.Err\n }\n \n@@ -140,3 +144,13 @@\n \n // finish は完了通知より先に受付数を戻し、次の保守判断へ確定状態を見せる。\n func (w *Worker) finish(t task, r result) { w.mu.Lock(); w.pending--; w.mu.Unlock(); t.done <- r }\n+\n+var probeOn atomic.Bool\n+var probeMu sync.Mutex\n+var probeRows = map[string]*probeRow{}\n+type probeRow struct { Count int64; TotalNS int64; MaxNS int64 }\n+func ProbeBegin() { probeMu.Lock(); probeRows=map[string]*probeRow{}; probeMu.Unlock(); probeOn.Store(true) }\n+func ProbeEnd() map[string]probeRow { probeOn.Store(false); probeMu.Lock(); defer probeMu.Unlock(); result:=map[string]probeRow{}; for k,v:=range probeRows {result[k]=*v}; return result }\n+func probeRecord(key string, ns int64) { if !probeOn.Load() {return}; probeMu.Lock(); defer probeMu.Unlock(); r:=probeRows[key]; if r==nil {r=&probeRow{};probeRows[key]=r}; r.Count++;r.TotalNS+=ns;if ns>r.MaxNS {r.MaxNS=ns} }\n+func probeStart() time.Time {if probeOn.Load(){return time.Now()};return time.Time{}}\n+func probeEnd(key string,start time.Time) {if !start.IsZero(){probeRecord(key,time.Since(start).Nanoseconds())}}\n",
+    "internal/board/batch.go": "--- product/batch.go\n+++ diagnostic/batch.go\n@@ -48,6 +48,7 @@\n \n // execute は先頭と同じ一括操作を最大64件集め、異種の次操作を次回へ持ち越す。\n func (w *Worker) execute(first task) *task {\n+ start:=probeStart(); kind:=\"execute_normal\";if first.batch!=nil {kind=\"execute_batch\"};defer probeEnd(kind,start)\n \tif first.batch == nil {\n \t\tv, e := w.invoke(first)\n \t\tw.finish(first, result{v, e})\n@@ -129,6 +130,7 @@\n \n // invoke は開始前だけ取消/受付終了を確認し、開始した処理の確定を待つ。\n func (w *Worker) invoke(t task) (any, error) {\n+ kind:=\"normal\";if t.batch!=nil {kind=\"batch\"};probeEnd(\"queue_\"+kind,t.probeAt); start:=probeStart();defer probeEnd(\"invoke_\"+kind,start)\n \tw.mu.Lock()\n \tclosed := w.closed\n \tw.mu.Unlock()\n",
+    "internal/store/durable.go": "--- product/durable.go\n+++ diagnostic/durable.go\n@@ -7,6 +7,8 @@\n \t\"os\"\n \t\"path/filepath\"\n \t\"sync\"\n+\"sync/atomic\"\n+\"time\"\n )\n \n // MaxCommitFramesは一括同期の件数上限。総bytesの8MiB上限も別途適用する。\n@@ -118,7 +120,9 @@\n \t}\n \tif e == nil {\n \t\tw.stats.Syncs++\n-\t\te = w.file.Sync()\n+\t\tbegin:=probeStart()\n+ e = w.file.Sync()\n+ name:=\"unknown\";if f,ok:=w.file.(*os.File);ok{name=f.Name()};probeEnd(name,begin)\n \t}\n \tif e != nil {\n \t\tw.stopped = true\n@@ -171,3 +175,13 @@\n \t}\n \treturn c\n }\n+\n+var probeOn atomic.Bool\n+var probeMu sync.Mutex\n+var probeRows = map[string]*probeRow{}\n+type probeRow struct { Count int64; TotalNS int64; MaxNS int64 }\n+func ProbeBegin() { probeMu.Lock(); probeRows=map[string]*probeRow{}; probeMu.Unlock(); probeOn.Store(true) }\n+func ProbeEnd() map[string]probeRow { probeOn.Store(false); probeMu.Lock(); defer probeMu.Unlock(); result:=map[string]probeRow{}; for k,v:=range probeRows {result[k]=*v}; return result }\n+func probeRecord(key string, ns int64) { if !probeOn.Load() {return}; probeMu.Lock(); defer probeMu.Unlock(); r:=probeRows[key]; if r==nil {r=&probeRow{};probeRows[key]=r}; r.Count++;r.TotalNS+=ns;if ns>r.MaxNS {r.MaxNS=ns} }\n+func probeStart() time.Time {if probeOn.Load(){return time.Now()};return time.Time{}}\n+func probeEnd(key string,start time.Time) {if !start.IsZero(){probeRecord(key,time.Since(start).Nanoseconds())}}\n",
+    "internal/app/posting_batch.go": "--- product/posting_batch.go\n+++ diagnostic/posting_batch.go\n@@ -2,6 +2,8 @@\n package app\n \n import (\n+ \"sync/atomic\"\n+ \"time\"\n \t\"bytes\"\n \t\"context\"\n \t\"crypto/sha256\"\n@@ -135,7 +137,9 @@\n \t\t\treturn json.Marshal(pending.proposal)\n \t\t}}\n \t}\n-\tevents, result := b.journal.AppendBatch(requests)\n+\tbegin:=probeStart()\n+ events, result := b.journal.AppendBatch(requests)\n+ probeEnd(\"proposal\",begin)\n \tif result.Status != store.Durable {\n \t\tif result.Status == store.Unknown {\n \t\t\tfor _, p := range b.threads {\n@@ -153,7 +157,10 @@\n \t\t}\n \t}\n \t// 全proposalの同期後、互いに独立したWALだけを並行同期する。完了まで所有列を返さない。\n-\tif result = b.commitThreads(); result.Status != store.Durable {\n+\tbegin=probeStart()\n+ result=b.commitThreads()\n+ probeEnd(\"threads\",begin)\n+ if result.Status != store.Durable {\n \t\treturn b.unknown(result)\n \t}\n \tfor _, p := range b.threads {\n@@ -169,7 +176,10 @@\n \t\t\treturn json.Marshal(d)\n \t\t}}\n \t}\n-\tif _, result = b.journal.AppendBatch(requests); result.Status != store.Durable {\n+\tbegin=probeStart()\n+ _,result=b.journal.AppendBatch(requests)\n+ probeEnd(\"decision\",begin)\n+ if result.Status != store.Durable {\n \t\treturn b.unknown(result)\n \t}\n \tfor _, p := range b.threads {\n@@ -261,3 +271,13 @@\n \tb.finished = true\n \tb.releaseCandidates()\n }\n+\n+var probeOn atomic.Bool\n+var probeMu sync.Mutex\n+var probeRows = map[string]*probeRow{}\n+type probeRow struct { Count int64; TotalNS int64; MaxNS int64 }\n+func ProbeBegin() { probeMu.Lock(); probeRows=map[string]*probeRow{}; probeMu.Unlock(); probeOn.Store(true) }\n+func ProbeEnd() map[string]probeRow { probeOn.Store(false); probeMu.Lock(); defer probeMu.Unlock(); result:=map[string]probeRow{}; for k,v:=range probeRows {result[k]=*v}; return result }\n+func probeRecord(key string, ns int64) { if !probeOn.Load() {return}; probeMu.Lock(); defer probeMu.Unlock(); r:=probeRows[key]; if r==nil {r=&probeRow{};probeRows[key]=r}; r.Count++;r.TotalNS+=ns;if ns>r.MaxNS {r.MaxNS=ns} }\n+func probeStart() time.Time {if probeOn.Load(){return time.Now()};return time.Time{}}\n+func probeEnd(key string,start time.Time) {if !start.IsZero(){probeRecord(key,time.Since(start).Nanoseconds())}}\n",
+    "cmd/oimobbs/main.go": "--- product/main.go\n+++ diagnostic/main.go\n@@ -2,6 +2,14 @@\n package main\n \n import (\n+ \"runtime\"\n+ \"runtime/pprof\"\n+ \"time\"\n+ \"path/filepath\"\n+ pb \"oimobbs/internal/board\"\n+ ps \"oimobbs/internal/store\"\n+ pa \"oimobbs/internal/app\"\n+\n \t\"encoding/json\"\n \t\"errors\"\n \t\"flag\"\n@@ -82,3 +90,20 @@\n \t}\n \treturn json.NewEncoder(out).Encode(report)\n }\n+\n+func init() {\n+ if len(os.Args)<2 || os.Args[1]!=\"validation-serve\" {return}\n+ go func() {\n+ dir:=\"/data/profiles\";os.MkdirAll(dir,0700)\n+ for {if _,e:=os.Stat(dir+\"/start\");e==nil{break};time.Sleep(10*time.Millisecond)}\n+ runtime.SetBlockProfileRate(1000000);runtime.SetMutexProfileFraction(5)\n+ f,e:=os.Create(dir+\"/cpu.pprof\");if e!=nil{return};if pprof.StartCPUProfile(f)!=nil{return}\n+ pb.ProbeBegin();ps.ProbeBegin();pa.ProbeBegin();os.WriteFile(dir+\"/ready\",nil,0600)\n+ now:=time.Now();next:=time.Now();index:=0\n+ for {if _,e:=os.Stat(dir+\"/stop\");e==nil{break};if time.Now().After(next){g,e:=os.Create(filepath.Join(dir,fmt.Sprintf(\"goroutine-%03d.txt\",index)));if e==nil{pprof.Lookup(\"goroutine\").WriteTo(g,1);g.Close()};index++;next=time.Now().Add(3*time.Second)};time.Sleep(10*time.Millisecond)}\n+ rows:=map[string]any{\"seconds\":time.Since(now).Seconds(),\"board\":pb.ProbeEnd(),\"sync\":ps.ProbeEnd(),\"posting\":pa.ProbeEnd()}\n+ pprof.StopCPUProfile();f.Close();for _,name:=range []string{\"block\",\"mutex\",\"heap\",\"allocs\"}{g,e:=os.Create(dir+\"/\"+name+\".pprof\");if e==nil{pprof.Lookup(name).WriteTo(g,0);g.Close()}}\n+ var mem runtime.MemStats;runtime.ReadMemStats(&mem);rows[\"memory\"]=mem\n+ raw,_:=json.MarshalIndent(rows,\"\",\"  \");os.WriteFile(dir+\"/metrics.json\",raw,0600);os.WriteFile(dir+\"/done\",nil,0600)\n+ }()\n+}\n"
+  },
+  "temporary_driver_source": "# 隔離診断用markerを主負荷の境界で送る一時driver。\nimport os,sys,pathlib\nsys.dont_write_bytecode=True\nroot=pathlib.Path.cwd();sys.path.insert(0,str(root/'scripts'))\nimport probe_posting_capacity as capacity\nsource=(root/'scripts/probe_posting_capacity.py').read_text()\nsource='import os,subprocess\\n'+source\nsource=source.replace('    before = counters(probe.cgroup)', '    subprocess.run([\"docker\",\"exec\",os.environ[\"OIMO_DIAG_CONTAINER\"],\"sh\",\"-c\",\"touch /data/profiles/start; while [ ! -f /data/profiles/ready ]; do sleep 0.01; done\"],check=True,timeout=10)\\n    before = counters(probe.cgroup)')\nsource=source.replace('    after = counters(probe.cgroup)', '    after = counters(probe.cgroup)\\n    subprocess.run([\"docker\",\"exec\",os.environ[\"OIMO_DIAG_CONTAINER\"],\"sh\",\"-c\",\"touch /data/profiles/stop; while [ ! -f /data/profiles/done ]; do sleep 0.01; done\"],check=True,timeout=20)')\nexec(compile(source,str(root/'scripts/probe_posting_capacity.py'),'exec'),capacity.__dict__)\nsource=(root/'scripts/probe-thread-resources.py').read_text()\nneedle='    name = \"oimobbs-resource-probe-\" + uuid.uuid4().hex[:10]'\nsource=source.replace(needle,needle+'\\n    os.environ[\"OIMO_DIAG_CONTAINER\"]=name')\nexec(compile(source,str(root/'scripts/probe-thread-resources.py'),'exec'),{'__name__':'__main__','__file__':str(root/'scripts/probe-thread-resources.py'),'os':os})\n",
+  "temporary_helpers_removed": true,
+  "trials": [
+    {
+      "label": "diag400",
+      "diagnostic_only": true,
+      "raw_report_path": "var/throughput-bottleneck-20261017/diag400.json",
+      "raw_report_sha256": "9ac439490dfdd89d14547fb3d7634b5681cbee456c523f4c6c73a44323856565",
+      "profiles": {
+        "allocs.pprof": "9b7fc9debb4999aed49b0fa33ba4f5ed904e438d5fdf57a6252a10275d24db35",
+        "block.pprof": "567eefa04a5b090adcb6e473a3b125e0469236a9b70f2e5e678b833e0adca0e8",
+        "cpu.pprof": "affdc6a476112ce3d261e2032b4c24cba47e1d9d0f14654f737defc9fcf9e18c",
+        "done": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "goroutine-000.txt": "a80dad31c2c335aa1763db107fa3d9c16bad2873d35801113de8b92ea50f1fe8",
+        "goroutine-001.txt": "6b8c8590522e57bdf24b545dce203625f46f51bef7bd6a7950fa2a417e1126ff",
+        "goroutine-002.txt": "ead11b12ea825a15dd879e9c789072854543a144a67346f3645eb942d3f4d246",
+        "goroutine-003.txt": "79299f8000e43e20ddb94a874a9e9adffe471c80ef48fcc74868bf16c72f898c",
+        "goroutine-004.txt": "4074a8bdbe70792ded20c1b201e94d2c20b91689cb2f57248aa03d6478163a09",
+        "goroutine-005.txt": "ac4c599d4378a9303447b768ff4a1e6b52e5afd289ad45d9374187b7dbf38455",
+        "goroutine-006.txt": "edcd15f54b296ec1927fcadaaa042740404e95a15a31191b3a9e417bc1f9a9af",
+        "heap.pprof": "e1db84f30796d6962579499336943a5be01b5b065e4dba0fbc0851e451279cac",
+        "metrics.json": "446f1698b74f68377e3706612ee3c3da4d9c7ce37117415ea3484f456978438f",
+        "mutex.pprof": "259d1869fc2a81a7448f29963cb1aa786e38e4f2be633efc88a0eeeae656ad7e",
+        "ready": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "start": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stop": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "measured_window_seconds": 20.554657824,
+      "derived_timings": {
+        "board": {
+          "execute_batch": {
+            "count": 133,
+            "total_seconds": 20.432563583,
+            "mean_ms": 153.62829761654135,
+            "max_ms": 206.537416,
+            "fraction_of_window_percent": 99.40600207483172
+          },
+          "invoke_batch": {
+            "count": 8310,
+            "total_seconds": 11.525987923,
+            "mean_ms": 1.3870021567990372,
+            "max_ms": 14.067205,
+            "fraction_of_window_percent": 56.07482265913492
+          },
+          "queue_batch": {
+            "count": 8310,
+            "total_seconds": 1056.811562766,
+            "mean_ms": 127.17347325703972,
+            "max_ms": 212.137703,
+            "fraction_of_window_percent": 5141.469986097492
+          },
+          "submit_total": {
+            "count": 8310,
+            "total_seconds": 1527.551564083,
+            "mean_ms": 183.82088617123947,
+            "max_ms": 350.218518,
+            "fraction_of_window_percent": 7431.656499284569
+          }
+        },
+        "posting": {
+          "decision": {
+            "count": 131,
+            "total_seconds": 0.98620396,
+            "mean_ms": 7.528274503816793,
+            "max_ms": 12.050739,
+            "fraction_of_window_percent": 4.797958537886678
+          },
+          "proposal": {
+            "count": 131,
+            "total_seconds": 4.859296953,
+            "mean_ms": 37.09386987022901,
+            "max_ms": 67.78775,
+            "fraction_of_window_percent": 23.64085549177177
+          },
+          "threads": {
+            "count": 131,
+            "total_seconds": 2.883352225,
+            "mean_ms": 22.010322328244275,
+            "max_ms": 37.213604,
+            "fraction_of_window_percent": 14.027731571543576
+          }
+        }
+      },
+      "raw_instrument_metrics": {
+        "board": {
+          "execute_batch": {
+            "Count": 133,
+            "TotalNS": 20432563583,
+            "MaxNS": 206537416
+          },
+          "invoke_batch": {
+            "Count": 8310,
+            "TotalNS": 11525987923,
+            "MaxNS": 14067205
+          },
+          "queue_batch": {
+            "Count": 8310,
+            "TotalNS": 1056811562766,
+            "MaxNS": 212137703
+          },
+          "submit_total": {
+            "Count": 8310,
+            "TotalNS": 1527551564083,
+            "MaxNS": 350218518
+          }
+        },
+        "memory": {
+          "Alloc": 303607888,
+          "TotalAlloc": 4961270384,
+          "Sys": 395200856,
+          "Lookups": 0,
+          "Mallocs": 25842011,
+          "Frees": 25289615,
+          "HeapAlloc": 303607888,
+          "HeapSys": 376307712,
+          "HeapIdle": 55762944,
+          "HeapInuse": 320544768,
+          "HeapReleased": 12967936,
+          "HeapObjects": 552396,
+          "StackInuse": 5373952,
+          "StackSys": 5373952,
+          "MSpanInuse": 3160640,
+          "MSpanSys": 3851520,
+          "MCacheInuse": 4592,
+          "MCacheSys": 16072,
+          "BuckHashSys": 2096526,
+          "GCSys": 6458688,
+          "OtherSys": 1096386,
+          "NextGC": 355818467,
+          "LastGC": 1792249113028069365,
+          "PauseTotalNs": 7468052,
+          "PauseNs": [
+            75365,
+            66424,
+            46868,
+            65236,
+            66004,
+            90940,
+            109730,
+            145420,
+            130333,
+            85842,
+            2180954,
+            62793,
+            63002,
+            76551,
+            69777,
+            68031,
+            56226,
+            51267,
+            80184,
+            53642,
+            121043,
+            63212,
+            83746,
+            81092,
+            91289,
+            69078,
+            92546,
+            139274,
+            59230,
+            84863,
+            99531,
+            114758,
+            99601,
+            100998,
+            121463,
+            84445,
+            129286,
+            119997,
+            62094,
+            133896,
+            64189,
+            162602,
+            61884,
+            64747,
+            100997,
+            70126,
+            79067,
+            95969,
+            97505,
+            86680,
+            65725,
+            100648,
+            102815,
+            65795,
+            87378,
+            79974,
+            110567,
+            64747,
+            60487,
+            100230,
+            78856,
+            71033,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "PauseEnd": [
+            1792249079932470519,
+            1792249079939091189,
+            1792249079982971983,
+            1792249080012292595,
+            1792249080178059623,
+            1792249080281547337,
+            1792249085006788110,
+            1792249085194905706,
+            1792249085379874278,
+            1792249085848318319,
+            1792249085883128718,
+            1792249085931444479,
+            1792249085972447809,
+            1792249086023561407,
+            1792249086056882053,
+            1792249086195261118,
+            1792249086204800600,
+            1792249086217198476,
+            1792249086232224323,
+            1792249086252512678,
+            1792249086367193278,
+            1792249086445996713,
+            1792249086536359310,
+            1792249089472476486,
+            1792249092910601751,
+            1792249093161022198,
+            1792249093464430431,
+            1792249093808410553,
+            1792249094105530096,
+            1792249094409645523,
+            1792249094790136455,
+            1792249095154053394,
+            1792249095551246836,
+            1792249095931245769,
+            1792249096328321100,
+            1792249096750628584,
+            1792249097184623466,
+            1792249097689424788,
+            1792249098158519652,
+            1792249098612386184,
+            1792249099063741319,
+            1792249099613228553,
+            1792249100166061150,
+            1792249100732163236,
+            1792249101290917411,
+            1792249101828672683,
+            1792249102433719307,
+            1792249103064542046,
+            1792249103765986272,
+            1792249104458854477,
+            1792249105180277078,
+            1792249105984430716,
+            1792249106778466544,
+            1792249107620477908,
+            1792249108413036483,
+            1792249109115470360,
+            1792249109904448537,
+            1792249110596625399,
+            1792249111230827652,
+            1792249111839352132,
+            1792249112483683998,
+            1792249113028069365,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "NumGC": 62,
+          "NumForcedGC": 0,
+          "GCCPUFraction": 0.008259164163320348,
+          "EnableGC": true,
+          "DebugGC": false,
+          "BySize": [
+            {
+              "Size": 0,
+              "Mallocs": 0,
+              "Frees": 0
+            },
+            {
+              "Size": 8,
+              "Mallocs": 398262,
+              "Frees": 389079
+            },
+            {
+              "Size": 16,
+              "Mallocs": 7022876,
+              "Frees": 6868109
+            },
+            {
+              "Size": 24,
+              "Mallocs": 3604414,
+              "Frees": 3557565
+            },
+            {
+              "Size": 32,
+              "Mallocs": 1435001,
+              "Frees": 1404261
+            },
+            {
+              "Size": 48,
+              "Mallocs": 2767015,
+              "Frees": 2687418
+            },
+            {
+              "Size": 64,
+              "Mallocs": 1485700,
+              "Frees": 1454052
+            },
+            {
+              "Size": 80,
+              "Mallocs": 672949,
+              "Frees": 663832
+            },
+            {
+              "Size": 96,
+              "Mallocs": 559172,
+              "Frees": 510947
+            },
+            {
+              "Size": 112,
+              "Mallocs": 393495,
+              "Frees": 384012
+            },
+            {
+              "Size": 128,
+              "Mallocs": 616417,
+              "Frees": 609251
+            },
+            {
+              "Size": 144,
+              "Mallocs": 298552,
+              "Frees": 295379
+            },
+            {
+              "Size": 160,
+              "Mallocs": 136541,
+              "Frees": 134983
+            },
+            {
+              "Size": 176,
+              "Mallocs": 26609,
+              "Frees": 26212
+            },
+            {
+              "Size": 192,
+              "Mallocs": 182250,
+              "Frees": 179423
+            },
+            {
+              "Size": 208,
+              "Mallocs": 42255,
+              "Frees": 41535
+            },
+            {
+              "Size": 224,
+              "Mallocs": 164284,
+              "Frees": 158267
+            },
+            {
+              "Size": 240,
+              "Mallocs": 32222,
+              "Frees": 17352
+            },
+            {
+              "Size": 256,
+              "Mallocs": 276205,
+              "Frees": 272772
+            },
+            {
+              "Size": 288,
+              "Mallocs": 163771,
+              "Frees": 162150
+            },
+            {
+              "Size": 320,
+              "Mallocs": 147965,
+              "Frees": 145594
+            },
+            {
+              "Size": 352,
+              "Mallocs": 283128,
+              "Frees": 275440
+            },
+            {
+              "Size": 384,
+              "Mallocs": 93273,
+              "Frees": 91090
+            },
+            {
+              "Size": 416,
+              "Mallocs": 383866,
+              "Frees": 376242
+            },
+            {
+              "Size": 448,
+              "Mallocs": 20412,
+              "Frees": 20251
+            },
+            {
+              "Size": 480,
+              "Mallocs": 104119,
+              "Frees": 99317
+            },
+            {
+              "Size": 512,
+              "Mallocs": 14521,
+              "Frees": 14218
+            },
+            {
+              "Size": 576,
+              "Mallocs": 185731,
+              "Frees": 183683
+            },
+            {
+              "Size": 640,
+              "Mallocs": 41555,
+              "Frees": 41061
+            },
+            {
+              "Size": 704,
+              "Mallocs": 124841,
+              "Frees": 123493
+            },
+            {
+              "Size": 768,
+              "Mallocs": 475,
+              "Frees": 440
+            },
+            {
+              "Size": 896,
+              "Mallocs": 17738,
+              "Frees": 13204
+            },
+            {
+              "Size": 1024,
+              "Mallocs": 71299,
+              "Frees": 61551
+            },
+            {
+              "Size": 1152,
+              "Mallocs": 93540,
+              "Frees": 84668
+            },
+            {
+              "Size": 1280,
+              "Mallocs": 1274,
+              "Frees": 1225
+            },
+            {
+              "Size": 1408,
+              "Mallocs": 117070,
+              "Frees": 111447
+            },
+            {
+              "Size": 1536,
+              "Mallocs": 4603,
+              "Frees": 4497
+            },
+            {
+              "Size": 1792,
+              "Mallocs": 154766,
+              "Frees": 152936
+            },
+            {
+              "Size": 2048,
+              "Mallocs": 78263,
+              "Frees": 60781
+            },
+            {
+              "Size": 2304,
+              "Mallocs": 12450,
+              "Frees": 12232
+            },
+            {
+              "Size": 2688,
+              "Mallocs": 35519,
+              "Frees": 34983
+            },
+            {
+              "Size": 3072,
+              "Mallocs": 51602,
+              "Frees": 50822
+            },
+            {
+              "Size": 3200,
+              "Mallocs": 1044,
+              "Frees": 1042
+            },
+            {
+              "Size": 3456,
+              "Mallocs": 4678,
+              "Frees": 4624
+            },
+            {
+              "Size": 4096,
+              "Mallocs": 32398,
+              "Frees": 31215
+            },
+            {
+              "Size": 4864,
+              "Mallocs": 8489,
+              "Frees": 8391
+            },
+            {
+              "Size": 5376,
+              "Mallocs": 1753,
+              "Frees": 1737
+            },
+            {
+              "Size": 6144,
+              "Mallocs": 2355,
+              "Frees": 2128
+            },
+            {
+              "Size": 6528,
+              "Mallocs": 453,
+              "Frees": 436
+            },
+            {
+              "Size": 6784,
+              "Mallocs": 1941,
+              "Frees": 1892
+            },
+            {
+              "Size": 6912,
+              "Mallocs": 334,
+              "Frees": 325
+            },
+            {
+              "Size": 8192,
+              "Mallocs": 11043,
+              "Frees": 10796
+            },
+            {
+              "Size": 9472,
+              "Mallocs": 8693,
+              "Frees": 7394
+            },
+            {
+              "Size": 9728,
+              "Mallocs": 747,
+              "Frees": 219
+            },
+            {
+              "Size": 10240,
+              "Mallocs": 1351,
+              "Frees": 1309
+            },
+            {
+              "Size": 10880,
+              "Mallocs": 24161,
+              "Frees": 17118
+            },
+            {
+              "Size": 12288,
+              "Mallocs": 8062,
+              "Frees": 7898
+            },
+            {
+              "Size": 13568,
+              "Mallocs": 465,
+              "Frees": 439
+            },
+            {
+              "Size": 14336,
+              "Mallocs": 3609,
+              "Frees": 3555
+            },
+            {
+              "Size": 16384,
+              "Mallocs": 836,
+              "Frees": 823
+            },
+            {
+              "Size": 18432,
+              "Mallocs": 636,
+              "Frees": 562
+            }
+          ]
+        },
+        "posting": {
+          "decision": {
+            "Count": 131,
+            "TotalNS": 986203960,
+            "MaxNS": 12050739
+          },
+          "proposal": {
+            "Count": 131,
+            "TotalNS": 4859296953,
+            "MaxNS": 67787750
+          },
+          "threads": {
+            "Count": 131,
+            "TotalNS": 2883352225,
+            "MaxNS": 37213604
+          }
+        },
+        "seconds": 20.554657824,
+        "sync": {
+          "/data/site/boards/c88d747ad07cc18fbeddd108c44e7db9/threads/1792249080/delta-000001.wal": {
+            "Count": 117,
+            "TotalNS": 372115088,
+            "MaxNS": 6113167
+          },
+          "/data/site/boards/c88d747ad07cc18fbeddd108c44e7db9/threads/1792249081/delta-000001.wal": {
+            "Count": 116,
+            "TotalNS": 373548339,
+            "MaxNS": 5968654
+          },
+          "/data/site/boards/c88d747ad07cc18fbeddd108c44e7db9/threads/1792249082/delta-000001.wal": {
+            "Count": 122,
+            "TotalNS": 414043604,
+            "MaxNS": 8404339
+          },
+          "/data/site/boards/c88d747ad07cc18fbeddd108c44e7db9/threads/1792249083/delta-000001.wal": {
+            "Count": 120,
+            "TotalNS": 400091297,
+            "MaxNS": 7227496
+          },
+          "/data/site/boards/c88d747ad07cc18fbeddd108c44e7db9/threads/1792249084/delta-000001.wal": {
+            "Count": 115,
+            "TotalNS": 372818441,
+            "MaxNS": 6472247
+          },
+          "/data/site/boards/c88d747ad07cc18fbeddd108c44e7db9/threads/1792249085/delta-000001.wal": {
+            "Count": 119,
+            "TotalNS": 383789349,
+            "MaxNS": 6465821
+          },
+          "/data/site/boards/c88d747ad07cc18fbeddd108c44e7db9/threads/1792249086/delta-000001.wal": {
+            "Count": 119,
+            "TotalNS": 369655383,
+            "MaxNS": 6551104
+          },
+          "/data/site/boards/c88d747ad07cc18fbeddd108c44e7db9/threads/1792249087/delta-000001.wal": {
+            "Count": 116,
+            "TotalNS": 377447860,
+            "MaxNS": 6749607
+          },
+          "/data/site/boards/c88d747ad07cc18fbeddd108c44e7db9/threads/1792249088/delta-000001.wal": {
+            "Count": 127,
+            "TotalNS": 409072565,
+            "MaxNS": 5722096
+          },
+          "/data/site/boards/c88d747ad07cc18fbeddd108c44e7db9/threads/1792249089/delta-000001.wal": {
+            "Count": 114,
+            "TotalNS": 353531056,
+            "MaxNS": 8640698
+          },
+          "/data/site/boards/c88d747ad07cc18fbeddd108c44e7db9/threads/1792249090/delta-000001.wal": {
+            "Count": 122,
+            "TotalNS": 388605967,
+            "MaxNS": 9032258
+          },
+          "/data/site/boards/c88d747ad07cc18fbeddd108c44e7db9/threads/1792249091/delta-000001.wal": {
+            "Count": 112,
+            "TotalNS": 345283801,
+            "MaxNS": 6406731
+          },
+          "/data/site/boards/c88d747ad07cc18fbeddd108c44e7db9/threads/1792249092/delta-000001.wal": {
+            "Count": 123,
+            "TotalNS": 390122326,
+            "MaxNS": 7499548
+          },
+          "/data/site/boards/c88d747ad07cc18fbeddd108c44e7db9/threads/1792249093/delta-000001.wal": {
+            "Count": 120,
+            "TotalNS": 379899051,
+            "MaxNS": 7029342
+          },
+          "/data/site/boards/c88d747ad07cc18fbeddd108c44e7db9/threads/1792249094/delta-000001.wal": {
+            "Count": 118,
+            "TotalNS": 363932312,
+            "MaxNS": 5698418
+          },
+          "/data/site/boards/c88d747ad07cc18fbeddd108c44e7db9/threads/1792249095/delta-000001.wal": {
+            "Count": 119,
+            "TotalNS": 382840839,
+            "MaxNS": 6130558
+          },
+          "/data/site/evidence/c88d747ad07cc18fbeddd108c44e7db9/20261017/control-000001.wal": {
+            "Count": 262,
+            "TotalNS": 886986797,
+            "MaxNS": 17329731
+          },
+          "/data/site/reports/http/20261017/control-000001.wal": {
+            "Count": 63,
+            "TotalNS": 315288823,
+            "MaxNS": 7610184
+          }
+        }
+      },
+      "profile_outputs": {
+        "cpu_top": {
+          "command": [
+            "mise",
+            "exec",
+            "--",
+            "go",
+            "tool",
+            "pprof",
+            "-top",
+            "-cum",
+            "-nodecount=200",
+            "var/throughput-bottleneck-20261017/build/oimobbs",
+            "var/throughput-bottleneck-20261017/diag400.json.profiles/cpu.pprof"
+          ],
+          "stdout": "File: oimobbs\nBuild ID: 4906e9387dbce2c5b59d02c6ce1e136d648fd799\nType: cpu\nTime: 2026-10-17 23:58:12 JST\nDuration: 20.56s, Total samples = 26.19s (127.41%)\nShowing nodes accounting for 14.39s, 54.94% of 26.19s total\nDropped 964 nodes (cum <= 0.13s)\nShowing top 200 nodes out of 334\n      flat  flat%   sum%        cum   cum%\n         0     0%     0%     16.27s 62.12%  oimobbs/internal/board.(*Worker).execute\n         0     0%     0%     16.27s 62.12%  oimobbs/internal/board.(*Worker).loop\n         0     0%     0%     16.27s 62.12%  oimobbs/internal/bootstrap.(*postingBoard).runPostingReadyBatch\n         0     0%     0%     11.11s 42.42%  oimobbs/internal/board.(*Worker).invoke\n     0.02s 0.076% 0.076%     11.01s 42.04%  oimobbs/internal/bootstrap.(*Repository).submitForm.func4\n     0.01s 0.038%  0.11%     10.40s 39.71%  oimobbs/internal/strictjson.Decode\n         0     0%  0.11%     10.14s 38.72%  oimobbs/internal/board.(*Worker).execute.func2.func1\n     0.01s 0.038%  0.15%      7.79s 29.74%  encoding/json.Unmarshal (inline)\n         0     0%  0.15%      7.78s 29.71%  encoding/json/v2.Unmarshal\n     0.02s 0.076%  0.23%      7.72s 29.48%  encoding/json/v2.unmarshalDecode\n     0.23s  0.88%  1.11%      6.33s 24.17%  encoding/json/v2.makeStructArshaler.func3\n         0     0%  1.11%      5.97s 22.79%  oimobbs/internal/bootstrap.(*postingBoard).postAdmitted\n         0     0%  1.11%      5.13s 19.59%  oimobbs/internal/bootstrap.(*postingGroup).flush\n         0     0%  1.11%      5.10s 19.47%  oimobbs/internal/app.(*PostingBatch).Commit\n         0     0%  1.11%      5.06s 19.32%  oimobbs/internal/evidence.(*Journal).AppendBatch\n     0.49s  1.87%  2.98%      4.19s 16.00%  encoding/json/jsontext.(*decoderState).consumeValue\n     0.01s 0.038%  3.02%      3.93s 15.01%  net/http.(*conn).serve\n     0.01s 0.038%  3.05%      3.75s 14.32%  oimobbs/internal/postcapture.decode\n         0     0%  3.05%      3.55s 13.55%  oimobbs/internal/strictjson.validateFields\n         0     0%  3.05%      3.53s 13.48%  oimobbs/internal/store.(*ControlLog).appendFramesChecked\n         0     0%  3.05%      3.49s 13.33%  oimobbs/internal/evidence.(*OptionalQueue).run\n         0     0%  3.05%      3.49s 13.33%  oimobbs/internal/evidence.NewOptionalBatchQueue.func1\n         0     0%  3.05%      3.44s 13.13%  oimobbs/internal/bootstrap.(*Repository).ensureOptionalLogs.func1\n         0     0%  3.05%      3.35s 12.79%  oimobbs/internal/evidence.(*OptionalStore).WriteBatch\n         0     0%  3.05%      3.31s 12.64%  oimobbs/internal/strictjson.Validate (inline)\n         0     0%  3.05%      3.23s 12.33%  oimobbs/internal/evidence.(*OptionalStore).writeOptionalBatch\n         0     0%  3.05%      3.20s 12.22%  oimobbs/internal/evidence.(*Journal).appendOptionalBatch\n         0     0%  3.05%      3.17s 12.10%  net/http.HandlerFunc.ServeHTTP (partial-inline)\n         0     0%  3.05%      3.17s 12.10%  net/http.serverHandler.ServeHTTP\n         0     0%  3.05%      3.17s 12.10%  oimobbs/internal/bootstrap.securityTransportHeaders.func1\n     0.01s 0.038%  3.09%      3.17s 12.10%  oimobbs/internal/evidence.(*HTTPObserver).WrapOptional.func1\n     0.52s  1.99%  5.08%      3.15s 12.03%  encoding/json/jsontext.(*decoderState).consumeObject\n     0.21s   0.8%  5.88%      3.14s 11.99%  encoding/json/jsontext.(*decoderState).ReadValue\n         0     0%  5.88%      3.14s 11.99%  oimobbs/internal/bootstrap.(*Repository).openPostingBoard.func3\n         0     0%  5.88%         3s 11.45%  oimobbs/internal/evidence.(*Journal).validatePayload\n         0     0%  5.88%      2.97s 11.34%  oimobbs/internal/postcapture.ValidateFrame\n         0     0%  5.88%      2.88s 11.00%  oimobbs/internal/bootstrap.(*Repository).trafficHandler.func1\n     0.06s  0.23%  6.11%      2.87s 10.96%  encoding/json/v2.makeMethodArshaler.func6\n         0     0%  6.11%      2.80s 10.69%  oimobbs/internal/bootstrap.(*Repository).wafHandler.func1\n         0     0%  6.11%      2.79s 10.65%  oimobbs/internal/delivery.(*RequestGate).Wrap.func1\n         0     0%  6.11%      2.79s 10.65%  oimobbs/internal/delivery.(*Scheduler).Wrap.func1\n     0.01s 0.038%  6.15%      2.78s 10.61%  oimobbs/internal/bootstrap.(*Repository).SiteWebHandler.func1\n         0     0%  6.15%      2.78s 10.61%  oimobbs/internal/bootstrap.(*Repository).publicHTTPServer.func2\n         0     0%  6.15%      2.62s 10.00%  oimobbs/internal/app.PostingValidator.func1\n         0     0%  6.15%      2.58s  9.85%  oimobbs/internal/domain.ParseOperation\n     2.46s  9.39% 15.54%      2.46s  9.39%  encoding/json/internal/jsonwire.ConsumeSimpleString (inline)\n         0     0% 15.54%      2.22s  8.48%  oimobbs/internal/store.applyControlOperation\n     0.18s  0.69% 16.23%      2.15s  8.21%  oimobbs/internal/strictjson.(*shapeScanner).value\n         0     0% 16.23%      2.15s  8.21%  oimobbs/internal/strictjson.shape (inline)\n         0     0% 16.23%      2.14s  8.17%  encoding/json.Marshal (inline)\n     0.01s 0.038% 16.27%      2.14s  8.17%  encoding/json/v2.Marshal\n         0     0% 16.27%      2.14s  8.17%  oimobbs/internal/bootstrap.bindPostingCapture.func1\n         0     0% 16.27%      2.10s  8.02%  encoding/json/jsontext.(*Decoder).ReadValue (inline)\n     0.12s  0.46% 16.72%      2.10s  8.02%  oimobbs/internal/strictjson.(*shapeScanner).object\n         0     0% 16.72%      2.07s  7.90%  oimobbs/internal/evidence.(*Journal).validateValue\n     0.02s 0.076% 16.80%         2s  7.64%  encoding/json/v2.marshalEncode\n     0.22s  0.84% 17.64%      1.89s  7.22%  oimobbs/internal/strictjson.(*keyScanner).container\n         0     0% 17.64%      1.87s  7.14%  oimobbs/internal/store.(*ControlLog).AppendSeriesChecked (inline)\n         0     0% 17.64%      1.86s  7.10%  oimobbs/internal/evidence.DecodeHTTPObservation\n         0     0% 17.64%      1.66s  6.34%  oimobbs/internal/store.(*ControlLog).AppendBatch (inline)\n         0     0% 17.64%      1.66s  6.34%  oimobbs/internal/store.(*ControlLog).AppendBatchChecked (inline)\n     0.33s  1.26% 18.90%      1.57s  5.99%  encoding/json/v2.makeStructArshaler.func2\n         0     0% 18.90%      1.56s  5.96%  encoding/json.Valid (inline)\n     0.02s 0.076% 18.98%      1.56s  5.96%  encoding/json.checkValid\n         0     0% 18.98%      1.55s  5.92%  oimobbs/internal/evidence.PostingHTTPObservation\n         0     0% 18.98%      1.53s  5.84%  oimobbs/internal/bootstrap.(*Repository).legacyPostingPage\n         0     0% 18.98%      1.52s  5.80%  oimobbs/internal/evidence.(*Journal).verifyPayloadSignature\n         0     0% 18.98%      1.47s  5.61%  crypto/ed25519.Verify (inline)\n         0     0% 18.98%      1.47s  5.61%  crypto/ed25519.VerifyWithOptions\n         0     0% 18.98%      1.47s  5.61%  oimobbs/internal/evidence.verifyEventSignature\n     0.06s  0.23% 19.21%      1.44s  5.50%  encoding/json/v2.makeSliceArshaler.func3\n         0     0% 19.21%      1.39s  5.31%  encoding/json/jsontext.(*decoderState).CheckNextValue\n         0     0% 19.21%      1.33s  5.08%  crypto/internal/fips140/ed25519.Verify (inline)\n         0     0% 19.21%      1.33s  5.08%  crypto/internal/fips140/ed25519.verify\n         0     0% 19.21%      1.33s  5.08%  crypto/internal/fips140/ed25519.verifyWithDom\n         0     0% 19.21%      1.31s  5.00%  oimobbs/internal/postcapture.Validate\n     0.03s  0.11% 19.32%      1.27s  4.85%  encoding/json/jsontext.(*decoderState).consumeArray\n         0     0% 19.32%      1.23s  4.70%  oimobbs/internal/bootstrap.(*Repository).routeLegacyPost\n         0     0% 19.32%      1.23s  4.70%  oimobbs/internal/postcapture.New (inline)\n         0     0% 19.32%      1.23s  4.70%  oimobbs/internal/postcapture.newCapture\n     0.14s  0.53% 19.85%      1.23s  4.70%  runtime.mallocgc\n         0     0% 19.85%      1.22s  4.66%  runtime.systemstack\n     0.02s 0.076% 19.93%      1.17s  4.47%  crypto/internal/fips140/edwards25519.(*Point).VarTimeDoubleScalarBaseMult\n         0     0% 19.93%      1.15s  4.39%  oimobbs/internal/postcapture.WithAnonymous\n         0     0% 19.93%      1.15s  4.39%  oimobbs/internal/postcapture.readFrame\n     0.30s  1.15% 21.08%      1.15s  4.39%  oimobbs/internal/strictjson.(*keyScanner).quoted\n     0.23s  0.88% 21.95%      1.09s  4.16%  runtime.mapaccess2_faststr\n     0.01s 0.038% 21.99%      1.07s  4.09%  oimobbs/internal/bootstrap.(*Repository).submitForm\n         0     0% 21.99%      1.05s  4.01%  oimobbs/internal/app.(*PostingBatch).commitThreads.func1\n         0     0% 21.99%      1.05s  4.01%  oimobbs/internal/store.(*ThreadLog).AppendBatch\n         0     0% 21.99%      1.05s  4.01%  sync.(*WaitGroup).Go.func1\n         0     0% 21.99%      1.02s  3.89%  oimobbs/internal/postinput.(*Input).UnmarshalJSON\n     0.01s 0.038% 22.03%      1.02s  3.89%  oimobbs/internal/store.(*Writer).commitSeriesChecked\n         0     0% 22.03%      0.98s  3.74%  oimobbs/internal/postcapture.ValidateKeyAndMetadata\n         0     0% 22.03%      0.97s  3.70%  oimobbs/internal/board.(*Worker).execute.func2.1\n         0     0% 22.03%      0.96s  3.67%  oimobbs/internal/evidence.Seal\n     0.01s 0.038% 22.07%      0.90s  3.44%  oimobbs/internal/bootstrap.(*postingBoard).reserveGuard\n     0.06s  0.23% 22.30%      0.89s  3.40%  bytes.IndexByte (inline)\n         0     0% 22.30%      0.84s  3.21%  oimobbs/internal/app.(*PostingBatch).Stage\n         0     0% 22.30%      0.84s  3.21%  time.Now\n     0.84s  3.21% 25.51%      0.84s  3.21%  time.runtimeNow\n         0     0% 25.51%      0.83s  3.17%  oimobbs/internal/store.(*Writer).CommitBatchChecked (inline)\n         0     0% 25.51%      0.83s  3.17%  oimobbs/internal/store.applyFrame\n         0     0% 25.51%      0.83s  3.17%  oimobbs/internal/store.encodeWALSeries\n     0.05s  0.19% 25.70%      0.82s  3.13%  encoding/json/v2.makePointerArshaler.func3\n         0     0% 25.70%      0.82s  3.13%  oimobbs/internal/store.EncodeWALBlock\n         0     0% 25.70%      0.81s  3.09%  oimobbs/internal/bootstrap.(*Repository).BoardWebHandler.1\n     0.04s  0.15% 25.85%      0.79s  3.02%  crypto/internal/fips140/edwards25519/field.(*Element).Multiply (inline)\n     0.07s  0.27% 26.12%      0.78s  2.98%  encoding/json/v2.makeStringArshaler.func2\n     0.75s  2.86% 28.98%      0.75s  2.86%  crypto/internal/fips140/edwards25519/field.feMul\n         0     0% 28.98%      0.75s  2.86%  oimobbs/internal/evidence.ValidateHTTPObservation (inline)\n     0.01s 0.038% 29.02%      0.74s  2.83%  oimobbs/internal/store.validateFrame\n         0     0% 29.02%      0.72s  2.75%  crypto/ed25519.Sign (inline)\n         0     0% 29.02%      0.72s  2.75%  crypto/ed25519.sign\n         0     0% 29.02%      0.72s  2.75%  crypto/internal/fips140/ed25519.Sign (inline)\n         0     0% 29.02%      0.72s  2.75%  crypto/internal/fips140/ed25519.sign\n         0     0% 29.02%      0.72s  2.75%  crypto/internal/fips140/ed25519.signWithDom\n     0.71s  2.71% 31.73%      0.71s  2.71%  indexbytebody\n         0     0% 31.73%      0.71s  2.71%  oimobbs/internal/postcapture.schemaOf\n         0     0% 31.73%      0.71s  2.71%  runtime.gcBgMarkWorker\n     0.02s 0.076% 31.81%      0.70s  2.67%  runtime.mapaccess1_faststr\n     0.08s  0.31% 32.11%      0.68s  2.60%  oimobbs/internal/bootstrap.(*abuseGuard).prune\n         0     0% 32.11%      0.68s  2.60%  runtime.gcBgMarkWorker.func2\n         0     0% 32.11%      0.68s  2.60%  runtime.gcDrain\n     0.03s  0.11% 32.23%      0.66s  2.52%  encoding/json/v2.makeMethodArshaler.func3\n     0.64s  2.44% 34.67%      0.64s  2.44%  internal/runtime/syscall/linux.Syscall6\n         0     0% 34.67%      0.62s  2.37%  oimobbs/internal/app.postingFrame\n     0.01s 0.038% 34.71%      0.62s  2.37%  oimobbs/internal/store.decodeBody\n     0.01s 0.038% 34.75%      0.61s  2.33%  oimobbs/internal/strictjson.(*shapeScanner).array\n         0     0% 34.75%      0.60s  2.29%  oimobbs/internal/evidence.ValidateHTTPObservationValue\n     0.01s 0.038% 34.78%      0.60s  2.29%  syscall.RawSyscall6\n         0     0% 34.78%      0.58s  2.21%  oimobbs/internal/zstdencode.(*Encoder).EncodeBestArchive\n     0.58s  2.21% 37.00%      0.58s  2.21%  runtime.nanotime (inline)\n         0     0% 37.00%      0.57s  2.18%  oimobbs/internal/postcapture.OverrideMetadata\n     0.02s 0.076% 37.08%      0.57s  2.18%  oimobbs/internal/zstdencode.(*Encoder).encode\n         0     0% 37.08%      0.56s  2.14%  oimobbs/internal/bootstrap.(*postingBoard).reserveGuard.func1\n         0     0% 37.08%      0.56s  2.14%  syscall.Syscall\n     0.54s  2.06% 39.14%      0.54s  2.06%  encoding/json/internal/jsonwire.ConsumeWhitespace (inline)\n     0.21s   0.8% 39.94%      0.54s  2.06%  oimobbs/internal/strictjson.(*keySet).add\n     0.54s  2.06% 42.00%      0.54s  2.06%  runtime.memmove\n     0.02s 0.076% 42.08%      0.52s  1.99%  encoding/json/jsontext.(*Decoder).SkipValue\n     0.25s  0.95% 43.03%      0.51s  1.95%  internal/runtime/maps.(*Map).getWithoutKeySmallFastStr\n         0     0% 43.03%      0.51s  1.95%  oimobbs/internal/domain.Apply\n     0.14s  0.53% 43.57%      0.51s  1.95%  runtime.scanObject\n         0     0% 43.57%      0.50s  1.91%  crypto/internal/fips140/edwards25519.(*Point).ScalarBaseMult\n     0.01s 0.038% 43.60%      0.50s  1.91%  encoding/json/jsontext.(*decoderState).SkipValue\n     0.04s  0.15% 43.76%      0.49s  1.87%  crypto/internal/fips140/edwards25519.(*projP1xP1).Double\n     0.01s 0.038% 43.80%      0.48s  1.83%  oimobbs/internal/evidence.validateConnectionObservation\n     0.03s  0.11% 43.91%      0.48s  1.83%  runtime.growslice\n         0     0% 43.91%      0.47s  1.79%  oimobbs/internal/store.ValidateThreadFrame\n         0     0% 43.91%      0.45s  1.72%  crypto/internal/fips140/edwards25519/field.(*Element).SquareN (inline)\n     0.18s  0.69% 44.60%      0.45s  1.72%  crypto/internal/fips140/edwards25519/field.feSquareN\n     0.19s  0.73% 45.32%      0.45s  1.72%  encoding/json/internal/jsonwire.ConsumeStringResumable\n         0     0% 45.32%      0.45s  1.72%  internal/poll.ignoringEINTRIO (inline)\n         0     0% 45.32%      0.45s  1.72%  oimobbs/internal/bootstrap.(*Repository).WebPostingHandler.1\n         0     0% 45.32%      0.45s  1.72%  oimobbs/internal/store.decodeControlOperation\n     0.36s  1.37% 46.70%      0.44s  1.68%  oimobbs/internal/app.(*PostingLog).AbusePostVisible\n         0     0% 46.70%      0.43s  1.64%  oimobbs/internal/evidence.validateObservation (inline)\n         0     0% 46.70%      0.42s  1.60%  encoding/json/jsontext.(*decoderState).consumeString\n     0.11s  0.42% 47.12%      0.42s  1.60%  oimobbs/internal/strictjson.(*shapeScanner).skip\n         0     0% 47.12%      0.42s  1.60%  runtime.mcall\n     0.15s  0.57% 47.69%      0.40s  1.53%  encoding/json/jsontext.(*decoderState).ReadToken\n         0     0% 47.69%      0.40s  1.53%  oimobbs/internal/store.decodeFrameView\n         0     0% 47.69%      0.39s  1.49%  oimobbs/internal/evidence.validateCompletedObservation (inline)\n         0     0% 47.69%      0.38s  1.45%  oimobbs/internal/bootstrap.withLegacyOptionalField\n         0     0% 47.69%      0.38s  1.45%  oimobbs/internal/evidence.(*OptionalStore).validate\n         0     0% 47.69%      0.38s  1.45%  runtime.schedule\n         0     0% 47.69%      0.37s  1.41%  crypto/internal/fips140/edwards25519.(*Point).Bytes (inline)\n         0     0% 47.69%      0.37s  1.41%  crypto/internal/fips140/edwards25519.(*Point).bytes\n     0.03s  0.11% 47.80%      0.37s  1.41%  encoding/json/v2.makeMapArshaler.func2\n     0.37s  1.41% 49.22%      0.37s  1.41%  memeqbody\n         0     0% 49.22%      0.36s  1.37%  crypto/internal/fips140/edwards25519/field.(*Element).Invert\n     0.01s 0.038% 49.26%      0.36s  1.37%  encoding/json/jsontext.(*Encoder).WriteValue (inline)\n         0     0% 49.26%      0.36s  1.37%  oimobbs/internal/bootstrap.(*Repository).threadPage\n     0.01s 0.038% 49.29%      0.36s  1.37%  oimobbs/internal/bootstrap.(*Repository).webBoards\n         0     0% 49.29%      0.36s  1.37%  runtime.gcDrainMarkWorkerFractional (inline)\n     0.08s  0.31% 49.60%      0.35s  1.34%  encoding/json/jsontext.(*encoderState).WriteValue\n     0.02s 0.076% 49.68%      0.35s  1.34%  encoding/json/v2.makeSliceArshaler.func2\n         0     0% 49.68%      0.35s  1.34%  oimobbs/internal/app.(*PostingLog).PreparePost\n         0     0% 49.68%      0.35s  1.34%  oimobbs/internal/bootstrap.(*Repository).postingResultPage\n     0.01s 0.038% 49.71%      0.35s  1.34%  oimobbs/internal/bootstrap.(*postingBoard).guardCandidate\n         0     0% 49.71%      0.35s  1.34%  oimobbs/internal/postcapture.operationPosts\n         0     0% 49.71%      0.35s  1.34%  oimobbs/internal/postinput.Build\n         0     0% 49.71%      0.35s  1.34%  oimobbs/internal/store.(*Writer).CommitBatch (inline)\n     0.02s 0.076% 49.79%      0.34s  1.30%  encoding/json/v2.makeMapArshaler.func3\n     0.06s  0.23% 50.02%      0.34s  1.30%  encoding/json/v2.makeStringArshaler.func1\n     0.33s  1.26% 51.28%      0.33s  1.26%  internal/runtime/maps.memHashAES\n     0.33s  1.26% 52.54%      0.33s  1.26%  oimobbs/internal/domain.scalarText\n     0.01s 0.038% 52.58%      0.33s  1.26%  oimobbs/internal/identity.MAC\n         0     0% 52.58%      0.33s  1.26%  oimobbs/internal/store.ReadFrame\n     0.12s  0.46% 53.04%      0.33s  1.26%  oimobbs/internal/zstdencode.(*Encoder).parse\n         0     0% 53.04%      0.33s  1.26%  runtime.findRunnable\n     0.03s  0.11% 53.15%      0.32s  1.22%  crypto/internal/fips140/edwards25519.(*Point).fromP1xP1\n         0     0% 53.15%      0.32s  1.22%  crypto/internal/fips140/edwards25519/field.(*Element).Square (inline)\n     0.18s  0.69% 53.84%      0.32s  1.22%  crypto/internal/fips140/edwards25519/field.feSquare\n         0     0% 53.84%      0.32s  1.22%  internal/poll.(*FD).Write\n         0     0% 53.84%      0.32s  1.22%  runtime.gcDrainMarkWorkerIdle (inline)\n     0.05s  0.19% 54.03%      0.32s  1.22%  runtime.slicebytetostring\n     0.23s  0.88% 54.91%      0.32s  1.22%  runtime.tryDeferToSpanScan\n     0.01s 0.038% 54.94%      0.32s  1.22%  syscall.Write (inline)\n",
+          "stderr": ""
+        },
+        "cpu_flat": {
+          "command": [
+            "mise",
+            "exec",
+            "--",
+            "go",
+            "tool",
+            "pprof",
+            "-top",
+            "-nodecount=25",
+            "var/throughput-bottleneck-20261017/build/oimobbs",
+            "var/throughput-bottleneck-20261017/diag400.json.profiles/cpu.pprof"
+          ],
+          "stdout": "File: oimobbs\nBuild ID: 4906e9387dbce2c5b59d02c6ce1e136d648fd799\nType: cpu\nTime: 2026-10-17 23:58:12 JST\nDuration: 20.56s, Total samples = 26.19s (127.41%)\nShowing nodes accounting for 12.14s, 46.35% of 26.19s total\nDropped 964 nodes (cum <= 0.13s)\nShowing top 25 nodes out of 334\n      flat  flat%   sum%        cum   cum%\n     2.46s  9.39%  9.39%      2.46s  9.39%  encoding/json/internal/jsonwire.ConsumeSimpleString (inline)\n     0.84s  3.21% 12.60%      0.84s  3.21%  time.runtimeNow\n     0.75s  2.86% 15.46%      0.75s  2.86%  crypto/internal/fips140/edwards25519/field.feMul\n     0.71s  2.71% 18.17%      0.71s  2.71%  indexbytebody\n     0.64s  2.44% 20.62%      0.64s  2.44%  internal/runtime/syscall/linux.Syscall6\n     0.58s  2.21% 22.83%      0.58s  2.21%  runtime.nanotime\n     0.54s  2.06% 24.89%      0.54s  2.06%  encoding/json/internal/jsonwire.ConsumeWhitespace (inline)\n     0.54s  2.06% 26.96%      0.54s  2.06%  runtime.memmove\n     0.52s  1.99% 28.94%      3.15s 12.03%  encoding/json/jsontext.(*decoderState).consumeObject\n     0.49s  1.87% 30.81%      4.19s 16.00%  encoding/json/jsontext.(*decoderState).consumeValue\n     0.37s  1.41% 32.23%      0.37s  1.41%  memeqbody\n     0.36s  1.37% 33.60%      0.44s  1.68%  oimobbs/internal/app.(*PostingLog).AbusePostVisible\n     0.33s  1.26% 34.86%      1.57s  5.99%  encoding/json/v2.makeStructArshaler.func2\n     0.33s  1.26% 36.12%      0.33s  1.26%  internal/runtime/maps.memHashAES\n     0.33s  1.26% 37.38%      0.33s  1.26%  oimobbs/internal/domain.scalarText\n     0.30s  1.15% 38.53%      1.15s  4.39%  oimobbs/internal/strictjson.(*keyScanner).quoted\n     0.25s  0.95% 39.48%      0.51s  1.95%  internal/runtime/maps.(*Map).getWithoutKeySmallFastStr\n     0.25s  0.95% 40.44%      0.25s  0.95%  oimobbs/internal/strictjson.(*keyScanner).space (inline)\n     0.23s  0.88% 41.31%      6.33s 24.17%  encoding/json/v2.makeStructArshaler.func3\n     0.23s  0.88% 42.19%      1.09s  4.16%  runtime.mapaccess2_faststr\n     0.23s  0.88% 43.07%      0.32s  1.22%  runtime.tryDeferToSpanScan\n     0.22s  0.84% 43.91%      0.22s  0.84%  internal/runtime/maps.ctrlGroup.matchH2 (inline)\n     0.22s  0.84% 44.75%      1.89s  7.22%  oimobbs/internal/strictjson.(*keyScanner).container\n     0.21s   0.8% 45.55%      3.14s 11.99%  encoding/json/jsontext.(*decoderState).ReadValue\n     0.21s   0.8% 46.35%      0.54s  2.06%  oimobbs/internal/strictjson.(*keySet).add\n",
+          "stderr": ""
+        },
+        "json_callers": {
+          "command": [
+            "mise",
+            "exec",
+            "--",
+            "go",
+            "tool",
+            "pprof",
+            "-peek",
+            "strictjson.Decode",
+            "var/throughput-bottleneck-20261017/build/oimobbs",
+            "var/throughput-bottleneck-20261017/diag400.json.profiles/cpu.pprof"
+          ],
+          "stdout": "File: oimobbs\nBuild ID: 4906e9387dbce2c5b59d02c6ce1e136d648fd799\nType: cpu\nTime: 2026-10-17 23:58:12 JST\nDuration: 20.56s, Total samples = 26.19s (127.41%)\nShowing nodes accounting for 26.19s, 100% of 26.19s total\n----------------------------------------------------------+-------------\n      flat  flat%   sum%        cum   cum%   calls calls% + context \t \t \n----------------------------------------------------------+-------------\n                                             3.07s 29.52% |   oimobbs/internal/postcapture.decode\n                                             2.58s 24.81% |   oimobbs/internal/domain.ParseOperation\n                                             1.67s 16.06% |   oimobbs/internal/evidence.DecodeHTTPObservation\n                                             0.69s  6.63% |   oimobbs/internal/bootstrap.(*Repository).submitForm.func4\n                                             0.45s  4.33% |   oimobbs/internal/store.decodeControlOperation\n                                             0.36s  3.46% |   oimobbs/internal/postinput.(*Input).UnmarshalJSON\n                                             0.35s  3.37% |   oimobbs/internal/postcapture.operationPosts\n                                             0.31s  2.98% |   oimobbs/internal/evidence.(*Journal).validateValue\n                                             0.27s  2.60% |   oimobbs/internal/app.PostingValidator.func1\n                                             0.26s  2.50% |   oimobbs/internal/evidence.ValidateOptionalPayload\n                                             0.23s  2.21% |   oimobbs/internal/domain.Apply\n                                             0.20s  1.92% |   oimobbs/internal/evidence.HTTPObservation.ValidatePosting\n                                             0.12s  1.15% |   oimobbs/internal/bootstrap.siteDirectories\n                                             0.10s  0.96% |   oimobbs/internal/bootstrap.(*Repository).submitForm\n                                             0.06s  0.58% |   oimobbs/internal/bootstrap.(*boardPresentation).UnmarshalJSON\n                                             0.06s  0.58% |   oimobbs/internal/bootstrap.(*postingBoard).prepareEditing\n                                             0.04s  0.38% |   oimobbs/internal/bootstrap.(*Repository).webBoards\n                                             0.02s  0.19% |   oimobbs/internal/bootstrap.(*boardIdentity).UnmarshalJSON\n                                             0.02s  0.19% |   oimobbs/internal/bootstrap.(*boardPosting).UnmarshalJSON\n     0.01s 0.038% 0.038%     10.40s 39.71%                | oimobbs/internal/strictjson.Decode\n                                             6.18s 59.42% |   encoding/json.Unmarshal (inline)\n                                             2.35s 22.60% |   oimobbs/internal/strictjson.Validate (inline)\n                                             2.15s 20.67% |   oimobbs/internal/strictjson.shape (inline)\n----------------------------------------------------------+-------------\n",
+          "stderr": ""
+        },
+        "capture_callers": {
+          "command": [
+            "mise",
+            "exec",
+            "--",
+            "go",
+            "tool",
+            "pprof",
+            "-peek",
+            "postcapture.decode",
+            "var/throughput-bottleneck-20261017/build/oimobbs",
+            "var/throughput-bottleneck-20261017/diag400.json.profiles/cpu.pprof"
+          ],
+          "stdout": "File: oimobbs\nBuild ID: 4906e9387dbce2c5b59d02c6ce1e136d648fd799\nType: cpu\nTime: 2026-10-17 23:58:12 JST\nDuration: 20.56s, Total samples = 26.19s (127.41%)\nShowing nodes accounting for 26.19s, 100% of 26.19s total\n----------------------------------------------------------+-------------\n      flat  flat%   sum%        cum   cum%   calls calls% + context \t \t \n----------------------------------------------------------+-------------\n                                             1.39s 37.07% |   oimobbs/internal/postcapture.ValidateFrame\n                                             0.84s 22.40% |   oimobbs/internal/postcapture.Validate\n                                             0.63s 16.80% |   oimobbs/internal/postcapture.ValidateKeyAndMetadata\n                                             0.48s 12.80% |   oimobbs/internal/postcapture.OverrideMetadata\n                                             0.41s 10.93% |   oimobbs/internal/postcapture.WithAnonymous\n     0.01s 0.038% 0.038%      3.75s 14.32%                | oimobbs/internal/postcapture.decode\n                                             3.07s 81.87% |   oimobbs/internal/strictjson.Decode\n                                             0.60s 16.00% |   oimobbs/internal/evidence.ValidateHTTPObservationValue\n                                             0.02s  0.53% |   crypto/sha256.Sum256\n                                             0.02s  0.53% |   oimobbs/internal/compat.Normalize\n                                             0.01s  0.27% |   memeqbody\n                                             0.01s  0.27% |   reflect.DeepEqual\n                                             0.01s  0.27% |   strings.ContainsAny (inline)\n----------------------------------------------------------+-------------\n",
+          "stderr": ""
+        },
+        "decoder": {
+          "command": [
+            "mise",
+            "exec",
+            "--",
+            "go",
+            "tool",
+            "pprof",
+            "-top",
+            "-cum",
+            "-focus",
+            "zstddecode",
+            "var/throughput-bottleneck-20261017/build/oimobbs",
+            "var/throughput-bottleneck-20261017/diag400.json.profiles/cpu.pprof"
+          ],
+          "stdout": "File: oimobbs\nBuild ID: 4906e9387dbce2c5b59d02c6ce1e136d648fd799\nType: cpu\nTime: 2026-10-17 23:58:12 JST\nDuration: 20.56s, Total samples = 26.19s (127.41%)\nActive filters:\n   focus=zstddecode\nShowing nodes accounting for 0, 0% of 26.19s total\n      flat  flat%   sum%        cum   cum%\n",
+          "stderr": "Focus expression matched no samples\n"
+        },
+        "block": {
+          "command": [
+            "mise",
+            "exec",
+            "--",
+            "go",
+            "tool",
+            "pprof",
+            "-top",
+            "-nodecount=20",
+            "var/throughput-bottleneck-20261017/build/oimobbs",
+            "var/throughput-bottleneck-20261017/diag400.json.profiles/block.pprof"
+          ],
+          "stdout": "File: oimobbs\nBuild ID: 4906e9387dbce2c5b59d02c6ce1e136d648fd799\nType: delay\nTime: 2026-10-17 23:58:33 JST\nShowing nodes accounting for 1530.63s, 99.71% of 1535.09s total\nDropped 30 nodes (cum <= 7.68s)\nShowing top 20 nodes out of 33\n      flat  flat%   sum%        cum   cum%\n  1495.39s 97.41% 97.41%   1495.39s 97.41%  runtime.chanrecv1\n    35.24s  2.30% 99.71%     35.24s  2.30%  runtime.selectgo\n         0     0% 99.71%     19.98s  1.30%  main.serveConfiguredWithNetworkClient.func4\n         0     0% 99.71%   1496.96s 97.52%  net/http.(*Server).Serve.gowrap3\n         0     0% 99.71%   1496.96s 97.52%  net/http.(*conn).serve\n         0     0% 99.71%   1496.50s 97.49%  net/http.HandlerFunc.ServeHTTP (partial-inline)\n         0     0% 99.71%   1496.50s 97.49%  net/http.serverHandler.ServeHTTP\n         0     0% 99.71%   1495.37s 97.41%  oimobbs/internal/board.(*Worker).SubmitBatch\n         0     0% 99.71%   1495.37s 97.41%  oimobbs/internal/board.(*Worker).submit\n         0     0% 99.71%    295.65s 19.26%  oimobbs/internal/bootstrap.(*Repository).BoardWebHandler.1\n         0     0% 99.71%     19.98s  1.30%  oimobbs/internal/bootstrap.(*Repository).RunStorageMonitor\n         0     0% 99.71%   1496.47s 97.48%  oimobbs/internal/bootstrap.(*Repository).SiteWebHandler.func1\n         0     0% 99.71%    295.65s 19.26%  oimobbs/internal/bootstrap.(*Repository).WebPostingHandler.1\n         0     0% 99.71%      9.06s  0.59%  oimobbs/internal/bootstrap.(*Repository).ensureOptionalLogs.func1\n         0     0% 99.71%   1200.40s 78.20%  oimobbs/internal/bootstrap.(*Repository).legacyPostingPage\n         0     0% 99.71%     73.61s  4.79%  oimobbs/internal/bootstrap.(*Repository).postingFormPage\n         0     0% 99.71%    222.04s 14.46%  oimobbs/internal/bootstrap.(*Repository).postingResultPage\n         0     0% 99.71%   1496.47s 97.48%  oimobbs/internal/bootstrap.(*Repository).publicHTTPServer.func2\n         0     0% 99.71%     73.61s  4.79%  oimobbs/internal/bootstrap.(*Repository).renderEditing\n         0     0% 99.71%   1200.40s 78.20%  oimobbs/internal/bootstrap.(*Repository).routeLegacyPost\n",
+          "stderr": ""
+        },
+        "mutex": {
+          "command": [
+            "mise",
+            "exec",
+            "--",
+            "go",
+            "tool",
+            "pprof",
+            "-top",
+            "-nodecount=20",
+            "var/throughput-bottleneck-20261017/build/oimobbs",
+            "var/throughput-bottleneck-20261017/diag400.json.profiles/mutex.pprof"
+          ],
+          "stdout": "File: oimobbs\nBuild ID: 4906e9387dbce2c5b59d02c6ce1e136d648fd799\nType: delay\nTime: 2026-10-17 23:58:33 JST\nShowing nodes accounting for 349.54ms, 99.71% of 350.56ms total\nDropped 136 nodes (cum <= 1.75ms)\nShowing top 20 nodes out of 29\n      flat  flat%   sum%        cum   cum%\n  349.54ms 99.71% 99.71%   349.54ms 99.71%  sync.(*Mutex).Unlock (partial-inline)\n         0     0% 99.71%   348.87ms 99.52%  net/http.(*Server).Serve.gowrap3\n         0     0% 99.71%   348.92ms 99.53%  net/http.(*conn).serve\n         0     0% 99.71%   348.88ms 99.52%  net/http.HandlerFunc.ServeHTTP (partial-inline)\n         0     0% 99.71%   348.88ms 99.52%  net/http.serverHandler.ServeHTTP\n         0     0% 99.71%    24.30ms  6.93%  oimobbs/internal/bootstrap.(*Repository).BoardWebHandler.1\n         0     0% 99.71%   338.75ms 96.63%  oimobbs/internal/bootstrap.(*Repository).SiteWebHandler.func1\n         0     0% 99.71%    24.26ms  6.92%  oimobbs/internal/bootstrap.(*Repository).WebPostingHandler.1\n         0     0% 99.71%    43.28ms 12.35%  oimobbs/internal/bootstrap.(*Repository).admitAttempt\n         0     0% 99.71%    51.06ms 14.56%  oimobbs/internal/bootstrap.(*Repository).anonymousCookie\n         0     0% 99.71%   146.69ms 41.84%  oimobbs/internal/bootstrap.(*Repository).legacyPostingPage\n         0     0% 99.71%    14.80ms  4.22%  oimobbs/internal/bootstrap.(*Repository).postingOwner\n         0     0% 99.71%    24.26ms  6.92%  oimobbs/internal/bootstrap.(*Repository).postingResultPage\n         0     0% 99.71%    17.23ms  4.92%  oimobbs/internal/bootstrap.(*Repository).protectedBoardSlugs\n         0     0% 99.71%   338.75ms 96.63%  oimobbs/internal/bootstrap.(*Repository).publicHTTPServer.func2\n         0     0% 99.71%    74.84ms 21.35%  oimobbs/internal/bootstrap.(*Repository).recordPostingLatency\n         0     0% 99.71%    17.23ms  4.92%  oimobbs/internal/bootstrap.(*Repository).reprintCrawlerGate\n         0     0% 99.71%   146.61ms 41.82%  oimobbs/internal/bootstrap.(*Repository).routeLegacyPost\n         0     0% 99.71%   170.37ms 48.60%  oimobbs/internal/bootstrap.(*Repository).submitForm\n         0     0% 99.71%    24.26ms  6.92%  oimobbs/internal/bootstrap.(*Repository).submitWebRequest\n",
+          "stderr": ""
+        }
+      },
+      "image": "sha256:4190d7d44cf63574cf1eb6fdb223db0b649c71cba75faf68252d65d69a5a787e",
+      "waf": {
+        "enabled": true,
+        "traffic": {
+          "posting": {
+            "client_rate": 10,
+            "client_burst": 30,
+            "global_rate": 1000,
+            "global_burst": 2000,
+            "client_concurrent": 8,
+            "global_concurrent": 128
+          },
+          "enabled": true,
+          "client_rate": 10000,
+          "client_burst": 100000,
+          "global_rate": 100000,
+          "global_burst": 200000,
+          "client_concurrent": 32,
+          "global_concurrent": 128,
+          "search_rate": 2,
+          "search_burst": 10,
+          "search_global_rate": 12,
+          "search_global_burst": 24,
+          "search_concurrent": 4
+        }
+      },
+      "cpu_max": "200000 100000",
+      "memory_max": "536870912",
+      "cache_bytes": 268435456,
+      "egress_budget_bits_per_second": 400000000,
+      "scope": "isolated actual TLS HTTP/1.1, synthetic data, fsync enabled; no WAN or production capacity guarantee",
+      "post_mix": "80% legacy / 20% Web including form, CSRF and redirect",
+      "rate": 400,
+      "seconds": 20,
+      "workers": 80,
+      "thread_count": 16,
+      "board_count": 1,
+      "distribution": "round-robin",
+      "planned_reads_per_second": 0,
+      "load_started_monotonic": 1663515.892505064,
+      "duration_with_drain_seconds": 20.449517337139696,
+      "summary": {
+        "planned": 8000,
+        "sent": 3878,
+        "success": 3878,
+        "errors": 0,
+        "skipped": 4122,
+        "http_p95_ms": 630.9302330482751,
+        "scheduled_p95_ms": 730.281675234437,
+        "issuance_wait_p95_ms": 189.67702495865524
+      },
+      "completed_in_window": 3782,
+      "completed_per_second": 189.1,
+      "success_per_second_with_drain": 189.63772768156795,
+      "stable_at_tested_rate": false,
+      "stability_definition": "all planned accepted, no skips/errors, >=99% completed during window, scheduled p95 <=250ms, DAT exact and recovery100/100",
+      "windows": [
+        {
+          "begin_s": 0,
+          "end_s": 5,
+          "planned": 2000,
+          "sent": 1038,
+          "success": 1038,
+          "errors": 0,
+          "skipped": 962,
+          "http_p95_ms": 624.0641970653087,
+          "scheduled_p95_ms": 724.6924580540508,
+          "issuance_wait_p95_ms": 188.82882199250162,
+          "completed_in_window": 944
+        },
+        {
+          "begin_s": 5,
+          "end_s": 10,
+          "planned": 2000,
+          "sent": 990,
+          "success": 990,
+          "errors": 0,
+          "skipped": 1010,
+          "http_p95_ms": 616.500454954803,
+          "scheduled_p95_ms": 715.4499911703169,
+          "issuance_wait_p95_ms": 189.24299511127174,
+          "completed_in_window": 989
+        },
+        {
+          "begin_s": 10,
+          "end_s": 15,
+          "planned": 2000,
+          "sent": 933,
+          "success": 933,
+          "errors": 0,
+          "skipped": 1067,
+          "http_p95_ms": 634.6654768567532,
+          "scheduled_p95_ms": 741.6072711348534,
+          "issuance_wait_p95_ms": 190.45128324069083,
+          "completed_in_window": 919
+        },
+        {
+          "begin_s": 15,
+          "end_s": 20,
+          "planned": 2000,
+          "sent": 917,
+          "success": 917,
+          "errors": 0,
+          "skipped": 1083,
+          "http_p95_ms": 651.3772741891444,
+          "scheduled_p95_ms": 745.2718901913613,
+          "issuance_wait_p95_ms": 190.79414498992264,
+          "completed_in_window": 930
+        }
+      ],
+      "by_kind": {
+        "legacy": {
+          "planned": 6400,
+          "sent": 3324,
+          "success": 3324,
+          "errors": 0,
+          "skipped": 3076,
+          "http_p95_ms": 500.2860319800675,
+          "scheduled_p95_ms": 646.2121731601655,
+          "issuance_wait_p95_ms": 189.57342999055982
+        },
+        "web": {
+          "planned": 1600,
+          "sent": 554,
+          "success": 554,
+          "errors": 0,
+          "skipped": 1046,
+          "http_p95_ms": 670.6736020278186,
+          "scheduled_p95_ms": 825.8163330610842,
+          "issuance_wait_p95_ms": 190.20443712361157
+        }
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 21.23302617110312,
+        "scheduled_p95_ms": 21.361615974456072,
+        "issuance_wait_p95_ms": null
+      },
+      "integrity": {
+        "ok": true,
+        "threads": [
+          {
+            "key": "1792249080",
+            "lines": 256,
+            "invalid_bodies": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "3dd242b856185df4412ab691ddc71b55af9bf6685e153a52140634b98fde1197"
+          },
+          {
+            "key": "1792249081",
+            "lines": 254,
+            "invalid_bodies": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "f200717d119888ef66bb1d2ecb09293d060b1a308e9ad86c3a27438ed183264d"
+          },
+          {
+            "key": "1792249082",
+            "lines": 253,
+            "invalid_bodies": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "e9b84cafc1c4fe74c9d075a4f4e13a431fc26ded69eee177611fad3bf553258c"
+          },
+          {
+            "key": "1792249083",
+            "lines": 257,
+            "invalid_bodies": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "4481688ae076b8cbd4233545ebaba11ea72c7c4176ede580cf8ccbb1c7a04529"
+          },
+          {
+            "key": "1792249084",
+            "lines": 253,
+            "invalid_bodies": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "4a393512b10a90d0a49405fa46fe85b9c1e3c936b3879ed070928f0be22e3f30"
+          },
+          {
+            "key": "1792249085",
+            "lines": 255,
+            "invalid_bodies": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "10efba192c60029069d3cb6de9d264d6cd18d19a881cbc9de8dfea45cb9136ec"
+          },
+          {
+            "key": "1792249086",
+            "lines": 256,
+            "invalid_bodies": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "0449530391230a20d7879626c8e36048fa75673efc4ace4b43956083fa900ce6"
+          },
+          {
+            "key": "1792249087",
+            "lines": 253,
+            "invalid_bodies": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "e03f440e7c19e1c080631858e46c03127909f3164390f7b57ff55d3a85e5c755"
+          },
+          {
+            "key": "1792249088",
+            "lines": 253,
+            "invalid_bodies": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "5448d91e803c6eca1f4edff729fafa1429b5c7d1fe24cf747961a53e50838e3c"
+          },
+          {
+            "key": "1792249089",
+            "lines": 254,
+            "invalid_bodies": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "fbb6d2f3497804d254309dee7ef0103ac527514c57a04fadaccfaa95fe9459d2"
+          },
+          {
+            "key": "1792249090",
+            "lines": 256,
+            "invalid_bodies": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "d071ba71e63ac74228d752b5b5e5110f75654c114f0b96f4d7e7fccefa61c276"
+          },
+          {
+            "key": "1792249091",
+            "lines": 256,
+            "invalid_bodies": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "f5bf595f00884818e12cdc2dcc32a1eac824e3cfe8bb43687f9c09e9f6609586"
+          },
+          {
+            "key": "1792249092",
+            "lines": 255,
+            "invalid_bodies": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "28c5cfa9688b4cac594701e081db0cdd9392351019fc3827c79ceb31b13cde1e"
+          },
+          {
+            "key": "1792249093",
+            "lines": 257,
+            "invalid_bodies": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "7210390edf3185dca2e345672dff93e5b450c9eb93e46feed6b5149868664e34"
+          },
+          {
+            "key": "1792249094",
+            "lines": 254,
+            "invalid_bodies": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "2b421a899e3ecfcae9eccd395642896a83b02bd43baa48c7d4bf5d7d9b404b7f"
+          },
+          {
+            "key": "1792249095",
+            "lines": 252,
+            "invalid_bodies": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "c425a14f40729ccc9935fe370e1e05b61156871dadb0ff8bc5f6a040e11630e6"
+          }
+        ]
+      },
+      "resources": {
+        "cpu_cores_average": 1.2993965364522715,
+        "generator_cpu_seconds": 5.839083390000001,
+        "wbytes_delta": 33312768,
+        "wios_delta": 3692,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 0,
+        "io_some_usec_delta": 397588
+      },
+      "memory_peak_bytes": 438968320,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 17510,
+          "saved": 17510,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 6928336,
+        "day_file_bytes": {
+          "20261017": 6928336
+        }
+      }
+    },
+    {
+      "label": "diag400-r2",
+      "diagnostic_only": true,
+      "raw_report_path": "var/throughput-bottleneck-20261017/diag400-r2.json",
+      "raw_report_sha256": "1d7940da433a49a372cd0891a05c5ede9a5b7514ac7d313cc5a5cd4fbf046b7b",
+      "profiles": {
+        "allocs.pprof": "64a35260e7f73c3ce70ad919ab4796241895f31be1d5189443f03d78c5f81f42",
+        "block.pprof": "b9d41feaf512e7e1f8d4f04b57d92b5f89988dece67de4bc38cfc58e032b6c22",
+        "cpu.pprof": "c0b915a9a08c1b48b5e618efc6963844a6c27c3a1c486a12929065e61f454bd3",
+        "done": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "goroutine-000.txt": "1443239701bd714b688bb733c3e25baaf63d2160ac22c4d9544c9300ed787309",
+        "goroutine-001.txt": "88777717e8ef6b4cfb4caa1afeb1f160efee8a86c146ffec76a863330e641347",
+        "goroutine-002.txt": "717d9d3a6c1f1d6f90decaf1a47c0168b4696b51d72497f219cf152a7c7a3916",
+        "goroutine-003.txt": "61d37c3776d85d39bd42b0a0f98e9e1f273d6fa459a89e7d64c2c76373d3d1c8",
+        "goroutine-004.txt": "59123b9b4942b9c0de72ca730dfc104ad84400b103b8f1bf329be985de155e25",
+        "goroutine-005.txt": "1031805732bc5ca360d55b73f4289acfdb7f06d2e0f6d128be60d8bb0e3948d3",
+        "goroutine-006.txt": "9e2c115d23304263faa765598e7d4479ca3e7fe7b176a01f7d83da00e22f295b",
+        "heap.pprof": "67c7af7779437b01cc880bbeb53df7e6881e103873056d5dcbb25eef25228fb4",
+        "metrics.json": "66e77faf1b314e9efd69d2a805772ef3f679ecaff890d014122e0696b8f8efc9",
+        "mutex.pprof": "b721dc13457857067e9afc22991f26efbcb537bb650cd065d4f4157a2f9859e9",
+        "ready": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "start": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stop": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "measured_window_seconds": 20.561829514,
+      "derived_timings": {
+        "board": {
+          "execute_batch": {
+            "count": 132,
+            "total_seconds": 20.445689075,
+            "mean_ms": 154.89158390151516,
+            "max_ms": 229.621342,
+            "fraction_of_window_percent": 99.43516485767513
+          },
+          "invoke_batch": {
+            "count": 8292,
+            "total_seconds": 11.733991923,
+            "mean_ms": 1.4150979164254702,
+            "max_ms": 21.861292,
+            "fraction_of_window_percent": 57.06686710445994
+          },
+          "queue_batch": {
+            "count": 8292,
+            "total_seconds": 1051.58219797,
+            "mean_ms": 126.8188854281235,
+            "max_ms": 269.214678,
+            "fraction_of_window_percent": 5114.244319816025
+          },
+          "submit_total": {
+            "count": 8292,
+            "total_seconds": 1525.422722255,
+            "mean_ms": 183.96318406355525,
+            "max_ms": 392.508787,
+            "fraction_of_window_percent": 7418.711069539704
+          }
+        },
+        "posting": {
+          "decision": {
+            "count": 131,
+            "total_seconds": 0.990296611,
+            "mean_ms": 7.5595161145038166,
+            "max_ms": 11.242475,
+            "fraction_of_window_percent": 4.816189193309542
+          },
+          "proposal": {
+            "count": 131,
+            "total_seconds": 4.970009402,
+            "mean_ms": 37.93900306870229,
+            "max_ms": 59.803808,
+            "fraction_of_window_percent": 24.171046640650598
+          },
+          "threads": {
+            "count": 131,
+            "total_seconds": 2.585258334,
+            "mean_ms": 19.73479644274809,
+            "max_ms": 39.340212,
+            "fraction_of_window_percent": 12.573094880685431
+          }
+        }
+      },
+      "raw_instrument_metrics": {
+        "board": {
+          "execute_batch": {
+            "Count": 132,
+            "TotalNS": 20445689075,
+            "MaxNS": 229621342
+          },
+          "invoke_batch": {
+            "Count": 8292,
+            "TotalNS": 11733991923,
+            "MaxNS": 21861292
+          },
+          "queue_batch": {
+            "Count": 8292,
+            "TotalNS": 1051582197970,
+            "MaxNS": 269214678
+          },
+          "submit_total": {
+            "Count": 8292,
+            "TotalNS": 1525422722255,
+            "MaxNS": 392508787
+          }
+        },
+        "memory": {
+          "Alloc": 323812872,
+          "TotalAlloc": 4955150800,
+          "Sys": 394942824,
+          "Lookups": 0,
+          "Mallocs": 25798826,
+          "Frees": 25158999,
+          "HeapAlloc": 323812872,
+          "HeapSys": 376340480,
+          "HeapIdle": 39034880,
+          "HeapInuse": 337305600,
+          "HeapReleased": 13770752,
+          "HeapObjects": 639827,
+          "StackInuse": 5341184,
+          "StackSys": 5341184,
+          "MSpanInuse": 3352000,
+          "MSpanSys": 3769920,
+          "MCacheInuse": 4592,
+          "MCacheSys": 16072,
+          "BuckHashSys": 2102582,
+          "GCSys": 6460752,
+          "OtherSys": 911834,
+          "NextGC": 359441369,
+          "LastGC": 1792249298198282572,
+          "PauseTotalNs": 5405763,
+          "PauseNs": [
+            35413,
+            74247,
+            42746,
+            56646,
+            53922,
+            81999,
+            79136,
+            71522,
+            74038,
+            54760,
+            80882,
+            68589,
+            60207,
+            53502,
+            49172,
+            52734,
+            58183,
+            64957,
+            62302,
+            59369,
+            52386,
+            237547,
+            68030,
+            68450,
+            67471,
+            72011,
+            92965,
+            96668,
+            87866,
+            125794,
+            109589,
+            128517,
+            124536,
+            64050,
+            67053,
+            113012,
+            66075,
+            281691,
+            134175,
+            69218,
+            64538,
+            120624,
+            121882,
+            99042,
+            85980,
+            113221,
+            169657,
+            112034,
+            131941,
+            75294,
+            63070,
+            118599,
+            96109,
+            112592,
+            66774,
+            81371,
+            181531,
+            69008,
+            98623,
+            62443,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "PauseEnd": [
+            1792249265170607750,
+            1792249265177342758,
+            1792249265221758080,
+            1792249265256040226,
+            1792249265424472569,
+            1792249265534837065,
+            1792249266337883192,
+            1792249266365383743,
+            1792249266395383049,
+            1792249266434272962,
+            1792249266474325608,
+            1792249266492696955,
+            1792249266635358074,
+            1792249266646358113,
+            1792249266659917114,
+            1792249266669552564,
+            1792249266730547393,
+            1792249266781807871,
+            1792249266854503159,
+            1792249266939337611,
+            1792249267647868227,
+            1792249271422605149,
+            1792249275822866034,
+            1792249278231750647,
+            1792249278583644807,
+            1792249278895014439,
+            1792249279287343305,
+            1792249279648031963,
+            1792249279979665710,
+            1792249280335943429,
+            1792249280745147183,
+            1792249281125336046,
+            1792249281524227957,
+            1792249281924759303,
+            1792249282364055816,
+            1792249282783940479,
+            1792249283274779648,
+            1792249283734850084,
+            1792249284283462906,
+            1792249284815404372,
+            1792249285317241972,
+            1792249285886187637,
+            1792249286451034925,
+            1792249287027711748,
+            1792249287653147917,
+            1792249288297515532,
+            1792249288940598881,
+            1792249289654114494,
+            1792249290365239684,
+            1792249291120148992,
+            1792249291922035796,
+            1792249292688282221,
+            1792249293549787111,
+            1792249294347218832,
+            1792249295095400743,
+            1792249295761451539,
+            1792249296441128877,
+            1792249297043427867,
+            1792249297658266868,
+            1792249298198282572,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "NumGC": 60,
+          "NumForcedGC": 0,
+          "GCCPUFraction": 0.009429346795194235,
+          "EnableGC": true,
+          "DebugGC": false,
+          "BySize": [
+            {
+              "Size": 0,
+              "Mallocs": 0,
+              "Frees": 0
+            },
+            {
+              "Size": 8,
+              "Mallocs": 397408,
+              "Frees": 387029
+            },
+            {
+              "Size": 16,
+              "Mallocs": 7012146,
+              "Frees": 6832258
+            },
+            {
+              "Size": 24,
+              "Mallocs": 3598970,
+              "Frees": 3538822
+            },
+            {
+              "Size": 32,
+              "Mallocs": 1432243,
+              "Frees": 1395583
+            },
+            {
+              "Size": 48,
+              "Mallocs": 2762824,
+              "Frees": 2671744
+            },
+            {
+              "Size": 64,
+              "Mallocs": 1482394,
+              "Frees": 1445935
+            },
+            {
+              "Size": 80,
+              "Mallocs": 671628,
+              "Frees": 659031
+            },
+            {
+              "Size": 96,
+              "Mallocs": 558830,
+              "Frees": 507740
+            },
+            {
+              "Size": 112,
+              "Mallocs": 392523,
+              "Frees": 381883
+            },
+            {
+              "Size": 128,
+              "Mallocs": 615131,
+              "Frees": 605617
+            },
+            {
+              "Size": 144,
+              "Mallocs": 298012,
+              "Frees": 294172
+            },
+            {
+              "Size": 160,
+              "Mallocs": 136142,
+              "Frees": 134275
+            },
+            {
+              "Size": 176,
+              "Mallocs": 26644,
+              "Frees": 26131
+            },
+            {
+              "Size": 192,
+              "Mallocs": 182105,
+              "Frees": 177482
+            },
+            {
+              "Size": 208,
+              "Mallocs": 42183,
+              "Frees": 41355
+            },
+            {
+              "Size": 224,
+              "Mallocs": 163955,
+              "Frees": 157435
+            },
+            {
+              "Size": 240,
+              "Mallocs": 32480,
+              "Frees": 17209
+            },
+            {
+              "Size": 256,
+              "Mallocs": 275573,
+              "Frees": 271181
+            },
+            {
+              "Size": 288,
+              "Mallocs": 163420,
+              "Frees": 161353
+            },
+            {
+              "Size": 320,
+              "Mallocs": 147668,
+              "Frees": 144900
+            },
+            {
+              "Size": 352,
+              "Mallocs": 282751,
+              "Frees": 273497
+            },
+            {
+              "Size": 384,
+              "Mallocs": 93235,
+              "Frees": 89774
+            },
+            {
+              "Size": 416,
+              "Mallocs": 382830,
+              "Frees": 373562
+            },
+            {
+              "Size": 448,
+              "Mallocs": 20379,
+              "Frees": 20162
+            },
+            {
+              "Size": 480,
+              "Mallocs": 103861,
+              "Frees": 98651
+            },
+            {
+              "Size": 512,
+              "Mallocs": 14477,
+              "Frees": 14153
+            },
+            {
+              "Size": 576,
+              "Mallocs": 185340,
+              "Frees": 182738
+            },
+            {
+              "Size": 640,
+              "Mallocs": 41463,
+              "Frees": 40824
+            },
+            {
+              "Size": 704,
+              "Mallocs": 124575,
+              "Frees": 122827
+            },
+            {
+              "Size": 768,
+              "Mallocs": 453,
+              "Frees": 415
+            },
+            {
+              "Size": 896,
+              "Mallocs": 17709,
+              "Frees": 13161
+            },
+            {
+              "Size": 1024,
+              "Mallocs": 71289,
+              "Frees": 61102
+            },
+            {
+              "Size": 1152,
+              "Mallocs": 93414,
+              "Frees": 84206
+            },
+            {
+              "Size": 1280,
+              "Mallocs": 1286,
+              "Frees": 1232
+            },
+            {
+              "Size": 1408,
+              "Mallocs": 116911,
+              "Frees": 110247
+            },
+            {
+              "Size": 1536,
+              "Mallocs": 4584,
+              "Frees": 4485
+            },
+            {
+              "Size": 1792,
+              "Mallocs": 154353,
+              "Frees": 152017
+            },
+            {
+              "Size": 2048,
+              "Mallocs": 78208,
+              "Frees": 60173
+            },
+            {
+              "Size": 2304,
+              "Mallocs": 12524,
+              "Frees": 12276
+            },
+            {
+              "Size": 2688,
+              "Mallocs": 35575,
+              "Frees": 34527
+            },
+            {
+              "Size": 3072,
+              "Mallocs": 51510,
+              "Frees": 50519
+            },
+            {
+              "Size": 3200,
+              "Mallocs": 1021,
+              "Frees": 1018
+            },
+            {
+              "Size": 3456,
+              "Mallocs": 4660,
+              "Frees": 4589
+            },
+            {
+              "Size": 4096,
+              "Mallocs": 32335,
+              "Frees": 31094
+            },
+            {
+              "Size": 4864,
+              "Mallocs": 8455,
+              "Frees": 8337
+            },
+            {
+              "Size": 5376,
+              "Mallocs": 1773,
+              "Frees": 1755
+            },
+            {
+              "Size": 6144,
+              "Mallocs": 2285,
+              "Frees": 2014
+            },
+            {
+              "Size": 6528,
+              "Mallocs": 389,
+              "Frees": 372
+            },
+            {
+              "Size": 6784,
+              "Mallocs": 1938,
+              "Frees": 1888
+            },
+            {
+              "Size": 6912,
+              "Mallocs": 353,
+              "Frees": 344
+            },
+            {
+              "Size": 8192,
+              "Mallocs": 11078,
+              "Frees": 10799
+            },
+            {
+              "Size": 9472,
+              "Mallocs": 8717,
+              "Frees": 7390
+            },
+            {
+              "Size": 9728,
+              "Mallocs": 748,
+              "Frees": 219
+            },
+            {
+              "Size": 10240,
+              "Mallocs": 1358,
+              "Frees": 1314
+            },
+            {
+              "Size": 10880,
+              "Mallocs": 24091,
+              "Frees": 17033
+            },
+            {
+              "Size": 12288,
+              "Mallocs": 8049,
+              "Frees": 7865
+            },
+            {
+              "Size": 13568,
+              "Mallocs": 470,
+              "Frees": 440
+            },
+            {
+              "Size": 14336,
+              "Mallocs": 3603,
+              "Frees": 3547
+            },
+            {
+              "Size": 16384,
+              "Mallocs": 773,
+              "Frees": 763
+            },
+            {
+              "Size": 18432,
+              "Mallocs": 654,
+              "Frees": 580
+            }
+          ]
+        },
+        "posting": {
+          "decision": {
+            "Count": 131,
+            "TotalNS": 990296611,
+            "MaxNS": 11242475
+          },
+          "proposal": {
+            "Count": 131,
+            "TotalNS": 4970009402,
+            "MaxNS": 59803808
+          },
+          "threads": {
+            "Count": 131,
+            "TotalNS": 2585258334,
+            "MaxNS": 39340212
+          }
+        },
+        "seconds": 20.561829514,
+        "sync": {
+          "/data/site/boards/973d73a57960580048d121a87e8fae1a/threads/1792249265/delta-000001.wal": {
+            "Count": 121,
+            "TotalNS": 393114005,
+            "MaxNS": 5967746
+          },
+          "/data/site/boards/973d73a57960580048d121a87e8fae1a/threads/1792249266/delta-000001.wal": {
+            "Count": 118,
+            "TotalNS": 395299294,
+            "MaxNS": 7914435
+          },
+          "/data/site/boards/973d73a57960580048d121a87e8fae1a/threads/1792249267/delta-000001.wal": {
+            "Count": 110,
+            "TotalNS": 369087271,
+            "MaxNS": 7807430
+          },
+          "/data/site/boards/973d73a57960580048d121a87e8fae1a/threads/1792249268/delta-000001.wal": {
+            "Count": 117,
+            "TotalNS": 403415509,
+            "MaxNS": 6903548
+          },
+          "/data/site/boards/973d73a57960580048d121a87e8fae1a/threads/1792249269/delta-000001.wal": {
+            "Count": 124,
+            "TotalNS": 408541680,
+            "MaxNS": 6924362
+          },
+          "/data/site/boards/973d73a57960580048d121a87e8fae1a/threads/1792249270/delta-000001.wal": {
+            "Count": 122,
+            "TotalNS": 423503475,
+            "MaxNS": 11375114
+          },
+          "/data/site/boards/973d73a57960580048d121a87e8fae1a/threads/1792249271/delta-000001.wal": {
+            "Count": 118,
+            "TotalNS": 379675137,
+            "MaxNS": 6895515
+          },
+          "/data/site/boards/973d73a57960580048d121a87e8fae1a/threads/1792249272/delta-000001.wal": {
+            "Count": 120,
+            "TotalNS": 403117334,
+            "MaxNS": 12045778
+          },
+          "/data/site/boards/973d73a57960580048d121a87e8fae1a/threads/1792249273/delta-000001.wal": {
+            "Count": 122,
+            "TotalNS": 406046692,
+            "MaxNS": 13396538
+          },
+          "/data/site/boards/973d73a57960580048d121a87e8fae1a/threads/1792249274/delta-000001.wal": {
+            "Count": 116,
+            "TotalNS": 372839213,
+            "MaxNS": 6714264
+          },
+          "/data/site/boards/973d73a57960580048d121a87e8fae1a/threads/1792249275/delta-000001.wal": {
+            "Count": 121,
+            "TotalNS": 401821974,
+            "MaxNS": 7225190
+          },
+          "/data/site/boards/973d73a57960580048d121a87e8fae1a/threads/1792249276/delta-000001.wal": {
+            "Count": 120,
+            "TotalNS": 387804565,
+            "MaxNS": 9166361
+          },
+          "/data/site/boards/973d73a57960580048d121a87e8fae1a/threads/1792249277/delta-000001.wal": {
+            "Count": 116,
+            "TotalNS": 389172433,
+            "MaxNS": 13718040
+          },
+          "/data/site/boards/973d73a57960580048d121a87e8fae1a/threads/1792249278/delta-000001.wal": {
+            "Count": 113,
+            "TotalNS": 361666711,
+            "MaxNS": 6539159
+          },
+          "/data/site/boards/973d73a57960580048d121a87e8fae1a/threads/1792249279/delta-000001.wal": {
+            "Count": 113,
+            "TotalNS": 384870810,
+            "MaxNS": 7007549
+          },
+          "/data/site/boards/973d73a57960580048d121a87e8fae1a/threads/1792249280/delta-000001.wal": {
+            "Count": 117,
+            "TotalNS": 383243810,
+            "MaxNS": 14243844
+          },
+          "/data/site/evidence/973d73a57960580048d121a87e8fae1a/20261017/control-000001.wal": {
+            "Count": 262,
+            "TotalNS": 896778093,
+            "MaxNS": 6283172
+          },
+          "/data/site/reports/http/20261017/control-000001.wal": {
+            "Count": 63,
+            "TotalNS": 316544759,
+            "MaxNS": 12551257
+          }
+        }
+      },
+      "profile_outputs": {
+        "cpu_top": {
+          "command": [
+            "mise",
+            "exec",
+            "--",
+            "go",
+            "tool",
+            "pprof",
+            "-top",
+            "-cum",
+            "-nodecount=200",
+            "var/throughput-bottleneck-20261017/build/oimobbs",
+            "var/throughput-bottleneck-20261017/diag400-r2.json.profiles/cpu.pprof"
+          ],
+          "stdout": "File: oimobbs\nBuild ID: 4906e9387dbce2c5b59d02c6ce1e136d648fd799\nType: cpu\nTime: 2026-10-18 00:01:18 JST\nDuration: 20.56s, Total samples = 26.42s (128.49%)\nShowing nodes accounting for 14.72s, 55.72% of 26.42s total\nDropped 977 nodes (cum <= 0.13s)\nShowing top 200 nodes out of 324\n      flat  flat%   sum%        cum   cum%\n         0     0%     0%     16.45s 62.26%  oimobbs/internal/board.(*Worker).execute\n         0     0%     0%     16.45s 62.26%  oimobbs/internal/board.(*Worker).loop\n         0     0%     0%     16.45s 62.26%  oimobbs/internal/bootstrap.(*postingBoard).runPostingReadyBatch\n         0     0%     0%     11.20s 42.39%  oimobbs/internal/board.(*Worker).invoke\n     0.03s  0.11%  0.11%        11s 41.64%  oimobbs/internal/bootstrap.(*Repository).submitForm.func4\n     0.03s  0.11%  0.23%     10.64s 40.27%  oimobbs/internal/strictjson.Decode\n         0     0%  0.23%     10.27s 38.87%  oimobbs/internal/board.(*Worker).execute.func2.func1\n         0     0%  0.23%      8.16s 30.89%  encoding/json.Unmarshal (inline)\n     0.03s  0.11%  0.34%      8.16s 30.89%  encoding/json/v2.Unmarshal\n     0.02s 0.076%  0.42%      8.10s 30.66%  encoding/json/v2.unmarshalDecode\n     0.29s  1.10%  1.51%      6.63s 25.09%  encoding/json/v2.makeStructArshaler.func3\n         0     0%  1.51%      5.44s 20.59%  oimobbs/internal/bootstrap.(*postingBoard).postAdmitted\n         0     0%  1.51%      5.24s 19.83%  oimobbs/internal/bootstrap.(*postingGroup).flush\n         0     0%  1.51%      5.20s 19.68%  oimobbs/internal/app.(*PostingBatch).Commit\n         0     0%  1.51%      5.17s 19.57%  oimobbs/internal/evidence.(*Journal).AppendBatch\n     0.43s  1.63%  3.14%      4.04s 15.29%  encoding/json/jsontext.(*decoderState).consumeValue\n     0.02s 0.076%  3.22%      3.84s 14.53%  oimobbs/internal/strictjson.validateFields\n         0     0%  3.22%      3.81s 14.42%  oimobbs/internal/postcapture.decode\n         0     0%  3.22%      3.73s 14.12%  oimobbs/internal/evidence.(*OptionalQueue).run\n         0     0%  3.22%      3.73s 14.12%  oimobbs/internal/evidence.NewOptionalBatchQueue.func1\n         0     0%  3.22%      3.71s 14.04%  oimobbs/internal/bootstrap.(*Repository).ensureOptionalLogs.func1\n     0.01s 0.038%  3.26%      3.68s 13.93%  net/http.(*conn).serve\n     0.01s 0.038%  3.29%      3.66s 13.85%  oimobbs/internal/store.(*ControlLog).appendFramesChecked\n         0     0%  3.29%      3.59s 13.59%  oimobbs/internal/evidence.(*OptionalStore).WriteBatch\n         0     0%  3.29%      3.51s 13.29%  oimobbs/internal/evidence.(*OptionalStore).writeOptionalBatch\n         0     0%  3.29%      3.51s 13.29%  oimobbs/internal/strictjson.Validate (inline)\n         0     0%  3.29%      3.47s 13.13%  oimobbs/internal/evidence.(*Journal).appendOptionalBatch\n         0     0%  3.29%      3.47s 13.13%  oimobbs/internal/postcapture.ValidateFrame\n     0.62s  2.35%  5.64%      3.30s 12.49%  encoding/json/jsontext.(*decoderState).consumeObject\n     0.39s  1.48%  7.12%      3.22s 12.19%  encoding/json/jsontext.(*decoderState).ReadValue\n     0.01s 0.038%  7.15%      3.21s 12.15%  oimobbs/internal/bootstrap.(*Repository).openPostingBoard.func3\n         0     0%  7.15%      3.09s 11.70%  oimobbs/internal/evidence.(*Journal).validatePayload\n     0.05s  0.19%  7.34%      2.95s 11.17%  encoding/json/v2.makeMethodArshaler.func6\n         0     0%  7.34%      2.91s 11.01%  net/http.HandlerFunc.ServeHTTP (partial-inline)\n         0     0%  7.34%      2.91s 11.01%  net/http.serverHandler.ServeHTTP\n         0     0%  7.34%      2.91s 11.01%  oimobbs/internal/bootstrap.securityTransportHeaders.func1\n     0.01s 0.038%  7.38%      2.90s 10.98%  oimobbs/internal/evidence.(*HTTPObserver).WrapOptional.func1\n         0     0%  7.38%      2.67s 10.11%  oimobbs/internal/bootstrap.(*Repository).trafficHandler.func1\n         0     0%  7.38%      2.64s  9.99%  oimobbs/internal/bootstrap.(*Repository).wafHandler.func1\n         0     0%  7.38%      2.62s  9.92%  oimobbs/internal/bootstrap.(*Repository).SiteWebHandler.func1\n         0     0%  7.38%      2.62s  9.92%  oimobbs/internal/bootstrap.(*Repository).publicHTTPServer.func2\n         0     0%  7.38%      2.62s  9.92%  oimobbs/internal/delivery.(*RequestGate).Wrap.func1\n         0     0%  7.38%      2.62s  9.92%  oimobbs/internal/delivery.(*Scheduler).Wrap.func1\n     0.01s 0.038%  7.42%      2.58s  9.77%  oimobbs/internal/app.PostingValidator.func1\n         0     0%  7.42%      2.41s  9.12%  oimobbs/internal/domain.ParseOperation\n     2.38s  9.01% 16.43%      2.38s  9.01%  encoding/json/internal/jsonwire.ConsumeSimpleString (inline)\n     0.13s  0.49% 16.92%      2.26s  8.55%  oimobbs/internal/strictjson.(*shapeScanner).value\n         0     0% 16.92%      2.26s  8.55%  oimobbs/internal/strictjson.shape (inline)\n         0     0% 16.92%      2.25s  8.52%  oimobbs/internal/store.applyControlOperation\n     0.06s  0.23% 17.15%      2.23s  8.44%  oimobbs/internal/strictjson.(*shapeScanner).object\n         0     0% 17.15%      2.20s  8.33%  oimobbs/internal/bootstrap.bindPostingCapture.func1\n         0     0% 17.15%      2.17s  8.21%  encoding/json/jsontext.(*Decoder).ReadValue (inline)\n     0.02s 0.076% 17.22%      2.11s  7.99%  oimobbs/internal/evidence.(*Journal).validateValue\n         0     0% 17.22%      2.02s  7.65%  encoding/json.Marshal (inline)\n     0.02s 0.076% 17.30%      2.02s  7.65%  encoding/json/v2.Marshal\n     0.26s  0.98% 18.28%      1.97s  7.46%  oimobbs/internal/strictjson.(*keyScanner).container\n         0     0% 18.28%      1.91s  7.23%  oimobbs/internal/store.(*ControlLog).AppendSeriesChecked (inline)\n         0     0% 18.28%      1.80s  6.81%  encoding/json/v2.marshalEncode\n     0.01s 0.038% 18.32%      1.75s  6.62%  oimobbs/internal/evidence.DecodeHTTPObservation\n         0     0% 18.32%      1.75s  6.62%  oimobbs/internal/store.(*ControlLog).AppendBatch (inline)\n         0     0% 18.32%      1.75s  6.62%  oimobbs/internal/store.(*ControlLog).AppendBatchChecked (inline)\n         0     0% 18.32%      1.73s  6.55%  encoding/json.Valid (inline)\n         0     0% 18.32%      1.73s  6.55%  encoding/json.checkValid\n         0     0% 18.32%      1.51s  5.72%  oimobbs/internal/postcapture.WithAnonymous\n     0.01s 0.038% 18.36%      1.47s  5.56%  oimobbs/internal/bootstrap.(*Repository).legacyPostingPage\n     0.01s 0.038% 18.40%      1.46s  5.53%  encoding/json/jsontext.(*decoderState).CheckNextValue\n     0.11s  0.42% 18.81%      1.44s  5.45%  runtime.mallocgc\n         0     0% 18.81%      1.43s  5.41%  oimobbs/internal/postcapture.Validate\n         0     0% 18.81%      1.43s  5.41%  oimobbs/internal/postcapture.readFrame\n     0.04s  0.15% 18.96%      1.41s  5.34%  encoding/json/v2.makeSliceArshaler.func3\n         0     0% 18.96%      1.40s  5.30%  oimobbs/internal/evidence.PostingHTTPObservation\n         0     0% 18.96%      1.38s  5.22%  oimobbs/internal/evidence.(*Journal).verifyPayloadSignature\n         0     0% 18.96%      1.35s  5.11%  oimobbs/internal/evidence.verifyEventSignature\n         0     0% 18.96%      1.33s  5.03%  crypto/ed25519.Verify (inline)\n         0     0% 18.96%      1.33s  5.03%  crypto/ed25519.VerifyWithOptions\n     0.25s  0.95% 19.91%      1.33s  5.03%  encoding/json/v2.makeStructArshaler.func2\n     0.03s  0.11% 20.02%      1.32s  5.00%  encoding/json/jsontext.(*decoderState).consumeArray\n     0.01s 0.038% 20.06%      1.32s  5.00%  runtime.systemstack\n         0     0% 20.06%      1.28s  4.84%  oimobbs/internal/postcapture.New (inline)\n         0     0% 20.06%      1.28s  4.84%  oimobbs/internal/postcapture.newCapture\n         0     0% 20.06%      1.26s  4.77%  crypto/internal/fips140/ed25519.Verify (inline)\n         0     0% 20.06%      1.26s  4.77%  crypto/internal/fips140/ed25519.verify\n         0     0% 20.06%      1.26s  4.77%  crypto/internal/fips140/ed25519.verifyWithDom\n     0.26s  0.98% 21.04%      1.18s  4.47%  oimobbs/internal/strictjson.(*keyScanner).quoted\n         0     0% 21.04%      1.15s  4.35%  oimobbs/internal/bootstrap.(*Repository).routeLegacyPost\n         0     0% 21.04%      1.13s  4.28%  oimobbs/internal/app.(*PostingBatch).commitThreads.func1\n         0     0% 21.04%      1.13s  4.28%  oimobbs/internal/store.(*ThreadLog).AppendBatch\n         0     0% 21.04%      1.13s  4.28%  sync.(*WaitGroup).Go.func1\n     0.02s 0.076% 21.12%      1.10s  4.16%  crypto/internal/fips140/edwards25519.(*Point).VarTimeDoubleScalarBaseMult\n         0     0% 21.12%      1.10s  4.16%  oimobbs/internal/store.(*Writer).commitSeriesChecked\n     0.19s  0.72% 21.84%      1.10s  4.16%  runtime.mapaccess2_faststr\n     0.09s  0.34% 22.18%      1.09s  4.13%  bytes.IndexByte (inline)\n         0     0% 22.18%      1.09s  4.13%  oimobbs/internal/evidence.Seal\n     0.01s 0.038% 22.22%      1.04s  3.94%  oimobbs/internal/store.validateFrame\n         0     0% 22.22%      1.02s  3.86%  oimobbs/internal/bootstrap.(*Repository).submitForm\n         0     0% 22.22%         1s  3.79%  oimobbs/internal/postcapture.ValidateKeyAndMetadata\n     0.98s  3.71% 25.93%      0.98s  3.71%  indexbytebody\n     0.04s  0.15% 26.08%      0.97s  3.67%  encoding/json/v2.makePointerArshaler.func3\n         0     0% 26.08%      0.93s  3.52%  oimobbs/internal/board.(*Worker).execute.func2.1\n         0     0% 26.08%      0.93s  3.52%  oimobbs/internal/store.EncodeWALBlock\n         0     0% 26.08%      0.93s  3.52%  oimobbs/internal/store.decodeBody\n         0     0% 26.08%      0.93s  3.52%  oimobbs/internal/store.encodeWALSeries\n     0.08s   0.3% 26.38%      0.92s  3.48%  encoding/json/v2.makeStringArshaler.func2\n         0     0% 26.38%      0.90s  3.41%  oimobbs/internal/store.applyFrame\n         0     0% 26.38%      0.86s  3.26%  oimobbs/internal/store.(*Writer).CommitBatchChecked (inline)\n         0     0% 26.38%      0.85s  3.22%  oimobbs/internal/bootstrap.(*postingBoard).reserveGuard\n     0.04s  0.15% 26.53%      0.84s  3.18%  crypto/internal/fips140/edwards25519/field.(*Element).Multiply (inline)\n         0     0% 26.53%      0.82s  3.10%  oimobbs/internal/postinput.(*Input).UnmarshalJSON\n         0     0% 26.53%      0.81s  3.07%  oimobbs/internal/postcapture.schemaOf\n     0.80s  3.03% 29.56%      0.80s  3.03%  crypto/internal/fips140/edwards25519/field.feMul\n         0     0% 29.56%      0.77s  2.91%  oimobbs/internal/app.(*PostingBatch).Stage\n         0     0% 29.56%      0.74s  2.80%  oimobbs/internal/evidence.ValidateHTTPObservation (inline)\n         0     0% 29.56%      0.73s  2.76%  oimobbs/internal/bootstrap.(*Repository).BoardWebHandler.1\n         0     0% 29.56%      0.73s  2.76%  runtime.gcBgMarkWorker\n         0     0% 29.56%      0.73s  2.76%  runtime.gcBgMarkWorker.func2\n         0     0% 29.56%      0.73s  2.76%  runtime.gcDrain\n     0.08s   0.3% 29.86%      0.72s  2.73%  oimobbs/internal/bootstrap.(*abuseGuard).prune\n         0     0% 29.86%      0.71s  2.69%  crypto/ed25519.Sign (inline)\n         0     0% 29.86%      0.71s  2.69%  crypto/ed25519.sign\n     0.01s 0.038% 29.90%      0.71s  2.69%  oimobbs/internal/strictjson.(*shapeScanner).array\n         0     0% 29.90%      0.70s  2.65%  crypto/internal/fips140/ed25519.Sign (inline)\n         0     0% 29.90%      0.70s  2.65%  crypto/internal/fips140/ed25519.sign\n         0     0% 29.90%      0.70s  2.65%  crypto/internal/fips140/ed25519.signWithDom\n     0.01s 0.038% 29.94%      0.67s  2.54%  oimobbs/internal/domain.Apply\n         0     0% 29.94%      0.66s  2.50%  time.Now\n     0.66s  2.50% 32.44%      0.66s  2.50%  time.runtimeNow\n     0.14s  0.53% 32.97%      0.65s  2.46%  runtime.scanObject\n         0     0% 32.97%      0.63s  2.38%  oimobbs/internal/zstdencode.(*Encoder).EncodeBestArchive\n     0.62s  2.35% 35.31%      0.62s  2.35%  encoding/json/internal/jsonwire.ConsumeWhitespace (inline)\n     0.01s 0.038% 35.35%      0.62s  2.35%  oimobbs/internal/zstdencode.(*Encoder).encode\n     0.03s  0.11% 35.47%      0.60s  2.27%  oimobbs/internal/bootstrap.(*postingBoard).reserveGuard.func1\n         0     0% 35.47%      0.60s  2.27%  oimobbs/internal/bootstrap.withLegacyOptionalField\n         0     0% 35.47%      0.60s  2.27%  oimobbs/internal/evidence.ValidateHTTPObservationValue\n         0     0% 35.47%      0.59s  2.23%  oimobbs/internal/store.decodeFrameView\n         0     0% 35.47%      0.58s  2.20%  encoding/json/jsontext.(*Decoder).SkipValue\n     0.19s  0.72% 36.18%      0.58s  2.20%  encoding/json/jsontext.(*decoderState).ReadToken\n     0.02s 0.076% 36.26%      0.58s  2.20%  encoding/json/jsontext.(*decoderState).SkipValue\n     0.02s 0.076% 36.34%      0.54s  2.04%  encoding/json/v2.makeMethodArshaler.func3\n     0.19s  0.72% 37.06%      0.54s  2.04%  oimobbs/internal/strictjson.(*keySet).add\n     0.04s  0.15% 37.21%      0.54s  2.04%  runtime.growslice\n     0.01s 0.038% 37.24%      0.54s  2.04%  runtime.mapaccess1_faststr\n     0.52s  1.97% 39.21%      0.52s  1.97%  memeqbody\n         0     0% 39.21%      0.51s  1.93%  oimobbs/internal/evidence.(*OptionalStore).validate\n     0.10s  0.38% 39.59%      0.51s  1.93%  oimobbs/internal/strictjson.(*shapeScanner).skip\n     0.50s  1.89% 41.48%      0.50s  1.89%  runtime.memmove\n     0.20s  0.76% 42.24%      0.49s  1.85%  internal/runtime/maps.(*Map).getWithoutKeySmallFastStr\n     0.01s 0.038% 42.28%      0.49s  1.85%  oimobbs/internal/evidence.validateConnectionObservation\n         0     0% 42.28%      0.49s  1.85%  oimobbs/internal/store.ValidateThreadFrame\n     0.48s  1.82% 44.10%      0.48s  1.82%  internal/runtime/syscall/linux.Syscall6\n     0.01s 0.038% 44.13%      0.48s  1.82%  oimobbs/internal/app.postingFrame\n         0     0% 44.13%      0.47s  1.78%  runtime.(*mcache).nextFree\n     0.47s  1.78% 45.91%      0.47s  1.78%  runtime.nanotime (inline)\n     0.01s 0.038% 45.95%      0.46s  1.74%  oimobbs/internal/evidence.validateObservation (inline)\n         0     0% 45.95%      0.46s  1.74%  runtime.gcDrainMarkWorkerFractional (inline)\n     0.36s  1.36% 47.31%      0.45s  1.70%  oimobbs/internal/app.(*PostingLog).AbusePostVisible\n     0.02s 0.076% 47.39%      0.45s  1.70%  runtime.(*mcache).refill\n     0.24s  0.91% 48.30%      0.45s  1.70%  runtime.tryDeferToSpanScan\n         0     0% 48.30%      0.44s  1.67%  oimobbs/internal/store.ReadFrame\n     0.06s  0.23% 48.52%      0.44s  1.67%  runtime.mallocgcSmallNoscan\n     0.02s 0.076% 48.60%      0.43s  1.63%  encoding/json/jsontext.(*decoderState).consumeString\n         0     0% 48.60%      0.43s  1.63%  oimobbs/internal/evidence.validateCompletedObservation (inline)\n         0     0% 48.60%      0.43s  1.63%  oimobbs/internal/store.decodeControlOperation\n     0.21s  0.79% 49.39%      0.43s  1.63%  oimobbs/internal/zstdencode.(*Encoder).parse\n         0     0% 49.39%      0.42s  1.59%  oimobbs/internal/bootstrap.(*boardPresentation).UnmarshalJSON\n     0.21s  0.79% 50.19%      0.41s  1.55%  encoding/json/internal/jsonwire.ConsumeStringResumable\n         0     0% 50.19%      0.41s  1.55%  oimobbs/internal/evidence.payloadSource\n     0.14s  0.53% 50.72%      0.41s  1.55%  oimobbs/internal/strictjson.(*shapeScanner).skipString\n         0     0% 50.72%      0.41s  1.55%  runtime.mcall\n         0     0% 50.72%      0.40s  1.51%  crypto/internal/fips140/edwards25519.(*projP1xP1).Double\n         0     0% 50.72%      0.40s  1.51%  crypto/internal/fips140/edwards25519/field.(*Element).SquareN (inline)\n     0.17s  0.64% 51.36%      0.40s  1.51%  crypto/internal/fips140/edwards25519/field.feSquareN\n     0.01s 0.038% 51.40%      0.40s  1.51%  encoding/json/v2.makeMapArshaler.func3\n         0     0% 51.40%      0.40s  1.51%  oimobbs/internal/bootstrap.(*Repository).WebPostingHandler.1\n     0.40s  1.51% 52.91%      0.40s  1.51%  oimobbs/internal/domain.scalarText\n         0     0% 52.91%      0.40s  1.51%  syscall.RawSyscall6\n         0     0% 52.91%      0.39s  1.48%  syscall.Syscall\n         0     0% 52.91%      0.38s  1.44%  crypto/internal/fips140/edwards25519.(*Point).Bytes (inline)\n         0     0% 52.91%      0.38s  1.44%  crypto/internal/fips140/edwards25519.(*Point).bytes\n         0     0% 52.91%      0.38s  1.44%  crypto/internal/fips140/edwards25519/field.(*Element).Invert\n         0     0% 52.91%      0.38s  1.44%  oimobbs/internal/postcapture.operationPosts\n         0     0% 52.91%      0.37s  1.40%  crypto/internal/fips140/edwards25519.(*Point).ScalarBaseMult\n     0.03s  0.11% 53.03%      0.37s  1.40%  encoding/json/v2.makeMapArshaler.func2\n         0     0% 53.03%      0.37s  1.40%  runtime.schedule\n     0.36s  1.36% 54.39%      0.36s  1.36%  internal/runtime/maps.memHashAES\n     0.09s  0.34% 54.73%      0.35s  1.32%  encoding/json/v2.makeString\n         0     0% 54.73%      0.35s  1.32%  oimobbs/internal/store.(*Writer).CommitBatch (inline)\n         0     0% 54.73%      0.35s  1.32%  oimobbs/internal/strictjson.SelectFields\n     0.01s 0.038% 54.77%      0.34s  1.29%  crypto/internal/fips140/edwards25519.(*projP2).FromP1xP1\n     0.01s 0.038% 54.81%      0.34s  1.29%  encoding/json/v2.makeSliceArshaler.func2\n     0.04s  0.15% 54.96%      0.34s  1.29%  reflect.(*rtype).ptrTo\n     0.01s 0.038% 55.00%      0.34s  1.29%  runtime.findRunnable\n     0.04s  0.15% 55.15%      0.33s  1.25%  crypto/internal/fips140/sha256.(*Digest).Write\n         0     0% 55.15%      0.33s  1.25%  oimobbs/internal/app.(*PostingLog).PreparePost\n         0     0% 55.15%      0.33s  1.25%  oimobbs/internal/postinput.Build\n         0     0% 55.15%      0.33s  1.25%  reflect.(*rtype).typeOff (inline)\n     0.07s  0.26% 55.41%      0.33s  1.25%  reflect.resolveTypeOff\n         0     0% 55.41%      0.32s  1.21%  oimobbs/internal/bootstrap.(*Repository).postingResultPage\n         0     0% 55.41%      0.32s  1.21%  oimobbs/internal/bootstrap.(*Repository).threadPage\n     0.05s  0.19% 55.60%      0.32s  1.21%  reflect.(*rtype).Implements\n     0.03s  0.11% 55.72%      0.31s  1.17%  encoding/json/jsontext.(*Encoder).WriteValue (inline)\n",
+          "stderr": ""
+        },
+        "cpu_flat": {
+          "command": [
+            "mise",
+            "exec",
+            "--",
+            "go",
+            "tool",
+            "pprof",
+            "-top",
+            "-nodecount=25",
+            "var/throughput-bottleneck-20261017/build/oimobbs",
+            "var/throughput-bottleneck-20261017/diag400-r2.json.profiles/cpu.pprof"
+          ],
+          "stdout": "File: oimobbs\nBuild ID: 4906e9387dbce2c5b59d02c6ce1e136d648fd799\nType: cpu\nTime: 2026-10-18 00:01:18 JST\nDuration: 20.56s, Total samples = 26.42s (128.49%)\nShowing nodes accounting for 12.35s, 46.74% of 26.42s total\nDropped 977 nodes (cum <= 0.13s)\nShowing top 25 nodes out of 324\n      flat  flat%   sum%        cum   cum%\n     2.38s  9.01%  9.01%      2.38s  9.01%  encoding/json/internal/jsonwire.ConsumeSimpleString (inline)\n     0.98s  3.71% 12.72%      0.98s  3.71%  indexbytebody\n     0.80s  3.03% 15.75%      0.80s  3.03%  crypto/internal/fips140/edwards25519/field.feMul\n     0.66s  2.50% 18.24%      0.66s  2.50%  time.runtimeNow\n     0.62s  2.35% 20.59%      0.62s  2.35%  encoding/json/internal/jsonwire.ConsumeWhitespace (inline)\n     0.62s  2.35% 22.94%      3.30s 12.49%  encoding/json/jsontext.(*decoderState).consumeObject\n     0.52s  1.97% 24.91%      0.52s  1.97%  memeqbody\n     0.50s  1.89% 26.80%      0.50s  1.89%  runtime.memmove\n     0.48s  1.82% 28.61%      0.48s  1.82%  internal/runtime/syscall/linux.Syscall6\n     0.47s  1.78% 30.39%      0.47s  1.78%  runtime.nanotime\n     0.43s  1.63% 32.02%      4.04s 15.29%  encoding/json/jsontext.(*decoderState).consumeValue\n     0.40s  1.51% 33.54%      0.40s  1.51%  oimobbs/internal/domain.scalarText\n     0.39s  1.48% 35.01%      3.22s 12.19%  encoding/json/jsontext.(*decoderState).ReadValue\n     0.36s  1.36% 36.37%      0.36s  1.36%  internal/runtime/maps.memHashAES\n     0.36s  1.36% 37.74%      0.45s  1.70%  oimobbs/internal/app.(*PostingLog).AbusePostVisible\n     0.29s  1.10% 38.83%      6.63s 25.09%  encoding/json/v2.makeStructArshaler.func3\n     0.26s  0.98% 39.82%      1.97s  7.46%  oimobbs/internal/strictjson.(*keyScanner).container\n     0.26s  0.98% 40.80%      1.18s  4.47%  oimobbs/internal/strictjson.(*keyScanner).quoted\n     0.25s  0.95% 41.75%      0.25s  0.95%  crypto/internal/fips140/sha256.blockSHANI\n     0.25s  0.95% 42.69%      1.33s  5.03%  encoding/json/v2.makeStructArshaler.func2\n     0.24s  0.91% 43.60%      0.45s  1.70%  runtime.tryDeferToSpanScan\n     0.21s  0.79% 44.40%      0.41s  1.55%  encoding/json/internal/jsonwire.ConsumeStringResumable\n     0.21s  0.79% 45.19%      0.21s  0.79%  oimobbs/internal/strictjson.(*keyScanner).space (inline)\n     0.21s  0.79% 45.99%      0.43s  1.63%  oimobbs/internal/zstdencode.(*Encoder).parse\n     0.20s  0.76% 46.74%      0.49s  1.85%  internal/runtime/maps.(*Map).getWithoutKeySmallFastStr\n",
+          "stderr": ""
+        },
+        "json_callers": {
+          "command": [
+            "mise",
+            "exec",
+            "--",
+            "go",
+            "tool",
+            "pprof",
+            "-peek",
+            "strictjson.Decode",
+            "var/throughput-bottleneck-20261017/build/oimobbs",
+            "var/throughput-bottleneck-20261017/diag400-r2.json.profiles/cpu.pprof"
+          ],
+          "stdout": "File: oimobbs\nBuild ID: 4906e9387dbce2c5b59d02c6ce1e136d648fd799\nType: cpu\nTime: 2026-10-18 00:01:18 JST\nDuration: 20.56s, Total samples = 26.42s (128.49%)\nShowing nodes accounting for 26.42s, 100% of 26.42s total\n----------------------------------------------------------+-------------\n      flat  flat%   sum%        cum   cum%   calls calls% + context \t \t \n----------------------------------------------------------+-------------\n                                             3.11s 29.23% |   oimobbs/internal/postcapture.decode\n                                             2.41s 22.65% |   oimobbs/internal/domain.ParseOperation\n                                             1.52s 14.29% |   oimobbs/internal/evidence.DecodeHTTPObservation\n                                             1.07s 10.06% |   oimobbs/internal/bootstrap.(*Repository).submitForm.func4\n                                             0.43s  4.04% |   oimobbs/internal/store.decodeControlOperation\n                                             0.38s  3.57% |   oimobbs/internal/domain.Apply\n                                             0.38s  3.57% |   oimobbs/internal/postcapture.operationPosts\n                                             0.37s  3.48% |   oimobbs/internal/evidence.(*Journal).validateValue\n                                             0.32s  3.01% |   oimobbs/internal/postinput.(*Input).UnmarshalJSON\n                                             0.25s  2.35% |   oimobbs/internal/evidence.ValidateOptionalPayload\n                                             0.21s  1.97% |   oimobbs/internal/app.PostingValidator.func1\n                                             0.12s  1.13% |   oimobbs/internal/bootstrap.(*boardIdentity).UnmarshalJSON\n                                             0.12s  1.13% |   oimobbs/internal/bootstrap.(*boardPresentation).UnmarshalJSON\n                                             0.12s  1.13% |   oimobbs/internal/bootstrap.(*postingBoard).prepareEditing\n                                             0.12s  1.13% |   oimobbs/internal/bootstrap.siteDirectories\n                                             0.12s  1.13% |   oimobbs/internal/evidence.HTTPObservation.ValidatePosting\n                                             0.09s  0.85% |   oimobbs/internal/bootstrap.(*Repository).submitForm\n                                             0.06s  0.56% |   oimobbs/internal/bootstrap.(*Repository).webBoards\n                                             0.02s  0.19% |   oimobbs/internal/bootstrap.(*boardPosting).UnmarshalJSON\n     0.03s  0.11%  0.11%     10.64s 40.27%                | oimobbs/internal/strictjson.Decode\n                                             6.32s 59.40% |   encoding/json.Unmarshal (inline)\n                                             2.30s 21.62% |   oimobbs/internal/strictjson.Validate (inline)\n                                             2.26s 21.24% |   oimobbs/internal/strictjson.shape (inline)\n                                             0.02s  0.19% |   reflect.(*rtype).Elem (inline)\n                                             0.01s 0.094% |   reflect.Value.IsNil (inline)\n----------------------------------------------------------+-------------\n",
+          "stderr": ""
+        },
+        "capture_callers": {
+          "command": [
+            "mise",
+            "exec",
+            "--",
+            "go",
+            "tool",
+            "pprof",
+            "-peek",
+            "postcapture.decode",
+            "var/throughput-bottleneck-20261017/build/oimobbs",
+            "var/throughput-bottleneck-20261017/diag400-r2.json.profiles/cpu.pprof"
+          ],
+          "stdout": "File: oimobbs\nBuild ID: 4906e9387dbce2c5b59d02c6ce1e136d648fd799\nType: cpu\nTime: 2026-10-18 00:01:18 JST\nDuration: 20.56s, Total samples = 26.42s (128.49%)\nShowing nodes accounting for 26.42s, 100% of 26.42s total\n----------------------------------------------------------+-------------\n      flat  flat%   sum%        cum   cum%   calls calls% + context \t \t \n----------------------------------------------------------+-------------\n                                             1.54s 40.42% |   oimobbs/internal/postcapture.ValidateFrame\n                                             0.80s 21.00% |   oimobbs/internal/postcapture.Validate\n                                             0.76s 19.95% |   oimobbs/internal/postcapture.ValidateKeyAndMetadata\n                                             0.48s 12.60% |   oimobbs/internal/postcapture.WithAnonymous\n                                             0.23s  6.04% |   oimobbs/internal/postcapture.OverrideMetadata\n         0     0%     0%      3.81s 14.42%                | oimobbs/internal/postcapture.decode\n                                             3.11s 81.63% |   oimobbs/internal/strictjson.Decode\n                                             0.60s 15.75% |   oimobbs/internal/evidence.ValidateHTTPObservationValue\n                                             0.05s  1.31% |   reflect.DeepEqual\n                                             0.02s  0.52% |   oimobbs/internal/compat.Normalize\n                                             0.02s  0.52% |   runtime.stringtoslicebyte\n                                             0.01s  0.26% |   runtime.newobject\n----------------------------------------------------------+-------------\n",
+          "stderr": ""
+        },
+        "decoder": {
+          "command": [
+            "mise",
+            "exec",
+            "--",
+            "go",
+            "tool",
+            "pprof",
+            "-top",
+            "-cum",
+            "-focus",
+            "zstddecode",
+            "var/throughput-bottleneck-20261017/build/oimobbs",
+            "var/throughput-bottleneck-20261017/diag400-r2.json.profiles/cpu.pprof"
+          ],
+          "stdout": "File: oimobbs\nBuild ID: 4906e9387dbce2c5b59d02c6ce1e136d648fd799\nType: cpu\nTime: 2026-10-18 00:01:18 JST\nDuration: 20.56s, Total samples = 26.42s (128.49%)\nActive filters:\n   focus=zstddecode\nShowing nodes accounting for 0, 0% of 26.42s total\n      flat  flat%   sum%        cum   cum%\n",
+          "stderr": "Focus expression matched no samples\n"
+        },
+        "block": {
+          "command": [
+            "mise",
+            "exec",
+            "--",
+            "go",
+            "tool",
+            "pprof",
+            "-top",
+            "-nodecount=20",
+            "var/throughput-bottleneck-20261017/build/oimobbs",
+            "var/throughput-bottleneck-20261017/diag400-r2.json.profiles/block.pprof"
+          ],
+          "stdout": "File: oimobbs\nBuild ID: 4906e9387dbce2c5b59d02c6ce1e136d648fd799\nType: delay\nTime: 2026-10-18 00:01:38 JST\nShowing nodes accounting for 1527.36s, 99.68% of 1532.23s total\nDropped 39 nodes (cum <= 7.66s)\nShowing top 20 nodes out of 33\n      flat  flat%   sum%        cum   cum%\n  1492.26s 97.39% 97.39%   1492.26s 97.39%  runtime.chanrecv1\n    35.10s  2.29% 99.68%     35.10s  2.29%  runtime.selectgo\n         0     0% 99.68%     19.99s  1.30%  main.serveConfiguredWithNetworkClient.func4\n         0     0% 99.68%   1494.54s 97.54%  net/http.(*Server).Serve.gowrap3\n         0     0% 99.68%   1494.54s 97.54%  net/http.(*conn).serve\n         0     0% 99.68%   1493.99s 97.50%  net/http.HandlerFunc.ServeHTTP (partial-inline)\n         0     0% 99.68%   1493.99s 97.50%  net/http.serverHandler.ServeHTTP\n         0     0% 99.68%   1492.25s 97.39%  oimobbs/internal/board.(*Worker).SubmitBatch\n         0     0% 99.68%   1492.25s 97.39%  oimobbs/internal/board.(*Worker).submit\n         0     0% 99.68%    295.04s 19.26%  oimobbs/internal/bootstrap.(*Repository).BoardWebHandler.1\n         0     0% 99.68%     19.99s  1.30%  oimobbs/internal/bootstrap.(*Repository).RunStorageMonitor\n         0     0% 99.68%   1493.99s 97.50%  oimobbs/internal/bootstrap.(*Repository).SiteWebHandler.func1\n         0     0% 99.68%    295.04s 19.26%  oimobbs/internal/bootstrap.(*Repository).WebPostingHandler.1\n         0     0% 99.68%      8.93s  0.58%  oimobbs/internal/bootstrap.(*Repository).ensureOptionalLogs.func1\n         0     0% 99.68%   1197.64s 78.16%  oimobbs/internal/bootstrap.(*Repository).legacyPostingPage\n         0     0% 99.68%     70.74s  4.62%  oimobbs/internal/bootstrap.(*Repository).postingFormPage\n         0     0% 99.68%    224.30s 14.64%  oimobbs/internal/bootstrap.(*Repository).postingResultPage\n         0     0% 99.68%   1493.99s 97.50%  oimobbs/internal/bootstrap.(*Repository).publicHTTPServer.func2\n         0     0% 99.68%     70.74s  4.62%  oimobbs/internal/bootstrap.(*Repository).renderEditing\n         0     0% 99.68%   1197.63s 78.16%  oimobbs/internal/bootstrap.(*Repository).routeLegacyPost\n",
+          "stderr": ""
+        },
+        "mutex": {
+          "command": [
+            "mise",
+            "exec",
+            "--",
+            "go",
+            "tool",
+            "pprof",
+            "-top",
+            "-nodecount=20",
+            "var/throughput-bottleneck-20261017/build/oimobbs",
+            "var/throughput-bottleneck-20261017/diag400-r2.json.profiles/mutex.pprof"
+          ],
+          "stdout": "File: oimobbs\nBuild ID: 4906e9387dbce2c5b59d02c6ce1e136d648fd799\nType: delay\nTime: 2026-10-18 00:01:38 JST\nShowing nodes accounting for 702.99ms, 99.74% of 704.81ms total\nDropped 122 nodes (cum <= 3.52ms)\nShowing top 20 nodes out of 43\n      flat  flat%   sum%        cum   cum%\n  702.99ms 99.74% 99.74%   702.99ms 99.74%  sync.(*Mutex).Unlock (partial-inline)\n         0     0% 99.74%   689.75ms 97.86%  net/http.(*Server).Serve.gowrap3\n         0     0% 99.74%   689.81ms 97.87%  net/http.(*conn).serve\n         0     0% 99.74%   689.81ms 97.87%  net/http.HandlerFunc.ServeHTTP (partial-inline)\n         0     0% 99.74%   689.81ms 97.87%  net/http.serverHandler.ServeHTTP\n         0     0% 99.74%    13.27ms  1.88%  oimobbs/internal/board.(*Worker).execute\n         0     0% 99.74%    13.22ms  1.88%  oimobbs/internal/board.(*Worker).execute.func2.func1\n         0     0% 99.74%    13.22ms  1.88%  oimobbs/internal/board.(*Worker).invoke\n         0     0% 99.74%    13.27ms  1.88%  oimobbs/internal/board.(*Worker).loop\n         0     0% 99.74%    13.22ms  1.88%  oimobbs/internal/board.NewWorker.gowrap1\n         0     0% 99.74%    49.16ms  6.98%  oimobbs/internal/bootstrap.(*Repository).BoardWebHandler.1\n         0     0% 99.74%   689.78ms 97.87%  oimobbs/internal/bootstrap.(*Repository).SiteWebHandler.func1\n         0     0% 99.74%    27.14ms  3.85%  oimobbs/internal/bootstrap.(*Repository).WebPostingHandler.1\n         0     0% 99.74%    58.78ms  8.34%  oimobbs/internal/bootstrap.(*Repository).admitAttempt\n         0     0% 99.74%   180.12ms 25.56%  oimobbs/internal/bootstrap.(*Repository).anonymousCookie\n         0     0% 99.74%   269.52ms 38.24%  oimobbs/internal/bootstrap.(*Repository).anonymousRequestCookie\n         0     0% 99.74%   492.05ms 69.81%  oimobbs/internal/bootstrap.(*Repository).legacyPostingPage\n         0     0% 99.74%     3.79ms  0.54%  oimobbs/internal/bootstrap.(*Repository).postingFormPage\n         0     0% 99.74%    24.83ms  3.52%  oimobbs/internal/bootstrap.(*Repository).postingOwner\n         0     0% 99.74%    23.35ms  3.31%  oimobbs/internal/bootstrap.(*Repository).postingResultPage\n",
+          "stderr": ""
+        }
+      },
+      "image": "sha256:4190d7d44cf63574cf1eb6fdb223db0b649c71cba75faf68252d65d69a5a787e",
+      "waf": {
+        "enabled": true,
+        "traffic": {
+          "posting": {
+            "client_rate": 10,
+            "client_burst": 30,
+            "global_rate": 1000,
+            "global_burst": 2000,
+            "client_concurrent": 8,
+            "global_concurrent": 128
+          },
+          "enabled": true,
+          "client_rate": 10000,
+          "client_burst": 100000,
+          "global_rate": 100000,
+          "global_burst": 200000,
+          "client_concurrent": 32,
+          "global_concurrent": 128,
+          "search_rate": 2,
+          "search_burst": 10,
+          "search_global_rate": 12,
+          "search_global_burst": 24,
+          "search_concurrent": 4
+        }
+      },
+      "cpu_max": "200000 100000",
+      "memory_max": "536870912",
+      "cache_bytes": 268435456,
+      "egress_budget_bits_per_second": 400000000,
+      "scope": "isolated actual TLS HTTP/1.1, synthetic data, fsync enabled; no WAN or production capacity guarantee",
+      "post_mix": "80% legacy / 20% Web including form, CSRF and redirect",
+      "rate": 400,
+      "seconds": 20,
+      "workers": 80,
+      "thread_count": 16,
+      "board_count": 1,
+      "distribution": "round-robin",
+      "planned_reads_per_second": 0,
+      "load_started_monotonic": 1663701.136926729,
+      "duration_with_drain_seconds": 20.458379114046693,
+      "summary": {
+        "planned": 8000,
+        "sent": 3869,
+        "success": 3869,
+        "errors": 0,
+        "skipped": 4131,
+        "http_p95_ms": 631.8406630307436,
+        "scheduled_p95_ms": 727.8780129272491,
+        "issuance_wait_p95_ms": 189.0479139983654
+      },
+      "completed_in_window": 3748,
+      "completed_per_second": 187.4,
+      "success_per_second_with_drain": 189.1156664187316,
+      "stable_at_tested_rate": false,
+      "stability_definition": "all planned accepted, no skips/errors, >=99% completed during window, scheduled p95 <=250ms, DAT exact and recovery100/100",
+      "windows": [
+        {
+          "begin_s": 0,
+          "end_s": 5,
+          "planned": 2000,
+          "sent": 1033,
+          "success": 1033,
+          "errors": 0,
+          "skipped": 967,
+          "http_p95_ms": 619.9780250899494,
+          "scheduled_p95_ms": 724.7430169954896,
+          "issuance_wait_p95_ms": 187.42505996488035,
+          "completed_in_window": 939
+        },
+        {
+          "begin_s": 5,
+          "end_s": 10,
+          "planned": 2000,
+          "sent": 978,
+          "success": 978,
+          "errors": 0,
+          "skipped": 1022,
+          "http_p95_ms": 611.5689370781183,
+          "scheduled_p95_ms": 713.3120519574732,
+          "issuance_wait_p95_ms": 190.13843894936144,
+          "completed_in_window": 984
+        },
+        {
+          "begin_s": 10,
+          "end_s": 15,
+          "planned": 2000,
+          "sent": 946,
+          "success": 946,
+          "errors": 0,
+          "skipped": 1054,
+          "http_p95_ms": 636.3273859024048,
+          "scheduled_p95_ms": 727.2977670654655,
+          "issuance_wait_p95_ms": 189.384306082502,
+          "completed_in_window": 930
+        },
+        {
+          "begin_s": 15,
+          "end_s": 20,
+          "planned": 2000,
+          "sent": 912,
+          "success": 912,
+          "errors": 0,
+          "skipped": 1088,
+          "http_p95_ms": 656.5500099677593,
+          "scheduled_p95_ms": 760.5977258644998,
+          "issuance_wait_p95_ms": 188.61347995698452,
+          "completed_in_window": 895
+        }
+      ],
+      "by_kind": {
+        "legacy": {
+          "planned": 6400,
+          "sent": 3315,
+          "success": 3315,
+          "errors": 0,
+          "skipped": 3085,
+          "http_p95_ms": 510.7199631165713,
+          "scheduled_p95_ms": 655.4545771796256,
+          "issuance_wait_p95_ms": 189.51917300000787
+        },
+        "web": {
+          "planned": 1600,
+          "sent": 554,
+          "success": 554,
+          "errors": 0,
+          "skipped": 1046,
+          "http_p95_ms": 684.0847858693451,
+          "scheduled_p95_ms": 827.8600061312318,
+          "issuance_wait_p95_ms": 184.09714102745056
+        }
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 20.656581036746502,
+        "scheduled_p95_ms": 20.965140080079436,
+        "issuance_wait_p95_ms": null
+      },
+      "integrity": {
+        "ok": true,
+        "threads": [
+          {
+            "key": "1792249265",
+            "lines": 255,
+            "invalid_bodies": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "0c9f8dbc58352fb027c5865ffad00b40ae42095b50db44e33185dc5b856cdb4d"
+          },
+          {
+            "key": "1792249266",
+            "lines": 255,
+            "invalid_bodies": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "1ab2c9ed647dd362f80b9e62c54c6711014cb837e827042672b6384d6b1dadfd"
+          },
+          {
+            "key": "1792249267",
+            "lines": 253,
+            "invalid_bodies": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "bbf633d43672605537955ec52670a4974be2237768623b584428332e8267c8b4"
+          },
+          {
+            "key": "1792249268",
+            "lines": 249,
+            "invalid_bodies": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "20e33318681695a72d086aef4ad6b241b5392b3b9e5e302e5f27a775377d3874"
+          },
+          {
+            "key": "1792249269",
+            "lines": 257,
+            "invalid_bodies": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "96b72b06d7a967ba3ad8caea510c531dce763f44a9436b3ec0479e31b8c99690"
+          },
+          {
+            "key": "1792249270",
+            "lines": 252,
+            "invalid_bodies": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "e5f03962a27717faae019bb4df12e3751afa68d2f4b60faf89fcbef1cda7cdeb"
+          },
+          {
+            "key": "1792249271",
+            "lines": 254,
+            "invalid_bodies": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "306e75b9b6d79b9d1a1aebd9ce83c54810445d09d9a986691e1966aeb3eb750d"
+          },
+          {
+            "key": "1792249272",
+            "lines": 259,
+            "invalid_bodies": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "37a18f89710c6eeb2d1e65ff6a9e2cf6d95374c66a614560eeed48d23dda89d8"
+          },
+          {
+            "key": "1792249273",
+            "lines": 255,
+            "invalid_bodies": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "5920c7cf982dd5c46bb421b93425af51fed21311d22b78d31c3dfe359e23c566"
+          },
+          {
+            "key": "1792249274",
+            "lines": 256,
+            "invalid_bodies": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "5e35da09fb14d32188f4ddbc2075e8e1468fed694a0849a0a49480e695361e73"
+          },
+          {
+            "key": "1792249275",
+            "lines": 254,
+            "invalid_bodies": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "e0744e57f97cf30057a4739681f88c17346ba9dfb0696c37a4ba1501645457a3"
+          },
+          {
+            "key": "1792249276",
+            "lines": 253,
+            "invalid_bodies": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "9f34d694d2439b9cc20ba85fc13cc75b518983eb24ee218714eb03355b53babf"
+          },
+          {
+            "key": "1792249277",
+            "lines": 254,
+            "invalid_bodies": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "69e31fe55bc84d255119324a1f32ec07ba9fe6fb5bc0a08120c472437868456a"
+          },
+          {
+            "key": "1792249278",
+            "lines": 250,
+            "invalid_bodies": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "75b08c6ba3dad99ada78e1c6b8ba8f2de68f62f18fe065b19f87134363bdf473"
+          },
+          {
+            "key": "1792249279",
+            "lines": 256,
+            "invalid_bodies": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "0a350b154fedf51af1a4b2fc05082d415584aed94ec4d8b4a9d1d5b9731aa588"
+          },
+          {
+            "key": "1792249280",
+            "lines": 253,
+            "invalid_bodies": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "39c75dbe4b9830721504f02236404f9ba4ec0f4a91fa102223c66a0c720d1268"
+          }
+        ]
+      },
+      "resources": {
+        "cpu_cores_average": 1.308015891719726,
+        "generator_cpu_seconds": 5.848785696999999,
+        "wbytes_delta": 33210368,
+        "wios_delta": 3671,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 0,
+        "io_some_usec_delta": 353473
+      },
+      "memory_peak_bytes": 425521152,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 17474,
+          "saved": 17474,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 6915298,
+        "day_file_bytes": {
+          "20261017": 6915298
+        }
+      }
+    }
+  ]
+}

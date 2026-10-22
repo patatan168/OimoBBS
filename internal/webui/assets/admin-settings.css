@@ -1,0 +1,23 @@
+/* 設定フォームの区切りと、保存前の確認。 */
+/* 設定フォームは目的ごとに区切り、詳細条件と保存前の変更を同じ操作で確認できる。 */
+.settings-nav { gap:6px; }
+.settings-nav a { font-size:13px; padding:8px 12px; }
+.settings-section { padding:20px; border:1px solid var(--line); border-radius:10px; margin:20px 0; background:var(--paper); scroll-margin-top:24px; }
+.settings-section > h2:first-child { margin-top:0; }
+.settings-section > .field-hint { margin:0 0 16px; }
+.settings-section .field-grid { margin-top:16px; }
+.settings-section > summary { font-size:15px; }
+.settings-section > fieldset { margin-top:16px; }
+.settings-details { margin:20px 0; }
+.settings-details > fieldset { margin-top:12px; }
+.settings-review { grid-column:1 / -1; padding:18px; border:1px solid var(--line); border-radius:10px; background:var(--canvas); margin:24px 0 16px; }
+.settings-review h2 { margin:0 0 8px; font-size:16px; }
+.settings-review p { margin:8px 0; }
+.settings-review[data-edited="true"] { border-color:var(--accent); }
+.settings-review ul { margin:12px 0; }
+.settings-review li + li { margin-top:8px; }
+.settings-review code { font:inherit; white-space:pre-wrap; }
+.settings-impact { padding:14px 16px; margin:16px 0; border-left:3px solid var(--accent); background:var(--tonal); color:var(--on-tonal); border-radius:0 8px 8px 0; }
+[data-settings-form] > fieldset + fieldset { margin-top:24px; }
+@media (max-width:700px) { .settings-section { padding:16px; } .settings-review { padding:14px; } }
+

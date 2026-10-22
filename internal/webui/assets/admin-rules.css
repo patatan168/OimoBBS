@@ -1,0 +1,3 @@
+/* 投稿規制で使う条件説明。 */
+.policy-guide { padding:20px; border:1px solid var(--line); border-radius:12px; background:var(--paper); }
+.policy-guide h2 { margin-top:0; }

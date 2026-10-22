@@ -1,0 +1,59 @@
+<!-- 全板共通の連投・類似文・埋め立て対策を編集する管理画面。 -->
+<!doctype html><html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>荒らし対策 — OimoBBS管理</title>{{template "admin-assets" .}}</head><body class="admin">{{template "admin-header" .}}<main id="main" tabindex="-1"><h1>掲示板全体の荒らし対策</h1>
+{{if .Message}}<p role="alert">{{.Message}}</p>{{end}}
+<p>全板共通の設定です。類似文は板をまたいで比較し、集中投稿・占有率は対象スレッドごと、投稿者の連投は全板合計で判定します。</p>
+{{if and (not .Configured) (not .Message)}}<p>共通設定は未保存です。類似文・埋め立ては検出のみで動作し、従来の投稿間隔・Cookie待機時間を維持しています。保存すると、投稿間隔とCookie待機時間も全板共通になります。</p>{{end}}
+<p class="settings-impact">対象は全板です。動作モードだけを変える場合、詳細な検出条件は開かずに保存できます。</p><nav class="settings-nav" aria-label="荒らし対策の設定項目"><a href="#guard-rates">投稿間隔</a><a href="#guard-similar">類似文</a><a href="#guard-flood">埋め立て</a></nav><form data-settings-form method="post" action="{{adminBase}}/abuse-guard"><input type="hidden" name="csrf" value="{{.Values.Get "csrf"}}"><input type="hidden" name="revision" value="{{.Values.Get "revision"}}"><input type="hidden" name="request_id" value="{{.Values.Get "request_id"}}">
+<fieldset><legend>Botによる不正フォームの反復</legend>
+{{if .BotMode}}<section class="bot-status" aria-labelledby="bot-status-heading">
+<div class="bot-status-heading"><h2 id="bot-status-heading">現在の稼働状況</h2><a class="tonal-link" href="{{adminBase}}/abuse-guard">最新の状況を取得</a></div>
+<div class="bot-status-grid">
+<div class="bot-metric"><h3>稼働中のモード</h3><strong class="bot-mode bot-mode-{{.BotMode}}">{{if eq .BotMode "reject"}}自動で一時停止{{else if eq .BotMode "observe"}}検出のみ{{else}}無効{{end}}</strong><p>{{if eq .BotMode "reject"}}{{if .Bot.Active}}停止条件に達したCookieの新規投稿を停止しています。{{else}}停止中のCookieはありません。違反の反復を監視しています。{{end}}{{else if eq .BotMode "observe"}}停止条件を検出しますが、投稿は止めません。{{else}}新しい違反の検出・投稿停止は行いません。{{end}}</p></div>
+<div class="bot-metric"><h3>{{if eq .BotMode "reject"}}停止中のCookie{{else}}停止条件に該当するCookie{{end}}</h3><p class="bot-metric-value">{{.Bot.Active}}<span>件</span></p><p>{{if eq .BotMode "reject"}}停止は120秒で自動解除します。{{else}}保持中の条件成立数です。現在のモードでは停止しません。{{end}}</p></div>
+<div class="bot-metric"><h3>有効な違反履歴のCookie</h3><p class="bot-metric-value">{{.Bot.Subjects}}<span> / 4096件</span></p><p>集計期間内の履歴と、停止条件の有効期間内の履歴です。</p></div>
+</div>
+<h3 class="bot-totals-heading">起動後の累計</h3>
+<dl class="bot-totals"><div><dt>異なる違反</dt><dd>{{.Bot.Signals}}<span>件</span></dd></div><div><dt>停止条件の成立</dt><dd>{{.Bot.Stops}}<span>回</span></dd></div><div><dt>投稿の拒否</dt><dd>{{.Bot.Rejected}}<span>件</span></dd></div><div><dt>容量不足による記録省略</dt><dd>{{.Bot.Overflow}}<span>件</span></dd></div></dl>
+<p class="field-hint">表示は取得時点の値です。累計には以前のモードの結果も含み、モード変更ではリセットしません。集計・違反履歴・停止状態は再起動で消えます。</p>
+</section>{{else}}<p class="field-hint">入力エラーなどで再表示した画面では、稼働状況を表示していません。最新の状況は設定を読み直して確認してください。</p>{{end}}
+<label>保存する動作モード <select name="bot_mode" aria-describedby="bot-mode-hint"><option value="reject" {{if eq (.Values.Get "bot_mode") "reject"}}selected{{end}}>自動で一時停止</option><option value="observe" {{if eq (.Values.Get "bot_mode") "observe"}}selected{{end}}>検出のみ</option><option value="off" {{if eq (.Values.Get "bot_mode") "off"}}selected{{end}}>無効</option></select></label>
+<p class="field-hint" id="bot-mode-hint">選択を変えた後、画面下部の「全板共通の設定を保存」で反映します。</p>
+<details class="bot-help"><summary>停止条件・対象とならない操作</summary>
+<p>有効な匿名Cookieで、非表示の罠欄への入力や構文が壊れたCSRF値を60秒以内に8件送ると、自動停止モードではそのCookieの全板への新規投稿を120秒停止します。同じ本文の再送は一件です。停止中の要求で期限を延長せず、自動で解除します。</p>
+<p>閲覧・別Cookieの利用者・受理済み再送・認証済みCAPには追加停止を適用しません。確認往復、空のCSRF値、期限切れや署名不一致だけでは違反に数えません。未設定時も自動停止で動作し、WAFのON/OFFとは独立します。</p>
+<p>検出のみでは停止条件の成立を数えるだけで投稿を止めません。モード変更で履歴や期限をリセットしません。</p></details>
+</fieldset>
+<fieldset id="guard-similar"><legend>類似文の連投</legend>
+<p>全板の直近の投稿と本文を比較します。「検出のみ」では止めず、「投稿を拒否」では条件に一致する投稿と比較上限を超える投稿を拒否します。</p>
+<label>動作モード <select name="similar_mode"><option value="off" {{if eq (.Values.Get "similar_mode") "off"}}selected{{end}}>無効</option><option value="observe" {{if eq (.Values.Get "similar_mode") "observe"}}selected{{end}}>検出のみ</option><option value="reject" {{if eq (.Values.Get "similar_mode") "reject"}}selected{{end}}>投稿を拒否</option></select></label>
+<details {{if .Message}}open{{end}} class="settings-details"><summary>類似文を検出する条件（詳細設定）</summary><div class="field-grid">{{range slice .Fields 0 5}}<label>{{.Label}} <input type="number" name="{{.Name}}" min="{{.Min}}" max="{{.Max}}" value="{{$.Values.Get .Name}}" required><small class="field-hint">{{.Hint}}</small></label>{{end}}</div><p>空白を畳んだ本文の文字3個ずつの組合せで類似度を比較します。最低文字数未満は完全一致だけを検出します。既存の類似投稿数が閾値以上なら、今回の投稿を検出します。類似件数は比較投稿数以下にしてください。文字3個の異なる組合せが比較上限4096個を超える投稿は「比較上限」として扱い、拒否モードでは投稿できません。</p></details>
+
+</fieldset>
+<fieldset id="guard-flood"><legend>スレッドの埋め立て</legend>
+<p>短時間の集中投稿や、同じ投稿者によるスレッドの占有を調べます。拒否は今回の投稿だけに適用し、スレッド終了・永久規制は行いません。</p>
+<label>動作モード <select name="flood_mode"><option value="off" {{if eq (.Values.Get "flood_mode") "off"}}selected{{end}}>無効</option><option value="observe" {{if eq (.Values.Get "flood_mode") "observe"}}selected{{end}}>検出のみ</option><option value="reject" {{if eq (.Values.Get "flood_mode") "reject"}}selected{{end}}>投稿を拒否</option></select></label>
+<details {{if .Message}}open{{end}} class="settings-details"><summary>集中投稿・占有率の条件（詳細設定）</summary><div class="field-grid">{{range slice .Fields 5 10}}<label>{{.Label}} <input type="number" name="{{.Name}}" min="{{.Min}}" max="{{.Max}}" value="{{$.Values.Get .Name}}" required><small class="field-hint">{{.Hint}}</small></label>{{end}}</div><p>Cookieと接続元を別々に比較し、Cookieの取り直しだけで連投件数を消せないようにします。IPv6は/64単位です。拒否は今回の投稿だけに適用し、スレッド終了や永久規制は行いません。</p></details>
+
+</fieldset>
+<p>共有回線や実況の定型文も検出され得るため、類似文・埋め立て対策は検出のみで状況を確認してから閾値を調整してください。</p>
+<fieldset id="guard-rates"><legend>投稿間隔・連投制限</legend>
+<label>投稿間隔制限 <select name="rate_enabled"><option value="true" {{if eq (.Values.Get "rate_enabled") "true"}}selected{{end}}>有効</option><option value="false" {{if eq (.Values.Get "rate_enabled") "false"}}selected{{end}}>無効</option></select></label>
+<p>返信とスレ立ての投稿枠を、設定した間隔で補充します。連投許容量は、ためられる投稿枠の上限です。</p>
+<h2>返信</h2>
+<div class="field-grid">{{range slice .Fields 10 12}}<label>{{.Label}} <input type="number" name="{{.Name}}" min="{{.Min}}" max="{{.Max}}" value="{{$.Values.Get .Name}}" required><small class="field-hint">{{.Hint}}</small></label>{{end}}</div>
+<h2>スレ立て</h2>
+<div class="field-grid">{{range slice .Fields 12 15}}<label>{{.Label}} <input type="number" name="{{.Name}}" min="{{.Min}}" max="{{.Max}}" value="{{$.Values.Get .Name}}" required><small class="field-hint">{{.Hint}}</small></label>{{end}}</div>
+<p>返信・スレ立てそれぞれで、補充間隔×連投許容量は3600以下、スレ立ての61分上限は連投許容量以上にしてください。変更・無効化・再起動で直近の投稿履歴を消しません。</p>
+</fieldset>
+<fieldset><legend>その他</legend>
+<label>認証済みCAPの追加対策免除 <select name="exempt_caps"><option value="true" {{if eq (.Values.Get "exempt_caps") "true"}}selected{{end}}>免除する</option><option value="false" {{if eq (.Values.Get "exempt_caps") "false"}}selected{{end}}>免除しない</option></select></label>
+<p>CAP免除は類似文・埋め立ての追加対策に適用します。既存の個別規制や投稿間隔制限は維持します。</p>
+<div class="field-grid">{{range slice .Fields 15 16}}<label>{{.Label}} <input type="number" name="{{.Name}}" min="{{.Min}}" max="{{.Max}}" value="{{$.Values.Get .Name}}" required><small class="field-hint">{{.Hint}}</small></label>{{end}}</div>
+<p>Cookie発行後の待ち時間は、発行から投稿可能になるまでの時間です。匿名Cookieはすべての投稿で必須です。</p>
+</fieldset>
+{{template "settings-review" .}}<button type="submit">全板共通の設定を保存</button> <a href="{{adminBase}}/abuse-guard">最新の設定を読み直す</a></form>
+<section><h2>既存の対策を調整</h2><p><a href="{{adminBase}}/operations">通報の集計期間・成立票数・停止時間</a> · <a href="{{adminBase}}/anonymous">Cookieの失効・再発行</a> · <a href="{{adminBase}}/networks">共通の回線分類</a> · <a href="{{adminBase}}/auto-reports">自動停止と通報の確認</a> · <a href="{{adminBase}}/boards">対象を指定した個別規制</a></p></section>
+<section><h2>直近の検出（最大100件）</h2><p>再起動で検出一覧は消えます。判定に使う投稿履歴は保存済み投稿から復旧します。本文・接続元・Cookieはこの一覧に保存しません。</p>{{range .Events}}<article class="card"><p><time>{{.At}}</time> {{.Reason}}：{{.Count}}件 {{if .Rejected}}拒否{{else}}検出のみ{{end}}</p><p>板ID {{.Board}} · スレッド {{.Thread}} · レス {{.PostNumber}}</p></article>{{else}}<p>検出記録はありません。</p>{{end}}</section>
+</main>{{template "footer" .}}</body></html>
+
+{{define "page-assets"}}{{template "stylesheet" "admin-settings.css"}}{{template "stylesheet" "admin-bot.css"}}{{template "javascript" "admin-settings.js"}}{{end}}

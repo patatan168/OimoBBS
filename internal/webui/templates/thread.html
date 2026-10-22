@@ -1,0 +1,15 @@
+<!-- レス情報と本文を分離し、範囲指定で読み進める公開スレッド画面。 -->
+<!doctype html><html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>{{.Title}}</title>{{template "assets" .}}</head>
+<body class="public">{{template "public-header" .}}<main id="main" tabindex="-1" data-thread-base="/test/read.cgi/{{.Board}}/{{.Key}}/">
+<div class="page-heading"><div><span class="eyebrow">スレッド</span><h1>{{.Title}}</h1></div>{{if .CanReply}}<a class="action-button" href="/web/post?bbs={{.Board}}&amp;key={{.Key}}">返信する</a>{{else}}<span class="count">書き込み終了</span>{{end}}</div>
+{{if .CapOnly}}<p>このスレッドへの返信は制限されています。</p>{{end}}
+{{if .MoveTarget}}<p><a class="tonal-link" href="{{.MoveTarget}}" rel="nofollow noopener">移転先のスレッド</a></p>{{end}}
+<nav class="thread-toolbar" aria-label="レスの表示"><span class="count">{{.Count}}レス</span><a href="/test/read.cgi/{{.Board}}/{{.Key}}/1-">最初から</a><a href="/test/read.cgi/{{.Board}}/{{.Key}}/l50">最新50レス</a><a href="/test/read.cgi/{{.Board}}/{{.Key}}/l50#thread-end">末尾へ</a></nav>
+<form class="reader-tools" method="get" action="/test/read.cgi/{{.Board}}/{{.Key}}/" data-response-jump hidden><label>レス番号へ移動<input type="number" name="response" min="1" max="{{.Count}}" placeholder="例：25" required></label><button type="submit">移動</button></form>
+<div class="response-list">{{range .Rows}}<article id="{{.Number}}"><header class="response-heading"><a class="response-number" href="#{{.Number}}" aria-label="レス{{.Number}}">{{.Number}}</a><h2>{{.Name}}</h2><a class="response-report" href="/reports?board={{$.Board}}&amp;thread={{$.Key}}&amp;ranges={{.Number}}#report-form" aria-label="レス{{.Number}}の削除依頼・問い合わせ">削除依頼・問い合わせ</a></header><div class="response-meta"><span>{{.Date}}</span>{{if .Mail}}<span>メール：{{.Mail}}</span>{{end}}</div><pre class="response-body" data-response-body>{{.Body}}</pre></article>{{end}}</div>
+<div id="thread-end"></div><nav class="pagination" aria-label="レスのページ">{{if .Previous}}<a href="{{.Previous}}" rel="prev">前のページ</a>{{end}}{{if .Next}}<a href="{{.Next}}" rel="next">次のページ</a>{{end}}</nav>
+{{if .CanReply}}<p><a class="action-button" href="/web/post?bbs={{.Board}}&amp;key={{.Key}}">返信する</a></p>{{else}}<p>このスレッドの書き込みは終了しています。</p>{{end}}
+<nav class="page-actions" aria-label="閲覧先"><a href="/{{.Board}}/subback.html">スレッド一覧</a><a href="/">板一覧</a></nav>
+</main>{{template "footer" .}}</body></html>
+
+{{define "page-assets"}}{{template "stylesheet" "thread.css"}}{{template "javascript" "thread.js"}}{{end}}

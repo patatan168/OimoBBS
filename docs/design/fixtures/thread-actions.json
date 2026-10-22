@@ -1,0 +1,12 @@
+{
+ "schema":"thread-actions-v1",
+ "cases":[
+  {"name":"stop","value":{"kind":"stop","target":"","policy":null},"valid":true},
+  {"name":"archive","value":{"kind":"archive","target":"","policy":null},"valid":true},
+  {"name":"move","value":{"kind":"move_link","target":"https://example.invalid/thread/1","policy":null},"valid":true},
+  {"name":"unexpected_target","value":{"kind":"stop","target":"https://example.invalid","policy":null},"valid":false},
+  {"name":"empty_move","value":{"kind":"move_link","target":"","policy":null},"valid":false},
+  {"name":"missing_policy","value":{"kind":"update_policy","target":"","policy":null},"valid":false},
+  {"name":"unknown_action","value":{"kind":"destroy","target":"","policy":null},"valid":false}
+ ]
+}

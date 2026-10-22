@@ -1,0 +1,13 @@
+/* WAFの選択と、停止中の入力欄。 */
+/* 停止中のWAF設定は値を読める状態で薄くし、編集できないことを示す。 */
+#waf-settings [aria-disabled="true"] { opacity:.55; }
+#waf-settings input:disabled,#waf-settings select:disabled { cursor:not-allowed; background:var(--surface); }
+.waf-mode-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; }
+.waf-mode-grid > p { margin:0; padding:16px; background:var(--canvas); border:1px solid var(--line); border-radius:10px; }
+.waf-mode-grid label { font-size:14px; }
+.waf-result { margin-top:20px; padding:16px; border:1px solid var(--line); border-radius:10px; background:var(--canvas); }
+.waf-result h3 { font-size:14px; margin:0 0 8px; }
+.waf-result > p { margin-bottom:0; }
+@media (max-width:700px) { .waf-mode-grid { grid-template-columns:minmax(0,1fr); } }
+#waf-settings { padding:0; border:0; background:none; }
+#waf-settings > .admin-form-section { background:var(--paper); }

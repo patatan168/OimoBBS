@@ -1,0 +1,9 @@
+/* カテゴリーと所属板の編集一覧。 */
+/* カテゴリーと板は概要だけを並べ、開いた行で編集する。 */
+.category-editor-list > li { padding:8px; }
+.category-editor-list details { margin:0; }
+.category-editor-list form { margin:12px 0; }
+.category-editor-list .row-meta { color:var(--muted); font-size:14px; font-weight:400; }
+.category-editor-list form:has(input[value="delete"]) button { color:var(--error); background:var(--paper); border-color:var(--line); }
+
+.category-editor-list form:has(input[value="delete"]) button:hover { background:var(--error-bg); }

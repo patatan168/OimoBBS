@@ -1,0 +1,91 @@
+/* 管理画面のメニュー、共通カード、操作と許可項目。 */
+/* 管理ナビは一列に収まる幅だけ展開し、それ以外は同じリンク一覧を開く。 */
+.admin .header-inner { max-width:none; position:relative; justify-content:space-between; flex-wrap:nowrap; }
+.admin .site-header nav a { white-space:nowrap; justify-content:flex-start; }
+.admin .site-header nav svg { width:20px; height:20px; }
+.admin .admin-nav-wide { display:none; }
+.admin-menu { margin:0; }
+.admin-menu > summary { font-size:14px; white-space:nowrap; display:flex; align-items:center; gap:8px; border:1px solid var(--line); background:var(--paper); list-style:none; }
+.admin-menu > summary::-webkit-details-marker { display:none; }
+.admin-menu > summary::after { content:""; width:7px; height:7px; margin:0 4px 4px 8px; border-right:2px solid currentColor; border-bottom:2px solid currentColor; transform:rotate(45deg); }
+.admin-menu[open] > summary { margin:0; background:var(--tonal); color:var(--on-tonal); }
+.admin-menu[open] > summary::after { transform:rotate(225deg); margin-bottom:0; }
+.admin .admin-menu nav { position:absolute; z-index:20; top:calc(100% + 8px); right:24px; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); width:min(720px,calc(100% - 48px)); gap:6px; padding:12px; background:var(--paper); border:1px solid var(--line); border-radius:12px; box-shadow:0 12px 32px #17203320; max-height:calc(100dvh - 100px); overflow-y:auto; }
+.admin .admin-menu nav a { min-width:0; padding:12px; }
+@media (min-width:2200px) {
+ .admin .admin-nav-wide { display:flex; flex-wrap:nowrap; gap:4px; }
+ .admin .admin-nav-wide a { padding-inline:10px; }
+ .admin-menu { display:none; }
+}
+@media (max-width:700px) {
+ .admin .admin-menu nav { right:12px; width:calc(100% - 24px); grid-template-columns:repeat(2,minmax(0,1fr)); padding:8px; gap:4px; }
+ .admin .admin-menu nav a { padding:10px 8px; font-size:13px; gap:6px; }
+}
+@media (max-width:359px) {
+ .admin .admin-menu nav { grid-template-columns:minmax(0,1fr); }
+}
+
+/* 許可チェックはラベル全体を押せるようにし、国の選択も幅に合わせて並べる。 */
+.permission-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(150px,100%),1fr)); gap:8px; margin:12px 0; }
+.check-option { display:flex; align-items:center; gap:10px; min-height:48px; padding:10px 12px; border:1px solid var(--line); border-radius:8px; background:var(--paper); cursor:pointer; }
+.check-option input[type="checkbox"] { width:22px; height:22px; min-height:22px; flex:0 0 22px; margin:0; padding:0; accent-color:var(--accent); }
+.check-option:has(input:checked) { background:var(--tonal); border-color:var(--accent); }
+/* 極小幅でも管理の入口と回線選択を領域内に収める。 */
+@media (max-width:319px) {
+ .admin .header-inner { flex-wrap:wrap; }
+ .admin .brand { font-size:16px; white-space:normal; }
+}
+/* 管理画面の共通部品。現在値・集計・操作を分け、狭い画面でも同じ順で読める。 */
+.admin-panel { margin:24px 0; padding:20px; background:var(--paper); border:1px solid var(--line); border-radius:12px; }
+.admin-panel > h2:first-child,.admin-panel > .admin-section-heading:first-child { margin-top:0; }
+.admin-section-heading { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin:0 0 16px; }
+.admin-section-heading h2,.admin-section-heading h3 { margin:0; }
+.admin-section-heading h2 { display:flex; align-items:center; gap:8px; }
+.admin-status-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr)); gap:12px; border:0; border-radius:0; overflow:visible; margin:16px 0; background:none; }
+.admin-status-grid > div { padding:16px; background:var(--canvas); border:1px solid var(--line); border-radius:10px; }
+.admin-status-grid dt,.admin-status-grid dd { padding:0; border:0; background:none; }
+.admin-status-grid dt { color:var(--muted); font-size:13px; margin-bottom:10px; }
+.admin-status-grid dd { font-size:24px; line-height:1.4; font-weight:750; font-variant-numeric:tabular-nums; }
+.admin-status-grid dd small { margin-left:5px; font-size:13px; font-weight:400; }
+.admin-status-grid .admin-status-copy { font-size:16px; }
+.admin-status-grid p { font-size:12px; color:var(--muted); margin:10px 0 0; }
+.admin-badge { display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border:1px solid var(--line); border-radius:6px; background:var(--surface); color:var(--ink); font-size:13px; font-weight:650; line-height:1.5; }
+.admin-badge-on { background:var(--tonal); color:var(--on-tonal); }
+.admin-badge-off { color:var(--muted); }
+.admin-badge-alert { background:var(--error-bg); color:var(--error); border-color:var(--error); }
+.admin-panel details { margin-top:16px; }
+.admin-panel details > summary { font-size:14px; }
+.admin-totals { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr)); margin:12px 0; }
+.admin-totals > div { padding:12px 16px; }
+.admin-totals dt,.admin-totals dd { border:0; padding:0; background:none; }
+.admin-totals dt { font-size:12px; }
+.admin-totals dd { margin-top:6px; font-size:20px; font-weight:700; font-variant-numeric:tabular-nums; }
+.admin-totals dd small { margin-left:5px; font-size:12px; font-weight:400; }
+.admin-record-header { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:12px; }
+.admin-record-header h2,.admin-record-header h3 { margin:0; }
+.admin-record-meta { display:flex; flex-wrap:wrap; align-items:center; gap:6px 16px; color:var(--muted); font-size:13px; margin:8px 0; }
+.admin-record-meta code { font-size:12px; }
+.admin-record-list > li { padding:20px; }
+.admin-record-link { display:flex!important; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px 16px; width:100%; text-decoration:none; }
+.admin-record-link strong { font-size:16px; }
+.admin-record-link .admin-record-meta { flex-basis:100%; margin:0; }
+.admin-description { white-space:pre-wrap; }
+.admin-form-section { margin:24px 0; padding:20px; border:1px solid var(--line); border-radius:10px; }
+.admin-form-section > h2:first-child { margin-top:0; }
+.admin-form-actions { display:flex; align-items:center; flex-wrap:wrap; gap:12px; margin-top:24px; }
+.admin-form-actions > a { min-height:44px; display:inline-flex; align-items:center; }
+.admin-help { margin:16px 0; }
+.admin-danger { border-left:4px solid var(--error); }
+@media (max-width:700px) {
+ .admin-panel,.admin-form-section { padding:16px; }
+ .admin-status-grid { grid-template-columns:minmax(0,1fr); }
+ .admin-totals { grid-template-columns:repeat(2,minmax(0,1fr)); }
+ .admin-totals > div { padding:12px; }
+ .admin-record-list > li { padding:16px; }
+}
+.admin-shortcuts { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; margin:24px 0; }
+.admin-shortcuts .admin-panel { margin:0; }
+.admin-shortcuts h2 { display:flex; align-items:center; gap:8px; font-size:16px; }
+.admin-shortcuts nav { margin-bottom:0; }
+@media (max-width:700px) { .admin-shortcuts { grid-template-columns:minmax(0,1fr); } }
+

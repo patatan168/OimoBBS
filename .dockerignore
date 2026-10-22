@@ -1,0 +1,11 @@
+**
+!go.mod
+!go.sum
+!Dockerfile
+!internal/
+!internal/**
+!cmd/
+!cmd/**
+!third_party/
+!third_party/argon2/
+!third_party/argon2/**

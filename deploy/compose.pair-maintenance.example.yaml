@@ -1,0 +1,58 @@
+# 独立した順序付き完成ペア巡回。固定絶対pathと実行UID所有の0700親を使う。
+name: oimobbs-pair-maintenance
+services:
+  pair-maintenance:
+    build:
+      context: ..
+    image: oimobbs-pair-maintenance:local
+    command: ["backup", "watch-pairs", "--copy-parent", "/private/copies", "--keys-parent", "/private/key-bundles", "--plan-parent", "/private/pair-plans", "--trust-instance", "/private/trust/site-instance.json", "--limit", "16", "--interval", "1m", "--budget", "30s"]
+    volumes:
+      - type: bind
+        source: /private/copies
+        target: /private/copies
+        bind:
+          create_host_path: false
+      - type: bind
+        source: /private/key-bundles
+        target: /private/key-bundles
+        bind:
+          create_host_path: false
+      - type: bind
+        source: /private/pair-plans
+        target: /private/pair-plans
+        bind:
+          create_host_path: false
+      - type: bind
+        source: /private/partial-plans
+        target: /private/partial-plans
+        bind:
+          create_host_path: false
+      - type: bind
+        source: /private/partial-key-plans
+        target: /private/partial-key-plans
+        bind:
+          create_host_path: false
+      - type: bind
+        source: /private/key-plans
+        target: /private/key-plans
+        bind:
+          create_host_path: false
+      - type: bind
+        source: /private/trust
+        target: /private/trust
+        read_only: true
+        bind:
+          create_host_path: false
+    network_mode: none
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    init: true
+    restart: "no"
+    stop_grace_period: 35s
+    mem_limit: 256m
+    cpus: 1
+    pids_limit: 64
+    logging:
+      driver: json-file
+      options: {max-size: "2m", max-file: "2"}

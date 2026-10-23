@@ -235,7 +235,7 @@ func Test5chThreadIDSelection(t *testing.T) {
 	if res.StatusCode != 200 || !strings.Contains(body, `value="required" selected`) || strings.Contains(body, `<select name="require_id">`) {
 		t.Fatal("effective ID selection")
 	}
-	f := pageFields(body)
+	f := threadPolicyFormFields(t, body, path)
 	for k, v := range map[string]string{"step": "confirm", "kind": "update_policy", "target": "", "id_mode": "optional", "slip_mode": "none", "post_limit": "1000", "dat_limit": "524288"} {
 		f.Set(k, v)
 	}

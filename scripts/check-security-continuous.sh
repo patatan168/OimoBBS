@@ -6,7 +6,7 @@ test "$(go version | cut -d' ' -f3)" = go1.27.3
 case "${1:-}" in ''|--fuzz-only) ;; *) exit 2 ;; esac
 if [ "${1:-}" != --fuzz-only ]; then
 go test -race ./internal/adminauth ./internal/securityaudit ./internal/publicedge ./internal/sealedbackup ./internal/delivery
-go test -race ./internal/bootstrap -run 'TestSecurityTransportHeaders|TestHTTPPathSecurityBoundary|TestAdminBrowserBoundaryBeforeLoginNonce|TestAdministratorBrowserFormOriginPolicy|TestProxy|TestNetworkFetch|TestSnapshotAssignedBoardCategory' -timeout=10m
+go test -race ./internal/bootstrap -run 'TestSecurityTransportHeaders|TestHTTPPathSecurityBoundary|TestAdminBrowserBoundaryBeforeLoginNonce|TestAdministratorBrowserFormOriginPolicy|TestAdminHTTPPrivilegeBoundaries|TestPrivateReportsRequireExplicitPermission|TestAdminQueuedSessionLogout|TestAdminPasskeyLoginCredentialOwnership|TestWSTG|TestProxy|TestNetworkFetch|TestSnapshotAssignedBoardCategory' -timeout=10m
 go vet ./cmd/... ./internal/... ./tools/...
 python3 scripts/check-deps.py
 python3 tools/designcheck/check.py

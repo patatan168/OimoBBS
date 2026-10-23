@@ -202,7 +202,7 @@ func TestThreadSlipPolicyForm(t *testing.T) {
 	if res.StatusCode != 200 {
 		t.Fatal(res.StatusCode, body)
 	}
-	fields := pageFields(body)
+	fields := threadPolicyFormFields(t, body, path)
 	for k, v := range map[string]string{"step": "confirm", "kind": "update_policy", "target": "", "slip_mode": "vvvvvv", "id_mode": "required", "post_limit": "1000", "dat_limit": "524288"} {
 		fields.Set(k, v)
 	}
@@ -211,7 +211,7 @@ func TestThreadSlipPolicyForm(t *testing.T) {
 	if res.StatusCode != 200 || !strings.Contains(body, "変更内容の確認") || !strings.Contains(body, "回線名・週ごとの識別子・IPアドレスを表示") {
 		t.Fatal(res.StatusCode, body)
 	}
-	fields.Set("step", "apply")
+	fields = pageFields(body)
 	res, body = c.request("POST", path, fields.Encode(), headers)
 	if res.StatusCode != 200 || !strings.Contains(body, "投稿の表示・上限を変更：反映済み") {
 		t.Fatal(res.StatusCode, body)
@@ -235,7 +235,7 @@ func TestThreadSlipPolicyForm(t *testing.T) {
 	if res.StatusCode != 200 || !strings.Contains(body, `value="vvvvvv" selected`) || strings.Contains(body, `<select name="require_public_ip">`) {
 		t.Fatal("display selection", res.StatusCode)
 	}
-	fields = pageFields(body)
+	fields = threadPolicyFormFields(t, body, path)
 	for k, v := range map[string]string{"step": "confirm", "kind": "update_policy", "target": "", "slip_mode": "vvvvv", "id_mode": "required", "post_limit": "1000", "dat_limit": "524288"} {
 		fields.Set(k, v)
 	}

@@ -233,7 +233,7 @@ func TestMeaningfulPermissionAndRuleForms(t *testing.T) {
 	}
 
 	_, page = c.request("GET", "/caps", "", nil)
-	if !strings.Contains(page, "返信する") || !strings.Contains(page, `type="datetime-local"`) || strings.Contains(page, "post・create") {
+	if !strings.Contains(page, "返信する") || !strings.Contains(page, `name="expires_at" type="text" data-date-format="local" data-date-kind="expiry"`) || strings.Contains(page, "post・create") {
 		t.Fatal("cap controls missing")
 	}
 	fields = pageFields(page)

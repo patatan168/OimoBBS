@@ -12,6 +12,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"testing"
 	"time"
@@ -20,6 +21,19 @@ import (
 	"oimobbs/internal/postcapture"
 	"oimobbs/internal/strictjson"
 )
+
+// threadPolicyFormFields は同じ送信先を持つ投稿停止フォームを除き、表示設定フォームのhidden値だけを取得する。
+func threadPolicyFormFields(t *testing.T, page, path string) url.Values {
+	t.Helper()
+	forms := regexp.MustCompile(`(?s)<form[^>]*action="`+regexp.QuoteMeta(path)+`"[^>]*>(.*?)</form>`).FindAllStringSubmatch(page, -1)
+	for _, form := range forms {
+		if strings.Contains(form[1], `name="display_selection"`) {
+			return pageFields(form[1])
+		}
+	}
+	t.Fatal("missing thread policy form", path)
+	return nil
+}
 
 func TestThreadActionsHTTPRecovery(t *testing.T) {
 	for _, kind := range []string{"stop", "archive", "move_link", "update_policy"} {

@@ -20,17 +20,22 @@ func TestAuditSourceOperationDetails(t *testing.T) {
 	request := domain.Hash{1}
 	keyID := uint32(1)
 	id := domain.NewID()
-	state := repo.site.State()
 	reason := "board_categories_update"
-	frame, err := controlFrame(state, id, domain.Time(time.Now().UnixNano()), reason,
-		[]store.Mutation{{Collection: "site", Key: "state", Value: state.Rows["site:state"].Value}},
-		[]string{}, domain.Actor{Kind: "admin", ID: &actor, Reason: reason, Request: &request, Idempotency: &request, KeyID: &keyID})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if result := repo.site.Append(frame); result.Status != store.Durable {
-		t.Fatal(result)
-	}
+	func() {
+		// 起動時の回線更新もsiteを参照するため、fixtureの直接追記にも所有mutexを使う。
+		repo.mu.Lock()
+		defer repo.mu.Unlock()
+		state := repo.site.State()
+		frame, err := controlFrame(state, id, domain.Time(time.Now().UnixNano()), reason,
+			[]store.Mutation{{Collection: "site", Key: "state", Value: state.Rows["site:state"].Value}},
+			[]string{}, domain.Actor{Kind: "admin", ID: &actor, Reason: reason, Request: &request, Idempotency: &request, KeyID: &keyID})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if result := repo.site.Append(frame); result.Status != store.Durable {
+			t.Fatal(result)
+		}
+	}()
 	q := auditQuery{From: time.Now().Add(-time.Hour), To: time.Now().Add(time.Hour), Action: reason}
 	for attempt := 0; attempt < 2; attempt++ {
 		rows, err := collectAuditFixture(repo, context.Background(), q)

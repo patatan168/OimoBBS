@@ -177,16 +177,21 @@ func TestAdminAuditBrowser(t *testing.T) {
 		t.Fatal(err)
 	}
 	request, keyID := domain.Hash{1}, uint32(1)
-	state := repo.site.State()
-	frame, err := controlFrame(state, domain.NewID(), domain.Time(time.Now().UnixNano()), "board_categories_update",
-		[]store.Mutation{{Collection: "site", Key: "state", Value: state.Rows["site:state"].Value}}, []string{},
-		domain.Actor{Kind: "admin", ID: &session.Admin, Reason: "board_categories_update", Request: &request, Idempotency: &request, KeyID: &keyID})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if result := repo.site.Append(frame); result.Status != store.Durable {
-		t.Fatal(result)
-	}
+	func() {
+		// HTTP・起動処理と同じ所有mutexで、試験用の直接追記も保護する。
+		repo.mu.Lock()
+		defer repo.mu.Unlock()
+		state := repo.site.State()
+		frame, err := controlFrame(state, domain.NewID(), domain.Time(time.Now().UnixNano()), "board_categories_update",
+			[]store.Mutation{{Collection: "site", Key: "state", Value: state.Rows["site:state"].Value}}, []string{},
+			domain.Actor{Kind: "admin", ID: &session.Admin, Reason: "board_categories_update", Request: &request, Idempotency: &request, KeyID: &keyID})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if result := repo.site.Append(frame); result.Status != store.Durable {
+			t.Fatal(result)
+		}
+	}()
 	for _, name := range []string{"監査画面の試験1", "監査画面の試験2"} {
 		res, _ := c.site()
 		headers := http.Header{"Content-Type": {"application/json"}, "If-Match": {res.Header.Get("ETag")}, "X-CSRF-Token": {res.Header.Get("X-CSRF-Token")}, "Idempotency-Key": {domain.NewID().String()}}

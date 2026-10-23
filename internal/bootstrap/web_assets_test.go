@@ -164,7 +164,7 @@ func TestAdminHTMLBoundary(t *testing.T) {
 	defer c.server.Close()
 	for _, path := range []string{"/audit", "/boards", "/administrators", "/reading", "/waf", "/abuse-guard", "/operations", "/networks", "/rules", "/passkeys", "/manual", "/reports", "/maintenance"} {
 		res, body := c.request("GET", path, "", nil)
-		if res.StatusCode != 401 || res.Header.Get("Cache-Control") != "no-store" || strings.Contains(body, `name="password"`) {
+		if res.StatusCode != 401 || res.Header.Get("Cache-Control") != "no-store" || !strings.Contains(body, `data-login-form`) || strings.Contains(body, `name="request_id"`) || res.Header.Get("X-CSRF-Token") != "" {
 			t.Fatal("anonymous admin HTML", path, res.StatusCode)
 		}
 	}

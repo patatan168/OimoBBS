@@ -1,0 +1,34 @@
+<!-- 管理者本人のパスキーを登録日付きで表示し、登録・削除には再認証を要求する。 -->
+<!doctype html>
+<html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>パスキー — OimoBBS管理</title>{{template "admin-assets" .}}</head>
+<body class="admin">{{template "admin-header" .}}
+<main id="main" class="passkeys-page" tabindex="-1">
+<header class="passkeys-heading"><span class="passkey-emblem">{{template "passkey-icon"}}</span><div><h1>自分のパスキー</h1><p>指紋・顔認証やPINで、スムーズにログイン。</p></div></header>
+<div class="passkey-notice" data-passkey-reauth-required{{if .Reauthenticated}} hidden{{end}}><div><strong>パスキーを追加・削除するには</strong><p>安全のため、先に本人確認をお願いします。</p></div><a class="action-button passkey-button" href="{{adminBase}}/reauth?return_to=%2Fpasskeys">{{template "shield-icon"}}<span>再認証して登録・削除へ進む</span></a></div>
+<div class="passkey-workspace" data-passkey-manager data-csrf="{{.CSRF}}">
+<section class="passkey-panel" aria-labelledby="passkey-list-title"><div class="passkey-panel-heading"><h2 id="passkey-list-title">登録したパスキー</h2><span class="passkey-count">{{len .Rows}} / 16件</span></div>
+<ul class="passkey-list">{{range .Rows}}
+<li class="passkey-row"><span class="passkey-row-icon">{{template "passkey-icon"}}</span><div class="passkey-row-copy"><h3>{{.Name}}</h3><p>登録日 <span>{{.Created}}</span></p></div>{{if $.Reauthenticated}}<button class="passkey-remove" type="button" data-passkey-remove="{{.ID}}" aria-label="{{.Name}}のパスキーを削除">削除</button>{{end}}</li>
+{{else}}<li class="passkey-empty"><span class="passkey-emblem">{{template "passkey-icon"}}</span><h3>まだパスキーがありません</h3><p>お使いの端末やセキュリティキーを登録すると、<br>パスワードを入力せずにログインできます。</p></li>{{end}}</ul></section>
+{{if .Reauthenticated}}<section class="passkey-panel passkey-add" aria-labelledby="passkey-add-title"><h2 id="passkey-add-title">新しいパスキーを追加</h2><p>あとで見分けられる名前を付けてください。</p><form data-passkey-register><label>パスキーの名前<input name="name" maxlength="128" required placeholder="例：普段使うスマートフォン"></label><button class="passkey-button" type="submit">{{template "passkey-icon"}}<span>パスキーを登録</span></button></form></section>{{end}}
+<section class="passkey-panel" data-otp-manager data-csrf="{{.OTPCSRF}}"><h2>認証アプリのOTP</h2><p>{{if .OTPEnabled}}登録済み{{else}}未登録{{end}}。6桁のコードは30秒ごとに変わります。</p>{{if .Reauthenticated}}{{if .OTPEnabled}}<button type="button" data-otp-remove>OTPを解除する</button>{{else}}<button type="button" data-otp-begin>認証アプリへ登録する</button><div data-otp-setup hidden><p>認証アプリでQRコードを読み取るか、「手動入力」で追加してください。種類は時刻ベース、6桁、30秒です。登録用キーはこの画面だけに表示します。</p><img data-otp-qr alt="認証アプリ登録用QRコード"><p><strong>登録用キー：</strong><code data-otp-secret></code></p><p><a data-otp-uri>対応する認証アプリで開く</a></p><form data-otp-finish><label>アプリの6桁のコード<input name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required></label><button type="submit">コードを確認して登録</button></form><p>登録が完了すると全端末でログアウトします。使用したコードは再利用できないため、次のコードでログインしてください。</p></div>{{end}}{{else}}<p>登録・解除の前に<a href="{{adminBase}}/reauth?return_to=%2Fpasskeys">再認証</a>してください。</p>{{end}}</section>
+<section class="passkey-panel" data-auth-policy data-csrf="{{.OTPCSRF}}">
+<h2>このアカウントのログイン制限</h2>
+{{if .StrongReauthenticated}}
+<form data-auth-policy-form>
+<label class="check-option"><input type="checkbox" name="password_disabled"{{if .PasswordDisabled}} checked{{end}}>パスキーまたはパスワード＋OTPだけを受け付ける</label>
+<p>有効にするとパスワード単独でのログイン・再認証を禁止します。変更すると全端末でログアウトします。</p>
+<button type="submit">ログイン制限を保存</button>
+</form>
+{{else}}
+<p>パスキーまたはパスワード＋OTPだけを受け付ける</p>
+<p data-auth-policy-state>現在の設定：<strong>{{if .PasswordDisabled}}有効{{else}}無効{{end}}</strong></p>
+<p>変更するには<a href="{{adminBase}}/reauth?return_to=%2Fpasskeys">パスキーまたはパスワードとOTPで再認証</a>してください。</p>
+{{end}}
+</section>
+<p class="passkey-status" role="status" data-passkey-status aria-live="polite"></p></div>
+<details class="passkey-help"><summary>パスキーの利用について</summary><p>登録・削除には10分以内の再認証が必要です。削除すると、すべての端末でログアウトします。パスワード単独の認証を禁止した後にすべての認証手段を失った場合、サイト管理者は停止中のコマンドで復旧し、それ以外の管理者はサイト管理者にWebでの一時パスワード発行を依頼してください。</p><p>端末やセキュリティキーに保存できるパスキーが必要です。以前のキーでログインできない場合は、パスワードでログインして再登録してください。</p><p>HTTPSまたはブラウザが許可するlocalhostで利用できます。管理画面のホスト名を変更すると再登録が必要です。</p></details>
+<noscript><p>パスキーを使うにはJavaScriptを有効にしてください。</p></noscript>
+</main>{{template "footer" .}}</body></html>
+
+{{define "page-assets"}}{{template "stylesheet" "admin-auth.css"}}{{template "javascript" "admin-auth.js"}}{{end}}

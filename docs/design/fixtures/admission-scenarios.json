@@ -1,0 +1,13 @@
+{
+  "schema": "admission-design-scenarios-v1",
+  "execution_status": "NOT_RUN",
+  "time_unit": "seconds_from_activation",
+  "scenarios": [
+    {"case": "confirmation", "attempts": 2, "confirmations": 1, "accepted_posts": 1, "expected_attempt_cost": 2, "expected_accepted_cost": 1},
+    {"case": "duplicate", "accepted_posts": 1, "duplicate_requests": 2, "expected_attempt_cost": 3, "expected_accepted_cost": 1},
+    {"case": "atomic_reject", "available": {"ip": 0, "network": 120, "site": 400}, "cost_each": 1, "expected_http_status": 429, "expected_retry_after_seconds": 1, "expected_remaining": {"ip": 0, "network": 120, "site": 400}},
+    {"case": "create_window_boundary", "accepted_at": [0, 600, 1200, 1800, 2400, 3000], "request_at": 3600, "ring_minutes": 61, "window_limit": 6, "expected_http_status": 429, "expected_retry_after_seconds": 60, "earliest_retry_at": 3660},
+    {"case": "unknown", "reserved_cost": 1, "storage_outcome": "Unknown", "expected_refund": 0, "expected_board_writes_enabled": false},
+    {"case": "migration", "historical_records_have_rate_keys": false, "activation_repeated": true, "expected_rewrite_historical_records": false, "expected_reset_policy_ids": false, "expected_minimum_reader_version": 4}
+  ]
+}

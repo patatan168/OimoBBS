@@ -1,0 +1,78 @@
+/* パスキー・OTPのログイン、再認証、認証手段の設定。 */
+/* パスキーは静かな配色と一定の余白で、名前・登録日・操作を分ける。 */
+.passkeys-page { max-width:1040px; }
+.passkeys-heading { display:flex; align-items:center; gap:18px; margin-bottom:28px; }
+.passkeys-heading h1 { margin:0; }
+.passkeys-heading p { margin:6px 0 0; color:var(--muted); font-size:14px; }
+.passkey-emblem,.passkey-row-icon,.passkey-login-icon { display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; border:1px solid #dce3e9; color:#394b51; background:#f0f4f3; border-radius:14px; }
+.passkey-emblem { width:56px; height:56px; }
+.passkey-emblem svg { width:28px; height:28px; }
+.passkey-notice { display:flex; align-items:center; justify-content:space-between; gap:20px; padding:20px 24px; margin-bottom:24px; border:1px solid var(--line); border-radius:14px; background:var(--surface); }
+.passkey-notice p { margin:4px 0 0; color:var(--muted); font-size:14px; }
+.passkey-workspace { display:grid; grid-template-columns:minmax(0,1.35fr) minmax(280px,1fr); align-items:start; gap:24px; }
+.passkey-workspace:not(:has(.passkey-add)) { grid-template-columns:minmax(0,1fr); }
+.passkey-panel { border:1px solid #dce3e9; border-radius:16px; background:var(--paper); box-shadow:0 3px 12px #17203304; overflow:hidden; }
+.passkey-workspace > .passkey-panel { margin:0; }
+.passkey-panel-heading { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:22px 24px; border-bottom:1px solid #e8edf1; }
+.passkey-panel h2 { margin:0; font-size:17px; }
+.passkey-count { flex-shrink:0; padding:3px 10px; border-radius:20px; background:var(--surface); color:var(--muted); font-size:12px; font-variant-numeric:tabular-nums; }
+.passkey-list { list-style:none; margin:0; padding:0; }
+.passkey-row { display:flex; align-items:center; gap:14px; padding:22px 24px; }
+.passkey-row + .passkey-row { border-top:1px solid #e8edf1; }
+.passkey-row-icon { width:44px; height:44px; border-radius:12px; }
+.passkey-row-copy { flex:1; }
+.passkey-row-copy h3 { margin:0; font-size:15px; overflow-wrap:anywhere; }
+.passkey-row-copy p { margin:5px 0 0; color:var(--muted); font-size:12px; }
+.passkey-row-copy p span { margin-left:6px; }
+.passkey-remove { background:var(--paper); color:var(--error); border-color:var(--line); padding:8px 12px; flex-shrink:0; }
+.passkey-remove:hover { background:var(--error-bg); }
+.passkey-empty { padding:40px 24px; text-align:center; }
+.passkey-empty h3 { margin:18px 0 6px; font-size:16px; }
+.passkey-empty p { margin:0; color:var(--muted); font-size:13px; }
+.passkey-add { padding:24px; }
+.passkey-add > p { margin:8px 0 20px; color:var(--muted); font-size:13px; }
+.passkey-add form { margin:0; padding:0; border:0; border-radius:0; }
+.passkey-add form > button { width:100%; margin-top:18px; }
+.passkey-button { background:#303e43; color:#fff; border-color:#303e43; }
+.passkey-button:hover { background:#243136; filter:none; }
+.passkey-status { grid-column:1 / -1; margin:0; }
+.passkey-status:empty { display:none; }
+.passkey-help { margin-top:24px; color:var(--muted); font-size:13px; }
+.passkey-help > summary { min-height:44px; padding:10px 0; font-weight:600; }
+.passkey-help p { margin:8px 0; }
+/* ログイン名と同じフォーム内に、認証方法の選択肢として配置する。 */
+button.passkey-login-button { display:flex; width:100%; justify-content:flex-start; gap:14px; padding:16px; margin-top:20px; border:1px solid #c7d3d5; border-radius:12px; background:var(--paper); color:var(--ink); text-align:left; box-shadow:0 2px 5px #17203306; }
+button.passkey-login-button:hover { background:var(--surface); border-color:var(--muted); }
+.passkey-login-icon { width:42px; height:42px; border-radius:11px; }
+.passkey-login-copy { display:flex; flex:1; flex-direction:column; gap:3px; }
+.passkey-login-copy strong { font-size:15px; }
+.passkey-login-copy small { color:var(--muted); font-size:12px; font-weight:400; }
+.passkey-login-arrow { font-size:20px; color:#607772; }
+.auth-divider { display:flex; align-items:center; gap:12px; margin:24px 0; color:var(--muted); font-size:12px; font-weight:400; }
+.auth-divider::before,.auth-divider::after { content:""; flex:1; height:1px; background:#e0e6eb; }
+.auth-divider span { text-align:center; }
+.login-form [data-passkey-status]:not(:empty) { margin-top:16px; font-size:13px; }
+@media (max-width:760px) {
+ .passkey-workspace { grid-template-columns:minmax(0,1fr); gap:18px; }
+ .passkey-notice { flex-direction:column; align-items:stretch; padding:20px; gap:16px; }
+ .passkey-panel-heading,.passkey-row { padding:18px; }
+ .passkey-add { padding:20px; }
+}
+@media (max-width:359px) {
+ .passkeys-heading { align-items:flex-start; gap:12px; }
+ .passkeys-heading > .passkey-emblem { width:42px; height:42px; }
+ .passkey-row { flex-wrap:wrap; }
+ .passkey-row-copy { flex-basis:calc(100% - 60px); }
+ .passkey-remove { margin-left:58px; }
+ .passkey-login-arrow { display:none; }
+ button.passkey-login-button { padding:12px; gap:10px; }
+}
+/* OTPの手動登録キーとログイン制限を、狭い画面でも全文読めるようにする。 */
+.passkey-workspace > [data-otp-manager],.passkey-workspace > [data-auth-policy] { grid-column:1 / -1; padding:22px 24px; }
+[data-otp-secret] { display:block; max-width:100%; margin:10px 0; padding:12px; border-radius:8px; background:var(--surface); font-family:monospace; line-height:1.6; overflow-wrap:anywhere; user-select:all; }
+
+/* 認証アプリ用QRの白い余白を保ち、狭い画面でも領域内に収める。 */
+[data-otp-qr] { display: block; max-width: 100%; height: auto; background: white; image-rendering: pixelated; }
+
+.auth-help { color: var(--muted); font-size: .9rem; line-height: 1.6; }
+

@@ -1,0 +1,11 @@
+<!-- 構造化ローカルルールをプレーンテキストで編集する管理画面。 -->
+<!doctype html><html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>ローカルルール — OimoBBS管理</title>{{template "admin-assets" .}}</head>
+<body class="admin">{{template "admin-header" .}}<main id="main" tabindex="-1"><h1>ローカルルール</h1>
+{{if .Message}}<p role="alert">{{.Message}}</p>{{end}}
+<p>保存後、板のWeb画面と専ブラのローカルルール表示に反映されます。</p>
+<form method="post" action="{{adminURL (.Action)}}">
+<input type="hidden" name="csrf" value="{{.Values.Get "csrf"}}"><input type="hidden" name="revision" value="{{.Values.Get "revision"}}"><input type="hidden" name="request_id" value="{{.Values.Get "request_id"}}">
+<label>ローカルルール<textarea name="text" rows="14" cols="64">{{.Values.Get "text"}}</textarea></label>
+<p class="field-hint">1行を1段落として表示します。箇条書きは行頭に「* 」または「- 」を付け、リンクはhttpまたはhttpsのURLだけを1行に入力してください。HTMLタグは文字として表示します。128項目、合計16KiB、1項目2048バイトまで。空欄で保存すると削除します。</p>
+<button type="submit">保存</button> <a href="{{adminURL (.Action)}}">最新の設定を読み直す</a>
+</form><p><a href="{{adminBase}}/boards">板一覧へ</a></p></main>{{template "footer" .}}</body></html>

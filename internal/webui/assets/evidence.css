@@ -1,0 +1,82 @@
+/* 案件を比較できる一覧と、必要なときだけ開く保全・提出操作。 */
+.evidence-intro { margin-bottom:12px; color:var(--muted); }
+.evidence-tools { display:flex; flex-wrap:wrap; align-items:flex-start; gap:12px; margin:16px 0 20px; }
+.evidence-help { margin:0; flex:0 1 auto; }
+.evidence-help[open],.evidence-create[open] { flex:1 0 100%; }
+.evidence-help > summary { padding:12px; font-size:13px; }
+.evidence-create { margin:0; border:1px solid var(--line); border-radius:10px; background:var(--paper); }
+.evidence-create > summary { padding:10px 14px; font-weight:700; }
+.evidence-create .card { margin:0; border:0; }
+.evidence-list-heading { display:flex; align-items:center; justify-content:space-between; gap:12px; margin:24px 0 12px; }
+.evidence-list-heading h2 { margin:0; font-size:20px; }
+.evidence-list-heading > span { color:var(--muted); font-size:13px; }
+.evidence-list-columns,.evidence-case-summary { display:grid; grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) minmax(0,1.3fr) minmax(0,.7fr) minmax(0,1fr) 84px; gap:12px; align-items:center; }
+.evidence-list-columns { padding:8px 16px; color:var(--muted); font-size:12px; }
+.evidence-case { margin:0 0 8px; border:1px solid var(--line); border-radius:10px; background:var(--paper); overflow:hidden; }
+.evidence-case > .evidence-case-summary { padding:16px; list-style:none; cursor:pointer; font-weight:400; font-size:14px; border-radius:0; }
+.evidence-case-summary::-webkit-details-marker { display:none; }
+.evidence-case-summary:hover { background:var(--surface); }
+.evidence-case-summary:focus-visible { outline:3px solid var(--accent); outline-offset:-3px; }
+.evidence-case[open] > .evidence-case-summary { background:var(--surface); border-bottom:1px solid var(--line); }
+.evidence-case-summary > span { min-width:0; overflow-wrap:anywhere; }
+.evidence-case-title,.evidence-case-target { display:flex; flex-direction:column; gap:4px; }
+.evidence-case-title strong { font-size:14px; }
+.evidence-case-reason { color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.evidence-case-target > span { color:var(--muted); font-size:12px; }
+.evidence-case-state .admin-badge { font-size:12px; padding:3px 7px; }
+.evidence-case-state [data-state="partial"] { border-color:var(--error); color:var(--error); background:var(--error-bg); }
+.evidence-case-state [data-state="closed"] { color:var(--muted); }
+.evidence-case-until { font-size:12px; font-variant-numeric:tabular-nums; }
+.evidence-case-count { font-variant-numeric:tabular-nums; }
+.evidence-case-toggle { color:var(--accent); font-size:12px; text-align:right; white-space:nowrap; }
+.evidence-case-toggle::after { content:" ＋"; }
+.evidence-case[open] .evidence-case-toggle::after { content:" −"; }
+.evidence-case-body { padding:20px; }
+.evidence-case-body > h3 { margin-top:0; }
+.evidence-case-body p,.evidence-case-body dd { overflow-wrap:anywhere; }
+.evidence-case-body details { margin:16px 0; }
+.evidence-case-body textarea { min-height:80px; }
+.evidence-mobile-label,.evidence-until-short { display:none; }
+.evidence-empty { padding:24px; border:1px dashed var(--line); border-radius:10px; }
+@media (max-width:800px) {
+ .evidence-list-columns { display:none; }
+ .evidence-case > .evidence-case-summary { grid-template-columns:minmax(0,1fr) auto; gap:10px 12px; }
+ .evidence-case-title { grid-column:1; grid-row:1; }
+ .evidence-case-state { grid-column:2; grid-row:1; text-align:right; }
+ .evidence-case-target { grid-column:1 / -1; }
+ .evidence-case-count { grid-column:1; }
+ .evidence-case-until { grid-column:2; text-align:right; }
+ .evidence-case-toggle { grid-column:1 / -1; }
+ .evidence-mobile-label { display:inline; margin-right:5px; color:var(--muted); font-size:11px; }
+ .evidence-until-full { display:none; }
+ .evidence-until-short { display:inline; }
+ .evidence-case-body { padding:16px; }
+}
+@media (max-width:400px) {
+ .evidence-create > summary { font-size:14px; padding:10px 12px; }
+ .evidence-help > summary { font-size:12px; padding:10px 8px; }
+ .evidence-case > .evidence-case-summary { padding:12px; gap:8px; }
+ .evidence-case-state { max-width:120px; }
+ .evidence-list-heading { align-items:flex-start; }
+}
+
+/* 検索条件と現在の並び順を一覧の直前に表示する。 */
+.evidence-search { display:grid; grid-template-columns:minmax(160px,2fr) minmax(130px,1fr) minmax(160px,1fr) auto; gap:12px; align-items:end; padding:16px; border:1px solid var(--line); border-radius:10px; background:var(--paper); }
+.evidence-search label { display:flex; flex-direction:column; gap:6px; min-width:0; font-size:13px; }
+.evidence-search input,.evidence-search select { width:100%; min-width:0; box-sizing:border-box; }
+.evidence-search-actions { display:flex; align-items:center; gap:12px; white-space:nowrap; }
+.evidence-search-actions a { font-size:12px; }
+.evidence-search > p { grid-column:1 / -1; margin:0; color:var(--muted); font-size:12px; }
+.evidence-case-created { color:var(--muted); font-size:12px; font-variant-numeric:tabular-nums; }
+.evidence-list-heading > span { text-align:right; }
+@media (max-width:1000px) {
+ .evidence-search { grid-template-columns:minmax(0,1fr) minmax(0,1fr); }
+ .evidence-search-query,.evidence-search-actions { grid-column:1 / -1; }
+}
+
+.evidence-kinds { display:flex; flex-wrap:wrap; gap:8px; margin:16px 0; }
+.evidence-kinds a { padding:10px 14px; border:1px solid var(--line); border-radius:8px; font-size:14px; }
+.evidence-kinds a[aria-current="page"] { background:var(--button); border-color:var(--button); color:var(--on-accent); text-decoration:none; }
+.evidence-storage { padding:12px; background:var(--surface); border-radius:8px; }
+.evidence-search label { margin-top:0; }
+.evidence-exports > section { border-top:1px solid var(--line); padding-top:8px; }

@@ -1,0 +1,38 @@
+# 独立した署名計画付き鍵束巡回。固定絶対pathと実行UID所有の0700親を使う。
+name: oimobbs-keys-maintenance
+services:
+  keys-maintenance:
+    build:
+      context: ..
+    image: oimobbs-keys-maintenance:local
+    command: ["backup", "watch-keys-planned", "--keys-parent", "/private/key-bundles", "--plan-parent", "/private/key-plans", "--trust-instance", "/private/trust/site-instance.json", "--limit", "16", "--interval", "1m", "--budget", "30s"]
+    volumes:
+      - type: bind
+        source: /private/key-bundles
+        target: /private/key-bundles
+        bind:
+          create_host_path: false
+      - type: bind
+        source: /private/key-plans
+        target: /private/key-plans
+        bind:
+          create_host_path: false
+      - type: bind
+        source: /private/trust
+        target: /private/trust
+        read_only: true
+        bind:
+          create_host_path: false
+    network_mode: none
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    init: true
+    restart: "no"
+    stop_grace_period: 35s
+    mem_limit: 256m
+    cpus: 1
+    pids_limit: 64
+    logging:
+      driver: json-file
+      options: {max-size: "2m", max-file: "2"}

@@ -1,0 +1,5 @@
+/* 管理者の権限選択と、役割の参照表。 */
+.admin-access-permissions { grid-template-columns:repeat(auto-fit,minmax(min(280px,100%),1fr)); }
+.admin-access-permissions .check-option { align-items:flex-start; }
+.admin-access-permissions small { display:block; margin-top:6px; }
+.admin-access-table { overflow-x:auto; }

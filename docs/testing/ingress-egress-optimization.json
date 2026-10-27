@@ -1,0 +1,2354 @@
+{
+  "date": "2026-10-24",
+  "baseline_commit": "c6be599751fae275417487752a2b2be67a1bf181",
+  "scope": "isolated synthetic loopback HTTPS; fsync unchanged; no WAN capacity claim; deployment recorded separately",
+  "notes": [
+    "Mixed tests are single trials per version/resource cell, not confidence intervals.",
+    "Mixed high-rate reads can skip scheduled issuance; these are distinct from HTTP errors.",
+    "In the first four mixed trials, skipped read events retain the original legacy/web label, even for subject schedules; aggregate skipped counts and issued subject latency are accurate. Steady trials fix the classification.",
+    "Mixed trials with restart only expose queue counters for the last boot in optional_shutdown; those counters do not prove loss-free logging during the load. Burst and steady trials provide same-boot queue accounting.",
+    "Native benchmarks report elapsed time including real filesystem sync; allocation count rises about 14 percent even though allocated bytes are similar.",
+    "WAF retains one admission mutex for exact global/client token and concurrency decisions.",
+    "Log sequence/hash linkage, state application and Write/Sync remain ordered; independent computation is parallel.",
+    "Listings use each thread committed generation rather than one board-wide instantaneous view; deletion/expiry leases remain checked before and during transmission."
+  ],
+  "native": {
+    "waf_before": {
+      "2": {
+        "samples": [
+          {
+            "ns": 1393.0,
+            "bytes": 71,
+            "allocations": 2
+          },
+          {
+            "ns": 1589.0,
+            "bytes": 71,
+            "allocations": 2
+          },
+          {
+            "ns": 1527.0,
+            "bytes": 71,
+            "allocations": 2
+          }
+        ],
+        "median_ns": 1527.0
+      },
+      "4": {
+        "samples": [
+          {
+            "ns": 1506.0,
+            "bytes": 71,
+            "allocations": 2
+          },
+          {
+            "ns": 1509.0,
+            "bytes": 71,
+            "allocations": 2
+          },
+          {
+            "ns": 1437.0,
+            "bytes": 71,
+            "allocations": 2
+          }
+        ],
+        "median_ns": 1506.0
+      }
+    },
+    "waf_after": {
+      "2": {
+        "samples": [
+          {
+            "ns": 1136.0,
+            "bytes": 59,
+            "allocations": 2
+          },
+          {
+            "ns": 1299.0,
+            "bytes": 59,
+            "allocations": 2
+          },
+          {
+            "ns": 1298.0,
+            "bytes": 59,
+            "allocations": 2
+          }
+        ],
+        "median_ns": 1298.0
+      },
+      "4": {
+        "samples": [
+          {
+            "ns": 1193.0,
+            "bytes": 59,
+            "allocations": 2
+          },
+          {
+            "ns": 1222.0,
+            "bytes": 59,
+            "allocations": 2
+          },
+          {
+            "ns": 1166.0,
+            "bytes": 59,
+            "allocations": 2
+          }
+        ],
+        "median_ns": 1193.0
+      }
+    },
+    "log_before": {
+      "2": {
+        "samples": [
+          {
+            "ns": 49287130.0,
+            "bytes": 8377690,
+            "allocations": 36078
+          },
+          {
+            "ns": 49691306.0,
+            "bytes": 8401888,
+            "allocations": 36077
+          },
+          {
+            "ns": 48425575.0,
+            "bytes": 8289609,
+            "allocations": 36067
+          }
+        ],
+        "median_ns": 49287130.0
+      },
+      "4": {
+        "samples": [
+          {
+            "ns": 48438895.0,
+            "bytes": 8583530,
+            "allocations": 36119
+          },
+          {
+            "ns": 49400571.0,
+            "bytes": 8554739,
+            "allocations": 36113
+          },
+          {
+            "ns": 48058323.0,
+            "bytes": 8559495,
+            "allocations": 36115
+          }
+        ],
+        "median_ns": 48438895.0
+      }
+    },
+    "log_after": {
+      "2": {
+        "samples": [
+          {
+            "ns": 30056786.0,
+            "bytes": 8381652,
+            "allocations": 40959
+          },
+          {
+            "ns": 31116128.0,
+            "bytes": 8378788,
+            "allocations": 40956
+          },
+          {
+            "ns": 30831316.0,
+            "bytes": 8350330,
+            "allocations": 40951
+          }
+        ],
+        "median_ns": 30831316.0
+      },
+      "4": {
+        "samples": [
+          {
+            "ns": 21292903.0,
+            "bytes": 8503379,
+            "allocations": 41008
+          },
+          {
+            "ns": 20691568.0,
+            "bytes": 8676399,
+            "allocations": 41030
+          },
+          {
+            "ns": 21260994.0,
+            "bytes": 8697086,
+            "allocations": 41028
+          }
+        ],
+        "median_ns": 21260994.0
+      }
+    }
+  },
+  "images": {
+    "oimobbs:reading-resources-b3853f0-20261023": "sha256:d032957c785d32cade5e59dd245ddf5b30fed5df207b397b6861cbed7d025497",
+    "oimobbs:ingress-egress-20261024": "sha256:5c86e1104eb00ec49fcdfb7e04069eee1965d942ce6f689207c1c291d35c197d"
+  },
+  "source_files": {
+    "internal/app/posting.go": {
+      "baseline_sha256": "c1d542c7d63e2033d0074f8c361d7a1736e9cc32185feb7e00d543c972ab61ea",
+      "after_sha256": "72ecef55e7d1da9a3a98e41223f1438113aa524ee0f0d723ca189ca4c0c6230c"
+    },
+    "internal/app/public_reader.go": {
+      "baseline_sha256": "8cb7439d67833197ffe12f234d8a6da988297a8ef5cb2a325c86468259e80b45",
+      "after_sha256": "638a2036c853816446a61925df35710287842c077d1908a71c2995523635cb60"
+    },
+    "internal/board/worker.go": {
+      "baseline_sha256": "0e14587c5dfc0e2e5a39ca03c456c05f3551e60c2cab85cfbbc357330b347933",
+      "after_sha256": "4e43c69363cd9bdd4168d211266203c6622448277bf56c9bd47a103ad0bc8bc2"
+    },
+    "internal/bootstrap/posting.go": {
+      "baseline_sha256": "5d88dae91590a37f021fd1d457bc877d96c25bfd844a3d4a99438e4b58f0621e",
+      "after_sha256": "29112f088ce4e51eb4176ff6e94fdbcdec1776ab9d536198f46cf415ec4166b9"
+    },
+    "internal/bootstrap/posting_recovery.go": {
+      "baseline_sha256": "139d9e8bbdaec71948e8ddd140bcd173d1858b0a5d60e185cd14b30cf606ef7b",
+      "after_sha256": "ded814e89e5851afcf332af7eae75aba7be421eed08d940e71cd2cc96af69df3"
+    },
+    "internal/bootstrap/site_web.go": {
+      "baseline_sha256": "ef1925b3b6943ad8574cb0cfa47c478752ac160c3f94cd6e9c46475113bf9c28",
+      "after_sha256": "c32d15e5ec49b4a2890d252e9d721b01372b305d6b69833eb592d55503155ed0"
+    },
+    "internal/evidence/optional_batch.go": {
+      "baseline_sha256": "79562c81ac4313ac5b7d903173c60ab84ac55d42f9a616b710e6143923fff664",
+      "after_sha256": "bee728b92cfded5e747dcacbf15f50285dbaa8997fe686444caf74eb20a2b95b"
+    },
+    "internal/store/control_log.go": {
+      "baseline_sha256": "14791b016b52c9b7fb84e495c653e89027e5e07c5d53a8b5a29deb7d0b91c7f4",
+      "after_sha256": "b1b6d43dbfe204563d9c42ccf1d726411d1d9243f2197d4aa6978240c7908923"
+    },
+    "internal/store/durable.go": {
+      "baseline_sha256": "d85a883326b400dd8d4469afce801c6012ef45ae8161f3b6941887bb3642e3db",
+      "after_sha256": "2b1e37a54894a70f145eaca2aeba36e11b5ff0eccd703ee49610ba1ecfefbee0"
+    },
+    "internal/store/wal_parallel.go": {
+      "baseline_sha256": "7360ce6f108f6f68c80f307689eff6d8d91cb38aabdf92a6cf7e859d0f8be2ef",
+      "after_sha256": "fc57989380222ee247b1bb661d22d06481698b168b64cfe49184e041c72a4156"
+    },
+    "internal/waf/traffic.go": {
+      "baseline_sha256": "ad11c4922ca615508e45f840d805026cec893cfb1e7586cb69bc8c49565bed68",
+      "after_sha256": "ebe0829007ba5515bfbe22a7e5bead3f388ac9f6f92ca520137524e31f794e95"
+    },
+    "internal/waf/traffic_operations.go": {
+      "baseline_sha256": "2efcf961cd4a41570e93b1dbbbbffc7d2056b65209c07ee9f5c76c1b298e69e7",
+      "after_sha256": "24e96b3d633d2b41494d09b9ec32f3b10301392ac7a58c233b04b434d9771b7b"
+    }
+  },
+  "trials": [
+    {
+      "name": "mixed-base-2cpu",
+      "command": [
+        "mise",
+        "exec",
+        "--",
+        "python3",
+        "scripts/probe-thread-resources.py",
+        "--image",
+        "oimobbs:reading-resources-b3853f0-20261023",
+        "--cpus",
+        "2",
+        "--memory",
+        "2g",
+        "--egress-bps",
+        "8000000000",
+        "--waf",
+        "--waf-posting-rate",
+        "1000",
+        "--waf-posting-concurrent",
+        "256",
+        "--posting-capacity-rate",
+        "160",
+        "--posting-capacity-seconds",
+        "10",
+        "--posting-capacity-workers",
+        "40",
+        "--posting-capacity-threads",
+        "16",
+        "--posting-capacity-reads",
+        "800",
+        "--posting-capacity-subject-every",
+        "4",
+        "--posting-capacity-restart",
+        "--optional-log-stats",
+        "--collect-server-log",
+        "--output",
+        "/home/patatan/OimoBBS/var/ingress-egress-20261024/mixed-base-2cpu.json"
+      ],
+      "exit_code": 0,
+      "output": "var/ingress-egress-20261024/mixed-base-2cpu.json",
+      "result": {
+        "image": "sha256:d032957c785d32cade5e59dd245ddf5b30fed5df207b397b6861cbed7d025497",
+        "cpu_max": "200000 100000",
+        "memory_max": "2147483648",
+        "summary": {
+          "planned": 1600,
+          "sent": 1600,
+          "success": 1600,
+          "acknowledged": 1600,
+          "completion_errors_after_ack": 0,
+          "errors": 0,
+          "skipped": 0,
+          "http_p95_ms": 202.38292822614312,
+          "scheduled_p95_ms": 203.57217313721776,
+          "issuance_wait_p95_ms": 0.8425028063356876
+        },
+        "read_summary": {
+          "planned": 8000,
+          "sent": 7190,
+          "success": 7190,
+          "acknowledged": 7190,
+          "completion_errors_after_ack": 0,
+          "errors": 0,
+          "skipped": 810,
+          "http_p95_ms": 91.84186672791839,
+          "scheduled_p95_ms": null,
+          "issuance_wait_p95_ms": null,
+          "completed_body_mbps": 1755.4295255999998
+        },
+        "read_by_kind": {
+          "legacy": {
+            "planned": 5436,
+            "sent": 4786,
+            "success": 4786,
+            "acknowledged": 4786,
+            "completion_errors_after_ack": 0,
+            "errors": 0,
+            "skipped": 650,
+            "http_p95_ms": 30.17962770536542,
+            "scheduled_p95_ms": null,
+            "issuance_wait_p95_ms": null
+          },
+          "subject": {
+            "planned": 1206,
+            "sent": 1206,
+            "success": 1206,
+            "acknowledged": 1206,
+            "completion_errors_after_ack": 0,
+            "errors": 0,
+            "skipped": 0,
+            "http_p95_ms": 122.22809996455908,
+            "scheduled_p95_ms": null,
+            "issuance_wait_p95_ms": null
+          },
+          "web": {
+            "planned": 1358,
+            "sent": 1198,
+            "success": 1198,
+            "acknowledged": 1198,
+            "completion_errors_after_ack": 0,
+            "errors": 0,
+            "skipped": 160,
+            "http_p95_ms": 25.983259081840515,
+            "scheduled_p95_ms": null,
+            "issuance_wait_p95_ms": null
+          }
+        },
+        "resources": {
+          "cpu_cores_average": 1.5266242158806833,
+          "generator_cpu_seconds": 8.439663655,
+          "wbytes_delta": 32411648,
+          "wios_delta": 4299,
+          "oom_kill_delta": 0,
+          "throttled_usec_delta": 0,
+          "io_some_usec_delta": 52742
+        },
+        "stable_at_tested_rate": true,
+        "restart": {
+          "ok": true,
+          "mode": "graceful container restart on the same data volume",
+          "ready": true,
+          "readiness_timeout_seconds": 60,
+          "ready_seconds": 11.407436911016703,
+          "verification_seconds": 11.41639931499958,
+          "threads": [
+            {
+              "key": "1792805200",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            },
+            {
+              "key": "1792805201",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            },
+            {
+              "key": "1792805202",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            },
+            {
+              "key": "1792805203",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            },
+            {
+              "key": "1792805204",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            },
+            {
+              "key": "1792805205",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            },
+            {
+              "key": "1792805206",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            },
+            {
+              "key": "1792805207",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            },
+            {
+              "key": "1792805208",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            },
+            {
+              "key": "1792805209",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            },
+            {
+              "key": "1792805210",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            },
+            {
+              "key": "1792805211",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            },
+            {
+              "key": "1792805212",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            },
+            {
+              "key": "1792805213",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            },
+            {
+              "key": "1792805214",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            },
+            {
+              "key": "1792805215",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            }
+          ]
+        },
+        "recovery": {
+          "planned": 100,
+          "sent": 100,
+          "success": 100,
+          "acknowledged": 100,
+          "completion_errors_after_ack": 0,
+          "errors": 0,
+          "skipped": 0,
+          "http_p95_ms": 34.44269997999072,
+          "scheduled_p95_ms": 37.887715734541416,
+          "issuance_wait_p95_ms": null
+        },
+        "optional_shutdown": {
+          "clean": true,
+          "queue": {
+            "accepted": 17,
+            "saved": 17,
+            "failed": 0,
+            "dropped_capacity": 0,
+            "dropped_invalid": 0,
+            "dropped_closed": 0,
+            "dropped_shutdown": 0,
+            "loss_started_at_ns": "0",
+            "loss_finished_at_ns": "0",
+            "pending": 0,
+            "pending_bytes": 0,
+            "closed": true
+          }
+        },
+        "optional_storage": {
+          "file_bytes": 6039344,
+          "day_file_bytes": {
+            "20261024": 6039344
+          }
+        },
+        "memory_peak_bytes": 543547392,
+        "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n"
+      }
+    },
+    {
+      "name": "mixed-after-4cpu",
+      "command": [
+        "mise",
+        "exec",
+        "--",
+        "python3",
+        "scripts/probe-thread-resources.py",
+        "--image",
+        "oimobbs:ingress-egress-20261024",
+        "--cpus",
+        "4",
+        "--memory",
+        "2g",
+        "--egress-bps",
+        "8000000000",
+        "--waf",
+        "--waf-posting-rate",
+        "1000",
+        "--waf-posting-concurrent",
+        "256",
+        "--posting-capacity-rate",
+        "160",
+        "--posting-capacity-seconds",
+        "10",
+        "--posting-capacity-workers",
+        "40",
+        "--posting-capacity-threads",
+        "16",
+        "--posting-capacity-reads",
+        "800",
+        "--posting-capacity-subject-every",
+        "4",
+        "--posting-capacity-restart",
+        "--optional-log-stats",
+        "--collect-server-log",
+        "--output",
+        "/home/patatan/OimoBBS/var/ingress-egress-20261024/mixed-after-4cpu.json"
+      ],
+      "exit_code": 0,
+      "output": "var/ingress-egress-20261024/mixed-after-4cpu.json",
+      "result": {
+        "image": "sha256:5c86e1104eb00ec49fcdfb7e04069eee1965d942ce6f689207c1c291d35c197d",
+        "cpu_max": "400000 100000",
+        "memory_max": "2147483648",
+        "summary": {
+          "planned": 1600,
+          "sent": 1600,
+          "success": 1600,
+          "acknowledged": 1600,
+          "completion_errors_after_ack": 0,
+          "errors": 0,
+          "skipped": 0,
+          "http_p95_ms": 54.16269600391388,
+          "scheduled_p95_ms": 54.922232404351234,
+          "issuance_wait_p95_ms": 0.967624131590128
+        },
+        "read_summary": {
+          "planned": 8000,
+          "sent": 7986,
+          "success": 7986,
+          "acknowledged": 7986,
+          "completion_errors_after_ack": 0,
+          "errors": 0,
+          "skipped": 14,
+          "http_p95_ms": 10.8051598072052,
+          "scheduled_p95_ms": null,
+          "issuance_wait_p95_ms": null,
+          "completed_body_mbps": 1755.893448
+        },
+        "read_by_kind": {
+          "legacy": {
+            "planned": 4801,
+            "sent": 4787,
+            "success": 4787,
+            "acknowledged": 4787,
+            "completion_errors_after_ack": 0,
+            "errors": 0,
+            "skipped": 14,
+            "http_p95_ms": 16.058512963354588,
+            "scheduled_p95_ms": null,
+            "issuance_wait_p95_ms": null
+          },
+          "subject": {
+            "planned": 1999,
+            "sent": 1999,
+            "success": 1999,
+            "acknowledged": 1999,
+            "completion_errors_after_ack": 0,
+            "errors": 0,
+            "skipped": 0,
+            "http_p95_ms": 4.584643989801407,
+            "scheduled_p95_ms": null,
+            "issuance_wait_p95_ms": null
+          },
+          "web": {
+            "planned": 1200,
+            "sent": 1200,
+            "success": 1200,
+            "acknowledged": 1200,
+            "completion_errors_after_ack": 0,
+            "errors": 0,
+            "skipped": 0,
+            "http_p95_ms": 5.539514124393463,
+            "scheduled_p95_ms": null,
+            "issuance_wait_p95_ms": null
+          }
+        },
+        "resources": {
+          "cpu_cores_average": 1.8346075652303349,
+          "generator_cpu_seconds": 9.58361848,
+          "wbytes_delta": 24686592,
+          "wios_delta": 2143,
+          "oom_kill_delta": 0,
+          "throttled_usec_delta": 0,
+          "io_some_usec_delta": 26918
+        },
+        "stable_at_tested_rate": true,
+        "restart": {
+          "ok": true,
+          "mode": "graceful container restart on the same data volume",
+          "ready": true,
+          "readiness_timeout_seconds": 60,
+          "ready_seconds": 10.650637757964432,
+          "verification_seconds": 10.660175834782422,
+          "threads": [
+            {
+              "key": "1792805277",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            },
+            {
+              "key": "1792805278",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            },
+            {
+              "key": "1792805279",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            },
+            {
+              "key": "1792805280",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            },
+            {
+              "key": "1792805281",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            },
+            {
+              "key": "1792805282",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            },
+            {
+              "key": "1792805283",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            },
+            {
+              "key": "1792805284",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            },
+            {
+              "key": "1792805285",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            },
+            {
+              "key": "1792805286",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            },
+            {
+              "key": "1792805287",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            },
+            {
+              "key": "1792805288",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            },
+            {
+              "key": "1792805289",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            },
+            {
+              "key": "1792805290",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            },
+            {
+              "key": "1792805291",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            },
+            {
+              "key": "1792805292",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            }
+          ]
+        },
+        "recovery": {
+          "planned": 100,
+          "sent": 100,
+          "success": 100,
+          "acknowledged": 100,
+          "completion_errors_after_ack": 0,
+          "errors": 0,
+          "skipped": 0,
+          "http_p95_ms": 33.29651989042759,
+          "scheduled_p95_ms": 33.421100582927465,
+          "issuance_wait_p95_ms": null
+        },
+        "optional_shutdown": {
+          "clean": true,
+          "queue": {
+            "accepted": 17,
+            "saved": 17,
+            "failed": 0,
+            "dropped_capacity": 0,
+            "dropped_invalid": 0,
+            "dropped_closed": 0,
+            "dropped_shutdown": 0,
+            "loss_started_at_ns": "0",
+            "loss_finished_at_ns": "0",
+            "pending": 0,
+            "pending_bytes": 0,
+            "closed": true
+          }
+        },
+        "optional_storage": {
+          "file_bytes": 6385107,
+          "day_file_bytes": {
+            "20261024": 6385107
+          }
+        },
+        "memory_peak_bytes": 491585536,
+        "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n"
+      }
+    },
+    {
+      "name": "mixed-after-2cpu",
+      "command": [
+        "mise",
+        "exec",
+        "--",
+        "python3",
+        "scripts/probe-thread-resources.py",
+        "--image",
+        "oimobbs:ingress-egress-20261024",
+        "--cpus",
+        "2",
+        "--memory",
+        "2g",
+        "--egress-bps",
+        "8000000000",
+        "--waf",
+        "--waf-posting-rate",
+        "1000",
+        "--waf-posting-concurrent",
+        "256",
+        "--posting-capacity-rate",
+        "160",
+        "--posting-capacity-seconds",
+        "10",
+        "--posting-capacity-workers",
+        "40",
+        "--posting-capacity-threads",
+        "16",
+        "--posting-capacity-reads",
+        "800",
+        "--posting-capacity-subject-every",
+        "4",
+        "--posting-capacity-restart",
+        "--optional-log-stats",
+        "--collect-server-log",
+        "--output",
+        "/home/patatan/OimoBBS/var/ingress-egress-20261024/mixed-after-2cpu.json"
+      ],
+      "exit_code": 0,
+      "output": "var/ingress-egress-20261024/mixed-after-2cpu.json",
+      "result": {
+        "image": "sha256:5c86e1104eb00ec49fcdfb7e04069eee1965d942ce6f689207c1c291d35c197d",
+        "cpu_max": "200000 100000",
+        "memory_max": "2147483648",
+        "summary": {
+          "planned": 1600,
+          "sent": 1600,
+          "success": 1600,
+          "acknowledged": 1600,
+          "completion_errors_after_ack": 0,
+          "errors": 0,
+          "skipped": 0,
+          "http_p95_ms": 76.5927298925817,
+          "scheduled_p95_ms": 76.76940271630883,
+          "issuance_wait_p95_ms": 0.5483897402882576
+        },
+        "read_summary": {
+          "planned": 8000,
+          "sent": 8000,
+          "success": 8000,
+          "acknowledged": 8000,
+          "completion_errors_after_ack": 0,
+          "errors": 0,
+          "skipped": 0,
+          "http_p95_ms": 20.26766212657094,
+          "scheduled_p95_ms": null,
+          "issuance_wait_p95_ms": null,
+          "completed_body_mbps": 1758.756828
+        },
+        "read_by_kind": {
+          "legacy": {
+            "planned": 4800,
+            "sent": 4800,
+            "success": 4800,
+            "acknowledged": 4800,
+            "completion_errors_after_ack": 0,
+            "errors": 0,
+            "skipped": 0,
+            "http_p95_ms": 21.84430370107293,
+            "scheduled_p95_ms": null,
+            "issuance_wait_p95_ms": null
+          },
+          "subject": {
+            "planned": 2000,
+            "sent": 2000,
+            "success": 2000,
+            "acknowledged": 2000,
+            "completion_errors_after_ack": 0,
+            "errors": 0,
+            "skipped": 0,
+            "http_p95_ms": 18.15474033355713,
+            "scheduled_p95_ms": null,
+            "issuance_wait_p95_ms": null
+          },
+          "web": {
+            "planned": 1200,
+            "sent": 1200,
+            "success": 1200,
+            "acknowledged": 1200,
+            "completion_errors_after_ack": 0,
+            "errors": 0,
+            "skipped": 0,
+            "http_p95_ms": 17.581581138074398,
+            "scheduled_p95_ms": null,
+            "issuance_wait_p95_ms": null
+          }
+        },
+        "resources": {
+          "cpu_cores_average": 1.5312098066365287,
+          "generator_cpu_seconds": 8.342448959999999,
+          "wbytes_delta": 23482368,
+          "wios_delta": 1914,
+          "oom_kill_delta": 0,
+          "throttled_usec_delta": 0,
+          "io_some_usec_delta": 29782
+        },
+        "stable_at_tested_rate": true,
+        "restart": {
+          "ok": true,
+          "mode": "graceful container restart on the same data volume",
+          "ready": true,
+          "readiness_timeout_seconds": 60,
+          "ready_seconds": 11.396934044081718,
+          "verification_seconds": 11.404867819976062,
+          "threads": [
+            {
+              "key": "1792805353",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            },
+            {
+              "key": "1792805354",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            },
+            {
+              "key": "1792805355",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            },
+            {
+              "key": "1792805356",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            },
+            {
+              "key": "1792805357",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            },
+            {
+              "key": "1792805358",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            },
+            {
+              "key": "1792805359",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            },
+            {
+              "key": "1792805360",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            },
+            {
+              "key": "1792805361",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            },
+            {
+              "key": "1792805362",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            },
+            {
+              "key": "1792805363",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            },
+            {
+              "key": "1792805364",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            },
+            {
+              "key": "1792805365",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            },
+            {
+              "key": "1792805366",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            },
+            {
+              "key": "1792805367",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            },
+            {
+              "key": "1792805368",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            }
+          ]
+        },
+        "recovery": {
+          "planned": 100,
+          "sent": 100,
+          "success": 100,
+          "acknowledged": 100,
+          "completion_errors_after_ack": 0,
+          "errors": 0,
+          "skipped": 0,
+          "http_p95_ms": 35.12230282649398,
+          "scheduled_p95_ms": 35.792555660009384,
+          "issuance_wait_p95_ms": null
+        },
+        "optional_shutdown": {
+          "clean": true,
+          "queue": {
+            "accepted": 17,
+            "saved": 17,
+            "failed": 0,
+            "dropped_capacity": 0,
+            "dropped_invalid": 0,
+            "dropped_closed": 0,
+            "dropped_shutdown": 0,
+            "loss_started_at_ns": "0",
+            "loss_finished_at_ns": "0",
+            "pending": 0,
+            "pending_bytes": 0,
+            "closed": true
+          }
+        },
+        "optional_storage": {
+          "file_bytes": 6361739,
+          "day_file_bytes": {
+            "20261024": 6361739
+          }
+        },
+        "memory_peak_bytes": 487428096,
+        "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n"
+      }
+    },
+    {
+      "name": "mixed-base-4cpu",
+      "command": [
+        "mise",
+        "exec",
+        "--",
+        "python3",
+        "scripts/probe-thread-resources.py",
+        "--image",
+        "oimobbs:reading-resources-b3853f0-20261023",
+        "--cpus",
+        "4",
+        "--memory",
+        "2g",
+        "--egress-bps",
+        "8000000000",
+        "--waf",
+        "--waf-posting-rate",
+        "1000",
+        "--waf-posting-concurrent",
+        "256",
+        "--posting-capacity-rate",
+        "160",
+        "--posting-capacity-seconds",
+        "10",
+        "--posting-capacity-workers",
+        "40",
+        "--posting-capacity-threads",
+        "16",
+        "--posting-capacity-reads",
+        "800",
+        "--posting-capacity-subject-every",
+        "4",
+        "--posting-capacity-restart",
+        "--optional-log-stats",
+        "--collect-server-log",
+        "--output",
+        "/home/patatan/OimoBBS/var/ingress-egress-20261024/mixed-base-4cpu.json"
+      ],
+      "exit_code": 0,
+      "output": "var/ingress-egress-20261024/mixed-base-4cpu.json",
+      "result": {
+        "image": "sha256:d032957c785d32cade5e59dd245ddf5b30fed5df207b397b6861cbed7d025497",
+        "cpu_max": "400000 100000",
+        "memory_max": "2147483648",
+        "summary": {
+          "planned": 1600,
+          "sent": 1519,
+          "success": 1519,
+          "acknowledged": 1519,
+          "completion_errors_after_ack": 0,
+          "errors": 0,
+          "skipped": 81,
+          "http_p95_ms": 186.87688885256648,
+          "scheduled_p95_ms": 187.12173216044903,
+          "issuance_wait_p95_ms": 0.8446150459349155
+        },
+        "read_summary": {
+          "planned": 8000,
+          "sent": 7251,
+          "success": 7251,
+          "acknowledged": 7251,
+          "completion_errors_after_ack": 0,
+          "errors": 0,
+          "skipped": 749,
+          "http_p95_ms": 79.8669857904315,
+          "scheduled_p95_ms": null,
+          "issuance_wait_p95_ms": null,
+          "completed_body_mbps": 1755.1301848
+        },
+        "read_by_kind": {
+          "legacy": {
+            "planned": 5387,
+            "sent": 4785,
+            "success": 4785,
+            "acknowledged": 4785,
+            "completion_errors_after_ack": 0,
+            "errors": 0,
+            "skipped": 602,
+            "http_p95_ms": 5.242106970399618,
+            "scheduled_p95_ms": null,
+            "issuance_wait_p95_ms": null
+          },
+          "subject": {
+            "planned": 1266,
+            "sent": 1266,
+            "success": 1266,
+            "acknowledged": 1266,
+            "completion_errors_after_ack": 0,
+            "errors": 0,
+            "skipped": 0,
+            "http_p95_ms": 100.79867672175169,
+            "scheduled_p95_ms": null,
+            "issuance_wait_p95_ms": null
+          },
+          "web": {
+            "planned": 1347,
+            "sent": 1200,
+            "success": 1200,
+            "acknowledged": 1200,
+            "completion_errors_after_ack": 0,
+            "errors": 0,
+            "skipped": 147,
+            "http_p95_ms": 2.0874268375337124,
+            "scheduled_p95_ms": null,
+            "issuance_wait_p95_ms": null
+          }
+        },
+        "resources": {
+          "cpu_cores_average": 1.4687803301592361,
+          "generator_cpu_seconds": 8.805403731,
+          "wbytes_delta": 35815424,
+          "wios_delta": 5220,
+          "oom_kill_delta": 0,
+          "throttled_usec_delta": 0,
+          "io_some_usec_delta": 367754
+        },
+        "stable_at_tested_rate": false,
+        "restart": {
+          "ok": true,
+          "mode": "graceful container restart on the same data volume",
+          "ready": true,
+          "readiness_timeout_seconds": 60,
+          "ready_seconds": 11.22619667975232,
+          "verification_seconds": 11.233768581878394,
+          "threads": [
+            {
+              "key": "1792805430",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            },
+            {
+              "key": "1792805431",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            },
+            {
+              "key": "1792805432",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            },
+            {
+              "key": "1792805433",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            },
+            {
+              "key": "1792805434",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            },
+            {
+              "key": "1792805435",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            },
+            {
+              "key": "1792805436",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            },
+            {
+              "key": "1792805437",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            },
+            {
+              "key": "1792805438",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            },
+            {
+              "key": "1792805439",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            },
+            {
+              "key": "1792805440",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            },
+            {
+              "key": "1792805441",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            },
+            {
+              "key": "1792805442",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            },
+            {
+              "key": "1792805443",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            },
+            {
+              "key": "1792805444",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            },
+            {
+              "key": "1792805445",
+              "status": 200,
+              "body_equal": true,
+              "etag_equal": true,
+              "identity": true
+            }
+          ]
+        },
+        "recovery": {
+          "planned": 100,
+          "sent": 100,
+          "success": 100,
+          "acknowledged": 100,
+          "completion_errors_after_ack": 0,
+          "errors": 0,
+          "skipped": 0,
+          "http_p95_ms": 170.80245213583112,
+          "scheduled_p95_ms": 8403.050467837602,
+          "issuance_wait_p95_ms": null
+        },
+        "optional_shutdown": {
+          "clean": true,
+          "queue": {
+            "accepted": 17,
+            "saved": 17,
+            "failed": 0,
+            "dropped_capacity": 0,
+            "dropped_invalid": 0,
+            "dropped_closed": 0,
+            "dropped_shutdown": 0,
+            "loss_started_at_ns": "0",
+            "loss_finished_at_ns": "0",
+            "pending": 0,
+            "pending_bytes": 0,
+            "closed": true
+          }
+        },
+        "optional_storage": {
+          "file_bytes": 6007455,
+          "day_file_bytes": {
+            "20261024": 6007455
+          }
+        },
+        "memory_peak_bytes": 489877504,
+        "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n"
+      }
+    },
+    {
+      "name": "burst-base-4cpu-512m",
+      "command": [
+        "mise",
+        "exec",
+        "--",
+        "python3",
+        "scripts/probe-thread-resources.py",
+        "--image",
+        "oimobbs:reading-resources-b3853f0-20261023",
+        "--cpus",
+        "4",
+        "--memory",
+        "512m",
+        "--egress-bps",
+        "8000000000",
+        "--waf",
+        "--reading-only",
+        "--reading-go-client",
+        "/tmp/oimo-readload-rate",
+        "--reading-cases",
+        "dat_identity_304",
+        "html_gzip_304",
+        "subject_identity_full",
+        "--requests",
+        "6000",
+        "--crash-recovery",
+        "--optional-log-stats",
+        "--collect-server-log",
+        "--output",
+        "/home/patatan/OimoBBS/var/ingress-egress-20261024/burst-base-4cpu-512m.json"
+      ],
+      "exit_code": 0,
+      "result": {
+        "image": "sha256:d032957c785d32cade5e59dd245ddf5b30fed5df207b397b6861cbed7d025497",
+        "cpu_max": "400000 100000",
+        "memory_max": "536870912",
+        "recovery": {
+          "scope": "SIGKILL of isolated container after 1000 acknowledged posts; no power-loss/media-failure proof",
+          "signal_exit": "137 false",
+          "acknowledged_posts": 1000,
+          "dat_lines": 1001,
+          "dat_bytes_equal": true,
+          "etag_equal": true,
+          "crash_to_verified_dat_ms": 4135.18732227385,
+          "start_to_verified_dat_ms": 4033.260348252952,
+          "start_to_verified_dat_cpu_ms": 4963.676,
+          "start_to_verified_dat_throttled_ms": 0.0,
+          "waf_block_persisted": true,
+          "memory_events_before_crash": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+          "optional_log_stats_scope": "last process only; queued optional records may be lost at SIGKILL"
+        },
+        "optional_shutdown": {
+          "clean": true,
+          "queue": {
+            "accepted": 8196,
+            "saved": 8196,
+            "failed": 0,
+            "dropped_capacity": 9818,
+            "dropped_invalid": 0,
+            "dropped_closed": 0,
+            "dropped_shutdown": 0,
+            "loss_started_at_ns": "1792805509526159580",
+            "loss_finished_at_ns": "1792805510536808739",
+            "pending": 0,
+            "pending_bytes": 0,
+            "closed": true
+          }
+        },
+        "optional_storage": {
+          "file_bytes": 4417542,
+          "day_file_bytes": {
+            "20261024": 4417542
+          }
+        },
+        "memory_peak_bytes": 358129664,
+        "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+        "phases": [
+          {
+            "requests": 6000,
+            "errors": 0,
+            "status": {
+              "304": 6000
+            },
+            "body_bytes": 0,
+            "seconds": 0.419375934,
+            "requests_per_second": 14306.972607541185,
+            "p50_ms": 3.110817,
+            "p95_ms": 9.575864,
+            "max_ms": 79.407466,
+            "client_cpu_seconds": 0.5781029999999999,
+            "client_gomaxprocs": 2,
+            "scheduled_p95_ms": 9.575864,
+            "generator_max_lag_ms": 0,
+            "name": "dat_identity_304",
+            "workers": 64,
+            "go_exit_code": 0,
+            "generator": "Go HTTP/1.1, 64 independent loopback sources, no retries",
+            "http_p95_ms": 9.575864,
+            "server_observation_seconds": 0.4257784686051309,
+            "server_cpu_us_per_request": 241.324,
+            "cpu_cores_average": 3.400698031404755,
+            "memory_peak_sampled_bytes": 328171520,
+            "rbytes_delta": 0,
+            "wbytes_delta": 217088,
+            "rios_delta": 0,
+            "wios_delta": 4,
+            "throttled_usec_delta": 0,
+            "oom_kill_delta": 0
+          },
+          {
+            "requests": 6000,
+            "errors": 0,
+            "status": {
+              "304": 6000
+            },
+            "body_bytes": 0,
+            "seconds": 0.425263632,
+            "requests_per_second": 14108.895161766384,
+            "p50_ms": 3.007444,
+            "p95_ms": 10.904201,
+            "max_ms": 70.453864,
+            "client_cpu_seconds": 0.606665,
+            "client_gomaxprocs": 2,
+            "scheduled_p95_ms": 10.904201,
+            "generator_max_lag_ms": 0,
+            "name": "html_gzip_304",
+            "workers": 64,
+            "go_exit_code": 0,
+            "generator": "Go HTTP/1.1, 64 independent loopback sources, no retries",
+            "http_p95_ms": 10.904201,
+            "server_observation_seconds": 0.4325102590955794,
+            "server_cpu_us_per_request": 268.4985,
+            "cpu_cores_average": 3.724746329413636,
+            "memory_peak_sampled_bytes": 356982784,
+            "rbytes_delta": 0,
+            "wbytes_delta": 651264,
+            "rios_delta": 0,
+            "wios_delta": 13,
+            "throttled_usec_delta": 0,
+            "oom_kill_delta": 0
+          },
+          {
+            "requests": 6000,
+            "errors": 0,
+            "status": {
+              "200": 6000
+            },
+            "body_bytes": 264000,
+            "seconds": 0.438456627,
+            "requests_per_second": 13684.363812797383,
+            "p50_ms": 3.027769,
+            "p95_ms": 12.070355,
+            "max_ms": 77.267654,
+            "client_cpu_seconds": 0.648026,
+            "client_gomaxprocs": 2,
+            "scheduled_p95_ms": 12.070355,
+            "generator_max_lag_ms": 0,
+            "name": "subject_identity_full",
+            "workers": 64,
+            "go_exit_code": 0,
+            "generator": "Go HTTP/1.1, 64 independent loopback sources, no retries",
+            "http_p95_ms": 12.070355,
+            "server_observation_seconds": 0.4449128727428615,
+            "server_cpu_us_per_request": 275.198,
+            "cpu_cores_average": 3.7112614652404274,
+            "memory_peak_sampled_bytes": 355983360,
+            "rbytes_delta": 0,
+            "wbytes_delta": 647168,
+            "rios_delta": 0,
+            "wios_delta": 12,
+            "throttled_usec_delta": 0,
+            "oom_kill_delta": 0
+          }
+        ]
+      }
+    },
+    {
+      "name": "burst-after-4cpu-512m",
+      "command": [
+        "mise",
+        "exec",
+        "--",
+        "python3",
+        "scripts/probe-thread-resources.py",
+        "--image",
+        "oimobbs:ingress-egress-20261024",
+        "--cpus",
+        "4",
+        "--memory",
+        "512m",
+        "--egress-bps",
+        "8000000000",
+        "--waf",
+        "--reading-only",
+        "--reading-go-client",
+        "/tmp/oimo-readload-rate",
+        "--reading-cases",
+        "dat_identity_304",
+        "html_gzip_304",
+        "subject_identity_full",
+        "--requests",
+        "6000",
+        "--crash-recovery",
+        "--optional-log-stats",
+        "--collect-server-log",
+        "--output",
+        "/home/patatan/OimoBBS/var/ingress-egress-20261024/burst-after-4cpu-512m.json"
+      ],
+      "exit_code": 0,
+      "result": {
+        "image": "sha256:5c86e1104eb00ec49fcdfb7e04069eee1965d942ce6f689207c1c291d35c197d",
+        "cpu_max": "400000 100000",
+        "memory_max": "536870912",
+        "recovery": {
+          "scope": "SIGKILL of isolated container after 1000 acknowledged posts; no power-loss/media-failure proof",
+          "signal_exit": "137 false",
+          "acknowledged_posts": 1000,
+          "dat_lines": 1001,
+          "dat_bytes_equal": true,
+          "etag_equal": true,
+          "crash_to_verified_dat_ms": 4034.040146972984,
+          "start_to_verified_dat_ms": 3936.0950449481606,
+          "start_to_verified_dat_cpu_ms": 4865.411,
+          "start_to_verified_dat_throttled_ms": 0.0,
+          "waf_block_persisted": true,
+          "memory_events_before_crash": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+          "optional_log_stats_scope": "last process only; queued optional records may be lost at SIGKILL"
+        },
+        "optional_shutdown": {
+          "clean": true,
+          "queue": {
+            "accepted": 9734,
+            "saved": 9734,
+            "failed": 0,
+            "dropped_capacity": 8280,
+            "dropped_invalid": 0,
+            "dropped_closed": 0,
+            "dropped_shutdown": 0,
+            "loss_started_at_ns": "1792805558071006938",
+            "loss_finished_at_ns": "1792805559115827991",
+            "pending": 0,
+            "pending_bytes": 0,
+            "closed": true
+          }
+        },
+        "optional_storage": {
+          "file_bytes": 5094257,
+          "day_file_bytes": {
+            "20261024": 5094257
+          }
+        },
+        "memory_peak_bytes": 335548416,
+        "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+        "phases": [
+          {
+            "requests": 6000,
+            "errors": 0,
+            "status": {
+              "304": 6000
+            },
+            "body_bytes": 0,
+            "seconds": 0.4443263,
+            "requests_per_second": 13503.589591703214,
+            "p50_ms": 3.255607,
+            "p95_ms": 11.111435,
+            "max_ms": 81.063801,
+            "client_cpu_seconds": 0.617286,
+            "client_gomaxprocs": 2,
+            "scheduled_p95_ms": 11.111435,
+            "generator_max_lag_ms": 0,
+            "name": "dat_identity_304",
+            "workers": 64,
+            "go_exit_code": 0,
+            "generator": "Go HTTP/1.1, 64 independent loopback sources, no retries",
+            "http_p95_ms": 11.111435,
+            "server_observation_seconds": 0.4503573221154511,
+            "server_cpu_us_per_request": 264.9601666666667,
+            "cpu_cores_average": 3.529999229350728,
+            "memory_peak_sampled_bytes": 334585856,
+            "rbytes_delta": 0,
+            "wbytes_delta": 323584,
+            "rios_delta": 0,
+            "wios_delta": 6,
+            "throttled_usec_delta": 0,
+            "oom_kill_delta": 0
+          },
+          {
+            "requests": 6000,
+            "errors": 0,
+            "status": {
+              "304": 6000
+            },
+            "body_bytes": 0,
+            "seconds": 0.427018866,
+            "requests_per_second": 14050.90144190491,
+            "p50_ms": 3.089513,
+            "p95_ms": 10.219776,
+            "max_ms": 78.15065,
+            "client_cpu_seconds": 0.649782,
+            "client_gomaxprocs": 2,
+            "scheduled_p95_ms": 10.219776,
+            "generator_max_lag_ms": 0,
+            "name": "html_gzip_304",
+            "workers": 64,
+            "go_exit_code": 0,
+            "generator": "Go HTTP/1.1, 64 independent loopback sources, no retries",
+            "http_p95_ms": 10.219776,
+            "server_observation_seconds": 0.43500523595139384,
+            "server_cpu_us_per_request": 281.99083333333334,
+            "cpu_cores_average": 3.8894819192223533,
+            "memory_peak_sampled_bytes": 302989312,
+            "rbytes_delta": 0,
+            "wbytes_delta": 868352,
+            "rios_delta": 0,
+            "wios_delta": 17,
+            "throttled_usec_delta": 0,
+            "oom_kill_delta": 0
+          },
+          {
+            "requests": 6000,
+            "errors": 0,
+            "status": {
+              "200": 6000
+            },
+            "body_bytes": 264000,
+            "seconds": 0.472746427,
+            "requests_per_second": 12691.793437922694,
+            "p50_ms": 3.514109,
+            "p95_ms": 11.573958,
+            "max_ms": 75.338287,
+            "client_cpu_seconds": 0.642446,
+            "client_gomaxprocs": 2,
+            "scheduled_p95_ms": 11.573958,
+            "generator_max_lag_ms": 0,
+            "name": "subject_identity_full",
+            "workers": 64,
+            "go_exit_code": 0,
+            "generator": "Go HTTP/1.1, 64 independent loopback sources, no retries",
+            "http_p95_ms": 11.573958,
+            "server_observation_seconds": 0.47960575576871634,
+            "server_cpu_us_per_request": 304.62166666666667,
+            "cpu_cores_average": 3.8109008868554928,
+            "memory_peak_sampled_bytes": 307802112,
+            "rbytes_delta": 0,
+            "wbytes_delta": 978944,
+            "rios_delta": 0,
+            "wios_delta": 18,
+            "throttled_usec_delta": 0,
+            "oom_kill_delta": 0
+          }
+        ]
+      }
+    },
+    {
+      "name": "steady-base-2cpu",
+      "command": [
+        "mise",
+        "exec",
+        "--",
+        "python3",
+        "scripts/probe-thread-resources.py",
+        "--image",
+        "oimobbs:reading-resources-b3853f0-20261023",
+        "--cpus",
+        "2",
+        "--memory",
+        "2g",
+        "--egress-bps",
+        "8000000000",
+        "--waf",
+        "--waf-posting-rate",
+        "1000",
+        "--waf-posting-concurrent",
+        "256",
+        "--posting-capacity-rate",
+        "160",
+        "--posting-capacity-seconds",
+        "10",
+        "--posting-capacity-workers",
+        "40",
+        "--posting-capacity-threads",
+        "16",
+        "--posting-capacity-reads",
+        "400",
+        "--posting-capacity-subject-every",
+        "4",
+        "--optional-log-stats",
+        "--collect-server-log",
+        "--output",
+        "/home/patatan/OimoBBS/var/ingress-egress-20261024/steady-base-2cpu.json"
+      ],
+      "exit_code": 0,
+      "result": {
+        "image": "sha256:d032957c785d32cade5e59dd245ddf5b30fed5df207b397b6861cbed7d025497",
+        "cpu_max": "200000 100000",
+        "memory_max": "2147483648",
+        "summary": {
+          "planned": 1600,
+          "sent": 1600,
+          "success": 1600,
+          "acknowledged": 1600,
+          "completion_errors_after_ack": 0,
+          "errors": 0,
+          "skipped": 0,
+          "http_p95_ms": 219.87424790859222,
+          "scheduled_p95_ms": 221.50183003395796,
+          "issuance_wait_p95_ms": 0.45519787818193436
+        },
+        "read_summary": {
+          "planned": 4000,
+          "sent": 3976,
+          "success": 3976,
+          "acknowledged": 3976,
+          "completion_errors_after_ack": 0,
+          "errors": 0,
+          "skipped": 24,
+          "http_p95_ms": 109.73034426569939,
+          "scheduled_p95_ms": null,
+          "issuance_wait_p95_ms": null,
+          "completed_body_mbps": 880.4786192
+        },
+        "read_by_kind": {
+          "legacy": {
+            "planned": 2400,
+            "sent": 2400,
+            "success": 2400,
+            "acknowledged": 2400,
+            "completion_errors_after_ack": 0,
+            "errors": 0,
+            "skipped": 0,
+            "http_p95_ms": 16.825353726744652,
+            "scheduled_p95_ms": null,
+            "issuance_wait_p95_ms": null
+          },
+          "subject": {
+            "planned": 1000,
+            "sent": 976,
+            "success": 976,
+            "acknowledged": 976,
+            "completion_errors_after_ack": 0,
+            "errors": 0,
+            "skipped": 24,
+            "http_p95_ms": 126.3035531155765,
+            "scheduled_p95_ms": null,
+            "issuance_wait_p95_ms": null
+          },
+          "web": {
+            "planned": 600,
+            "sent": 600,
+            "success": 600,
+            "acknowledged": 600,
+            "completion_errors_after_ack": 0,
+            "errors": 0,
+            "skipped": 0,
+            "http_p95_ms": 16.751178074628115,
+            "scheduled_p95_ms": null,
+            "issuance_wait_p95_ms": null
+          }
+        },
+        "resources": {
+          "cpu_cores_average": 1.2108465067460934,
+          "generator_cpu_seconds": 5.220970152,
+          "wbytes_delta": 33910784,
+          "wios_delta": 5058,
+          "oom_kill_delta": 0,
+          "throttled_usec_delta": 0,
+          "io_some_usec_delta": 73726
+        },
+        "stable_at_tested_rate": false,
+        "recovery": {
+          "planned": 100,
+          "sent": 100,
+          "success": 100,
+          "acknowledged": 100,
+          "completion_errors_after_ack": 0,
+          "errors": 0,
+          "skipped": 0,
+          "http_p95_ms": 35.01753183081746,
+          "scheduled_p95_ms": 39.96381210163236,
+          "issuance_wait_p95_ms": null
+        },
+        "optional_shutdown": {
+          "clean": true,
+          "queue": {
+            "accepted": 10333,
+            "saved": 10333,
+            "failed": 0,
+            "dropped_capacity": 0,
+            "dropped_invalid": 0,
+            "dropped_closed": 0,
+            "dropped_shutdown": 0,
+            "loss_started_at_ns": "0",
+            "loss_finished_at_ns": "0",
+            "pending": 0,
+            "pending_bytes": 0,
+            "closed": true
+          }
+        },
+        "optional_storage": {
+          "file_bytes": 4693870,
+          "day_file_bytes": {
+            "20261024": 4693870
+          }
+        },
+        "memory_peak_bytes": 464302080,
+        "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n"
+      }
+    },
+    {
+      "name": "steady-after-2cpu",
+      "command": [
+        "mise",
+        "exec",
+        "--",
+        "python3",
+        "scripts/probe-thread-resources.py",
+        "--image",
+        "oimobbs:ingress-egress-20261024",
+        "--cpus",
+        "2",
+        "--memory",
+        "2g",
+        "--egress-bps",
+        "8000000000",
+        "--waf",
+        "--waf-posting-rate",
+        "1000",
+        "--waf-posting-concurrent",
+        "256",
+        "--posting-capacity-rate",
+        "160",
+        "--posting-capacity-seconds",
+        "10",
+        "--posting-capacity-workers",
+        "40",
+        "--posting-capacity-threads",
+        "16",
+        "--posting-capacity-reads",
+        "400",
+        "--posting-capacity-subject-every",
+        "4",
+        "--optional-log-stats",
+        "--collect-server-log",
+        "--output",
+        "/home/patatan/OimoBBS/var/ingress-egress-20261024/steady-after-2cpu.json"
+      ],
+      "exit_code": 0,
+      "result": {
+        "image": "sha256:5c86e1104eb00ec49fcdfb7e04069eee1965d942ce6f689207c1c291d35c197d",
+        "cpu_max": "200000 100000",
+        "memory_max": "2147483648",
+        "summary": {
+          "planned": 1600,
+          "sent": 1443,
+          "success": 1443,
+          "acknowledged": 1443,
+          "completion_errors_after_ack": 0,
+          "errors": 0,
+          "skipped": 157,
+          "http_p95_ms": 376.07210082933307,
+          "scheduled_p95_ms": 555.1949739456177,
+          "issuance_wait_p95_ms": 209.758753888309
+        },
+        "read_summary": {
+          "planned": 4000,
+          "sent": 4000,
+          "success": 4000,
+          "acknowledged": 4000,
+          "completion_errors_after_ack": 0,
+          "errors": 0,
+          "skipped": 0,
+          "http_p95_ms": 17.05850102007389,
+          "scheduled_p95_ms": null,
+          "issuance_wait_p95_ms": null,
+          "completed_body_mbps": 880.4861184
+        },
+        "read_by_kind": {
+          "legacy": {
+            "planned": 2400,
+            "sent": 2400,
+            "success": 2400,
+            "acknowledged": 2400,
+            "completion_errors_after_ack": 0,
+            "errors": 0,
+            "skipped": 0,
+            "http_p95_ms": 17.618877813220024,
+            "scheduled_p95_ms": null,
+            "issuance_wait_p95_ms": null
+          },
+          "subject": {
+            "planned": 1000,
+            "sent": 1000,
+            "success": 1000,
+            "acknowledged": 1000,
+            "completion_errors_after_ack": 0,
+            "errors": 0,
+            "skipped": 0,
+            "http_p95_ms": 15.89493127539754,
+            "scheduled_p95_ms": null,
+            "issuance_wait_p95_ms": null
+          },
+          "web": {
+            "planned": 600,
+            "sent": 600,
+            "success": 600,
+            "acknowledged": 600,
+            "completion_errors_after_ack": 0,
+            "errors": 0,
+            "skipped": 0,
+            "http_p95_ms": 15.481370966881514,
+            "scheduled_p95_ms": null,
+            "issuance_wait_p95_ms": null
+          }
+        },
+        "resources": {
+          "cpu_cores_average": 1.0356325493218752,
+          "generator_cpu_seconds": 4.9771691339999995,
+          "wbytes_delta": 13565952,
+          "wios_delta": 556,
+          "oom_kill_delta": 0,
+          "throttled_usec_delta": 0,
+          "io_some_usec_delta": 663723
+        },
+        "stable_at_tested_rate": false,
+        "recovery": {
+          "planned": 100,
+          "sent": 100,
+          "success": 100,
+          "acknowledged": 100,
+          "completion_errors_after_ack": 0,
+          "errors": 0,
+          "skipped": 0,
+          "http_p95_ms": 33.008540980517864,
+          "scheduled_p95_ms": 33.65874104201794,
+          "issuance_wait_p95_ms": null
+        },
+        "optional_shutdown": {
+          "clean": true,
+          "queue": {
+            "accepted": 9901,
+            "saved": 9901,
+            "failed": 0,
+            "dropped_capacity": 0,
+            "dropped_invalid": 0,
+            "dropped_closed": 0,
+            "dropped_shutdown": 0,
+            "loss_started_at_ns": "0",
+            "loss_finished_at_ns": "0",
+            "pending": 0,
+            "pending_bytes": 0,
+            "closed": true
+          }
+        },
+        "optional_storage": {
+          "file_bytes": 4403424,
+          "day_file_bytes": {
+            "20261024": 4403424
+          }
+        },
+        "memory_peak_bytes": 410619904,
+        "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n"
+      }
+    },
+    {
+      "name": "steady-r2-after-2cpu",
+      "command": [
+        "mise",
+        "exec",
+        "--",
+        "python3",
+        "scripts/probe-thread-resources.py",
+        "--image",
+        "oimobbs:ingress-egress-20261024",
+        "--cpus",
+        "2",
+        "--memory",
+        "2g",
+        "--egress-bps",
+        "8000000000",
+        "--waf",
+        "--waf-posting-rate",
+        "1000",
+        "--waf-posting-concurrent",
+        "256",
+        "--posting-capacity-rate",
+        "160",
+        "--posting-capacity-seconds",
+        "10",
+        "--posting-capacity-workers",
+        "40",
+        "--posting-capacity-threads",
+        "16",
+        "--posting-capacity-reads",
+        "400",
+        "--posting-capacity-subject-every",
+        "4",
+        "--optional-log-stats",
+        "--collect-server-log",
+        "--output",
+        "/home/patatan/OimoBBS/var/ingress-egress-20261024/steady-r2-after-2cpu.json"
+      ],
+      "exit_code": 0,
+      "result": {
+        "image": "sha256:5c86e1104eb00ec49fcdfb7e04069eee1965d942ce6f689207c1c291d35c197d",
+        "cpu_max": "200000 100000",
+        "memory_max": "2147483648",
+        "summary": {
+          "planned": 1600,
+          "sent": 1600,
+          "success": 1600,
+          "acknowledged": 1600,
+          "completion_errors_after_ack": 0,
+          "errors": 0,
+          "skipped": 0,
+          "http_p95_ms": 63.67680989205837,
+          "scheduled_p95_ms": 64.03295649215579,
+          "issuance_wait_p95_ms": 0.3658304922282696
+        },
+        "read_summary": {
+          "planned": 4000,
+          "sent": 4000,
+          "success": 4000,
+          "acknowledged": 4000,
+          "completion_errors_after_ack": 0,
+          "errors": 0,
+          "skipped": 0,
+          "http_p95_ms": 14.194312039762735,
+          "scheduled_p95_ms": null,
+          "issuance_wait_p95_ms": null,
+          "completed_body_mbps": 880.4940528
+        },
+        "read_by_kind": {
+          "legacy": {
+            "planned": 2400,
+            "sent": 2400,
+            "success": 2400,
+            "acknowledged": 2400,
+            "completion_errors_after_ack": 0,
+            "errors": 0,
+            "skipped": 0,
+            "http_p95_ms": 14.508201275020838,
+            "scheduled_p95_ms": null,
+            "issuance_wait_p95_ms": null
+          },
+          "subject": {
+            "planned": 1000,
+            "sent": 1000,
+            "success": 1000,
+            "acknowledged": 1000,
+            "completion_errors_after_ack": 0,
+            "errors": 0,
+            "skipped": 0,
+            "http_p95_ms": 14.143044594675303,
+            "scheduled_p95_ms": null,
+            "issuance_wait_p95_ms": null
+          },
+          "web": {
+            "planned": 600,
+            "sent": 600,
+            "success": 600,
+            "acknowledged": 600,
+            "completion_errors_after_ack": 0,
+            "errors": 0,
+            "skipped": 0,
+            "http_p95_ms": 11.92926475778222,
+            "scheduled_p95_ms": null,
+            "issuance_wait_p95_ms": null
+          }
+        },
+        "resources": {
+          "cpu_cores_average": 1.189478644361576,
+          "generator_cpu_seconds": 5.519849172,
+          "wbytes_delta": 22786048,
+          "wios_delta": 2040,
+          "oom_kill_delta": 0,
+          "throttled_usec_delta": 0,
+          "io_some_usec_delta": 37269
+        },
+        "stable_at_tested_rate": true,
+        "recovery": {
+          "planned": 100,
+          "sent": 100,
+          "success": 100,
+          "acknowledged": 100,
+          "completion_errors_after_ack": 0,
+          "errors": 0,
+          "skipped": 0,
+          "http_p95_ms": 33.594900742173195,
+          "scheduled_p95_ms": 33.88018812984228,
+          "issuance_wait_p95_ms": null
+        },
+        "optional_shutdown": {
+          "clean": true,
+          "queue": {
+            "accepted": 10357,
+            "saved": 10357,
+            "failed": 0,
+            "dropped_capacity": 0,
+            "dropped_invalid": 0,
+            "dropped_closed": 0,
+            "dropped_shutdown": 0,
+            "loss_started_at_ns": "0",
+            "loss_finished_at_ns": "0",
+            "pending": 0,
+            "pending_bytes": 0,
+            "closed": true
+          }
+        },
+        "optional_storage": {
+          "file_bytes": 4631956,
+          "day_file_bytes": {
+            "20261024": 4631956
+          }
+        },
+        "memory_peak_bytes": 453124096,
+        "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n"
+      }
+    },
+    {
+      "name": "steady-r2-base-2cpu",
+      "command": [
+        "mise",
+        "exec",
+        "--",
+        "python3",
+        "scripts/probe-thread-resources.py",
+        "--image",
+        "oimobbs:reading-resources-b3853f0-20261023",
+        "--cpus",
+        "2",
+        "--memory",
+        "2g",
+        "--egress-bps",
+        "8000000000",
+        "--waf",
+        "--waf-posting-rate",
+        "1000",
+        "--waf-posting-concurrent",
+        "256",
+        "--posting-capacity-rate",
+        "160",
+        "--posting-capacity-seconds",
+        "10",
+        "--posting-capacity-workers",
+        "40",
+        "--posting-capacity-threads",
+        "16",
+        "--posting-capacity-reads",
+        "400",
+        "--posting-capacity-subject-every",
+        "4",
+        "--optional-log-stats",
+        "--collect-server-log",
+        "--output",
+        "/home/patatan/OimoBBS/var/ingress-egress-20261024/steady-r2-base-2cpu.json"
+      ],
+      "exit_code": 0,
+      "result": {
+        "image": "sha256:d032957c785d32cade5e59dd245ddf5b30fed5df207b397b6861cbed7d025497",
+        "cpu_max": "200000 100000",
+        "memory_max": "2147483648",
+        "summary": {
+          "planned": 1600,
+          "sent": 1600,
+          "success": 1600,
+          "acknowledged": 1600,
+          "completion_errors_after_ack": 0,
+          "errors": 0,
+          "skipped": 0,
+          "http_p95_ms": 219.3707898259163,
+          "scheduled_p95_ms": 220.8235659636557,
+          "issuance_wait_p95_ms": 0.6100358441472054
+        },
+        "read_summary": {
+          "planned": 4000,
+          "sent": 3983,
+          "success": 3983,
+          "acknowledged": 3983,
+          "completion_errors_after_ack": 0,
+          "errors": 0,
+          "skipped": 17,
+          "http_p95_ms": 108.98403311148286,
+          "scheduled_p95_ms": null,
+          "issuance_wait_p95_ms": null,
+          "completed_body_mbps": 880.4694608
+        },
+        "read_by_kind": {
+          "legacy": {
+            "planned": 2400,
+            "sent": 2400,
+            "success": 2400,
+            "acknowledged": 2400,
+            "completion_errors_after_ack": 0,
+            "errors": 0,
+            "skipped": 0,
+            "http_p95_ms": 19.173728302121162,
+            "scheduled_p95_ms": null,
+            "issuance_wait_p95_ms": null
+          },
+          "subject": {
+            "planned": 1000,
+            "sent": 983,
+            "success": 983,
+            "acknowledged": 983,
+            "completion_errors_after_ack": 0,
+            "errors": 0,
+            "skipped": 17,
+            "http_p95_ms": 126.62777630612254,
+            "scheduled_p95_ms": null,
+            "issuance_wait_p95_ms": null
+          },
+          "web": {
+            "planned": 600,
+            "sent": 600,
+            "success": 600,
+            "acknowledged": 600,
+            "completion_errors_after_ack": 0,
+            "errors": 0,
+            "skipped": 0,
+            "http_p95_ms": 15.523906797170639,
+            "scheduled_p95_ms": null,
+            "issuance_wait_p95_ms": null
+          }
+        },
+        "resources": {
+          "cpu_cores_average": 1.211110948704843,
+          "generator_cpu_seconds": 5.559441677,
+          "wbytes_delta": 33763328,
+          "wios_delta": 5008,
+          "oom_kill_delta": 0,
+          "throttled_usec_delta": 0,
+          "io_some_usec_delta": 63961
+        },
+        "stable_at_tested_rate": false,
+        "recovery": {
+          "planned": 100,
+          "sent": 100,
+          "success": 100,
+          "acknowledged": 100,
+          "completion_errors_after_ack": 0,
+          "errors": 0,
+          "skipped": 0,
+          "http_p95_ms": 34.20654498040676,
+          "scheduled_p95_ms": 34.77251576259732,
+          "issuance_wait_p95_ms": null
+        },
+        "optional_shutdown": {
+          "clean": true,
+          "queue": {
+            "accepted": 10340,
+            "saved": 10340,
+            "failed": 0,
+            "dropped_capacity": 0,
+            "dropped_invalid": 0,
+            "dropped_closed": 0,
+            "dropped_shutdown": 0,
+            "loss_started_at_ns": "0",
+            "loss_finished_at_ns": "0",
+            "pending": 0,
+            "pending_bytes": 0,
+            "closed": true
+          }
+        },
+        "optional_storage": {
+          "file_bytes": 4697792,
+          "day_file_bytes": {
+            "20261024": 4697792
+          }
+        },
+        "memory_peak_bytes": 473874432,
+        "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n"
+      }
+    }
+  ],
+  "checks": {
+    "bootstrap-tests.txt": "ok  \toimobbs/internal/bootstrap\t102.246s\n",
+    "core-fixed-tests.txt": "ok  \toimobbs/internal/waf\t0.028s\nok  \toimobbs/internal/board\t0.005s\nok  \toimobbs/internal/app\t65.898s\nok  \toimobbs/internal/evidence\t115.713s\nok  \toimobbs/internal/store\t22.234s\n",
+    "race-tests.txt": "ok  \toimobbs/internal/waf\t1.167s\nok  \toimobbs/internal/board\t1.012s [no tests to run]\nok  \toimobbs/internal/app\t1.024s\nok  \toimobbs/internal/evidence\t7.481s\nok  \toimobbs/internal/store\t1.488s\nok  \toimobbs/internal/bootstrap\t84.762s\n",
+    "vet.txt": "",
+    "final-checks.txt": "COMMAND [\"mise\", \"exec\", \"--\", \"go\", \"test\", \"./internal/bootstrap\", \"./internal/app\", \"./internal/waf\", \"./internal/store\", \"./internal/evidence\", \"-run\", \"Test(ThreadListing|ListingReader|OptionalParallel|IndependentSeries|TrafficRelease)\", \"-count=1\"]\nok  \toimobbs/internal/bootstrap\t0.394s\nok  \toimobbs/internal/app\t0.006s\nok  \toimobbs/internal/waf\t0.005s\nok  \toimobbs/internal/store\t0.052s\nok  \toimobbs/internal/evidence\t0.051s\nCOMMAND [\"mise\", \"exec\", \"--\", \"go\", \"test\", \"-race\", \"./internal/bootstrap\", \"./internal/app\", \"./internal/waf\", \"./internal/board\", \"./internal/store\", \"./internal/evidence\", \"-run\", \"Test(ThreadListing|ListingReader|OptionalParallel|IndependentSeries|TrafficRelease)\", \"-count=1\"]\nok  \toimobbs/internal/bootstrap\t1.874s\nok  \toimobbs/internal/app\t1.028s\nok  \toimobbs/internal/waf\t1.025s\nok  \toimobbs/internal/board\t1.023s [no tests to run]\nok  \toimobbs/internal/store\t1.225s\nok  \toimobbs/internal/evidence\t1.093s\nCOMMAND [\"mise\", \"exec\", \"--\", \"go\", \"test\", \"./cmd/...\", \"./tools/...\", \"./internal/compat/...\", \"./internal/parallel/...\"]\nok  \toimobbs/cmd/compatprobe\t0.032s\nok  \toimobbs/cmd/oimobbs\t6.650s\nok  \toimobbs/cmd/oimoedge\t(cached)\nok  \toimobbs/cmd/oimoseal\t(cached)\n?   \toimobbs/tools/archivebench\t[no test files]\n?   \toimobbs/tools/burstprobe\t[no test files]\n?   \toimobbs/tools/codecbench\t[no test files]\n?   \toimobbs/tools/codecprobe\t[no test files]\n?   \toimobbs/tools/designcheck/contracts\t[no test files]\n?   \toimobbs/tools/designcheck/pack\t[no test files]\n?   \toimobbs/tools/designcheck/wal\t[no test files]\n?   \toimobbs/tools/gentables\t[no test files]\nok  \toimobbs/tools/readload\t0.048s\nok  \toimobbs/tools/setup\t0.287s\n?   \toimobbs/tools/storagebench\t[no test files]\n?   \toimobbs/tools/trafficprobe\t[no test files]\nok  \toimobbs/internal/compat\t0.154s\nok  \toimobbs/internal/parallel\t0.004s\nCOMMAND [\"mise\", \"exec\", \"--\", \"python3\", \"-m\", \"unittest\", \"discover\", \"-s\", \"scripts\", \"-p\", \"test_probe*.py\"]\n.................\n----------------------------------------------------------------------\nRan 17 tests in 0.016s\n\nOK\n"
+  },
+  "development_failures_retained": [
+    {
+      "log": "var/ingress-egress-20261024/listing-regression-before.txt",
+      "reason": "regression test reproduces old listing owner wait"
+    },
+    {
+      "log": "var/ingress-egress-20261024/log-initial-tests.txt",
+      "reason": "initial independent series called 64-frame writer; corrected to existing 256-frame series path"
+    },
+    {
+      "log": "var/ingress-egress-20261024/core-tests.txt",
+      "reason": "suite binary built before the series writer fix; superseded by core-fixed-tests.txt"
+    }
+  ],
+  "implementation_commit": "ffeafb45f1169060826c9d984dd876dfe00b4d60",
+  "deployment_report": "ingress-egress-deployment.md"
+}

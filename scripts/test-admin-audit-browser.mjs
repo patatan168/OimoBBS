@@ -1,0 +1,97 @@
+/** 隔離管理画面で操作者の選択・ページ送り・詳細表示と各画面幅のレイアウトを検証する。 */
+import assert from "node:assert/strict";
+import { createRequire } from "node:module";
+import { mkdir } from "node:fs/promises";
+const require = createRequire(import.meta.url);
+const { chromium, firefox } = require(process.env.OIMO_PLAYWRIGHT);
+const browser = await (process.env.OIMO_FIREFOX ? firefox.launch({headless:true}) : chromium.launch({ headless: true, executablePath: process.env.OIMO_CHROMIUM, args: ["--no-sandbox"] }));
+try {
+  const page = await browser.newPage();
+  const errors = [];
+  page.on("pageerror", error => errors.push(error.message));
+  const base = process.env.OIMO_AUDIT_URL;
+  await page.goto(`${base}/login`);
+  await page.locator('input[name="login"]').fill("owner");
+  await page.locator('input[name="password"]').fill(process.env.OIMO_TEST_PASSWORD);
+  await Promise.all([page.waitForURL(`${base}/`), page.locator('button[type="submit"]').click()]);
+  await page.goto(`${base}/audit`);
+  const actor = await page.locator('select[name="actor"] option').evaluateAll(options => options.find(option => option.value)?.value);
+  assert.ok(actor);
+  await page.locator('select[name="actor"]').selectOption(actor);
+  await page.locator('input[name="limit"]').fill("1");
+  await Promise.all([page.waitForURL(url => url.searchParams.get("actor") === actor), page.getByRole("button", { name: "絞り込む", exact: true }).click()]);
+  assert.equal(await page.locator(".audit-table tbody tr").count(), 1);
+  assert.ok((await page.locator(".audit-table tbody").textContent()).includes(actor));
+  await Promise.all([page.waitForURL(url => url.searchParams.has("cursor")), page.getByRole("link", { name: "次のページ", exact: true }).click()]);
+  assert.equal(await page.locator('select[name="actor"]').inputValue(), actor);
+  assert.equal(await page.locator('input[name="limit"]').inputValue(), "1");
+  assert.ok((await page.locator(".audit-table tbody").textContent()).includes(actor));
+  await page.locator(".audit-table summary").click();
+  assert.equal(await page.locator(".audit-details").isVisible(), true);
+  assert.ok((await page.locator(".audit-field-list").textContent()).includes("サイト名"));
+  assert.ok((await page.locator(".audit-description").textContent()).includes("表示名を保存"));
+  assert.ok((await page.locator(".audit-actor").textContent()).includes("owner"));
+  assert.ok((await page.locator(".audit-details").textContent()).includes("site_name_update"));
+  await page.locator(".audit-table summary").click();
+  if (process.env.OIMO_AUDIT_SCREENSHOTS) await mkdir(process.env.OIMO_AUDIT_SCREENSHOTS, { recursive: true });
+  for (const width of [320, 390, 700, 1024, 1440]) {
+    await page.setViewportSize({ width, height: 1000 });
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, `overflow at ${width}`);
+    assert.equal(await page.locator(".audit-table tr").last().isVisible(), true);
+    assert.ok(await page.locator(".audit-table caption").evaluate(caption => caption.getBoundingClientRect().height < 100), `caption layout at ${width}`);
+    await page.locator(".audit-table summary").click();
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, `details overflow at ${width}`);
+    await page.locator(".audit-table summary").click();
+    await page.evaluate(() => window.scrollTo(0, 0));
+    if (process.env.OIMO_AUDIT_SCREENSHOTS) await page.screenshot({ path: `${process.env.OIMO_AUDIT_SCREENSHOTS}/audit-${width}.png`, fullPage: true });
+  }
+  await page.getByRole("link", { name: "条件をリセット", exact: true }).click();
+  assert.equal(await page.locator('select[name="actor"]').inputValue(), "");
+  assert.ok(await page.locator(".audit-table tbody tr").count() > 1);
+  const picker = page.locator("[data-audit-action-picker]");
+  const summary = picker.locator("summary");
+  await summary.click();
+  const search = picker.locator("[data-audit-search]");
+  await search.fill("一致しない候補");
+  assert.equal(await picker.locator(".audit-action-option:visible").count(), 0);
+  assert.ok((await picker.locator("[role=status]").textContent()).includes("該当する操作がありません"));
+  await search.fill("カテゴリー");
+  assert.equal(await picker.locator(".audit-action-option:visible").count(), 1);
+  await picker.getByLabel("板のカテゴリー・並び順を変更", {exact:true}).check();
+  await picker.locator("details").evaluate(element => { if (element.open) throw new Error("picker did not close"); });
+  assert.ok((await summary.textContent()).includes("カテゴリー"));
+  await Promise.all([page.waitForURL(url => url.searchParams.get("action") === "board_categories_update"), page.getByRole("button", { name: "絞り込む", exact: true }).click()]);
+  assert.equal(await page.locator(".audit-table tbody tr").count(), 1);
+  assert.ok((await page.locator(".audit-table tbody").textContent()).includes("板のカテゴリー・並び順を変更"));
+  assert.equal((await page.locator(".audit-table tbody").textContent()).includes("詳細未記録"), false);
+  await summary.click();
+  await search.fill("パスキー");
+  assert.ok(await picker.locator(".audit-action-option:visible").count() >= 4);
+  await search.press("Escape");
+  assert.equal(await picker.locator('input[name="action"]:checked').inputValue(), "board_categories_update");
+  await summary.click();
+  await search.fill("すべて");
+  await search.press("Enter");
+  assert.equal(await picker.locator('input[name="action"]:checked').inputValue(), "");
+  for (const width of [320, 700, 1440]) {
+    await page.setViewportSize({ width, height: 1000 });
+    await summary.click();
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, `picker overflow at ${width}`);
+    assert.ok(await picker.locator(".audit-action-options").evaluate(element => element.clientHeight <= 245));
+    if (process.env.OIMO_AUDIT_SCREENSHOTS) await page.screenshot({ path: `${process.env.OIMO_AUDIT_SCREENSHOTS}/picker-${width}.png`, fullPage: true });
+    await search.press("Escape");
+  }
+  const fallback = await browser.newContext({ javaScriptEnabled: false });
+  await fallback.addCookies(await page.context().cookies());
+  const plain = await fallback.newPage();
+  await plain.goto(`${base}/audit`);
+  await plain.locator("[data-audit-action-picker] summary").click();
+  await plain.getByLabel("板のカテゴリー・並び順を変更", {exact:true}).check();
+  await Promise.all([plain.waitForURL(url => url.searchParams.get("action") === "board_categories_update"), plain.getByRole("button", { name: "絞り込む", exact: true }).click()]);
+  assert.equal(await plain.locator(".audit-table tbody tr").count(), 1);
+  await fallback.close();
+  assert.deepEqual(errors, []);
+  console.log("PASS: actor selection, cursor, details, reset, and 320/390/700/1024/1440px layouts");
+} finally {
+  await browser.close();
+}

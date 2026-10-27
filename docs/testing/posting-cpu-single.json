@@ -1,0 +1,3214 @@
+{
+  "date": "2026-10-27",
+  "baseline_commit": "7b6b71bdeee7dbe72e7c822a127c0cc9c254d542",
+  "go": "1.27.3",
+  "images": {
+    "baseline": {
+      "tag": "oimobbs:posting-cpu-single-baseline-20261027",
+      "id": "sha256:98bc005c210ed73751b5d5b30d66d9276e08a7eb87d628bb586574ee63d9dfb1"
+    },
+    "candidate": {
+      "tag": "oimobbs:posting-cpu-single-candidate-20261027",
+      "id": "sha256:2b69fd2ef2d662ba940b0a79f298e83cfbeb0324c5f3962d4002334ca330b537"
+    }
+  },
+  "runtime_id": "sha256:785d57bc85aab211471b1a6e4c6ea4b0d003be38df89c19a98fb208da3d8cac4",
+  "changed_go_files": [
+    "internal/identity/mac_test.go",
+    "internal/identity/public.go",
+    "internal/postcapture/capture.go",
+    "internal/postcapture/metadata.go",
+    "internal/postcapture/overrides.go",
+    "internal/postcapture/selected.go",
+    "internal/postcapture/selected_test.go"
+  ],
+  "source_manifests": {
+    "baseline": "8982af31654ca7bf03bde4f9a61b6577977a2cebd38d67b1509bb6e2fa732a95",
+    "candidate": "b3faa5119dd65f295666098db777762dfa0c42adb8b85ad27a8ae43b3e1557b7"
+  },
+  "microbenchmarks": {
+    "baseline": {
+      "BenchmarkCaptureMetadata/shared": {
+        "runs": [
+          {
+            "ns": 41657,
+            "bytes": 12504,
+            "allocations": 151
+          },
+          {
+            "ns": 41160,
+            "bytes": 12504,
+            "allocations": 151
+          },
+          {
+            "ns": 41172,
+            "bytes": 12504,
+            "allocations": 151
+          },
+          {
+            "ns": 41520,
+            "bytes": 12504,
+            "allocations": 151
+          },
+          {
+            "ns": 42485,
+            "bytes": 12504,
+            "allocations": 151
+          }
+        ],
+        "median": {
+          "ns": 41520,
+          "bytes": 12504,
+          "allocations": 151
+        }
+      },
+      "BenchmarkMACPosting": {
+        "runs": [
+          {
+            "ns": 1798,
+            "bytes": 1276,
+            "allocations": 33
+          },
+          {
+            "ns": 1806,
+            "bytes": 1276,
+            "allocations": 33
+          },
+          {
+            "ns": 1813,
+            "bytes": 1276,
+            "allocations": 33
+          },
+          {
+            "ns": 1849,
+            "bytes": 1276,
+            "allocations": 33
+          },
+          {
+            "ns": 1820,
+            "bytes": 1276,
+            "allocations": 33
+          }
+        ],
+        "median": {
+          "ns": 1813,
+          "bytes": 1276,
+          "allocations": 33
+        }
+      }
+    },
+    "candidate": {
+      "BenchmarkCaptureMetadata/shared": {
+        "runs": [
+          {
+            "ns": 33921,
+            "bytes": 11816,
+            "allocations": 126
+          },
+          {
+            "ns": 34297,
+            "bytes": 11816,
+            "allocations": 126
+          },
+          {
+            "ns": 35553,
+            "bytes": 11816,
+            "allocations": 126
+          },
+          {
+            "ns": 34056,
+            "bytes": 11816,
+            "allocations": 126
+          },
+          {
+            "ns": 34261,
+            "bytes": 11816,
+            "allocations": 126
+          }
+        ],
+        "median": {
+          "ns": 34261,
+          "bytes": 11816,
+          "allocations": 126
+        }
+      },
+      "BenchmarkMACPosting": {
+        "runs": [
+          {
+            "ns": 1165,
+            "bytes": 540,
+            "allocations": 8
+          },
+          {
+            "ns": 1174,
+            "bytes": 540,
+            "allocations": 8
+          },
+          {
+            "ns": 1192,
+            "bytes": 540,
+            "allocations": 8
+          },
+          {
+            "ns": 1160,
+            "bytes": 540,
+            "allocations": 8
+          },
+          {
+            "ns": 1158,
+            "bytes": 540,
+            "allocations": 8
+          }
+        ],
+        "median": {
+          "ns": 1165,
+          "bytes": 540,
+          "allocations": 8
+        }
+      }
+    }
+  },
+  "groups": [
+    {
+      "kind": "fixed",
+      "storage": "disk",
+      "cpu": 2,
+      "workers": 120,
+      "observed_gomaxprocs": [
+        2
+      ],
+      "baseline": {
+        "count": 1,
+        "names": [
+          "fixed-disk-w120-baseline-2cpu-r1"
+        ],
+        "throughput": 616.9522765974384,
+        "cpu_ms_per_success": 2.706145625,
+        "duration_with_drain_seconds": 12.966967305997969
+      },
+      "candidate": {
+        "count": 1,
+        "names": [
+          "fixed-disk-w120-candidate-2cpu-r1"
+        ],
+        "throughput": 626.4056736624876,
+        "cpu_ms_per_success": 2.6310275,
+        "duration_with_drain_seconds": 12.771276404993841
+      },
+      "cpu_reduction_percent": 2.775834541424571,
+      "throughput_increase_percent": 1.5322736334138831
+    },
+    {
+      "kind": "fixed",
+      "storage": "tmpfs",
+      "cpu": 1,
+      "workers": 80,
+      "observed_gomaxprocs": [
+        1
+      ],
+      "baseline": {
+        "count": 3,
+        "names": [
+          "fixed-tmpfs-w80-baseline-1cpu-r1",
+          "fixed-tmpfs-w80-baseline-1cpu-r2",
+          "fixed-tmpfs-w80-baseline-1cpu-r3"
+        ],
+        "throughput": 421.0546884310251,
+        "cpu_ms_per_success": 2.373865125,
+        "duration_with_drain_seconds": 18.999907185003394
+      },
+      "candidate": {
+        "count": 3,
+        "names": [
+          "fixed-tmpfs-w80-candidate-1cpu-r1",
+          "fixed-tmpfs-w80-candidate-1cpu-r2",
+          "fixed-tmpfs-w80-candidate-1cpu-r3"
+        ],
+        "throughput": 422.8464195101558,
+        "cpu_ms_per_success": 2.360381375,
+        "duration_with_drain_seconds": 18.919398700993042
+      },
+      "cpu_reduction_percent": 0.5680082603682135,
+      "throughput_increase_percent": 0.4255340525496143
+    },
+    {
+      "kind": "fixed",
+      "storage": "tmpfs",
+      "cpu": 1,
+      "workers": 120,
+      "observed_gomaxprocs": [
+        1
+      ],
+      "baseline": {
+        "count": 1,
+        "names": [
+          "fixed-tmpfs-baseline-1cpu-r3"
+        ],
+        "throughput": 428.6332968126731,
+        "cpu_ms_per_success": 2.3294805,
+        "duration_with_drain_seconds": 18.663972349997493
+      },
+      "candidate": {
+        "count": 0,
+        "names": [],
+        "throughput": null,
+        "cpu_ms_per_success": null,
+        "duration_with_drain_seconds": null
+      }
+    },
+    {
+      "kind": "fixed",
+      "storage": "tmpfs",
+      "cpu": 1,
+      "workers": 120,
+      "observed_gomaxprocs": [
+        2
+      ],
+      "baseline": {
+        "count": 1,
+        "names": [
+          "fixed-tmpfs-baseline-1cpu-r2"
+        ],
+        "throughput": 373.7746048140486,
+        "cpu_ms_per_success": 2.680536375,
+        "duration_with_drain_seconds": 21.403273248004552
+      },
+      "candidate": {
+        "count": 2,
+        "names": [
+          "fixed-tmpfs-candidate-1cpu-r2",
+          "fixed-tmpfs-candidate-1cpu-r3"
+        ],
+        "throughput": 379.78413669532716,
+        "cpu_ms_per_success": 2.6372444374999997,
+        "duration_with_drain_seconds": 21.066480238499935
+      },
+      "cpu_reduction_percent": 1.615047566739336,
+      "throughput_increase_percent": 1.6077956618450129
+    },
+    {
+      "kind": "mixed",
+      "storage": "disk",
+      "cpu": 2,
+      "workers": 120,
+      "observed_gomaxprocs": [
+        2
+      ],
+      "baseline": {
+        "count": 1,
+        "names": [
+          "mixed-disk-w120-baseline-2cpu-r1"
+        ],
+        "throughput": 159.815625576489,
+        "cpu_ms_per_success": 5.393807708333334,
+        "duration_with_drain_seconds": 30.034610087001056
+      },
+      "candidate": {
+        "count": 0,
+        "names": [],
+        "throughput": null,
+        "cpu_ms_per_success": null,
+        "duration_with_drain_seconds": null
+      }
+    }
+  ],
+  "trials": [
+    {
+      "name": "fixed-tmpfs-baseline-1cpu-r1",
+      "variant": "baseline",
+      "kind": "fixed",
+      "cpu": 1,
+      "memory": "4g",
+      "storage": "tmpfs",
+      "command": [
+        "python3",
+        "/home/patatan/OimoBBS/var/posting-cpu-single-20261027/balanced120-probe.py",
+        "--image",
+        "sha256:98bc005c210ed73751b5d5b30d66d9276e08a7eb87d628bb586574ee63d9dfb1",
+        "--cpus",
+        "1",
+        "--memory",
+        "4g",
+        "--egress-bps",
+        "80000000",
+        "--waf",
+        "--waf-posting-rate",
+        "100000",
+        "--waf-posting-concurrent",
+        "256",
+        "--waf-posting-client-rate",
+        "1000",
+        "--optional-log-stats",
+        "--collect-server-log",
+        "--posting-capacity-rate",
+        "1600",
+        "--posting-capacity-seconds",
+        "5",
+        "--posting-capacity-workers",
+        "120",
+        "--posting-capacity-threads",
+        "16",
+        "--output",
+        "/home/patatan/OimoBBS/var/posting-cpu-single-20261027/fixed-tmpfs-baseline-1cpu-r1.json",
+        "--posting-capacity-fixed-count"
+      ],
+      "exit_code": 1,
+      "wall_seconds": 8.330365615001938,
+      "throughput": null,
+      "cpu_ms_per_success": null,
+      "summary": null,
+      "read_summary": null,
+      "resources": null,
+      "duration_with_drain_seconds": null,
+      "restart": null,
+      "memory_peak_bytes": null,
+      "observed_gomaxprocs": [
+        2
+      ],
+      "workers": 120,
+      "trial_status": "setup_failure",
+      "recovery": null,
+      "integrity_ok": null,
+      "integrity_counts": {
+        "missing_acknowledged": 0,
+        "stored_without_acknowledgement": 0,
+        "duplicates": 0
+      },
+      "environment": {
+        "OIMO_PROBE_STORAGE": "tmpfs",
+        "OIMO_PROBE_TMPFS": "1",
+        "OIMO_PROBE_CPUS": null
+      },
+      "raw": "var/posting-cpu-single-20261027/fixed-tmpfs-baseline-1cpu-r1.json"
+    },
+    {
+      "name": "fixed-tmpfs-baseline-1cpu-r2",
+      "variant": "baseline",
+      "kind": "fixed",
+      "cpu": 1,
+      "memory": "4g",
+      "storage": "tmpfs",
+      "command": [
+        "python3",
+        "/home/patatan/OimoBBS/var/posting-cpu-single-20261027/balanced120-probe.py",
+        "--image",
+        "sha256:98bc005c210ed73751b5d5b30d66d9276e08a7eb87d628bb586574ee63d9dfb1",
+        "--cpus",
+        "1",
+        "--memory",
+        "4g",
+        "--egress-bps",
+        "80000000",
+        "--waf",
+        "--waf-posting-rate",
+        "100000",
+        "--waf-posting-concurrent",
+        "256",
+        "--waf-posting-client-rate",
+        "1000",
+        "--optional-log-stats",
+        "--collect-server-log",
+        "--posting-capacity-rate",
+        "1600",
+        "--posting-capacity-seconds",
+        "5",
+        "--posting-capacity-workers",
+        "120",
+        "--posting-capacity-threads",
+        "16",
+        "--output",
+        "/home/patatan/OimoBBS/var/posting-cpu-single-20261027/fixed-tmpfs-baseline-1cpu-r2.json",
+        "--posting-capacity-fixed-count"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 47.429181032995984,
+      "throughput": 373.7746048140486,
+      "cpu_ms_per_success": 2.680536375,
+      "summary": {
+        "planned": 8000,
+        "sent": 8000,
+        "success": 8000,
+        "acknowledged": 8000,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 530.6294570036698,
+        "scheduled_p95_ms": 15530.378356997971,
+        "issuance_wait_p95_ms": 15335.683764998976
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "resources": {
+        "cpu_cores_average": 1.0019164242553074,
+        "generator_cpu_seconds": 7.049679633999999,
+        "wbytes_delta": 0,
+        "wios_delta": 0,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 21203327,
+        "io_some_usec_delta": 0
+      },
+      "duration_with_drain_seconds": 21.403273248004552,
+      "restart": null,
+      "memory_peak_bytes": 948260864,
+      "observed_gomaxprocs": [
+        2
+      ],
+      "workers": 120,
+      "trial_status": "success",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 23.51271500083385,
+        "scheduled_p95_ms": 23.624219007615466,
+        "issuance_wait_p95_ms": null
+      },
+      "integrity_ok": true,
+      "integrity_counts": {
+        "missing_acknowledged": 0,
+        "stored_without_acknowledgement": 0,
+        "duplicates": 0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 20098,
+          "saved": 20098,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 8161536,
+        "day_file_bytes": {
+          "20261027": 8161536
+        }
+      },
+      "environment": {
+        "OIMO_PROBE_STORAGE": "tmpfs",
+        "OIMO_PROBE_TMPFS": "1",
+        "OIMO_PROBE_CPUS": null
+      },
+      "raw": "var/posting-cpu-single-20261027/fixed-tmpfs-baseline-1cpu-r2.json"
+    },
+    {
+      "name": "fixed-tmpfs-candidate-1cpu-r2",
+      "variant": "candidate",
+      "kind": "fixed",
+      "cpu": 1,
+      "memory": "4g",
+      "storage": "tmpfs",
+      "command": [
+        "python3",
+        "/home/patatan/OimoBBS/var/posting-cpu-single-20261027/balanced120-probe.py",
+        "--image",
+        "sha256:2b69fd2ef2d662ba940b0a79f298e83cfbeb0324c5f3962d4002334ca330b537",
+        "--cpus",
+        "1",
+        "--memory",
+        "4g",
+        "--egress-bps",
+        "80000000",
+        "--waf",
+        "--waf-posting-rate",
+        "100000",
+        "--waf-posting-concurrent",
+        "256",
+        "--waf-posting-client-rate",
+        "1000",
+        "--optional-log-stats",
+        "--collect-server-log",
+        "--posting-capacity-rate",
+        "1600",
+        "--posting-capacity-seconds",
+        "5",
+        "--posting-capacity-workers",
+        "120",
+        "--posting-capacity-threads",
+        "16",
+        "--output",
+        "/home/patatan/OimoBBS/var/posting-cpu-single-20261027/fixed-tmpfs-candidate-1cpu-r2.json",
+        "--posting-capacity-fixed-count"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 46.97529923300317,
+      "throughput": 383.37441947960855,
+      "cpu_ms_per_success": 2.611809625,
+      "summary": {
+        "planned": 8000,
+        "sent": 8000,
+        "success": 8000,
+        "acknowledged": 8000,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 516.6890199980116,
+        "scheduled_p95_ms": 15303.274017001968,
+        "issuance_wait_p95_ms": 15089.479870002833
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "resources": {
+        "cpu_cores_average": 1.001300998775629,
+        "generator_cpu_seconds": 7.120761029,
+        "wbytes_delta": 0,
+        "wios_delta": 0,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 20812090,
+        "io_some_usec_delta": 0
+      },
+      "duration_with_drain_seconds": 20.86732863100042,
+      "restart": null,
+      "memory_peak_bytes": 1046630400,
+      "observed_gomaxprocs": [
+        2
+      ],
+      "workers": 120,
+      "trial_status": "success",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 23.718407996057067,
+        "scheduled_p95_ms": 24.060133000602946,
+        "issuance_wait_p95_ms": null
+      },
+      "integrity_ok": true,
+      "integrity_counts": {
+        "missing_acknowledged": 0,
+        "stored_without_acknowledgement": 0,
+        "duplicates": 0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 20098,
+          "saved": 20098,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 8162314,
+        "day_file_bytes": {
+          "20261027": 8162314
+        }
+      },
+      "environment": {
+        "OIMO_PROBE_STORAGE": "tmpfs",
+        "OIMO_PROBE_TMPFS": "1",
+        "OIMO_PROBE_CPUS": null
+      },
+      "raw": "var/posting-cpu-single-20261027/fixed-tmpfs-candidate-1cpu-r2.json"
+    },
+    {
+      "name": "fixed-tmpfs-candidate-1cpu-r3",
+      "variant": "candidate",
+      "kind": "fixed",
+      "cpu": 1,
+      "memory": "4g",
+      "storage": "tmpfs",
+      "command": [
+        "python3",
+        "/home/patatan/OimoBBS/var/posting-cpu-single-20261027/balanced120-probe.py",
+        "--image",
+        "sha256:2b69fd2ef2d662ba940b0a79f298e83cfbeb0324c5f3962d4002334ca330b537",
+        "--cpus",
+        "1",
+        "--memory",
+        "4g",
+        "--egress-bps",
+        "80000000",
+        "--waf",
+        "--waf-posting-rate",
+        "100000",
+        "--waf-posting-concurrent",
+        "256",
+        "--waf-posting-client-rate",
+        "1000",
+        "--optional-log-stats",
+        "--collect-server-log",
+        "--posting-capacity-rate",
+        "1600",
+        "--posting-capacity-seconds",
+        "5",
+        "--posting-capacity-workers",
+        "120",
+        "--posting-capacity-threads",
+        "16",
+        "--output",
+        "/home/patatan/OimoBBS/var/posting-cpu-single-20261027/fixed-tmpfs-candidate-1cpu-r3.json",
+        "--posting-capacity-fixed-count"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 47.533754513999156,
+      "throughput": 376.1938539110458,
+      "cpu_ms_per_success": 2.66267925,
+      "summary": {
+        "planned": 8000,
+        "sent": 8000,
+        "success": 8000,
+        "acknowledged": 8000,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 525.0993950030534,
+        "scheduled_p95_ms": 15560.784110995883,
+        "issuance_wait_p95_ms": 15368.85047100077
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "resources": {
+        "cpu_cores_average": 1.001683568786473,
+        "generator_cpu_seconds": 7.19673154,
+        "wbytes_delta": 0,
+        "wios_delta": 0,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 20199676,
+        "io_some_usec_delta": 0
+      },
+      "duration_with_drain_seconds": 21.26563184599945,
+      "restart": null,
+      "memory_peak_bytes": 1063968768,
+      "observed_gomaxprocs": [
+        2
+      ],
+      "workers": 120,
+      "trial_status": "success",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 24.249815003713593,
+        "scheduled_p95_ms": 24.362754003959708,
+        "issuance_wait_p95_ms": null
+      },
+      "integrity_ok": true,
+      "integrity_counts": {
+        "missing_acknowledged": 0,
+        "stored_without_acknowledgement": 0,
+        "duplicates": 0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 20098,
+          "saved": 20098,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 8158982,
+        "day_file_bytes": {
+          "20261027": 8158982
+        }
+      },
+      "environment": {
+        "OIMO_PROBE_STORAGE": "tmpfs",
+        "OIMO_PROBE_TMPFS": "1",
+        "OIMO_PROBE_CPUS": null
+      },
+      "raw": "var/posting-cpu-single-20261027/fixed-tmpfs-candidate-1cpu-r3.json"
+    },
+    {
+      "name": "fixed-tmpfs-baseline-1cpu-r3",
+      "variant": "baseline",
+      "kind": "fixed",
+      "cpu": 1,
+      "memory": "4g",
+      "storage": "tmpfs",
+      "command": [
+        "python3",
+        "/home/patatan/OimoBBS/var/posting-cpu-single-20261027/balanced120-probe.py",
+        "--image",
+        "sha256:98bc005c210ed73751b5d5b30d66d9276e08a7eb87d628bb586574ee63d9dfb1",
+        "--cpus",
+        "1",
+        "--memory",
+        "4g",
+        "--egress-bps",
+        "80000000",
+        "--waf",
+        "--waf-posting-rate",
+        "100000",
+        "--waf-posting-concurrent",
+        "256",
+        "--waf-posting-client-rate",
+        "1000",
+        "--optional-log-stats",
+        "--collect-server-log",
+        "--posting-capacity-rate",
+        "1600",
+        "--posting-capacity-seconds",
+        "5",
+        "--posting-capacity-workers",
+        "120",
+        "--posting-capacity-threads",
+        "16",
+        "--output",
+        "/home/patatan/OimoBBS/var/posting-cpu-single-20261027/fixed-tmpfs-baseline-1cpu-r3.json",
+        "--posting-capacity-fixed-count"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 45.02019620799547,
+      "throughput": 428.6332968126731,
+      "cpu_ms_per_success": 2.3294805,
+      "summary": {
+        "planned": 8000,
+        "sent": 8000,
+        "success": 8000,
+        "acknowledged": 8000,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 505.7509440011927,
+        "scheduled_p95_ms": 13087.274858997262,
+        "issuance_wait_p95_ms": 12812.045514991041
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "resources": {
+        "cpu_cores_average": 0.9984929065758341,
+        "generator_cpu_seconds": 6.97629448,
+        "wbytes_delta": 0,
+        "wios_delta": 0,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 168880,
+        "io_some_usec_delta": 0
+      },
+      "duration_with_drain_seconds": 18.663972349997493,
+      "restart": null,
+      "memory_peak_bytes": 1042452480,
+      "observed_gomaxprocs": [
+        1
+      ],
+      "workers": 120,
+      "trial_status": "success",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 26.215746001980733,
+        "scheduled_p95_ms": 26.341379001678433,
+        "issuance_wait_p95_ms": null
+      },
+      "integrity_ok": true,
+      "integrity_counts": {
+        "missing_acknowledged": 0,
+        "stored_without_acknowledgement": 0,
+        "duplicates": 0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 20098,
+          "saved": 20098,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 8189099,
+        "day_file_bytes": {
+          "20261027": 8189099
+        }
+      },
+      "environment": {
+        "OIMO_PROBE_STORAGE": "tmpfs",
+        "OIMO_PROBE_TMPFS": "1",
+        "OIMO_PROBE_CPUS": "1"
+      },
+      "raw": "var/posting-cpu-single-20261027/fixed-tmpfs-baseline-1cpu-r3.json"
+    },
+    {
+      "name": "fixed-tmpfs-baseline-1cpu-r4",
+      "variant": "baseline",
+      "kind": "fixed",
+      "cpu": 1,
+      "memory": "4g",
+      "storage": "tmpfs",
+      "command": [
+        "python3",
+        "/home/patatan/OimoBBS/var/posting-cpu-single-20261027/balanced120-probe.py",
+        "--image",
+        "sha256:98bc005c210ed73751b5d5b30d66d9276e08a7eb87d628bb586574ee63d9dfb1",
+        "--cpus",
+        "1",
+        "--memory",
+        "4g",
+        "--egress-bps",
+        "80000000",
+        "--waf",
+        "--waf-posting-rate",
+        "100000",
+        "--waf-posting-concurrent",
+        "256",
+        "--waf-posting-client-rate",
+        "1000",
+        "--optional-log-stats",
+        "--collect-server-log",
+        "--posting-capacity-rate",
+        "1600",
+        "--posting-capacity-seconds",
+        "5",
+        "--posting-capacity-workers",
+        "120",
+        "--posting-capacity-threads",
+        "16",
+        "--output",
+        "/home/patatan/OimoBBS/var/posting-cpu-single-20261027/fixed-tmpfs-baseline-1cpu-r4.json",
+        "--posting-capacity-fixed-count"
+      ],
+      "exit_code": 1,
+      "wall_seconds": 53.36060807000467,
+      "throughput": 425.6849480392408,
+      "cpu_ms_per_success": 2.3486340206185568,
+      "summary": {
+        "planned": 8000,
+        "sent": 8000,
+        "success": 7954,
+        "acknowledged": 7954,
+        "completion_errors_after_ack": 0,
+        "errors": 46,
+        "skipped": 0,
+        "http_p95_ms": 503.3250079941354,
+        "scheduled_p95_ms": 13085.1724729946,
+        "issuance_wait_p95_ms": 12877.93915799557
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "resources": {
+        "cpu_cores_average": 0.9997781510302035,
+        "generator_cpu_seconds": 7.069330269,
+        "wbytes_delta": 0,
+        "wios_delta": 0,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 144463,
+        "io_some_usec_delta": 0
+      },
+      "duration_with_drain_seconds": 18.685180287997355,
+      "restart": null,
+      "memory_peak_bytes": 1127485440,
+      "observed_gomaxprocs": [
+        1
+      ],
+      "workers": 120,
+      "trial_status": "http_failure",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 25.267179997172207,
+        "scheduled_p95_ms": 25.428406006540172,
+        "issuance_wait_p95_ms": null
+      },
+      "integrity_ok": false,
+      "integrity_counts": {
+        "missing_acknowledged": 0,
+        "stored_without_acknowledgement": 46,
+        "duplicates": 0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 20085,
+          "saved": 20085,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 8193067,
+        "day_file_bytes": {
+          "20261027": 8193067
+        }
+      },
+      "environment": {
+        "OIMO_PROBE_STORAGE": "tmpfs",
+        "OIMO_PROBE_TMPFS": "1",
+        "OIMO_PROBE_CPUS": "1"
+      },
+      "raw": "var/posting-cpu-single-20261027/fixed-tmpfs-baseline-1cpu-r4.json"
+    },
+    {
+      "name": "fixed-tmpfs-w90-baseline-1cpu-r1",
+      "variant": "baseline",
+      "kind": "fixed",
+      "cpu": 1,
+      "memory": "4g",
+      "storage": "tmpfs",
+      "command": [
+        "python3",
+        "/home/patatan/OimoBBS/var/posting-cpu-single-20261027/balanced120-probe.py",
+        "--image",
+        "sha256:98bc005c210ed73751b5d5b30d66d9276e08a7eb87d628bb586574ee63d9dfb1",
+        "--cpus",
+        "1",
+        "--memory",
+        "4g",
+        "--egress-bps",
+        "80000000",
+        "--waf",
+        "--waf-posting-rate",
+        "100000",
+        "--waf-posting-concurrent",
+        "256",
+        "--waf-posting-client-rate",
+        "1000",
+        "--optional-log-stats",
+        "--collect-server-log",
+        "--posting-capacity-rate",
+        "1600",
+        "--posting-capacity-seconds",
+        "5",
+        "--posting-capacity-workers",
+        "90",
+        "--posting-capacity-threads",
+        "16",
+        "--output",
+        "/home/patatan/OimoBBS/var/posting-cpu-single-20261027/fixed-tmpfs-w90-baseline-1cpu-r1.json",
+        "--posting-capacity-fixed-count"
+      ],
+      "exit_code": 2,
+      "wall_seconds": 0.08082842599833384,
+      "throughput": null,
+      "cpu_ms_per_success": null,
+      "summary": null,
+      "read_summary": null,
+      "resources": null,
+      "duration_with_drain_seconds": null,
+      "restart": null,
+      "memory_peak_bytes": null,
+      "observed_gomaxprocs": [],
+      "workers": 90,
+      "trial_status": "cli_rejected",
+      "recovery": null,
+      "integrity_ok": null,
+      "integrity_counts": {
+        "missing_acknowledged": 0,
+        "stored_without_acknowledgement": 0,
+        "duplicates": 0
+      },
+      "environment": {
+        "OIMO_PROBE_STORAGE": "tmpfs",
+        "OIMO_PROBE_TMPFS": "1",
+        "OIMO_PROBE_CPUS": "1"
+      },
+      "raw": "var/posting-cpu-single-20261027/fixed-tmpfs-w90-baseline-1cpu-r1.json"
+    },
+    {
+      "name": "fixed-tmpfs-w90-candidate-1cpu-r1",
+      "variant": "candidate",
+      "kind": "fixed",
+      "cpu": 1,
+      "memory": "4g",
+      "storage": "tmpfs",
+      "command": [
+        "python3",
+        "/home/patatan/OimoBBS/var/posting-cpu-single-20261027/balanced120-probe.py",
+        "--image",
+        "sha256:2b69fd2ef2d662ba940b0a79f298e83cfbeb0324c5f3962d4002334ca330b537",
+        "--cpus",
+        "1",
+        "--memory",
+        "4g",
+        "--egress-bps",
+        "80000000",
+        "--waf",
+        "--waf-posting-rate",
+        "100000",
+        "--waf-posting-concurrent",
+        "256",
+        "--waf-posting-client-rate",
+        "1000",
+        "--optional-log-stats",
+        "--collect-server-log",
+        "--posting-capacity-rate",
+        "1600",
+        "--posting-capacity-seconds",
+        "5",
+        "--posting-capacity-workers",
+        "90",
+        "--posting-capacity-threads",
+        "16",
+        "--output",
+        "/home/patatan/OimoBBS/var/posting-cpu-single-20261027/fixed-tmpfs-w90-candidate-1cpu-r1.json",
+        "--posting-capacity-fixed-count"
+      ],
+      "exit_code": 2,
+      "wall_seconds": 0.09008347200142452,
+      "throughput": null,
+      "cpu_ms_per_success": null,
+      "summary": null,
+      "read_summary": null,
+      "resources": null,
+      "duration_with_drain_seconds": null,
+      "restart": null,
+      "memory_peak_bytes": null,
+      "observed_gomaxprocs": [],
+      "workers": 90,
+      "trial_status": "cli_rejected",
+      "recovery": null,
+      "integrity_ok": null,
+      "integrity_counts": {
+        "missing_acknowledged": 0,
+        "stored_without_acknowledgement": 0,
+        "duplicates": 0
+      },
+      "environment": {
+        "OIMO_PROBE_STORAGE": "tmpfs",
+        "OIMO_PROBE_TMPFS": "1",
+        "OIMO_PROBE_CPUS": "1"
+      },
+      "raw": "var/posting-cpu-single-20261027/fixed-tmpfs-w90-candidate-1cpu-r1.json"
+    },
+    {
+      "name": "fixed-tmpfs-w90-candidate-1cpu-r2",
+      "variant": "candidate",
+      "kind": "fixed",
+      "cpu": 1,
+      "memory": "4g",
+      "storage": "tmpfs",
+      "command": [
+        "python3",
+        "/home/patatan/OimoBBS/var/posting-cpu-single-20261027/balanced120-probe.py",
+        "--image",
+        "sha256:2b69fd2ef2d662ba940b0a79f298e83cfbeb0324c5f3962d4002334ca330b537",
+        "--cpus",
+        "1",
+        "--memory",
+        "4g",
+        "--egress-bps",
+        "80000000",
+        "--waf",
+        "--waf-posting-rate",
+        "100000",
+        "--waf-posting-concurrent",
+        "256",
+        "--waf-posting-client-rate",
+        "1000",
+        "--optional-log-stats",
+        "--collect-server-log",
+        "--posting-capacity-rate",
+        "1600",
+        "--posting-capacity-seconds",
+        "5",
+        "--posting-capacity-workers",
+        "90",
+        "--posting-capacity-threads",
+        "16",
+        "--output",
+        "/home/patatan/OimoBBS/var/posting-cpu-single-20261027/fixed-tmpfs-w90-candidate-1cpu-r2.json",
+        "--posting-capacity-fixed-count"
+      ],
+      "exit_code": 2,
+      "wall_seconds": 0.08435500500490889,
+      "throughput": null,
+      "cpu_ms_per_success": null,
+      "summary": null,
+      "read_summary": null,
+      "resources": null,
+      "duration_with_drain_seconds": null,
+      "restart": null,
+      "memory_peak_bytes": null,
+      "observed_gomaxprocs": [],
+      "workers": 90,
+      "trial_status": "cli_rejected",
+      "recovery": null,
+      "integrity_ok": null,
+      "integrity_counts": {
+        "missing_acknowledged": 0,
+        "stored_without_acknowledgement": 0,
+        "duplicates": 0
+      },
+      "environment": {
+        "OIMO_PROBE_STORAGE": "tmpfs",
+        "OIMO_PROBE_TMPFS": "1",
+        "OIMO_PROBE_CPUS": "1"
+      },
+      "raw": "var/posting-cpu-single-20261027/fixed-tmpfs-w90-candidate-1cpu-r2.json"
+    },
+    {
+      "name": "fixed-tmpfs-w90-baseline-1cpu-r2",
+      "variant": "baseline",
+      "kind": "fixed",
+      "cpu": 1,
+      "memory": "4g",
+      "storage": "tmpfs",
+      "command": [
+        "python3",
+        "/home/patatan/OimoBBS/var/posting-cpu-single-20261027/balanced120-probe.py",
+        "--image",
+        "sha256:98bc005c210ed73751b5d5b30d66d9276e08a7eb87d628bb586574ee63d9dfb1",
+        "--cpus",
+        "1",
+        "--memory",
+        "4g",
+        "--egress-bps",
+        "80000000",
+        "--waf",
+        "--waf-posting-rate",
+        "100000",
+        "--waf-posting-concurrent",
+        "256",
+        "--waf-posting-client-rate",
+        "1000",
+        "--optional-log-stats",
+        "--collect-server-log",
+        "--posting-capacity-rate",
+        "1600",
+        "--posting-capacity-seconds",
+        "5",
+        "--posting-capacity-workers",
+        "90",
+        "--posting-capacity-threads",
+        "16",
+        "--output",
+        "/home/patatan/OimoBBS/var/posting-cpu-single-20261027/fixed-tmpfs-w90-baseline-1cpu-r2.json",
+        "--posting-capacity-fixed-count"
+      ],
+      "exit_code": 2,
+      "wall_seconds": 0.0877959879944683,
+      "throughput": null,
+      "cpu_ms_per_success": null,
+      "summary": null,
+      "read_summary": null,
+      "resources": null,
+      "duration_with_drain_seconds": null,
+      "restart": null,
+      "memory_peak_bytes": null,
+      "observed_gomaxprocs": [],
+      "workers": 90,
+      "trial_status": "cli_rejected",
+      "recovery": null,
+      "integrity_ok": null,
+      "integrity_counts": {
+        "missing_acknowledged": 0,
+        "stored_without_acknowledgement": 0,
+        "duplicates": 0
+      },
+      "environment": {
+        "OIMO_PROBE_STORAGE": "tmpfs",
+        "OIMO_PROBE_TMPFS": "1",
+        "OIMO_PROBE_CPUS": "1"
+      },
+      "raw": "var/posting-cpu-single-20261027/fixed-tmpfs-w90-baseline-1cpu-r2.json"
+    },
+    {
+      "name": "fixed-tmpfs-w90-baseline-1cpu-r3",
+      "variant": "baseline",
+      "kind": "fixed",
+      "cpu": 1,
+      "memory": "4g",
+      "storage": "tmpfs",
+      "command": [
+        "python3",
+        "/home/patatan/OimoBBS/var/posting-cpu-single-20261027/balanced120-probe.py",
+        "--image",
+        "sha256:98bc005c210ed73751b5d5b30d66d9276e08a7eb87d628bb586574ee63d9dfb1",
+        "--cpus",
+        "1",
+        "--memory",
+        "4g",
+        "--egress-bps",
+        "80000000",
+        "--waf",
+        "--waf-posting-rate",
+        "100000",
+        "--waf-posting-concurrent",
+        "256",
+        "--waf-posting-client-rate",
+        "1000",
+        "--optional-log-stats",
+        "--collect-server-log",
+        "--posting-capacity-rate",
+        "1600",
+        "--posting-capacity-seconds",
+        "5",
+        "--posting-capacity-workers",
+        "90",
+        "--posting-capacity-threads",
+        "16",
+        "--output",
+        "/home/patatan/OimoBBS/var/posting-cpu-single-20261027/fixed-tmpfs-w90-baseline-1cpu-r3.json",
+        "--posting-capacity-fixed-count"
+      ],
+      "exit_code": 2,
+      "wall_seconds": 0.08055158700153697,
+      "throughput": null,
+      "cpu_ms_per_success": null,
+      "summary": null,
+      "read_summary": null,
+      "resources": null,
+      "duration_with_drain_seconds": null,
+      "restart": null,
+      "memory_peak_bytes": null,
+      "observed_gomaxprocs": [],
+      "workers": 90,
+      "trial_status": "cli_rejected",
+      "recovery": null,
+      "integrity_ok": null,
+      "integrity_counts": {
+        "missing_acknowledged": 0,
+        "stored_without_acknowledgement": 0,
+        "duplicates": 0
+      },
+      "environment": {
+        "OIMO_PROBE_STORAGE": "tmpfs",
+        "OIMO_PROBE_TMPFS": "1",
+        "OIMO_PROBE_CPUS": "1"
+      },
+      "raw": "var/posting-cpu-single-20261027/fixed-tmpfs-w90-baseline-1cpu-r3.json"
+    },
+    {
+      "name": "fixed-tmpfs-w90-candidate-1cpu-r3",
+      "variant": "candidate",
+      "kind": "fixed",
+      "cpu": 1,
+      "memory": "4g",
+      "storage": "tmpfs",
+      "command": [
+        "python3",
+        "/home/patatan/OimoBBS/var/posting-cpu-single-20261027/balanced120-probe.py",
+        "--image",
+        "sha256:2b69fd2ef2d662ba940b0a79f298e83cfbeb0324c5f3962d4002334ca330b537",
+        "--cpus",
+        "1",
+        "--memory",
+        "4g",
+        "--egress-bps",
+        "80000000",
+        "--waf",
+        "--waf-posting-rate",
+        "100000",
+        "--waf-posting-concurrent",
+        "256",
+        "--waf-posting-client-rate",
+        "1000",
+        "--optional-log-stats",
+        "--collect-server-log",
+        "--posting-capacity-rate",
+        "1600",
+        "--posting-capacity-seconds",
+        "5",
+        "--posting-capacity-workers",
+        "90",
+        "--posting-capacity-threads",
+        "16",
+        "--output",
+        "/home/patatan/OimoBBS/var/posting-cpu-single-20261027/fixed-tmpfs-w90-candidate-1cpu-r3.json",
+        "--posting-capacity-fixed-count"
+      ],
+      "exit_code": 2,
+      "wall_seconds": 0.07853663199784933,
+      "throughput": null,
+      "cpu_ms_per_success": null,
+      "summary": null,
+      "read_summary": null,
+      "resources": null,
+      "duration_with_drain_seconds": null,
+      "restart": null,
+      "memory_peak_bytes": null,
+      "observed_gomaxprocs": [],
+      "workers": 90,
+      "trial_status": "cli_rejected",
+      "recovery": null,
+      "integrity_ok": null,
+      "integrity_counts": {
+        "missing_acknowledged": 0,
+        "stored_without_acknowledgement": 0,
+        "duplicates": 0
+      },
+      "environment": {
+        "OIMO_PROBE_STORAGE": "tmpfs",
+        "OIMO_PROBE_TMPFS": "1",
+        "OIMO_PROBE_CPUS": "1"
+      },
+      "raw": "var/posting-cpu-single-20261027/fixed-tmpfs-w90-candidate-1cpu-r3.json"
+    },
+    {
+      "name": "fixed-disk-w120-candidate-2cpu-r1",
+      "variant": "candidate",
+      "kind": "fixed",
+      "cpu": 2,
+      "memory": "4g",
+      "storage": "disk",
+      "command": [
+        "python3",
+        "/home/patatan/OimoBBS/var/posting-cpu-single-20261027/balanced120-probe.py",
+        "--image",
+        "sha256:2b69fd2ef2d662ba940b0a79f298e83cfbeb0324c5f3962d4002334ca330b537",
+        "--cpus",
+        "2",
+        "--memory",
+        "4g",
+        "--egress-bps",
+        "80000000",
+        "--waf",
+        "--waf-posting-rate",
+        "100000",
+        "--waf-posting-concurrent",
+        "256",
+        "--waf-posting-client-rate",
+        "1000",
+        "--optional-log-stats",
+        "--collect-server-log",
+        "--posting-capacity-rate",
+        "1600",
+        "--posting-capacity-seconds",
+        "5",
+        "--posting-capacity-workers",
+        "120",
+        "--posting-capacity-threads",
+        "16",
+        "--output",
+        "/home/patatan/OimoBBS/var/posting-cpu-single-20261027/fixed-disk-w120-candidate-2cpu-r1.json",
+        "--posting-capacity-fixed-count"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 45.1617996030036,
+      "throughput": 626.4056736624876,
+      "cpu_ms_per_success": 2.6310275,
+      "summary": {
+        "planned": 8000,
+        "sent": 8000,
+        "success": 8000,
+        "acknowledged": 8000,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 321.9333900051424,
+        "scheduled_p95_ms": 7395.980911991501,
+        "issuance_wait_p95_ms": 7284.484298994357
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "resources": {
+        "cpu_cores_average": 1.6480905535620307,
+        "generator_cpu_seconds": 7.039010127,
+        "wbytes_delta": 136826880,
+        "wios_delta": 1436,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 0,
+        "io_some_usec_delta": 110786
+      },
+      "duration_with_drain_seconds": 12.771276404993841,
+      "restart": null,
+      "memory_peak_bytes": 1053589504,
+      "observed_gomaxprocs": [
+        2
+      ],
+      "workers": 120,
+      "trial_status": "success",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 33.30639599880669,
+        "scheduled_p95_ms": 33.413776007364504,
+        "issuance_wait_p95_ms": null
+      },
+      "integrity_ok": true,
+      "integrity_counts": {
+        "missing_acknowledged": 0,
+        "stored_without_acknowledgement": 0,
+        "duplicates": 0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 20098,
+          "saved": 20098,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 8209584,
+        "day_file_bytes": {
+          "20261027": 8209584
+        }
+      },
+      "environment": {
+        "OIMO_PROBE_STORAGE": "disk",
+        "OIMO_PROBE_TMPFS": "0",
+        "OIMO_PROBE_CPUS": "2"
+      },
+      "raw": "var/posting-cpu-single-20261027/fixed-disk-w120-candidate-2cpu-r1.json"
+    },
+    {
+      "name": "fixed-disk-w120-baseline-2cpu-r1",
+      "variant": "baseline",
+      "kind": "fixed",
+      "cpu": 2,
+      "memory": "4g",
+      "storage": "disk",
+      "command": [
+        "python3",
+        "/home/patatan/OimoBBS/var/posting-cpu-single-20261027/balanced120-probe.py",
+        "--image",
+        "sha256:98bc005c210ed73751b5d5b30d66d9276e08a7eb87d628bb586574ee63d9dfb1",
+        "--cpus",
+        "2",
+        "--memory",
+        "4g",
+        "--egress-bps",
+        "80000000",
+        "--waf",
+        "--waf-posting-rate",
+        "100000",
+        "--waf-posting-concurrent",
+        "256",
+        "--waf-posting-client-rate",
+        "1000",
+        "--optional-log-stats",
+        "--collect-server-log",
+        "--posting-capacity-rate",
+        "1600",
+        "--posting-capacity-seconds",
+        "5",
+        "--posting-capacity-workers",
+        "120",
+        "--posting-capacity-threads",
+        "16",
+        "--output",
+        "/home/patatan/OimoBBS/var/posting-cpu-single-20261027/fixed-disk-w120-baseline-2cpu-r1.json",
+        "--posting-capacity-fixed-count"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 40.0503890330001,
+      "throughput": 616.9522765974384,
+      "cpu_ms_per_success": 2.706145625,
+      "summary": {
+        "planned": 8000,
+        "sent": 8000,
+        "success": 8000,
+        "acknowledged": 8000,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 321.8736380003975,
+        "scheduled_p95_ms": 7649.857120995875,
+        "issuance_wait_p95_ms": 7526.453787999344
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "resources": {
+        "cpu_cores_average": 1.669562704147948,
+        "generator_cpu_seconds": 7.249450187,
+        "wbytes_delta": 134205440,
+        "wios_delta": 1410,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 0,
+        "io_some_usec_delta": 110476
+      },
+      "duration_with_drain_seconds": 12.966967305997969,
+      "restart": null,
+      "memory_peak_bytes": 1051029504,
+      "observed_gomaxprocs": [
+        2
+      ],
+      "workers": 120,
+      "trial_status": "success",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 33.550984000612516,
+        "scheduled_p95_ms": 33.6509999979171,
+        "issuance_wait_p95_ms": null
+      },
+      "integrity_ok": true,
+      "integrity_counts": {
+        "missing_acknowledged": 0,
+        "stored_without_acknowledgement": 0,
+        "duplicates": 0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 20098,
+          "saved": 20098,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 8209250,
+        "day_file_bytes": {
+          "20261027": 8209250
+        }
+      },
+      "environment": {
+        "OIMO_PROBE_STORAGE": "disk",
+        "OIMO_PROBE_TMPFS": "0",
+        "OIMO_PROBE_CPUS": "2"
+      },
+      "raw": "var/posting-cpu-single-20261027/fixed-disk-w120-baseline-2cpu-r1.json"
+    },
+    {
+      "name": "mixed-disk-w120-baseline-2cpu-r1",
+      "variant": "baseline",
+      "kind": "mixed",
+      "cpu": 2,
+      "memory": "4g",
+      "storage": "disk",
+      "command": [
+        "python3",
+        "/home/patatan/OimoBBS/var/posting-cpu-single-20261027/balanced120-probe.py",
+        "--image",
+        "sha256:98bc005c210ed73751b5d5b30d66d9276e08a7eb87d628bb586574ee63d9dfb1",
+        "--cpus",
+        "2",
+        "--memory",
+        "4g",
+        "--egress-bps",
+        "8000000000",
+        "--waf",
+        "--waf-posting-rate",
+        "100000",
+        "--waf-posting-concurrent",
+        "256",
+        "--waf-posting-client-rate",
+        "1000",
+        "--optional-log-stats",
+        "--collect-server-log",
+        "--posting-capacity-rate",
+        "160",
+        "--posting-capacity-seconds",
+        "30",
+        "--posting-capacity-workers",
+        "120",
+        "--posting-capacity-threads",
+        "16",
+        "--output",
+        "/home/patatan/OimoBBS/var/posting-cpu-single-20261027/mixed-disk-w120-baseline-2cpu-r1.json",
+        "--posting-capacity-reads",
+        "400",
+        "--posting-capacity-subject-every",
+        "4",
+        "--posting-capacity-restart"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 113.67560886499996,
+      "throughput": 159.815625576489,
+      "cpu_ms_per_success": 5.393807708333334,
+      "summary": {
+        "planned": 4800,
+        "sent": 4800,
+        "success": 4800,
+        "acknowledged": 4800,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 720.5131619994063,
+        "scheduled_p95_ms": 734.5228209960624,
+        "issuance_wait_p95_ms": 2.5972389921662398
+      },
+      "read_summary": {
+        "planned": 12000,
+        "sent": 12000,
+        "success": 12000,
+        "acknowledged": 12000,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 16.333758001565002,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 880.5536514666667
+      },
+      "resources": {
+        "cpu_cores_average": 0.8620147531465802,
+        "generator_cpu_seconds": 14.389300312000001,
+        "wbytes_delta": 139608064,
+        "wios_delta": 3660,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 0,
+        "io_some_usec_delta": 2098827
+      },
+      "duration_with_drain_seconds": 30.034610087001056,
+      "restart": {
+        "ok": true,
+        "mode": "graceful container restart on the same data volume",
+        "ready": true,
+        "readiness_timeout_seconds": 60,
+        "ready_seconds": 16.78280738999456,
+        "verification_seconds": 16.792159246993833,
+        "threads": [
+          {
+            "key": "1793094280",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1793094281",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1793094282",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1793094283",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1793094284",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1793094285",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1793094286",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1793094287",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1793094288",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1793094289",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1793094290",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1793094291",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1793094292",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1793094293",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1793094294",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1793094295",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          }
+        ]
+      },
+      "memory_peak_bytes": 1005215744,
+      "observed_gomaxprocs": [
+        2
+      ],
+      "workers": 120,
+      "trial_status": "success",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 32.59468400210608,
+        "scheduled_p95_ms": 32.93379900424043,
+        "issuance_wait_p95_ms": null
+      },
+      "integrity_ok": true,
+      "integrity_counts": {
+        "missing_acknowledged": 0,
+        "stored_without_acknowledgement": 0,
+        "duplicates": 0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 17,
+          "saved": 17,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 11352649,
+        "day_file_bytes": {
+          "20261027": 11352649
+        }
+      },
+      "timed_process_optional_shutdown": {
+        "summary": {
+          "schema": "optional-http-loss-summary-v1",
+          "completeness": "snapshot_only",
+          "site_id": "856ad46f4dc99c4ce3dbd2043771efd9",
+          "sequence": "3",
+          "previous_sha256": "fad1ac8fef513f5f3dc653e68710210dbcb02c2f62c8b045786ddf45ad254802",
+          "monitor_boot_id": "f374f5a01942d8a80400c7a4a45164db",
+          "opened_at_ns": "1793094243040959223",
+          "observed_at_ns": "1793094334171359836",
+          "clean_shutdown": true,
+          "prior_known_losses": {
+            "failed": 0,
+            "dropped_capacity": 0,
+            "dropped_invalid": 0,
+            "dropped_closed": 0,
+            "dropped_shutdown": 0,
+            "startup_discarded": 0
+          },
+          "queue": {
+            "accepted": 26437,
+            "saved": 26437,
+            "failed": 0,
+            "dropped_capacity": 0,
+            "dropped_invalid": 0,
+            "dropped_closed": 0,
+            "dropped_shutdown": 0,
+            "loss_started_at_ns": "0",
+            "loss_finished_at_ns": "0",
+            "pending": 0,
+            "pending_bytes": 0,
+            "closed": true
+          },
+          "startup_discarded": 0,
+          "unclean_boots": 0,
+          "unknown_from_ns": "0",
+          "unknown_until_ns": "0",
+          "known_loss_from_ns": "0",
+          "known_loss_until_ns": "0"
+        },
+        "signature": "tgnBw3zVslmPgFQ0kxm5retPCchrprTLETowFvcJvWuacVz20AJOdtqvrulR/xNmx5pkO3/c/uTT+cLv+kFyCg=="
+      },
+      "environment": {
+        "OIMO_PROBE_STORAGE": "disk",
+        "OIMO_PROBE_TMPFS": "0",
+        "OIMO_PROBE_CPUS": "2"
+      },
+      "raw": "var/posting-cpu-single-20261027/mixed-disk-w120-baseline-2cpu-r1.json"
+    },
+    {
+      "name": "mixed-disk-w120-candidate-2cpu-r1",
+      "variant": "candidate",
+      "kind": "mixed",
+      "cpu": 2,
+      "memory": "4g",
+      "storage": "disk",
+      "command": [
+        "python3",
+        "/home/patatan/OimoBBS/var/posting-cpu-single-20261027/balanced120-probe.py",
+        "--image",
+        "sha256:2b69fd2ef2d662ba940b0a79f298e83cfbeb0324c5f3962d4002334ca330b537",
+        "--cpus",
+        "2",
+        "--memory",
+        "4g",
+        "--egress-bps",
+        "8000000000",
+        "--waf",
+        "--waf-posting-rate",
+        "100000",
+        "--waf-posting-concurrent",
+        "256",
+        "--waf-posting-client-rate",
+        "1000",
+        "--optional-log-stats",
+        "--collect-server-log",
+        "--posting-capacity-rate",
+        "160",
+        "--posting-capacity-seconds",
+        "30",
+        "--posting-capacity-workers",
+        "120",
+        "--posting-capacity-threads",
+        "16",
+        "--output",
+        "/home/patatan/OimoBBS/var/posting-cpu-single-20261027/mixed-disk-w120-candidate-2cpu-r1.json",
+        "--posting-capacity-reads",
+        "400",
+        "--posting-capacity-subject-every",
+        "4",
+        "--posting-capacity-restart"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 100.71657907400368,
+      "throughput": 157.84220680246185,
+      "cpu_ms_per_success": 5.492448079358379,
+      "summary": {
+        "planned": 4800,
+        "sent": 4791,
+        "success": 4738,
+        "acknowledged": 4738,
+        "completion_errors_after_ack": 0,
+        "errors": 53,
+        "skipped": 9,
+        "http_p95_ms": 693.2459160016151,
+        "scheduled_p95_ms": 863.2403499941574,
+        "issuance_wait_p95_ms": 140.05289699707646
+      },
+      "read_summary": {
+        "planned": 12000,
+        "sent": 11584,
+        "success": 11565,
+        "acknowledged": 11565,
+        "completion_errors_after_ack": 0,
+        "errors": 19,
+        "skipped": 416,
+        "http_p95_ms": 14.96114499605028,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 848.2632248
+      },
+      "resources": {
+        "cpu_cores_average": 0.8669401255938697,
+        "generator_cpu_seconds": 13.830545455000001,
+        "wbytes_delta": 224636928,
+        "wios_delta": 3926,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 0,
+        "io_some_usec_delta": 1993683
+      },
+      "duration_with_drain_seconds": 30.01731980299519,
+      "restart": {
+        "ok": true,
+        "mode": "graceful container restart on the same data volume",
+        "ready": true,
+        "readiness_timeout_seconds": 60,
+        "ready_seconds": 15.613230094997562,
+        "verification_seconds": 15.619931389999692,
+        "threads": [
+          {
+            "key": "1793094382",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1793094383",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1793094384",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1793094385",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1793094386",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1793094387",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1793094388",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1793094389",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1793094390",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1793094391",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1793094392",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1793094393",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1793094394",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1793094395",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1793094396",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1793094397",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          }
+        ]
+      },
+      "memory_peak_bytes": 919486464,
+      "observed_gomaxprocs": [
+        2
+      ],
+      "workers": 120,
+      "trial_status": "http_failure",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 32.10465199663304,
+        "scheduled_p95_ms": 32.27294300450012,
+        "issuance_wait_p95_ms": null
+      },
+      "integrity_ok": true,
+      "integrity_counts": {
+        "missing_acknowledged": 0,
+        "stored_without_acknowledgement": 0,
+        "duplicates": 0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 17,
+          "saved": 17,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 11113185,
+        "day_file_bytes": {
+          "20261027": 11113185
+        }
+      },
+      "timed_process_optional_shutdown": {
+        "summary": {
+          "schema": "optional-http-loss-summary-v1",
+          "completeness": "snapshot_only",
+          "site_id": "94f77b6be744afc3be7b67000fad86ca",
+          "sequence": "3",
+          "previous_sha256": "ec11f0db86da6ab167bc311a03285e78a2ec719160cea1ab6a264ad81d4c2aee",
+          "monitor_boot_id": "d39ab177771195566b9f94f4164a077d",
+          "opened_at_ns": "1793094353292715835",
+          "observed_at_ns": "1793094436113435632",
+          "clean_shutdown": true,
+          "prior_known_losses": {
+            "failed": 0,
+            "dropped_capacity": 0,
+            "dropped_invalid": 0,
+            "dropped_closed": 0,
+            "dropped_shutdown": 0,
+            "startup_discarded": 0
+          },
+          "queue": {
+            "accepted": 25934,
+            "saved": 25934,
+            "failed": 0,
+            "dropped_capacity": 0,
+            "dropped_invalid": 0,
+            "dropped_closed": 0,
+            "dropped_shutdown": 0,
+            "loss_started_at_ns": "0",
+            "loss_finished_at_ns": "0",
+            "pending": 0,
+            "pending_bytes": 0,
+            "closed": true
+          },
+          "startup_discarded": 0,
+          "unclean_boots": 0,
+          "unknown_from_ns": "0",
+          "unknown_until_ns": "0",
+          "known_loss_from_ns": "0",
+          "known_loss_until_ns": "0"
+        },
+        "signature": "jIR66/2PR9uh2tkTpBfO9VmCsQ1ndl6O2U6pijuu88yQ1tGixTf3Cd/w7akQTX4wEJsgog6T15nO5KGUMIW+BQ=="
+      },
+      "environment": {
+        "OIMO_PROBE_STORAGE": "disk",
+        "OIMO_PROBE_TMPFS": "0",
+        "OIMO_PROBE_CPUS": "2"
+      },
+      "raw": "var/posting-cpu-single-20261027/mixed-disk-w120-candidate-2cpu-r1.json"
+    },
+    {
+      "name": "fixed-tmpfs-w80-candidate-1cpu-r1",
+      "variant": "candidate",
+      "kind": "fixed",
+      "cpu": 1,
+      "memory": "4g",
+      "storage": "tmpfs",
+      "command": [
+        "python3",
+        "/home/patatan/OimoBBS/var/posting-cpu-single-20261027/balanced120-probe.py",
+        "--image",
+        "sha256:2b69fd2ef2d662ba940b0a79f298e83cfbeb0324c5f3962d4002334ca330b537",
+        "--cpus",
+        "1",
+        "--memory",
+        "4g",
+        "--egress-bps",
+        "80000000",
+        "--waf",
+        "--waf-posting-rate",
+        "100000",
+        "--waf-posting-concurrent",
+        "256",
+        "--waf-posting-client-rate",
+        "1000",
+        "--optional-log-stats",
+        "--collect-server-log",
+        "--posting-capacity-rate",
+        "1600",
+        "--posting-capacity-seconds",
+        "5",
+        "--posting-capacity-workers",
+        "80",
+        "--posting-capacity-threads",
+        "16",
+        "--output",
+        "/home/patatan/OimoBBS/var/posting-cpu-single-20261027/fixed-tmpfs-w80-candidate-1cpu-r1.json",
+        "--posting-capacity-fixed-count"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 46.84968744399521,
+      "throughput": 422.8464195101558,
+      "cpu_ms_per_success": 2.360381375,
+      "summary": {
+        "planned": 8000,
+        "sent": 8000,
+        "success": 8000,
+        "acknowledged": 8000,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 337.3202910006512,
+        "scheduled_p95_ms": 13296.142036000674,
+        "issuance_wait_p95_ms": 13150.07857800083
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "resources": {
+        "cpu_cores_average": 0.9980788130972081,
+        "generator_cpu_seconds": 6.952637902,
+        "wbytes_delta": 0,
+        "wios_delta": 0,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 162826,
+        "io_some_usec_delta": 0
+      },
+      "duration_with_drain_seconds": 18.919398700993042,
+      "restart": null,
+      "memory_peak_bytes": 1080553472,
+      "observed_gomaxprocs": [
+        1
+      ],
+      "workers": 80,
+      "trial_status": "success",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 25.729424000019208,
+        "scheduled_p95_ms": 25.849110003036913,
+        "issuance_wait_p95_ms": null
+      },
+      "integrity_ok": true,
+      "integrity_counts": {
+        "missing_acknowledged": 0,
+        "stored_without_acknowledgement": 0,
+        "duplicates": 0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 19912,
+          "saved": 19912,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 8067267,
+        "day_file_bytes": {
+          "20261027": 8067267
+        }
+      },
+      "environment": {
+        "OIMO_PROBE_STORAGE": "tmpfs",
+        "OIMO_PROBE_TMPFS": "1",
+        "OIMO_PROBE_CPUS": "1"
+      },
+      "raw": "var/posting-cpu-single-20261027/fixed-tmpfs-w80-candidate-1cpu-r1.json"
+    },
+    {
+      "name": "fixed-tmpfs-w80-baseline-1cpu-r1",
+      "variant": "baseline",
+      "kind": "fixed",
+      "cpu": 1,
+      "memory": "4g",
+      "storage": "tmpfs",
+      "command": [
+        "python3",
+        "/home/patatan/OimoBBS/var/posting-cpu-single-20261027/balanced120-probe.py",
+        "--image",
+        "sha256:98bc005c210ed73751b5d5b30d66d9276e08a7eb87d628bb586574ee63d9dfb1",
+        "--cpus",
+        "1",
+        "--memory",
+        "4g",
+        "--egress-bps",
+        "80000000",
+        "--waf",
+        "--waf-posting-rate",
+        "100000",
+        "--waf-posting-concurrent",
+        "256",
+        "--waf-posting-client-rate",
+        "1000",
+        "--optional-log-stats",
+        "--collect-server-log",
+        "--posting-capacity-rate",
+        "1600",
+        "--posting-capacity-seconds",
+        "5",
+        "--posting-capacity-workers",
+        "80",
+        "--posting-capacity-threads",
+        "16",
+        "--output",
+        "/home/patatan/OimoBBS/var/posting-cpu-single-20261027/fixed-tmpfs-w80-baseline-1cpu-r1.json",
+        "--posting-capacity-fixed-count"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 44.634113101004914,
+      "throughput": 421.82149716631886,
+      "cpu_ms_per_success": 2.3681945,
+      "summary": {
+        "planned": 8000,
+        "sent": 8000,
+        "success": 8000,
+        "acknowledged": 8000,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 331.94242299941834,
+        "scheduled_p95_ms": 13361.426759001915,
+        "issuance_wait_p95_ms": 13250.061017999542
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "resources": {
+        "cpu_cores_average": 0.9989553495710419,
+        "generator_cpu_seconds": 6.6444587980000005,
+        "wbytes_delta": 0,
+        "wios_delta": 0,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 168544,
+        "io_some_usec_delta": 0
+      },
+      "duration_with_drain_seconds": 18.96536818000459,
+      "restart": null,
+      "memory_peak_bytes": 1136717824,
+      "observed_gomaxprocs": [
+        1
+      ],
+      "workers": 80,
+      "trial_status": "success",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 26.902209996478632,
+        "scheduled_p95_ms": 27.025960000173654,
+        "issuance_wait_p95_ms": null
+      },
+      "integrity_ok": true,
+      "integrity_counts": {
+        "missing_acknowledged": 0,
+        "stored_without_acknowledgement": 0,
+        "duplicates": 0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 19912,
+          "saved": 19912,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 8056640,
+        "day_file_bytes": {
+          "20261027": 8056640
+        }
+      },
+      "environment": {
+        "OIMO_PROBE_STORAGE": "tmpfs",
+        "OIMO_PROBE_TMPFS": "1",
+        "OIMO_PROBE_CPUS": "1"
+      },
+      "raw": "var/posting-cpu-single-20261027/fixed-tmpfs-w80-baseline-1cpu-r1.json"
+    },
+    {
+      "name": "fixed-tmpfs-w80-baseline-1cpu-r2",
+      "variant": "baseline",
+      "kind": "fixed",
+      "cpu": 1,
+      "memory": "4g",
+      "storage": "tmpfs",
+      "command": [
+        "python3",
+        "/home/patatan/OimoBBS/var/posting-cpu-single-20261027/balanced120-probe.py",
+        "--image",
+        "sha256:98bc005c210ed73751b5d5b30d66d9276e08a7eb87d628bb586574ee63d9dfb1",
+        "--cpus",
+        "1",
+        "--memory",
+        "4g",
+        "--egress-bps",
+        "80000000",
+        "--waf",
+        "--waf-posting-rate",
+        "100000",
+        "--waf-posting-concurrent",
+        "256",
+        "--waf-posting-client-rate",
+        "1000",
+        "--optional-log-stats",
+        "--collect-server-log",
+        "--posting-capacity-rate",
+        "1600",
+        "--posting-capacity-seconds",
+        "5",
+        "--posting-capacity-workers",
+        "80",
+        "--posting-capacity-threads",
+        "16",
+        "--output",
+        "/home/patatan/OimoBBS/var/posting-cpu-single-20261027/fixed-tmpfs-w80-baseline-1cpu-r2.json",
+        "--posting-capacity-fixed-count"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 40.060228821996134,
+      "throughput": 421.0546884310251,
+      "cpu_ms_per_success": 2.373865125,
+      "summary": {
+        "planned": 8000,
+        "sent": 8000,
+        "success": 8000,
+        "acknowledged": 8000,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 332.08490099787014,
+        "scheduled_p95_ms": 13418.05862399633,
+        "issuance_wait_p95_ms": 13293.134789993928
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "resources": {
+        "cpu_cores_average": 0.9995270405841515,
+        "generator_cpu_seconds": 6.7255557889999995,
+        "wbytes_delta": 0,
+        "wios_delta": 0,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 148523,
+        "io_some_usec_delta": 0
+      },
+      "duration_with_drain_seconds": 18.999907185003394,
+      "restart": null,
+      "memory_peak_bytes": 1118089216,
+      "observed_gomaxprocs": [
+        1
+      ],
+      "workers": 80,
+      "trial_status": "success",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 25.908916002663318,
+        "scheduled_p95_ms": 26.071371998114046,
+        "issuance_wait_p95_ms": null
+      },
+      "integrity_ok": true,
+      "integrity_counts": {
+        "missing_acknowledged": 0,
+        "stored_without_acknowledgement": 0,
+        "duplicates": 0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 19912,
+          "saved": 19912,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 8058206,
+        "day_file_bytes": {
+          "20261027": 8058206
+        }
+      },
+      "environment": {
+        "OIMO_PROBE_STORAGE": "tmpfs",
+        "OIMO_PROBE_TMPFS": "1",
+        "OIMO_PROBE_CPUS": "1"
+      },
+      "raw": "var/posting-cpu-single-20261027/fixed-tmpfs-w80-baseline-1cpu-r2.json"
+    },
+    {
+      "name": "fixed-tmpfs-w80-candidate-1cpu-r2",
+      "variant": "candidate",
+      "kind": "fixed",
+      "cpu": 1,
+      "memory": "4g",
+      "storage": "tmpfs",
+      "command": [
+        "python3",
+        "/home/patatan/OimoBBS/var/posting-cpu-single-20261027/balanced120-probe.py",
+        "--image",
+        "sha256:2b69fd2ef2d662ba940b0a79f298e83cfbeb0324c5f3962d4002334ca330b537",
+        "--cpus",
+        "1",
+        "--memory",
+        "4g",
+        "--egress-bps",
+        "80000000",
+        "--waf",
+        "--waf-posting-rate",
+        "100000",
+        "--waf-posting-concurrent",
+        "256",
+        "--waf-posting-client-rate",
+        "1000",
+        "--optional-log-stats",
+        "--collect-server-log",
+        "--posting-capacity-rate",
+        "1600",
+        "--posting-capacity-seconds",
+        "5",
+        "--posting-capacity-workers",
+        "80",
+        "--posting-capacity-threads",
+        "16",
+        "--output",
+        "/home/patatan/OimoBBS/var/posting-cpu-single-20261027/fixed-tmpfs-w80-candidate-1cpu-r2.json",
+        "--posting-capacity-fixed-count"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 40.01224186499894,
+      "throughput": 421.8601723515638,
+      "cpu_ms_per_success": 2.3696471250000006,
+      "summary": {
+        "planned": 8000,
+        "sent": 8000,
+        "success": 8000,
+        "acknowledged": 8000,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 335.6004559973371,
+        "scheduled_p95_ms": 13390.04049799405,
+        "issuance_wait_p95_ms": 13271.822640999744
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "resources": {
+        "cpu_cores_average": 0.9996597445648876,
+        "generator_cpu_seconds": 6.835563178,
+        "wbytes_delta": 0,
+        "wios_delta": 0,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 152615,
+        "io_some_usec_delta": 0
+      },
+      "duration_with_drain_seconds": 18.963629477999348,
+      "restart": null,
+      "memory_peak_bytes": 1121484800,
+      "observed_gomaxprocs": [
+        1
+      ],
+      "workers": 80,
+      "trial_status": "success",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 26.264710002578795,
+        "scheduled_p95_ms": 26.369505998445675,
+        "issuance_wait_p95_ms": null
+      },
+      "integrity_ok": true,
+      "integrity_counts": {
+        "missing_acknowledged": 0,
+        "stored_without_acknowledgement": 0,
+        "duplicates": 0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 19912,
+          "saved": 19912,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 8053142,
+        "day_file_bytes": {
+          "20261027": 8053142
+        }
+      },
+      "environment": {
+        "OIMO_PROBE_STORAGE": "tmpfs",
+        "OIMO_PROBE_TMPFS": "1",
+        "OIMO_PROBE_CPUS": "1"
+      },
+      "raw": "var/posting-cpu-single-20261027/fixed-tmpfs-w80-candidate-1cpu-r2.json"
+    },
+    {
+      "name": "fixed-tmpfs-w80-candidate-1cpu-r3",
+      "variant": "candidate",
+      "kind": "fixed",
+      "cpu": 1,
+      "memory": "4g",
+      "storage": "tmpfs",
+      "command": [
+        "python3",
+        "/home/patatan/OimoBBS/var/posting-cpu-single-20261027/balanced120-probe.py",
+        "--image",
+        "sha256:2b69fd2ef2d662ba940b0a79f298e83cfbeb0324c5f3962d4002334ca330b537",
+        "--cpus",
+        "1",
+        "--memory",
+        "4g",
+        "--egress-bps",
+        "80000000",
+        "--waf",
+        "--waf-posting-rate",
+        "100000",
+        "--waf-posting-concurrent",
+        "256",
+        "--waf-posting-client-rate",
+        "1000",
+        "--optional-log-stats",
+        "--collect-server-log",
+        "--posting-capacity-rate",
+        "1600",
+        "--posting-capacity-seconds",
+        "5",
+        "--posting-capacity-workers",
+        "80",
+        "--posting-capacity-threads",
+        "16",
+        "--output",
+        "/home/patatan/OimoBBS/var/posting-cpu-single-20261027/fixed-tmpfs-w80-candidate-1cpu-r3.json",
+        "--posting-capacity-fixed-count"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 39.668914425994444,
+      "throughput": 428.6595358264791,
+      "cpu_ms_per_success": 2.332241875,
+      "summary": {
+        "planned": 8000,
+        "sent": 8000,
+        "success": 8000,
+        "acknowledged": 8000,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 331.16159399651224,
+        "scheduled_p95_ms": 13020.69531599409,
+        "issuance_wait_p95_ms": 12896.030181000242
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "resources": {
+        "cpu_cores_average": 0.9997377195725772,
+        "generator_cpu_seconds": 6.744957268,
+        "wbytes_delta": 0,
+        "wios_delta": 0,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 146399,
+        "io_some_usec_delta": 0
+      },
+      "duration_with_drain_seconds": 18.662829895001778,
+      "restart": null,
+      "memory_peak_bytes": 1054289920,
+      "observed_gomaxprocs": [
+        1
+      ],
+      "workers": 80,
+      "trial_status": "success",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 25.630524003645405,
+        "scheduled_p95_ms": 25.756848997843917,
+        "issuance_wait_p95_ms": null
+      },
+      "integrity_ok": true,
+      "integrity_counts": {
+        "missing_acknowledged": 0,
+        "stored_without_acknowledgement": 0,
+        "duplicates": 0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 19912,
+          "saved": 19912,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 8069344,
+        "day_file_bytes": {
+          "20261027": 8069344
+        }
+      },
+      "environment": {
+        "OIMO_PROBE_STORAGE": "tmpfs",
+        "OIMO_PROBE_TMPFS": "1",
+        "OIMO_PROBE_CPUS": "1"
+      },
+      "raw": "var/posting-cpu-single-20261027/fixed-tmpfs-w80-candidate-1cpu-r3.json"
+    },
+    {
+      "name": "fixed-tmpfs-w80-baseline-1cpu-r3",
+      "variant": "baseline",
+      "kind": "fixed",
+      "cpu": 1,
+      "memory": "4g",
+      "storage": "tmpfs",
+      "command": [
+        "python3",
+        "/home/patatan/OimoBBS/var/posting-cpu-single-20261027/balanced120-probe.py",
+        "--image",
+        "sha256:98bc005c210ed73751b5d5b30d66d9276e08a7eb87d628bb586574ee63d9dfb1",
+        "--cpus",
+        "1",
+        "--memory",
+        "4g",
+        "--egress-bps",
+        "80000000",
+        "--waf",
+        "--waf-posting-rate",
+        "100000",
+        "--waf-posting-concurrent",
+        "256",
+        "--waf-posting-client-rate",
+        "1000",
+        "--optional-log-stats",
+        "--collect-server-log",
+        "--posting-capacity-rate",
+        "1600",
+        "--posting-capacity-seconds",
+        "5",
+        "--posting-capacity-workers",
+        "80",
+        "--posting-capacity-threads",
+        "16",
+        "--output",
+        "/home/patatan/OimoBBS/var/posting-cpu-single-20261027/fixed-tmpfs-w80-baseline-1cpu-r3.json",
+        "--posting-capacity-fixed-count"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 40.411094340997806,
+      "throughput": 414.27398544793493,
+      "cpu_ms_per_success": 2.40982375,
+      "summary": {
+        "planned": 8000,
+        "sent": 8000,
+        "success": 8000,
+        "acknowledged": 8000,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 343.9821690044482,
+        "scheduled_p95_ms": 13680.672021997452,
+        "issuance_wait_p95_ms": 13559.478304996446
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "resources": {
+        "cpu_cores_average": 0.998327289139588,
+        "generator_cpu_seconds": 6.818404602999999,
+        "wbytes_delta": 0,
+        "wios_delta": 0,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 176636,
+        "io_some_usec_delta": 0
+      },
+      "duration_with_drain_seconds": 19.31089153799985,
+      "restart": null,
+      "memory_peak_bytes": 1161367552,
+      "observed_gomaxprocs": [
+        1
+      ],
+      "workers": 80,
+      "trial_status": "success",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 25.418691002414562,
+        "scheduled_p95_ms": 25.526577002892736,
+        "issuance_wait_p95_ms": null
+      },
+      "integrity_ok": true,
+      "integrity_counts": {
+        "missing_acknowledged": 0,
+        "stored_without_acknowledgement": 0,
+        "duplicates": 0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 19912,
+          "saved": 19912,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 8064582,
+        "day_file_bytes": {
+          "20261027": 8064582
+        }
+      },
+      "environment": {
+        "OIMO_PROBE_STORAGE": "tmpfs",
+        "OIMO_PROBE_TMPFS": "1",
+        "OIMO_PROBE_CPUS": "1"
+      },
+      "raw": "var/posting-cpu-single-20261027/fixed-tmpfs-w80-baseline-1cpu-r3.json"
+    }
+  ],
+  "checks": {
+    "fuzz-selected.log": "fuzz: elapsed: 0s, gathering baseline coverage: 0/21 completed\nfuzz: elapsed: 0s, gathering baseline coverage: 21/21 completed, now fuzzing with 2 workers\nfuzz: elapsed: 3s, execs: 6503 (2167/sec), new interesting: 12 (total: 33)\nfuzz: elapsed: 6s, execs: 6503 (0/sec), new interesting: 12 (total: 33)\nfuzz: elapsed: 9s, execs: 6503 (0/sec), new interesting: 12 (total: 33)\nfuzz: elapsed: 12s, execs: 6503 (0/sec), new interesting: 12 (total: 33)\nfuzz: elapsed: 15s, execs: 6503 (0/sec), new interesting: 12 (total: 33)\nfuzz: elapsed: 18s, execs: 6503 (0/sec), new interesting: 12 (total: 33)\nfuzz: elapsed: 21s, execs: 6503 (0/sec), new interesting: 12 (total: 33)\nfuzz: elapsed: 24s, execs: 6503 (0/sec), new interesting: 12 (total: 33)\nfuzz: elapsed: 27s, execs: 6503 (0/sec), new interesting: 12 (total: 33)\nfuzz: elapsed: 30s, execs: 6503 (0/sec), new interesting: 12 (total: 33)\nfuzz: elapsed: 31s, execs: 6503 (0/sec), new interesting: 12 (total: 33)\nPASS\nok  \toimobbs/internal/postcapture\t31.018s\n",
+    "fuzz-mutation.log": "fuzz: elapsed: 0s, gathering baseline coverage: 0/2 completed\nfuzz: elapsed: 0s, gathering baseline coverage: 2/2 completed, now fuzzing with 2 workers\nfuzz: elapsed: 3s, execs: 15336 (5112/sec), new interesting: 188 (total: 190)\nfuzz: elapsed: 6s, execs: 36343 (7002/sec), new interesting: 239 (total: 241)\nfuzz: elapsed: 9s, execs: 57268 (6974/sec), new interesting: 303 (total: 305)\nfuzz: elapsed: 12s, execs: 77432 (6723/sec), new interesting: 323 (total: 325)\nfuzz: elapsed: 15s, execs: 96418 (6328/sec), new interesting: 325 (total: 327)\nfuzz: elapsed: 18s, execs: 116658 (6745/sec), new interesting: 325 (total: 327)\nfuzz: elapsed: 21s, execs: 136444 (6597/sec), new interesting: 329 (total: 331)\nfuzz: elapsed: 24s, execs: 155103 (6220/sec), new interesting: 351 (total: 353)\nfuzz: elapsed: 27s, execs: 171395 (5429/sec), new interesting: 369 (total: 371)\nfuzz: elapsed: 30s, execs: 190851 (6487/sec), new interesting: 369 (total: 371)\nfuzz: elapsed: 30s, execs: 190851 (0/sec), new interesting: 369 (total: 371)\nPASS\nok  \toimobbs/internal/postcapture\t30.078s\n",
+    "fuzz-mac.log": "fuzz: elapsed: 0s, gathering baseline coverage: 0/3 completed\nfuzz: elapsed: 0s, gathering baseline coverage: 3/3 completed, now fuzzing with 2 workers\nfuzz: elapsed: 3s, execs: 48204 (16067/sec), new interesting: 4 (total: 7)\nfuzz: elapsed: 6s, execs: 90136 (13977/sec), new interesting: 5 (total: 8)\nfuzz: elapsed: 9s, execs: 140958 (16938/sec), new interesting: 7 (total: 10)\nfuzz: elapsed: 12s, execs: 179206 (12751/sec), new interesting: 7 (total: 10)\nfuzz: elapsed: 15s, execs: 233943 (18243/sec), new interesting: 8 (total: 11)\nfuzz: elapsed: 18s, execs: 279424 (15163/sec), new interesting: 8 (total: 11)\nfuzz: elapsed: 21s, execs: 323070 (14547/sec), new interesting: 8 (total: 11)\nfuzz: elapsed: 24s, execs: 367228 (14720/sec), new interesting: 8 (total: 11)\nfuzz: elapsed: 27s, execs: 412646 (15137/sec), new interesting: 8 (total: 11)\nfuzz: elapsed: 30s, execs: 456656 (14675/sec), new interesting: 8 (total: 11)\nfuzz: elapsed: 30s, execs: 456656 (0/sec), new interesting: 8 (total: 11)\nPASS\nok  \toimobbs/internal/identity\t30.071s\n",
+    "race.log": "ok  \toimobbs/internal/postcapture\t4.468s\nok  \toimobbs/internal/identity\t1.197s\n",
+    "race-final.log": "ok  \toimobbs/internal/postcapture\t3.898s\nok  \toimobbs/internal/identity\t(cached)\n",
+    "regression.log": "ok  \toimobbs/internal/app\t29.123s\nok  \toimobbs/internal/evidence\t(cached)\nok  \toimobbs/internal/store\t(cached)\nok  \toimobbs/internal/domain\t(cached)\nok  \toimobbs/internal/postinput\t0.054s\nok  \toimobbs/internal/strictjson\t(cached)\nok  \toimobbs/internal/compat\t(cached)\n",
+    "bootstrap.log": "ok  \toimobbs/internal/bootstrap\t135.519s\n",
+    "vet.log": ""
+  },
+  "raw_sha256": {
+    "var/posting-cpu-single-20261027/balanced120-probe.py": "d9d484e7c25cd02508ebbc588ad8da14698e7f7824a955c7ccf55727b1aec9f1",
+    "var/posting-cpu-single-20261027/balanced120_capacity.py": "e86cf4ea67bfcf47311972c953332e24d18967c50709dcc6cc9c8055d5f00982",
+    "var/posting-cpu-single-20261027/baseline-bench-final.log": "4ecce190b92e645305a31e4f350e6fe44b94268e937743c156ac7628f1303ac1",
+    "var/posting-cpu-single-20261027/baseline-bench.log": "6a7d5c1b5e8200b7ff7a7b7bc1544e54554f9f115ff49173c216df8e2b8f989e",
+    "var/posting-cpu-single-20261027/baseline-build.log": "d012807ad137907ae1051d1b8cccb1ca1feab7d1dde857f92b5cc039943e6f8d",
+    "var/posting-cpu-single-20261027/bootstrap.log": "675ecaeb8b715609f87ee56d5d2c90405c5dac37b54646ff49d9cdf13d914938",
+    "var/posting-cpu-single-20261027/candidate-bench-final.log": "80f9df81b6836d8304e01a1e0edb9eb12f6175d46db68ad9a760ac2ecea618cc",
+    "var/posting-cpu-single-20261027/candidate-bench.log": "b23b598c3cb6ba21bc3993fe129ef81733f79456f60fc8b254fc54337a625f7f",
+    "var/posting-cpu-single-20261027/candidate-build.log": "c0d06390c8cc0746ab501a1835009b9e1fefcb1cc15176279767b2de6e799756",
+    "var/posting-cpu-single-20261027/continue.py": "c458cf97faac813bbe1f7e18b886351f95a64b1448a57ce9222c47361dcf096a",
+    "var/posting-cpu-single-20261027/extra-sequence.py": "a54fe3fcf08340c0371a031d4cd987d83051b1226c3e7bec5137fcb259769b69",
+    "var/posting-cpu-single-20261027/fixed-disk-w120-baseline-2cpu-r1.json": "baffa707fc70249fab3f4b440580d0b9ba38f1ff170ae03bac696eb547f8cb93",
+    "var/posting-cpu-single-20261027/fixed-disk-w120-baseline-2cpu-r1.json.server.log": "e04557a9484eb67d1d279a0ed90adb72f4357a05b062f21afbe262ef61d3a677",
+    "var/posting-cpu-single-20261027/fixed-disk-w120-baseline-2cpu-r1.log": "ba8ff20c78084951e999b278f42824793b90aebdd013e75e460555e6227c1a41",
+    "var/posting-cpu-single-20261027/fixed-disk-w120-candidate-2cpu-r1.json": "13ac5ddef1fb87ecbb475bb74f3d0ecf7d5806798300c831ce8805a0d7ed3840",
+    "var/posting-cpu-single-20261027/fixed-disk-w120-candidate-2cpu-r1.json.server.log": "dc1355f9e4ce86f7532a35f125d116274bad5047d2c030a2c7c544130c68da63",
+    "var/posting-cpu-single-20261027/fixed-disk-w120-candidate-2cpu-r1.log": "153bc885b02ae03d32cc57136b279f64a8a97c46444e0b366cad7452bd1120d2",
+    "var/posting-cpu-single-20261027/fixed-tmpfs-baseline-1cpu-r1.json.server.log": "3bdeb4021d87516e50984601512a0c8abcb9f28926197f24c2e84a7058003502",
+    "var/posting-cpu-single-20261027/fixed-tmpfs-baseline-1cpu-r1.log": "65e8fba7c9021437b5a241d8a406b95799d4651574fc4f74f7ad1fd91071b532",
+    "var/posting-cpu-single-20261027/fixed-tmpfs-baseline-1cpu-r2.json": "2573f2232c58b11f5305b812acc3c33c3e840fab23c3390f6fa768c19b772149",
+    "var/posting-cpu-single-20261027/fixed-tmpfs-baseline-1cpu-r2.json.server.log": "a9ddfb3dc0bcb07e102db1e481ebe60d0b3180b73d77e2c603efc9c98aebf2e7",
+    "var/posting-cpu-single-20261027/fixed-tmpfs-baseline-1cpu-r2.log": "258c94b2bb613375ca9012883eda61cf0af64f697c223e3f0f163ea57397c812",
+    "var/posting-cpu-single-20261027/fixed-tmpfs-baseline-1cpu-r3.json": "444e79a21eba60a702ae81ddde5d483d75ddae4c513f40ae3e7d9a5533747ad4",
+    "var/posting-cpu-single-20261027/fixed-tmpfs-baseline-1cpu-r3.json.server.log": "07f4f28dd8ee360321db03c71b83a879c72e1811861e4db1fda69e11561cb2b0",
+    "var/posting-cpu-single-20261027/fixed-tmpfs-baseline-1cpu-r3.log": "a19fd1646fce1b48fd8c52a26ccfc1e82b1570ad65eec401161f82cac2c47a1c",
+    "var/posting-cpu-single-20261027/fixed-tmpfs-baseline-1cpu-r4.json": "789e8f0568aff18ad4dfec256323394e22912c1bd8f9d3d6317e6a75f9d82af2",
+    "var/posting-cpu-single-20261027/fixed-tmpfs-baseline-1cpu-r4.json.server.log": "15034177b5925d5e87e8bd758669806028e5db58f3cf20309b4c32def17bb105",
+    "var/posting-cpu-single-20261027/fixed-tmpfs-baseline-1cpu-r4.log": "02647673250f19ef796add7cef6d29643d559ffc554fdfba74a40d2678d529bc",
+    "var/posting-cpu-single-20261027/fixed-tmpfs-candidate-1cpu-r2.json": "f6d8502408aac220afa797ba01bfbff9f1dbedbde2862c482d4bef008fd2d528",
+    "var/posting-cpu-single-20261027/fixed-tmpfs-candidate-1cpu-r2.json.server.log": "3406de017e6d56684484d50d08704edb0ec7da38f86e7400551c3c5226271fc1",
+    "var/posting-cpu-single-20261027/fixed-tmpfs-candidate-1cpu-r2.log": "47c2abe6ccb935ab0cb0fad98b80876e3896487ea255cae1d0aaf02c303d2c5e",
+    "var/posting-cpu-single-20261027/fixed-tmpfs-candidate-1cpu-r3.json": "6ba5b1555261c5495c4707320247ebd04512f1002fb290e7f25a5740a6072e8c",
+    "var/posting-cpu-single-20261027/fixed-tmpfs-candidate-1cpu-r3.json.server.log": "0a2131d8ade805cd90a7e6523c313d25dabb902210504f8a14e4aa2910bbfa4a",
+    "var/posting-cpu-single-20261027/fixed-tmpfs-candidate-1cpu-r3.log": "d810e518e336e9ab173586bec1e2c01225a9b68b03056bb7aeb504be9047474c",
+    "var/posting-cpu-single-20261027/fixed-tmpfs-w80-baseline-1cpu-r1.json": "1adff291329049599226e092724a1876cc4b1333d3825b8ad60179f6b7d9b5d5",
+    "var/posting-cpu-single-20261027/fixed-tmpfs-w80-baseline-1cpu-r1.json.server.log": "bd790cd185e2b7e5dd2615e07dd33865e350196f91ed256fc0f8152ee0b68a76",
+    "var/posting-cpu-single-20261027/fixed-tmpfs-w80-baseline-1cpu-r1.log": "d34c572a3e178281ca474bb511bb99ff9bd7f19a1e9a572a0862231ea7d2636f",
+    "var/posting-cpu-single-20261027/fixed-tmpfs-w80-baseline-1cpu-r2.json": "09da49349dd2b4bb6619e6b30b313aebb056a17315011d4c6e408bd59a2e3fb5",
+    "var/posting-cpu-single-20261027/fixed-tmpfs-w80-baseline-1cpu-r2.json.server.log": "d1e0403d2e34b852c2e9aea5b1ca8672dbe7703f2ab25908a2f6d674f3073eca",
+    "var/posting-cpu-single-20261027/fixed-tmpfs-w80-baseline-1cpu-r2.log": "224c272b2db374e227752e676ae9a5cc800f2b970da7e5650d0230574a7b9193",
+    "var/posting-cpu-single-20261027/fixed-tmpfs-w80-baseline-1cpu-r3.json": "602d9c6d623da50c9f44588d6806876f9da486a8c3495c70747568c67fd0cd6a",
+    "var/posting-cpu-single-20261027/fixed-tmpfs-w80-baseline-1cpu-r3.json.server.log": "dded902fcf02028fb1e79845bcf9075eecc4cc6dd875be545e68d506b2bfe007",
+    "var/posting-cpu-single-20261027/fixed-tmpfs-w80-baseline-1cpu-r3.log": "f921b980b044a18e52e050577482cfd48c9fe4e33ee06e6f4bdc8f159bb69ff7",
+    "var/posting-cpu-single-20261027/fixed-tmpfs-w80-candidate-1cpu-r1.json": "8162f141b510d70ac57c2eb1fcab5e8a6f7f8ab37d2a12e0d77680f7d140f625",
+    "var/posting-cpu-single-20261027/fixed-tmpfs-w80-candidate-1cpu-r1.json.server.log": "1f750179f13c1a0c5ab09940cfb3ef5e18f52395f09e0d8f54252ec2c66323ef",
+    "var/posting-cpu-single-20261027/fixed-tmpfs-w80-candidate-1cpu-r1.log": "57e3bb28c8768a5c9714d6740a4b404d93172dd8368b1519b958b6aa9b9fde23",
+    "var/posting-cpu-single-20261027/fixed-tmpfs-w80-candidate-1cpu-r2.json": "935567ab27d60319cefc59840cb43418a3d35214c7bbd60a6c580a8bc5289d1b",
+    "var/posting-cpu-single-20261027/fixed-tmpfs-w80-candidate-1cpu-r2.json.server.log": "ace5f22d98aeacd09fc4fa2012cac4f2fab4f78efae693800d94f6250276c075",
+    "var/posting-cpu-single-20261027/fixed-tmpfs-w80-candidate-1cpu-r2.log": "85b387eb7fa07468789ab64f0368187ee4c6e196d24b544215eedbebcf616009",
+    "var/posting-cpu-single-20261027/fixed-tmpfs-w80-candidate-1cpu-r3.json": "adaa0f0775ca7867f229bf3745c90312f6b403471ecc056b1adbe2b97fb703d9",
+    "var/posting-cpu-single-20261027/fixed-tmpfs-w80-candidate-1cpu-r3.json.server.log": "ced1bf03fac2e9e0d8340edd625b2c005e93fc64c86ac41e53e3bc3dd51a35ed",
+    "var/posting-cpu-single-20261027/fixed-tmpfs-w80-candidate-1cpu-r3.log": "00c3d440c213d911d797a09087883f94e891686ea08a3195dc47be0f9a3b8566",
+    "var/posting-cpu-single-20261027/fixed-tmpfs-w90-baseline-1cpu-r1.log": "9fa06a00149b0bd4472fba04f2cdf7a81a3771900f5f574be7e5e86bacf37c30",
+    "var/posting-cpu-single-20261027/fixed-tmpfs-w90-baseline-1cpu-r2.log": "9fa06a00149b0bd4472fba04f2cdf7a81a3771900f5f574be7e5e86bacf37c30",
+    "var/posting-cpu-single-20261027/fixed-tmpfs-w90-baseline-1cpu-r3.log": "9fa06a00149b0bd4472fba04f2cdf7a81a3771900f5f574be7e5e86bacf37c30",
+    "var/posting-cpu-single-20261027/fixed-tmpfs-w90-candidate-1cpu-r1.log": "9fa06a00149b0bd4472fba04f2cdf7a81a3771900f5f574be7e5e86bacf37c30",
+    "var/posting-cpu-single-20261027/fixed-tmpfs-w90-candidate-1cpu-r2.log": "9fa06a00149b0bd4472fba04f2cdf7a81a3771900f5f574be7e5e86bacf37c30",
+    "var/posting-cpu-single-20261027/fixed-tmpfs-w90-candidate-1cpu-r3.log": "9fa06a00149b0bd4472fba04f2cdf7a81a3771900f5f574be7e5e86bacf37c30",
+    "var/posting-cpu-single-20261027/fuzz-mac.log": "e8de88a77e7e1192656a178dc778a2538c9656c5702279b04d090704a2c82460",
+    "var/posting-cpu-single-20261027/fuzz-mutation.log": "2a137821177f09002fcde12353aca5e101f4083987c27e6b54ccef6cca53af43",
+    "var/posting-cpu-single-20261027/fuzz-selected.log": "cc7e9c3e2dcd16e5c66a38b18f9f5ee074d4c640ec77fae6a6e11ec5541d4302",
+    "var/posting-cpu-single-20261027/http-sequence.py": "7bea9d1f1254215cfce9b55f3b6a37936111b36e13dab1675afe3db7bc2423a7",
+    "var/posting-cpu-single-20261027/mixed-disk-w120-baseline-2cpu-r1.json": "4b9b112f8ce5b119cfbff18af586850edaeac1debf70af0abf5ba982547d173c",
+    "var/posting-cpu-single-20261027/mixed-disk-w120-baseline-2cpu-r1.json.pre-restart-optional.json": "4f67245f6b38173ce338af48687fef4cbc6703120b19a3c286cc60180206a2fd",
+    "var/posting-cpu-single-20261027/mixed-disk-w120-baseline-2cpu-r1.json.server.log": "c066b3809b610b5aaff3a6bd26367b11facdcc4792e39e61185507501fc612ee",
+    "var/posting-cpu-single-20261027/mixed-disk-w120-baseline-2cpu-r1.log": "5017c8a7ef8ec9967331872a9c7b5352828979c0466f05378f4744e456a55674",
+    "var/posting-cpu-single-20261027/mixed-disk-w120-candidate-2cpu-r1.json": "b92b3b50eb993a0be4dc8220fba79a7322cff962417ae3bcadb390b25f74f753",
+    "var/posting-cpu-single-20261027/mixed-disk-w120-candidate-2cpu-r1.json.pre-restart-optional.json": "a7fd1703917c10323d14387c29852ea529f23d51cc3c0b60a96b941624adcfe7",
+    "var/posting-cpu-single-20261027/mixed-disk-w120-candidate-2cpu-r1.json.server.log": "c1fe137fa3cf46e63b376796b3572eaeef8d52fd5dceab9412b0ae97696bbb67",
+    "var/posting-cpu-single-20261027/mixed-disk-w120-candidate-2cpu-r1.log": "004bc6298dd9e23caa52f5ab7972c91e8a5461e6f30cd175495896def5cc2701",
+    "var/posting-cpu-single-20261027/prepare.py": "7794118937b377fd1f32823d423a740c990e05d6401da46b6f938a7d6b86f31e",
+    "var/posting-cpu-single-20261027/probe_waf.py": "a88bcc17281a4d4c5c6fd7e380ad69ec97cfb3ecb0abace7adf90e535ca39525",
+    "var/posting-cpu-single-20261027/race-final.log": "2bb5907804786e195fea336a86fa1bed7f0dcc27d1e0ffe2a3903763f9ac7db2",
+    "var/posting-cpu-single-20261027/race.log": "f60d14ab210fb8fe8427f8b6992d16991ff6527e5905ac223d124e179f282ee0",
+    "var/posting-cpu-single-20261027/regression.log": "e9026239f37fe0a74497c65e3f0d6c343d979d63d8c0c0eb6c147f30b3f137da",
+    "var/posting-cpu-single-20261027/report.py": "bb1d64980c7b5af719c915797a80fd2cb623cd5f71b0d2d9466256390b56551b",
+    "var/posting-cpu-single-20261027/run.py": "5f327da39d1487b0a8630364a830c0f4a283cf590c84adf8c5b1134e7107215b",
+    "var/posting-cpu-single-20261027/sequence.py": "0b4b1e156eadf53aec7c572c039cff6487abdf37a2a0b681a7e68a03cddf5ce0",
+    "var/posting-cpu-single-20261027/setup.json": "020d6df646d78b35c3979a2763c842ecb0394c07dbfbeeb4d30291f554fc4102",
+    "var/posting-cpu-single-20261027/single80.py": "103af2ccb21fe51a6cd6ecba97f8697e5c34726e273048781ca3966b95fe8688",
+    "var/posting-cpu-single-20261027/trials.jsonl": "b8b4a26002bdd287459a71eda9011e9a08f86d5c0cb043fa1e7305534934abe5",
+    "var/posting-cpu-single-20261027/vet.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "limits": [
+    "tmpfs is an isolated CPU-ceiling diagnostic, not durable storage or production throughput",
+    "CPU slots are quota, not exclusive physical cores",
+    "fixed-count throughput includes completion drain; not sustainable arrival rate or p95 SLO",
+    "main-load CPU excludes setup, recovery posts and final optional queue drain",
+    "automatic runtime concurrency and explicit GOMAXPROCS=1 trials are separate groups",
+    "CLI-rejected 90-worker arguments are configuration checks, not performance trials",
+    "initial 1GiB tmpfs rejected setup at disk floor; retained as failed setup; successful tmpfs volume max is 8GiB",
+    "no live service replacement or host tuning"
+  ]
+}

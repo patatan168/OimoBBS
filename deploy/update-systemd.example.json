@@ -1,0 +1,8 @@
+{
+  "mode": "systemd",
+  "unit": "oimobbs.service",
+  "binary": "/srv/OimoBBS/bin/oimobbs",
+  "config": "/srv/OimoBBS/config.json",
+  "data_dir": "/srv/OimoBBS/var/site",
+  "go_binary": "/usr/local/go/bin/go"
+}

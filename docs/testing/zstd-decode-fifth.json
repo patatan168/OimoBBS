@@ -1,0 +1,1395 @@
+{
+  "measured_at": "2026-10-18",
+  "baseline_commit": "1dcd9252663600b33202271637c28dd787ef9789",
+  "scope": "共通Zstandardデコーダの展開単体比較。合成DAT、独立署名HTTP記録、WALの64件batch、snapshot相当入力。実HTTP・I/O・復旧時間・総RSS・本番は未測定。RAM履歴の圧縮保存は未実装。",
+  "environment": {
+    "cpu": "AMD Ryzen 5 5500U",
+    "go": "go version go1.27.2 linux/amd64",
+    "GOMAXPROCS": 1,
+    "host": "共有ホスト。他サービス稼働。比較中は他のbuild/test/fuzzを実行しない。"
+  },
+  "changes": [
+    "Huffmanの4本の列それぞれで4文字分のbitを先読みし、通常部分の補充検査をまとめる。短い末尾は従来の1文字単位の検査を維持。",
+    "FSE・Huffman表とweightの構築に固定長の局所作業配列を使用。入力から有効範囲の全cellを上書きし、配列拡張と表ごとのheap確保を削減。共有poolやgoroutineは追加しない。",
+    "3種類のシーケンス表がすべてRLEなら動的表の作業領域を初期化しない。"
+  ],
+  "method": {
+    "micro": "最終sourceのtest binaryと変更前binaryを交互2組。各実行600ms/条件を2回、cpu=1、profileなし。各条件4試行の中央値。",
+    "storage": "tools/storagebenchの変更前/最終binaryをbefore→final、final→beforeの順に実行。各実行3試行、各試行30反復。各条件6試行の中央値。",
+    "validation": "各storage条件の計時前に原文一致と独立testutil.DecodeZstdとの一致を検査。圧縮器は未変更。",
+    "units": "nsはsample全chunkの展開時間。http_wal_individualは128個の記録全体であり、1件の時間ではない。",
+    "workspace": "表のheap確保は減るが、局所固定配列によるstack使用量はある。総プロセスメモリと実サービスの容量改善は主張しない。"
+  },
+  "constraints": {
+    "format_unchanged": true,
+    "encoder_sources_unchanged": true,
+    "all_stored_sizes_identical": true,
+    "size_offset_window_terminal_checks_preserved": true,
+    "no_new_dependencies": true,
+    "live_deployed": false
+  },
+  "validation": [
+    "共通最適化後・RLE分岐調整前: zstddecode/zstdencode/store/app/compatの全通常試験とzstddecode/store/app/compatの全race試験、bootstrapのpack/snapshot/backup再生試験: PASS",
+    "最終RLE分岐調整後: go test -race ./internal/zstddecode ./internal/store -count=1 -timeout=3m: PASS",
+    "最終RLE分岐調整後: go test ./internal/app ./internal/bootstrap -run ^(TestPosting|TestPackMaintenanceBatchAndRecovery|TestSnapshotRepositoryAuditAndPosting|TestSnapshotStateIndependentRecovery|TestReclaimedBodyBackupReplay) -count=1 -timeout=3m: PASS",
+    "FuzzDecode: 初期12sと最終8s、FuzzArchiveRoundTrip: 10s、FuzzFSETransitionBounds: 10s: PASS",
+    "最終sourceでgo vet ./internal/zstddecode ./internal/zstdencode ./internal/store ./internal/app ./internal/compat: PASS"
+  ],
+  "limitations": "全入力の高速化は保証しない。最終単体測定ではrawの中央値が約4.6%、repeatが約8.9%遅い。反復文だけの交互4組の補助測定では約3.5%速く、通常の5条件を続けた最終測定と方向が一致しない。共有ホスト、GC、code配置などの影響を分離できず、反復文の改善は主張しない。実HTTP・I/O・起動・回復・総RSSへの効果は未測定。",
+  "sources": {
+    "before": {
+      "internal/zstddecode/decode.go": "b3582cdb5a51670c34af1e5372d3e0ef275f75b79bc412e2f7436606ea0b6371",
+      "internal/zstddecode/literals.go": "a8a8dd08ab4f166baf9ede418517c39dc2365dfa23d8e7eac19edaf2de0ad427",
+      "internal/zstddecode/huffman_four.go": "84108e16d93807ffbd0078a94cdfebd7e8611590db700d162b4e15905b372ab3"
+    },
+    "after": {
+      "internal/zstddecode/decode.go": "92c80f604b5a2c7234ea50303c48e399cece55e3066baa38f11b41d2c66f8888",
+      "internal/zstddecode/literals.go": "f925522fe1f41f16513dce51d55e4b4a0107abcd767a4340fbd910585b827803",
+      "internal/zstddecode/huffman_four.go": "bf65f3fdea738cb5e7c8a8430c4ecf7c690aa17c3cec68585e09f6bc70d0658e"
+    }
+  },
+  "micro": [
+    {
+      "sample": "text",
+      "before": {
+        "median": 219491.5,
+        "min": 217947,
+        "max": 228904
+      },
+      "after": {
+        "median": 216164.0,
+        "min": 214570,
+        "max": 218433
+      },
+      "time_change_percent": -1.516,
+      "before_allocated_bytes": 213488,
+      "after_allocated_bytes": 202752,
+      "before_allocations": 27,
+      "after_allocations": 2,
+      "before_ns_trials": [
+        218254,
+        220729,
+        217947,
+        228904
+      ],
+      "after_ns_trials": [
+        214570,
+        215250,
+        218433,
+        217078
+      ]
+    },
+    {
+      "sample": "mixed",
+      "before": {
+        "median": 361699.0,
+        "min": 358910,
+        "max": 371375
+      },
+      "after": {
+        "median": 347923.5,
+        "min": 345527,
+        "max": 350271
+      },
+      "time_change_percent": -3.809,
+      "before_allocated_bytes": 246640,
+      "after_allocated_bytes": 232064,
+      "before_allocations": 28,
+      "after_allocations": 2,
+      "before_ns_trials": [
+        359825,
+        358910,
+        363573,
+        371375
+      ],
+      "after_ns_trials": [
+        345527,
+        346788,
+        350271,
+        349059
+      ]
+    },
+    {
+      "sample": "entropy",
+      "before": {
+        "median": 1223472.5,
+        "min": 1219770,
+        "max": 1227114
+      },
+      "after": {
+        "median": 1112234.5,
+        "min": 1101435,
+        "max": 1183787
+      },
+      "time_change_percent": -9.092,
+      "before_allocated_bytes": 571232,
+      "after_allocated_bytes": 548864,
+      "before_allocations": 52,
+      "after_allocations": 2,
+      "before_ns_trials": [
+        1222534,
+        1219770,
+        1224411,
+        1227114
+      ],
+      "after_ns_trials": [
+        1101435,
+        1183787,
+        1122304,
+        1102165
+      ]
+    },
+    {
+      "sample": "raw",
+      "before": {
+        "median": 77338.0,
+        "min": 76763,
+        "max": 79516
+      },
+      "after": {
+        "median": 80879.5,
+        "min": 79741,
+        "max": 82702
+      },
+      "time_change_percent": 4.579,
+      "before_allocated_bytes": 524288,
+      "after_allocated_bytes": 524288,
+      "before_allocations": 1,
+      "after_allocations": 1,
+      "before_ns_trials": [
+        79516,
+        76763,
+        77029,
+        77647
+      ],
+      "after_ns_trials": [
+        82702,
+        81501,
+        80258,
+        79741
+      ]
+    },
+    {
+      "sample": "repeat",
+      "before": {
+        "median": 59525.0,
+        "min": 58220,
+        "max": 63314
+      },
+      "after": {
+        "median": 64835.5,
+        "min": 60085,
+        "max": 66814
+      },
+      "time_change_percent": 8.921,
+      "before_allocated_bytes": 507904,
+      "after_allocated_bytes": 507904,
+      "before_allocations": 1,
+      "after_allocations": 1,
+      "before_ns_trials": [
+        58775,
+        58220,
+        63314,
+        60275
+      ],
+      "after_ns_trials": [
+        66511,
+        66814,
+        60085,
+        63160
+      ]
+    }
+  ],
+  "storage": [
+    {
+      "sample": "http_wal_individual",
+      "codec": "zstd_fast",
+      "raw_bytes": 294046,
+      "stored_bytes": 198255,
+      "before_ns": {
+        "median": 2643830.5,
+        "min": 2610103,
+        "max": 2865443
+      },
+      "after_ns": {
+        "median": 2104697.0,
+        "min": 2091631,
+        "max": 2140958
+      },
+      "time_change_percent": -20.392,
+      "before_ns_trials": [
+        2865443,
+        2709265,
+        2644220,
+        2643441,
+        2610103,
+        2634852
+      ],
+      "after_ns_trials": [
+        2140958,
+        2091631,
+        2108052,
+        2109388,
+        2093738,
+        2101342
+      ]
+    },
+    {
+      "sample": "http_wal_individual",
+      "codec": "archive1",
+      "raw_bytes": 294046,
+      "stored_bytes": 198255,
+      "before_ns": {
+        "median": 2673187.5,
+        "min": 2648495,
+        "max": 2912645
+      },
+      "after_ns": {
+        "median": 2119979.0,
+        "min": 2102825,
+        "max": 2142768
+      },
+      "time_change_percent": -20.695,
+      "before_ns_trials": [
+        2912645,
+        2685075,
+        2649370,
+        2648495,
+        2661300,
+        2686315
+      ],
+      "after_ns_trials": [
+        2112603,
+        2127357,
+        2102825,
+        2126749,
+        2113209,
+        2142768
+      ]
+    },
+    {
+      "sample": "http_wal_individual",
+      "codec": "archive6",
+      "raw_bytes": 294046,
+      "stored_bytes": 199096,
+      "before_ns": {
+        "median": 2844107.0,
+        "min": 2820012,
+        "max": 2981409
+      },
+      "after_ns": {
+        "median": 2265083.0,
+        "min": 2239926,
+        "max": 2303201
+      },
+      "time_change_percent": -20.359,
+      "before_ns_trials": [
+        2981409,
+        2844073,
+        2852380,
+        2844141,
+        2832449,
+        2820012
+      ],
+      "after_ns_trials": [
+        2259184,
+        2303201,
+        2257923,
+        2270982,
+        2239926,
+        2296925
+      ]
+    },
+    {
+      "sample": "http_wal_individual",
+      "codec": "archive9",
+      "raw_bytes": 294046,
+      "stored_bytes": 195983,
+      "before_ns": {
+        "median": 3232145.0,
+        "min": 3162874,
+        "max": 3368021
+      },
+      "after_ns": {
+        "median": 2607230.0,
+        "min": 2533005,
+        "max": 2812775
+      },
+      "time_change_percent": -19.334,
+      "before_ns_trials": [
+        3368021,
+        3171611,
+        3344897,
+        3162874,
+        3217617,
+        3246673
+      ],
+      "after_ns_trials": [
+        2553825,
+        2812775,
+        2570398,
+        2644062,
+        2533005,
+        2658241
+      ]
+    },
+    {
+      "sample": "http_wal_batch_64",
+      "codec": "zstd_fast",
+      "raw_bytes": 294046,
+      "stored_bytes": 48614,
+      "before_ns": {
+        "median": 440903.0,
+        "min": 428743,
+        "max": 448511
+      },
+      "after_ns": {
+        "median": 399732.5,
+        "min": 388258,
+        "max": 433671
+      },
+      "time_change_percent": -9.338,
+      "before_ns_trials": [
+        431569,
+        428743,
+        443143,
+        448511,
+        442139,
+        439667
+      ],
+      "after_ns_trials": [
+        404911,
+        433671,
+        397643,
+        388258,
+        388576,
+        401822
+      ]
+    },
+    {
+      "sample": "http_wal_batch_64",
+      "codec": "archive1",
+      "raw_bytes": 294046,
+      "stored_bytes": 48614,
+      "before_ns": {
+        "median": 448297.0,
+        "min": 440796,
+        "max": 486824
+      },
+      "after_ns": {
+        "median": 395989.5,
+        "min": 388944,
+        "max": 467316
+      },
+      "time_change_percent": -11.668,
+      "before_ns_trials": [
+        463661,
+        451042,
+        442679,
+        440796,
+        486824,
+        445552
+      ],
+      "after_ns_trials": [
+        391391,
+        467316,
+        397463,
+        403705,
+        388944,
+        394516
+      ]
+    },
+    {
+      "sample": "http_wal_batch_64",
+      "codec": "archive6",
+      "raw_bytes": 294046,
+      "stored_bytes": 48631,
+      "before_ns": {
+        "median": 449459.0,
+        "min": 446279,
+        "max": 460693
+      },
+      "after_ns": {
+        "median": 403736.5,
+        "min": 398541,
+        "max": 411821
+      },
+      "time_change_percent": -10.173,
+      "before_ns_trials": [
+        448367,
+        446279,
+        447459,
+        450551,
+        460693,
+        450684
+      ],
+      "after_ns_trials": [
+        400213,
+        410266,
+        402385,
+        398541,
+        411821,
+        405088
+      ]
+    },
+    {
+      "sample": "http_wal_batch_64",
+      "codec": "archive9",
+      "raw_bytes": 294046,
+      "stored_bytes": 48410,
+      "before_ns": {
+        "median": 443034.0,
+        "min": 427804,
+        "max": 475069
+      },
+      "after_ns": {
+        "median": 392743.0,
+        "min": 383764,
+        "max": 399053
+      },
+      "time_change_percent": -11.351,
+      "before_ns_trials": [
+        475069,
+        427804,
+        440793,
+        431015,
+        475030,
+        445275
+      ],
+      "after_ns_trials": [
+        390728,
+        399053,
+        394758,
+        394995,
+        383764,
+        387492
+      ]
+    },
+    {
+      "sample": "signed_log_snapshot",
+      "codec": "zstd_fast",
+      "raw_bytes": 294046,
+      "stored_bytes": 45639,
+      "before_ns": {
+        "median": 404867.0,
+        "min": 390656,
+        "max": 424906
+      },
+      "after_ns": {
+        "median": 366975.5,
+        "min": 359923,
+        "max": 387911
+      },
+      "time_change_percent": -9.359,
+      "before_ns_trials": [
+        424906,
+        390656,
+        402872,
+        405379,
+        407319,
+        404355
+      ],
+      "after_ns_trials": [
+        360442,
+        387911,
+        360855,
+        359923,
+        373096,
+        385629
+      ]
+    },
+    {
+      "sample": "signed_log_snapshot",
+      "codec": "archive1",
+      "raw_bytes": 294046,
+      "stored_bytes": 45639,
+      "before_ns": {
+        "median": 414467.0,
+        "min": 400178,
+        "max": 496519
+      },
+      "after_ns": {
+        "median": 362137.5,
+        "min": 357050,
+        "max": 390942
+      },
+      "time_change_percent": -12.626,
+      "before_ns_trials": [
+        496519,
+        400178,
+        402690,
+        414480,
+        421493,
+        414454
+      ],
+      "after_ns_trials": [
+        358433,
+        390942,
+        363253,
+        357050,
+        376912,
+        361022
+      ]
+    },
+    {
+      "sample": "signed_log_snapshot",
+      "codec": "archive6",
+      "raw_bytes": 294046,
+      "stored_bytes": 45636,
+      "before_ns": {
+        "median": 423884.0,
+        "min": 404657,
+        "max": 436712
+      },
+      "after_ns": {
+        "median": 372122.0,
+        "min": 361034,
+        "max": 392618
+      },
+      "time_change_percent": -12.211,
+      "before_ns_trials": [
+        432228,
+        404657,
+        415155,
+        430978,
+        436712,
+        416790
+      ],
+      "after_ns_trials": [
+        361516,
+        392618,
+        369774,
+        361034,
+        378768,
+        374470
+      ]
+    },
+    {
+      "sample": "signed_log_snapshot",
+      "codec": "archive9",
+      "raw_bytes": 294046,
+      "stored_bytes": 45446,
+      "before_ns": {
+        "median": 404176.5,
+        "min": 392644,
+        "max": 427916
+      },
+      "after_ns": {
+        "median": 364202.5,
+        "min": 342152,
+        "max": 373145
+      },
+      "time_change_percent": -9.89,
+      "before_ns_trials": [
+        393636,
+        404147,
+        392644,
+        408923,
+        427916,
+        404206
+      ],
+      "after_ns_trials": [
+        342152,
+        364100,
+        373145,
+        353025,
+        364305,
+        372968
+      ]
+    },
+    {
+      "sample": "dat_text",
+      "codec": "zstd_fast",
+      "raw_bytes": 193755,
+      "stored_bytes": 12950,
+      "before_ns": {
+        "median": 297962.0,
+        "min": 261182,
+        "max": 324786
+      },
+      "after_ns": {
+        "median": 267075.5,
+        "min": 255624,
+        "max": 296200
+      },
+      "time_change_percent": -10.366,
+      "before_ns_trials": [
+        324786,
+        299614,
+        278848,
+        305076,
+        261182,
+        296310
+      ],
+      "after_ns_trials": [
+        271058,
+        296200,
+        263093,
+        257911,
+        272788,
+        255624
+      ]
+    },
+    {
+      "sample": "dat_text",
+      "codec": "archive1",
+      "raw_bytes": 193755,
+      "stored_bytes": 12950,
+      "before_ns": {
+        "median": 284413.0,
+        "min": 257704,
+        "max": 375513
+      },
+      "after_ns": {
+        "median": 257365.0,
+        "min": 242538,
+        "max": 305874
+      },
+      "time_change_percent": -9.51,
+      "before_ns_trials": [
+        257704,
+        284923,
+        309615,
+        283903,
+        375513,
+        273268
+      ],
+      "after_ns_trials": [
+        305874,
+        242538,
+        243332,
+        269589,
+        290608,
+        245141
+      ]
+    },
+    {
+      "sample": "dat_text",
+      "codec": "archive6",
+      "raw_bytes": 193755,
+      "stored_bytes": 12894,
+      "before_ns": {
+        "median": 270200.0,
+        "min": 262493,
+        "max": 288585
+      },
+      "after_ns": {
+        "median": 258925.0,
+        "min": 245527,
+        "max": 291402
+      },
+      "time_change_percent": -4.173,
+      "before_ns_trials": [
+        274720,
+        264649,
+        288585,
+        262493,
+        282715,
+        265680
+      ],
+      "after_ns_trials": [
+        245527,
+        272055,
+        245795,
+        289705,
+        291402,
+        245685
+      ]
+    },
+    {
+      "sample": "dat_text",
+      "codec": "archive9",
+      "raw_bytes": 193755,
+      "stored_bytes": 12886,
+      "before_ns": {
+        "median": 321964.5,
+        "min": 292547,
+        "max": 327503
+      },
+      "after_ns": {
+        "median": 297859.5,
+        "min": 292787,
+        "max": 305387
+      },
+      "time_change_percent": -7.487,
+      "before_ns_trials": [
+        321967,
+        321962,
+        295846,
+        292547,
+        324537,
+        327503
+      ],
+      "after_ns_trials": [
+        292787,
+        305387,
+        296184,
+        296941,
+        303839,
+        298778
+      ]
+    },
+    {
+      "sample": "dat_mixed",
+      "codec": "zstd_fast",
+      "raw_bytes": 204125,
+      "stored_bytes": 32117,
+      "before_ns": {
+        "median": 459214.0,
+        "min": 454553,
+        "max": 464672
+      },
+      "after_ns": {
+        "median": 433503.5,
+        "min": 420282,
+        "max": 447936
+      },
+      "time_change_percent": -5.599,
+      "before_ns_trials": [
+        464264,
+        457442,
+        455359,
+        454553,
+        460986,
+        464672
+      ],
+      "after_ns_trials": [
+        431231,
+        443685,
+        447936,
+        420282,
+        435776,
+        425728
+      ]
+    },
+    {
+      "sample": "dat_mixed",
+      "codec": "archive1",
+      "raw_bytes": 204125,
+      "stored_bytes": 32117,
+      "before_ns": {
+        "median": 459086.5,
+        "min": 455275,
+        "max": 466716
+      },
+      "after_ns": {
+        "median": 431276.0,
+        "min": 427972,
+        "max": 438477
+      },
+      "time_change_percent": -6.058,
+      "before_ns_trials": [
+        459445,
+        455275,
+        466716,
+        456802,
+        458728,
+        465756
+      ],
+      "after_ns_trials": [
+        435378,
+        429669,
+        430424,
+        427972,
+        438477,
+        432128
+      ]
+    },
+    {
+      "sample": "dat_mixed",
+      "codec": "archive6",
+      "raw_bytes": 204125,
+      "stored_bytes": 32095,
+      "before_ns": {
+        "median": 465950.5,
+        "min": 464250,
+        "max": 486328
+      },
+      "after_ns": {
+        "median": 440730.5,
+        "min": 434035,
+        "max": 454341
+      },
+      "time_change_percent": -5.413,
+      "before_ns_trials": [
+        464792,
+        486328,
+        464308,
+        464250,
+        472084,
+        467109
+      ],
+      "after_ns_trials": [
+        439292,
+        454341,
+        440670,
+        434035,
+        440791,
+        445101
+      ]
+    },
+    {
+      "sample": "dat_mixed",
+      "codec": "archive9",
+      "raw_bytes": 204125,
+      "stored_bytes": 31985,
+      "before_ns": {
+        "median": 473253.0,
+        "min": 457838,
+        "max": 476466
+      },
+      "after_ns": {
+        "median": 445050.5,
+        "min": 441301,
+        "max": 449270
+      },
+      "time_change_percent": -5.959,
+      "before_ns_trials": [
+        474019,
+        469034,
+        457838,
+        472487,
+        476448,
+        476466
+      ],
+      "after_ns_trials": [
+        441301,
+        445024,
+        449131,
+        442549,
+        449270,
+        445077
+      ]
+    },
+    {
+      "sample": "dat_entropy",
+      "codec": "zstd_fast",
+      "raw_bytes": 435955,
+      "stored_bytes": 178182,
+      "before_ns": {
+        "median": 1434762.0,
+        "min": 1418964,
+        "max": 1769673
+      },
+      "after_ns": {
+        "median": 1298944.0,
+        "min": 1282527,
+        "max": 1364305
+      },
+      "time_change_percent": -9.466,
+      "before_ns_trials": [
+        1432700,
+        1419379,
+        1418964,
+        1450162,
+        1436824,
+        1769673
+      ],
+      "after_ns_trials": [
+        1290929,
+        1284955,
+        1306959,
+        1364305,
+        1307870,
+        1282527
+      ]
+    },
+    {
+      "sample": "dat_entropy",
+      "codec": "archive1",
+      "raw_bytes": 435955,
+      "stored_bytes": 178182,
+      "before_ns": {
+        "median": 1434343.0,
+        "min": 1418475,
+        "max": 1685085
+      },
+      "after_ns": {
+        "median": 1273337.5,
+        "min": 1265659,
+        "max": 1329627
+      },
+      "time_change_percent": -11.225,
+      "before_ns_trials": [
+        1428391,
+        1418475,
+        1444807,
+        1427181,
+        1440295,
+        1685085
+      ],
+      "after_ns_trials": [
+        1268257,
+        1288736,
+        1269636,
+        1329627,
+        1277039,
+        1265659
+      ]
+    },
+    {
+      "sample": "dat_entropy",
+      "codec": "archive6",
+      "raw_bytes": 435955,
+      "stored_bytes": 178192,
+      "before_ns": {
+        "median": 1442444.0,
+        "min": 1426268,
+        "max": 1681020
+      },
+      "after_ns": {
+        "median": 1281752.0,
+        "min": 1280462,
+        "max": 1292457
+      },
+      "time_change_percent": -11.14,
+      "before_ns_trials": [
+        1441720,
+        1426268,
+        1467428,
+        1437516,
+        1443168,
+        1681020
+      ],
+      "after_ns_trials": [
+        1281354,
+        1292457,
+        1282150,
+        1280865,
+        1286937,
+        1280462
+      ]
+    },
+    {
+      "sample": "dat_entropy",
+      "codec": "archive9",
+      "raw_bytes": 435955,
+      "stored_bytes": 177964,
+      "before_ns": {
+        "median": 1444275.5,
+        "min": 1431474,
+        "max": 1473174
+      },
+      "after_ns": {
+        "median": 1295389.0,
+        "min": 1278210,
+        "max": 1321706
+      },
+      "time_change_percent": -10.309,
+      "before_ns_trials": [
+        1449913,
+        1431474,
+        1473174,
+        1437206,
+        1442933,
+        1445618
+      ],
+      "after_ns_trials": [
+        1299502,
+        1293043,
+        1278210,
+        1321706,
+        1297735,
+        1282301
+      ]
+    }
+  ],
+  "controls": [
+    {
+      "sample": "http_wal_individual",
+      "codec": "raw",
+      "raw_bytes": 294046,
+      "stored_bytes": 294046,
+      "before_ns": {
+        "median": 72050.5,
+        "min": 71149,
+        "max": 79738
+      },
+      "after_ns": {
+        "median": 73681.5,
+        "min": 67850,
+        "max": 78777
+      },
+      "time_change_percent": 2.264,
+      "before_ns_trials": [
+        71217,
+        79738,
+        71182,
+        72884,
+        77934,
+        71149
+      ],
+      "after_ns_trials": [
+        76814,
+        67850,
+        78777,
+        76940,
+        68854,
+        70549
+      ]
+    },
+    {
+      "sample": "http_wal_individual",
+      "codec": "gzip6",
+      "raw_bytes": 294046,
+      "stored_bytes": 191641,
+      "before_ns": {
+        "median": 4029877.0,
+        "min": 3978338,
+        "max": 4228678
+      },
+      "after_ns": {
+        "median": 4006772.5,
+        "min": 3976967,
+        "max": 4097389
+      },
+      "time_change_percent": -0.573,
+      "before_ns_trials": [
+        4228678,
+        4142742,
+        3978338,
+        4026193,
+        4033561,
+        4004231
+      ],
+      "after_ns_trials": [
+        4030997,
+        3976967,
+        4097389,
+        4088316,
+        3980574,
+        3982548
+      ]
+    },
+    {
+      "sample": "http_wal_batch_64",
+      "codec": "raw",
+      "raw_bytes": 294046,
+      "stored_bytes": 294046,
+      "before_ns": {
+        "median": 62365.5,
+        "min": 55499,
+        "max": 73261
+      },
+      "after_ns": {
+        "median": 56507.5,
+        "min": 51599,
+        "max": 61296
+      },
+      "time_change_percent": -9.393,
+      "before_ns_trials": [
+        61674,
+        59348,
+        72493,
+        73261,
+        63057,
+        55499
+      ],
+      "after_ns_trials": [
+        52119,
+        58226,
+        56326,
+        51599,
+        56689,
+        61296
+      ]
+    },
+    {
+      "sample": "http_wal_batch_64",
+      "codec": "gzip6",
+      "raw_bytes": 294046,
+      "stored_bytes": 51561,
+      "before_ns": {
+        "median": 854477.5,
+        "min": 843367,
+        "max": 861323
+      },
+      "after_ns": {
+        "median": 868506.5,
+        "min": 851872,
+        "max": 926012
+      },
+      "time_change_percent": 1.642,
+      "before_ns_trials": [
+        855630,
+        843367,
+        861323,
+        859835,
+        847943,
+        853325
+      ],
+      "after_ns_trials": [
+        857074,
+        926012,
+        870156,
+        866857,
+        851872,
+        876079
+      ]
+    },
+    {
+      "sample": "signed_log_snapshot",
+      "codec": "raw",
+      "raw_bytes": 294046,
+      "stored_bytes": 294046,
+      "before_ns": {
+        "median": 54267.5,
+        "min": 47222,
+        "max": 60372
+      },
+      "after_ns": {
+        "median": 52057.0,
+        "min": 47313,
+        "max": 68228
+      },
+      "time_change_percent": -4.073,
+      "before_ns_trials": [
+        60372,
+        47222,
+        55215,
+        53732,
+        54803,
+        50144
+      ],
+      "after_ns_trials": [
+        65348,
+        52184,
+        51930,
+        68228,
+        50566,
+        47313
+      ]
+    },
+    {
+      "sample": "signed_log_snapshot",
+      "codec": "gzip6",
+      "raw_bytes": 294046,
+      "stored_bytes": 50258,
+      "before_ns": {
+        "median": 825361.5,
+        "min": 813490,
+        "max": 886309
+      },
+      "after_ns": {
+        "median": 821654.5,
+        "min": 816160,
+        "max": 835028
+      },
+      "time_change_percent": -0.449,
+      "before_ns_trials": [
+        886309,
+        813490,
+        821941,
+        823136,
+        861055,
+        827587
+      ],
+      "after_ns_trials": [
+        821731,
+        835028,
+        832281,
+        816160,
+        820020,
+        821578
+      ]
+    },
+    {
+      "sample": "dat_text",
+      "codec": "raw",
+      "raw_bytes": 193755,
+      "stored_bytes": 193755,
+      "before_ns": {
+        "median": 57928.5,
+        "min": 39891,
+        "max": 60333
+      },
+      "after_ns": {
+        "median": 49373.5,
+        "min": 43379,
+        "max": 60861
+      },
+      "time_change_percent": -14.768,
+      "before_ns_trials": [
+        60333,
+        39891,
+        58998,
+        53443,
+        56859,
+        60088
+      ],
+      "after_ns_trials": [
+        60861,
+        46859,
+        55155,
+        48973,
+        43379,
+        49774
+      ]
+    },
+    {
+      "sample": "dat_text",
+      "codec": "gzip6",
+      "raw_bytes": 193755,
+      "stored_bytes": 16841,
+      "before_ns": {
+        "median": 382185.5,
+        "min": 366810,
+        "max": 391058
+      },
+      "after_ns": {
+        "median": 376083.0,
+        "min": 367015,
+        "max": 410161
+      },
+      "time_change_percent": -1.597,
+      "before_ns_trials": [
+        386539,
+        381578,
+        378267,
+        366810,
+        391058,
+        382793
+      ],
+      "after_ns_trials": [
+        367015,
+        410161,
+        370600,
+        375445,
+        377434,
+        376721
+      ]
+    },
+    {
+      "sample": "dat_mixed",
+      "codec": "raw",
+      "raw_bytes": 204125,
+      "stored_bytes": 204125,
+      "before_ns": {
+        "median": 61752.5,
+        "min": 58826,
+        "max": 64537
+      },
+      "after_ns": {
+        "median": 53017.0,
+        "min": 49956,
+        "max": 59446
+      },
+      "time_change_percent": -14.146,
+      "before_ns_trials": [
+        58826,
+        60414,
+        63091,
+        64537,
+        59390,
+        63916
+      ],
+      "after_ns_trials": [
+        50731,
+        54375,
+        52677,
+        49956,
+        59446,
+        53357
+      ]
+    },
+    {
+      "sample": "dat_mixed",
+      "codec": "gzip6",
+      "raw_bytes": 204125,
+      "stored_bytes": 39504,
+      "before_ns": {
+        "median": 700686.0,
+        "min": 683467,
+        "max": 712222
+      },
+      "after_ns": {
+        "median": 700353.0,
+        "min": 686535,
+        "max": 702742
+      },
+      "time_change_percent": -0.048,
+      "before_ns_trials": [
+        692709,
+        706707,
+        694665,
+        683467,
+        712222,
+        707107
+      ],
+      "after_ns_trials": [
+        701792,
+        702453,
+        702742,
+        698914,
+        686535,
+        688954
+      ]
+    },
+    {
+      "sample": "dat_entropy",
+      "codec": "raw",
+      "raw_bytes": 435955,
+      "stored_bytes": 435955,
+      "before_ns": {
+        "median": 79443.5,
+        "min": 74570,
+        "max": 82497
+      },
+      "after_ns": {
+        "median": 77382.0,
+        "min": 76774,
+        "max": 82767
+      },
+      "time_change_percent": -2.595,
+      "before_ns_trials": [
+        80919,
+        74570,
+        80057,
+        75464,
+        78830,
+        82497
+      ],
+      "after_ns_trials": [
+        77142,
+        78881,
+        82767,
+        76826,
+        77622,
+        76774
+      ]
+    },
+    {
+      "sample": "dat_entropy",
+      "codec": "gzip6",
+      "raw_bytes": 435955,
+      "stored_bytes": 199138,
+      "before_ns": {
+        "median": 2942297.5,
+        "min": 2936198,
+        "max": 3009406
+      },
+      "after_ns": {
+        "median": 2941994.0,
+        "min": 2927691,
+        "max": 2963373
+      },
+      "time_change_percent": -0.01,
+      "before_ns_trials": [
+        2966064,
+        2937166,
+        2947429,
+        2936198,
+        2936412,
+        3009406
+      ],
+      "after_ns_trials": [
+        2935238,
+        2947420,
+        2945450,
+        2927691,
+        2938538,
+        2963373
+      ]
+    }
+  ]
+}

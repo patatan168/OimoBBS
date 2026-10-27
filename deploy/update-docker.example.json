@@ -1,0 +1,8 @@
+{
+  "mode": "docker",
+  "project_directory": "/srv/OimoBBS",
+  "compose_files": ["/srv/OimoBBS/compose.yaml", "/srv/OimoBBS/compose.slip.yaml", "/srv/OimoBBS/deploy/compose.update.example.yaml"],
+  "service": "bbs",
+  "data_destination": "/data",
+  "override_file": "/var/lib/oimobbs-update/active-compose.json"
+}

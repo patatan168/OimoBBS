@@ -1,0 +1,112 @@
+<!-- 管理画面。動的な値はhtml/templateでエスケープする。 -->
+<!doctype html>
+<html lang="ja">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>板設定 — OimoBBS管理</title>{{template "admin-assets" .}}
+</head>
+<body class="admin">{{template "admin-header" .}}
+<main id="main" tabindex="-1">
+<h1>板設定{{if .Name}}：{{.Name}}{{end}}
+</h1>
+<nav><a href="{{adminBase}}/">サイト設定</a> <a href="{{adminBase}}/boards">板一覧</a> <a href="{{adminBase}}/board-categories">板カテゴリー</a>
+</nav>{{if .Message}}
+<p role="alert">{{.Message}}
+</p>{{end}}
+{{if .Editing}}
+{{if .BoardKey}}<p><a href="{{adminURL (.CapThreadURL .BoardKey)}}">CAP専用スレッドを作成</a>（公開投稿フォームを開きます。作成権限のあるCAPを入力してください。）</p>{{end}}
+{{if and (eq (.Values.Get "create_policy") "cap_only") (eq (.Values.Get "reply_policy") "cap_only")}}<p>この板はCAP専用板です。<a href="{{adminBase}}/caps">キャップ管理</a>で、この板を担当するCAPに「スレッド作成」「返信」の権限を設定してください。</p>{{end}}
+<p><a href="{{adminURL (.ModerationAction)}}">スレッドの削除・公開停止</a></p>
+<p><a href="{{adminURL (.ReadingAction)}}">板の閲覧権限を設定</a></p>
+<p><a href="{{adminURL (.ThreadAction)}}">レス数上限・終了レス（1001・1002）を設定</a>
+</p>
+<p>保存後に処理する投稿から適用します。既存の投稿本文やスレッドの表示条件は変わりません。サイズはShift_JIS互換のバイト数です。
+</p>
+<nav class="settings-nav" aria-label="板設定の項目"><a href="#board-posting">投稿受付</a><a href="#board-names">名前・メール</a><a href="#board-publishing">公開・通報</a><a href="#board-identity">ID・ワッチョイ</a><a href="#board-limits">文字数・行数</a><a href="#board-network">回線・国</a></nav>
+<form class="settings-form" data-settings-form method="post" action="{{adminURL (.Action)}}">
+
+<input type="hidden" name="csrf" value="{{.Values.Get "csrf"}}">
+<input type="hidden" name="revision" value="{{.Values.Get "revision"}}">
+<input type="hidden" name="request_id" value="{{.Values.Get "request_id"}}">
+
+<section class="settings-section" id="board-posting"><h2>1. 投稿を受け付ける人</h2><p class="field-hint">スレッド作成と返信を別々に設定できます。停止すると、その種類の新しい投稿を受け付けません。</p><div class="field-grid"><p><label>スレッド作成 <select name="create_policy"><option value="anyone" {{if eq (.Values.Get "create_policy") "anyone"}}selected{{end}}>許可</option><option value="cap_only" {{if eq (.Values.Get "create_policy") "cap_only"}}selected{{end}}>キャップのみ</option><option value="disabled" {{if eq (.Values.Get "create_policy") "disabled"}}selected{{end}}>停止</option></select></label>
+</p><p><label>返信 <select name="reply_policy"><option value="anyone" {{if eq (.Values.Get "reply_policy") "anyone"}}selected{{end}}>許可</option><option value="cap_only" {{if eq (.Values.Get "reply_policy") "cap_only"}}selected{{end}}>キャップのみ</option><option value="disabled" {{if eq (.Values.Get "reply_policy") "disabled"}}selected{{end}}>停止</option></select></label>
+</p></div></section>
+<section class="settings-section" id="board-names"><h2>2. 名前・メールの表示</h2><p class="field-hint">名前を省略した場合の表示と、投稿者が入力した名前・メールの扱いを選びます。</p><div class="field-grid"><p><label>名無し名
+<input name="noname" value="{{.Values.Get "noname"}}" maxlength="128" required></label>
+</p><p><label>名前の入力 <select name="name_required"><option value="false" {{if eq (.Values.Get "name_required") "false"}}selected{{end}}>任意</option><option value="true" {{if eq (.Values.Get "name_required") "true"}}selected{{end}}>必須</option></select></label>
+</p><p><label>名前の表示 <select name="force_noname"><option value="false" {{if eq (.Values.Get "force_noname") "false"}}selected{{end}}>投稿者の入力</option><option value="true" {{if eq (.Values.Get "force_noname") "true"}}selected{{end}}>名無し名に統一</option></select></label>
+</p><p><label>メールの表示 <select name="hide_mail"><option value="false" {{if eq (.Values.Get "hide_mail") "false"}}selected{{end}}>表示</option><option value="true" {{if eq (.Values.Get "hide_mail") "true"}}selected{{end}}>非表示</option></select></label>
+</p></div></section>
+<section class="settings-section" id="board-publishing"><h2>3. 公開方法・通報</h2><p class="field-hint">Web画面の公開、通報の受付、転載についての案内を設定します。</p><div class="field-grid"><p><label>Web画面の公開 <select name="hidden"><option value="false" {{if ne (.Values.Get "hidden") "true"}}selected{{end}}>Web・専ブラの両方で公開</option><option value="true" {{if eq (.Values.Get "hidden") "true"}}selected{{end}}>専ブラ閲覧専用（Web画面は拒否）</option></select></label><span class="field-hint">ONでも板一覧・専ブラ用メニューに表示します。全体検索には掲載せず、板やスレッドの直接リンクを専ブラへ追加して利用します。Webのスレッド閲覧・投稿フォームは403で拒否します。無断転載禁止と同じクローラー制限を適用します。URLを知っている人は専ブラ用データを取得できます。</span></p><p><label>通報機能（!report） <select name="auto_reports_enabled"><option value="true" {{if ne (.Values.Get "auto_reports_enabled") "false"}}selected{{end}}>有効</option><option value="false" {{if eq (.Values.Get "auto_reports_enabled") "false"}}selected{{end}}>無効</option></select></label><span class="field-hint">この板を対象とした !report と通報受付スレッドからの通報を切り替えます。無効時の !report は通常の投稿になります。切り替えると集計を開始し直し、通報履歴と成立済みの停止期限は保持します。サイトの通報機能が起動設定で有効になっている場合に適用されます。</span></p><p><label>無断転載禁止 <select name="no_reprint"><option value="false" {{if ne (.Values.Get "no_reprint") "true"}}selected{{end}}>OFF</option><option value="true" {{if eq (.Values.Get "no_reprint") "true"}}selected{{end}}>ON</option></select></label><span class="field-hint">ONでは投稿者の著作権・利用許諾・無断転載禁止（法令上の引用等を除く）の案内をローカルルールの先頭と投稿確認画面へ表示し、検索クローラーの巡回と取得を制限します。OFFの板では、共通規約の既定文は投稿者が権利を持つ投稿の転載・再配信を許可します。公開内容のコピーを完全には防げません。</span></p></div></section>
+<details {{if .Message}}open{{end}} class="settings-section" id="board-limits"><summary>文字数・行数の上限（詳細設定）</summary><p class="field-hint">文字数ではなくShift_JIS互換のバイト数です。本文の行数は2行単位で指定します。</p><div class="field-grid"><p><label>名前の上限（バイト）
+<input type="number" name="name_bytes" value="{{.Values.Get "name_bytes"}}" min="1" max="512" required></label>
+</p><p><label>メールの上限（バイト）
+<input type="number" name="mail_bytes" value="{{.Values.Get "mail_bytes"}}" min="0" max="256" required></label>
+</p><p><label>タイトルの上限（バイト）
+<input type="number" name="title_bytes" value="{{.Values.Get "title_bytes"}}" min="1" max="512" required></label>
+</p><p><label>本文の上限（バイト）
+<input type="number" name="body_bytes" value="{{.Values.Get "body_bytes"}}" min="1" max="32768" required></label>
+</p><p><label>本文の行数上限
+<input type="number" name="body_lines" value="{{.Values.Get "body_lines"}}" min="2" max="1000" step="2" required></label>
+</p></div></details>
+<p class="field-hint">匿名Cookieは全投稿で必須です。投稿間隔・Cookie待機時間は<a href="{{adminBase}}/abuse-guard">全板共通の荒らし対策</a>で調整します。閲覧できる人は<a href="{{adminURL (.ReadingAction)}}">閲覧権限</a>で設定します。</p>
+<details {{if .Message}}open{{end}} class="settings-section" id="board-network"><summary>投稿できる回線・国を絞る（詳細設定）</summary><p class="field-hint">許可を外すと、対象の回線・国からの投稿を拒否します。共有回線の利用者にも適用されます。</p><fieldset id="network-permissions"><legend>板全体の投稿許可</legend>
+<input type="hidden" name="access_options" value="1"><input type="hidden" name="country_scope" value="{{range .CountryCodes}}{{.}} {{end}}">
+<p>チェックあり＝許可、チェックなし＝拒否です。スレ立てと返信の両方へ、保存後すぐに適用します。</p>
+<h3>逆引き</h3><input type="hidden" name="reverse_options" value="1"><label class="check-option"><input type="checkbox" name="permit_unresolved_host" {{if ne (.Values.Get "deny_unresolved_host") "true"}}checked{{end}}><span>逆引きできない接続元からの投稿を許可する</span></label><p>許可しない場合、DNS失敗・時間切れ・確認待ちも投稿を拒否します。認証済みキャップは免除します。</p>
+<h3>回線種別</h3><div class="permission-grid">{{range .PermissionKinds}}<label class="check-option"><input type="checkbox" name="permit_kind_{{.Value}}" {{if $.KindAllowed .Value}}checked{{end}}><span>{{.Label}}</span></label>{{end}}<label class="check-option"><input type="checkbox" name="permit_vpn" {{if eq (.Values.Get "allow_vpn") "true"}}checked{{end}}><span>既知VPN</span></label></div>
+<p class="field-hint">固定・携帯混在、携帯、MVNOはそれぞれ別に選択できます。VPNは国・回線種別と独立して判定し、許可した回線でもVPNを拒否できます。</p>
+<h3>登録国・地域</h3><label class="check-option"><input type="checkbox" name="permit_foreign" {{if eq (.Values.Get "japan_only") "false"}}checked{{end}}><span>国外からの投稿を許可する</span></label>
+<p class="field-hint">オフにすると、国別のチェックにかかわらず国外を拒否します。日本の許可は下のJPで設定します。</p>
+<details><summary>国ごとの許可を設定する</summary><p>初期状態は全て許可です。拒否したい国のチェックを外してください。コードはIPの登録国を表します。</p><div class="permission-grid country-options country-permissions" data-filter-list data-filter-empty="一致する国がありません。国名や2文字のコードで検索してください。">{{range .CountryCodes}}<label class="check-option" data-country-row><input type="checkbox" name="allow_country" value="{{.}}" {{if $.CountryAllowed .}}checked{{end}}><span class="country-label"><span class="country-name" data-country-code="{{.}}"></span><code class="country-code">{{.}}</code></span></label>{{end}}</div></details>
+<p>認証済みキャップは、この板全体の回線・国の制限を免除します。個別の本文規制などは適用されます。<a href="{{adminBase}}/networks#network-access">回線分類で判定データを確認</a>できます。</p>
+<p class="field-hint">国を制限しているときに登録国が不明の場合や、VPN判定データが未取得の場合は投稿を停止します。登録国は所在地の保証ではなく、VPN判定は既知リストに掲載された範囲が対象です。回線・国・VPNの全ての許可条件を満たす必要があります。</p>
+</fieldset></details>
+<fieldset class="settings-section" id="board-identity"><legend>4. ID・ワッチョイ（新規スレッドの既定）</legend><p>共通の自動取得表と運営の上書きは <a href="{{adminBase}}/networks">回線分類</a> から操作できます。</p>
+{{$id := .Values.Get "id_mode"}}<label>ID表示<select name="id_mode">{{range choices "id"}}<option value="{{.Value}}" {{if eq $id .Value}}selected{{end}}>{{.Label}}</option>{{end}}</select></label>
+<input type="hidden" name="display_selection" value="1">{{$display := displayMode (.Values.Get "slip_mode") false (eq (.Values.Get "require_public_ip") "true")}}<label>回線表示（意味・コマンド）<select name="slip_mode">{{range $mode := .SlipModes}}<option value="{{$mode}}" {{if eq $display $mode}}selected{{end}}>{{choiceLabel "slip" $mode}}（!slip:{{$mode}}）</option>{{end}}</select></label>
+
+<details {{if .Message}}open{{end}} class="settings-details"><summary>投稿コマンドの許可（!slip・!extend）</summary><fieldset data-display-commands data-command-group><legend>ワッチョイコマンドの個別ON/OFF</legend>
+<input type="hidden" name="allow_thread_strengthen" value="true"><input type="hidden" name="display_command_selection" value="1">
+<p>この板で許可するコマンドにチェックを入れてください。OFFのコマンド付き投稿を拒否します。複数指定した場合は全てONである必要があります。全てOFFでも通常投稿はできます。変更後の投稿から適用し、既存スレッドの表示条件は維持します。</p>
+<div class="action-group"><button type="button" data-command-bulk="on" hidden>全てON</button><button type="button" data-command-bulk="off" hidden>全てOFF</button></div>
+<p class="field-hint">板のID・回線表示設定で受理できる項目を表示しています。一括操作は表示中の項目に適用します。</p>
+<fieldset data-command-group><legend>名前欄：その投稿だけの表示</legend>
+<div class="action-group"><button type="button" data-command-bulk="on" hidden>名前欄を全てON</button><button type="button" data-command-bulk="off" hidden>名前欄を全てOFF</button></div>
+<div class="permission-grid">{{range $mode := .SlipModes}}{{$command := printf "!slip:%s" $mode}}<label class="check-option" data-command-option {{if not ($.DisplayCommandAvailable $command)}}hidden{{end}}><input type="checkbox" name="display_commands" value="{{$command}}" {{if $.DisplayCommandAllowed $command}}checked{{end}}><span><code>{{$command}}</code><br>{{choiceLabel "slip" $mode}}</span></label>{{end}}
+<label class="check-option" data-command-option><input type="checkbox" name="display_commands" value="!id:on" {{if .DisplayCommandAllowed "!id:on"}}checked{{end}}><span><code>!id:on</code><br>その投稿のIDを表示</span></label></div></fieldset>
+<fieldset data-command-group><legend>本文先頭：新規スレッド全体の表示</legend>
+<div class="action-group"><button type="button" data-command-bulk="on" hidden>本文先頭を全てON</button><button type="button" data-command-bulk="off" hidden>本文先頭を全てOFF</button></div>
+<p>!extend は新規スレッドの本文1行目に書きます。IDと回線表示の組み合わせごとにON/OFFできます。default・空指定は板の設定を継承します。</p>
+{{range $mode := .ExtendModes}}<fieldset data-command-group data-command-mode {{if not ($.ExtendModeAvailable $mode)}}hidden{{end}}><legend>{{if eq $mode "default"}}回線表示：板の設定を継承{{else}}{{choiceLabel "slip" $mode}}{{end}}</legend><div class="action-group"><button type="button" data-command-bulk="on" hidden>この分類を全てON</button><button type="button" data-command-bulk="off" hidden>この分類を全てOFF</button></div><div class="permission-grid">
+{{$inherit := printf "!extend:default:%s::" $mode}}<label class="check-option" data-command-option {{if not ($.DisplayCommandAvailable $inherit)}}hidden{{end}}><input type="checkbox" name="display_commands" value="{{$inherit}}" {{if $.DisplayCommandAllowed $inherit}}checked{{end}}><span><code>{{$inherit}}</code><br>ID：板の設定を継承</span></label>
+{{$on := printf "!extend:checked:%s::" $mode}}<label class="check-option" data-command-option {{if not ($.DisplayCommandAvailable $on)}}hidden{{end}}><input type="checkbox" name="display_commands" value="{{$on}}" {{if $.DisplayCommandAllowed $on}}checked{{end}}><span><code>{{$on}}</code><br>IDを表示</span></label>
+{{$off := printf "!extend:none:%s::" $mode}}<label class="check-option" data-command-option {{if not ($.DisplayCommandAvailable $off)}}hidden{{end}}><input type="checkbox" name="display_commands" value="{{$off}}" {{if $.DisplayCommandAllowed $off}}checked{{end}}><span><code>{{$off}}</code><br>IDを非表示</span></label>
+</div></fieldset>{{end}}</fieldset>
+<p>板より回線表示の段階を下げる指定と、ID必須の板でIDを非表示にする指定は表示しません。既存スレッドの表示条件によっては、返信でさらに制限されます。名前欄の !id:none・!id:ignore は未対応です。例：!extend:checked:vvvvv:: はIDとワッチョイ、!extend:checked:vvvvvv:: はID・ワッチョイ・IPアドレスを表示します。</p>
+</fieldset></details>
+<p>ワッチョイは回線名とAABB-CCDD形式の識別子です。AAは週とIPのネットワーク範囲、BBはプロバイダ、CCは匿名Cookie、DDは週とUser-Agent分類で決まります。板ごとに異なり、BB・CCは週が変わっても維持されます。「IPアドレスを表示」を含む選択肢では接続元IPを公開します。ワッチョイのみの選択肢ではIPを公開しません。設定は新規スレッドに適用されます。既存スレッドは「スレッドの状態変更」で変更できます。</p>
+<details {{if .Message}}open{{end}} class="settings-details"><summary>この板だけの回線名・ID末尾の上書き</summary><fieldset data-board-network-rows><legend>この板だけの回線上書き</legend><input type="hidden" name="network_rows" value="1"><p>共通分類を変更せず、この板で使う回線名・ID末尾を上書きします。IP範囲と回線種別を指定し、表示名・末尾は省略すると種別の既定値を使います。削除する行はIP範囲・表示名・末尾を空欄にしてください。最大512件。</p><div data-network-rows>{{range .NetworkRows}}<div class="field-grid" data-network-row><label>IPアドレスまたは範囲<input name="network_cidr" value="{{.CIDR}}" placeholder="例：192.0.2.0/24"></label><label>回線種別<select name="network_kind">{{$kind:=.Kind}}{{range choices "network"}}<option value="{{.Value}}" {{if eq $kind .Value}}selected{{end}}>{{.Label}}</option>{{end}}</select></label><label>名前欄の表示（省略可）<input name="network_label" value="{{.Label}}" maxlength="16"></label><label>ID末尾（省略可）<input name="network_suffix" value="{{.Suffix}}" maxlength="1"></label><label>プロバイダ識別キー（省略可）<input name="network_provider" value="{{.Provider}}" maxlength="64" placeholder="例：ocn"></label><button type="button" data-network-remove hidden>この上書きを削除</button></div>{{end}}</div><button type="button" data-network-add hidden>回線上書きを追加</button><p>JavaScriptなしでも、最後の空欄へ1件追加して保存できます。</p></fieldset></details></fieldset>
+{{template "settings-review" .}}<button type="submit">保存</button> <a href="{{adminURL (.Action)}}">最新の設定を読み直す</a>
+</form>
+{{else}}
+{{if .CanCreate}}{{if .CreateReady}}<details class="admin-panel" {{if .Message}}open{{end}}><summary>板を追加</summary><form method="post" action="{{adminBase}}/boards">
+<input type="hidden" name="csrf" value="{{.Values.Get "csrf"}}">
+<label>板キー<input name="key" value="{{.Values.Get "key"}}" pattern="[a-z][a-z0-9_]{0,31}" maxlength="32" required></label>
+<p>URLに使います。先頭は英小文字、以降は英小文字・数字・下線で32文字以内。「test」「web」は使用できません。</p>
+<label>表示名<input name="name" value="{{.Values.Get "name"}}" maxlength="128" required></label>
+<label>板の種類<select name="posting_mode"><option value="anyone" {{if ne (.Values.Get "posting_mode") "cap_only"}}selected{{end}}>通常板</option><option value="cap_only" {{if eq (.Values.Get "posting_mode") "cap_only"}}selected{{end}}>CAP専用板</option></select></label>
+<p>CAP専用板は、スレッド作成・返信の両方をこの板で使用できるCAPに限定します。閲覧は誰でもできます。追加後に<a href="{{adminBase}}/caps">キャップ管理</a>でこの板のCAPを発行してください。</p>
+<p>追加後、板の設定画面で投稿条件を変更できます。</p>
+<button type="submit">板を追加</button>
+</form></details>{{else}}<p>板を追加するには<a href="{{adminBase}}/reauth?return_to=%2Fboards">管理者の再認証</a>を行ってください。</p>{{end}}{{end}}
+<ul class="card-list" data-filter-list>{{range .Rows}}
+<li><div class="admin-record-header"><h2><a href="{{adminBase}}/boards/{{.ID}}/settings">{{.Name}}</a></h2><span class="admin-badge">{{.Key}}</span></div><div class="action-group"><a class="tonal-link" href="{{adminBase}}/boards/{{.ID}}/threads">レス削除・投稿者規制</a><a href="{{adminBase}}/boards/{{.ID}}/settings">板設定</a><a href="{{adminBase}}/boards/{{.ID}}/rules">投稿規制</a></div><details class="admin-help"><summary>閲覧権限・表示・CAPの操作</summary><div class="action-group"><a href="{{adminBase}}/boards/{{.ID}}/reading">閲覧権限</a><a href="{{adminBase}}/boards/{{.ID}}/local-rules">ローカルルール</a><a href="{{adminBase}}/boards/{{.ID}}/thread-settings">レス数上限・終了レス</a><a href="{{adminURL ($.CapThreadURL .Key)}}">CAP専用スレッドを作成</a></div></details>
+</li>{{else}}
+<li>板がありません。
+</li>{{end}}
+</ul>{{if .Next}}<p><a href="{{adminURL (.Next)}}">次のページ</a></p>{{end}}{{end}}
+</main>{{template "footer" .}}
+</body>
+</html>
+
+{{define "page-assets"}}{{if .Editing}}{{template "stylesheet" "admin-settings.css"}}{{template "stylesheet" "admin-board.css"}}{{template "stylesheet" "list.css"}}{{template "stylesheet" "countries.css"}}{{template "javascript" "countries.js"}}{{template "javascript" "list.js"}}{{template "javascript" "admin-board.js"}}{{template "javascript" "admin-settings.js"}}{{else}}{{template "stylesheet" "list.css"}}{{template "javascript" "list.js"}}{{end}}{{end}}

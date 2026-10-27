@@ -1,0 +1,1763 @@
+{
+  "schema": "oimobbs-json-single-parallel-measurement-v1",
+  "date": "2026-10-25",
+  "baseline_commit": "f9bce38e78aab261a83b9008ba4d0e4716e23aa9",
+  "go": "go version go1.27.3 linux/amd64",
+  "environment": {
+    "cpu": "AMD Ryzen 5 5500U",
+    "gomaxprocs": [
+      1,
+      2,
+      4
+    ],
+    "shared_host": true,
+    "benchmark_seconds": 0.3,
+    "samples_per_condition": 3,
+    "benchmarks_overlapped_with_build_tests": false,
+    "loop": "b.N; b.Loop initial CPU configuration excluded"
+  },
+  "fixture": {
+    "file": "internal/domain/json_parallel_test.go",
+    "sha256": "068364316a62e9dd4c9ea995f28339eeb055c9e66dfdb3d8ab5557503d10080e",
+    "baseline_and_candidate_identical": true,
+    "posts_per_json": [
+      1,
+      128,
+      512
+    ],
+    "inputs_bytes_sha256": "1 1796 01e09d69539603fbc769c5014bacfa530d673b306a63cbb062b2feb9ae02065e\n128 228933 927cc5ff708f193de525a75022db3b1727a72082a3932e26dbe882791bc9f12f\n512 916677 5868409bdee5f63b0601fcf9b94dd6b2c20daafce81ed681bf8c3f7d06f3e650\n",
+    "baseline_inputs_match": true
+  },
+  "comparisons": [
+    {
+      "benchmark": "BenchmarkSingleJSONPosts/posts1/encode",
+      "baseline_median": {
+        "ns_per_op": 3357.0,
+        "bytes_per_op": 2048,
+        "allocs_per_op": 1
+      },
+      "candidate_median": {
+        "ns_per_op": 3186.0,
+        "bytes_per_op": 2048,
+        "allocs_per_op": 1
+      },
+      "speedup": 1.0536723163841808
+    },
+    {
+      "benchmark": "BenchmarkSingleJSONPosts/posts1/encode-2",
+      "baseline_median": {
+        "ns_per_op": 3430.0,
+        "bytes_per_op": 2048,
+        "allocs_per_op": 1
+      },
+      "candidate_median": {
+        "ns_per_op": 3266.0,
+        "bytes_per_op": 2048,
+        "allocs_per_op": 1
+      },
+      "speedup": 1.0502143294549908
+    },
+    {
+      "benchmark": "BenchmarkSingleJSONPosts/posts1/encode-4",
+      "baseline_median": {
+        "ns_per_op": 3267.0,
+        "bytes_per_op": 2048,
+        "allocs_per_op": 1
+      },
+      "candidate_median": {
+        "ns_per_op": 3311.0,
+        "bytes_per_op": 2048,
+        "allocs_per_op": 1
+      },
+      "speedup": 0.9867109634551495
+    },
+    {
+      "benchmark": "BenchmarkSingleJSONPosts/posts1/decode",
+      "baseline_median": {
+        "ns_per_op": 19260.0,
+        "bytes_per_op": 4240,
+        "allocs_per_op": 17
+      },
+      "candidate_median": {
+        "ns_per_op": 18103.0,
+        "bytes_per_op": 4240,
+        "allocs_per_op": 17
+      },
+      "speedup": 1.0639120587747888
+    },
+    {
+      "benchmark": "BenchmarkSingleJSONPosts/posts1/decode-2",
+      "baseline_median": {
+        "ns_per_op": 18673.0,
+        "bytes_per_op": 4242,
+        "allocs_per_op": 17
+      },
+      "candidate_median": {
+        "ns_per_op": 18026.0,
+        "bytes_per_op": 4241,
+        "allocs_per_op": 17
+      },
+      "speedup": 1.0358925995783868
+    },
+    {
+      "benchmark": "BenchmarkSingleJSONPosts/posts1/decode-4",
+      "baseline_median": {
+        "ns_per_op": 18457.0,
+        "bytes_per_op": 4244,
+        "allocs_per_op": 17
+      },
+      "candidate_median": {
+        "ns_per_op": 18477.0,
+        "bytes_per_op": 4244,
+        "allocs_per_op": 17
+      },
+      "speedup": 0.9989175731991125
+    },
+    {
+      "benchmark": "BenchmarkSingleJSONPosts/posts128/encode",
+      "baseline_median": {
+        "ns_per_op": 583057.0,
+        "bytes_per_op": 1183232,
+        "allocs_per_op": 18
+      },
+      "candidate_median": {
+        "ns_per_op": 596508.0,
+        "bytes_per_op": 1183232,
+        "allocs_per_op": 18
+      },
+      "speedup": 0.9774504281585494
+    },
+    {
+      "benchmark": "BenchmarkSingleJSONPosts/posts128/encode-2",
+      "baseline_median": {
+        "ns_per_op": 627646.0,
+        "bytes_per_op": 1183232,
+        "allocs_per_op": 18
+      },
+      "candidate_median": {
+        "ns_per_op": 427340.0,
+        "bytes_per_op": 642938,
+        "allocs_per_op": 27
+      },
+      "speedup": 1.4687274769504375
+    },
+    {
+      "benchmark": "BenchmarkSingleJSONPosts/posts128/encode-4",
+      "baseline_median": {
+        "ns_per_op": 571893.0,
+        "bytes_per_op": 1183235,
+        "allocs_per_op": 18
+      },
+      "candidate_median": {
+        "ns_per_op": 345544.0,
+        "bytes_per_op": 511997,
+        "allocs_per_op": 29
+      },
+      "speedup": 1.6550511656981455
+    },
+    {
+      "benchmark": "BenchmarkSingleJSONPosts/posts128/decode",
+      "baseline_median": {
+        "ns_per_op": 2386691.0,
+        "bytes_per_op": 598969,
+        "allocs_per_op": 1678
+      },
+      "candidate_median": {
+        "ns_per_op": 2491655.0,
+        "bytes_per_op": 598970,
+        "allocs_per_op": 1678
+      },
+      "speedup": 0.9578737826866079
+    },
+    {
+      "benchmark": "BenchmarkSingleJSONPosts/posts128/decode-2",
+      "baseline_median": {
+        "ns_per_op": 2350560.0,
+        "bytes_per_op": 599132,
+        "allocs_per_op": 1678
+      },
+      "candidate_median": {
+        "ns_per_op": 1661980.0,
+        "bytes_per_op": 607443,
+        "allocs_per_op": 1695
+      },
+      "speedup": 1.4143130482917965
+    },
+    {
+      "benchmark": "BenchmarkSingleJSONPosts/posts128/decode-4",
+      "baseline_median": {
+        "ns_per_op": 2447780.0,
+        "bytes_per_op": 599700,
+        "allocs_per_op": 1678
+      },
+      "candidate_median": {
+        "ns_per_op": 1534133.0,
+        "bytes_per_op": 596026,
+        "allocs_per_op": 1706
+      },
+      "speedup": 1.5955461488671452
+    },
+    {
+      "benchmark": "BenchmarkSingleJSONPosts/posts512/encode",
+      "baseline_median": {
+        "ns_per_op": 2620607.0,
+        "bytes_per_op": 5238272,
+        "allocs_per_op": 24
+      },
+      "candidate_median": {
+        "ns_per_op": 2661322.0,
+        "bytes_per_op": 5238272,
+        "allocs_per_op": 24
+      },
+      "speedup": 0.9847012124049627
+    },
+    {
+      "benchmark": "BenchmarkSingleJSONPosts/posts512/encode-2",
+      "baseline_median": {
+        "ns_per_op": 3322404.0,
+        "bytes_per_op": 5238276,
+        "allocs_per_op": 24
+      },
+      "candidate_median": {
+        "ns_per_op": 1686562.0,
+        "bytes_per_op": 2453375,
+        "allocs_per_op": 27
+      },
+      "speedup": 1.9699269875640504
+    },
+    {
+      "benchmark": "BenchmarkSingleJSONPosts/posts512/encode-4",
+      "baseline_median": {
+        "ns_per_op": 3004494.0,
+        "bytes_per_op": 5238279,
+        "allocs_per_op": 24
+      },
+      "candidate_median": {
+        "ns_per_op": 1139093.0,
+        "bytes_per_op": 2166906,
+        "allocs_per_op": 33
+      },
+      "speedup": 2.6376195797884807
+    },
+    {
+      "benchmark": "BenchmarkSingleJSONPosts/posts512/decode",
+      "baseline_median": {
+        "ns_per_op": 9879178.0,
+        "bytes_per_op": 2478124,
+        "allocs_per_op": 6675
+      },
+      "candidate_median": {
+        "ns_per_op": 9735351.0,
+        "bytes_per_op": 2478120,
+        "allocs_per_op": 6675
+      },
+      "speedup": 1.0147736840715862
+    },
+    {
+      "benchmark": "BenchmarkSingleJSONPosts/posts512/decode-2",
+      "baseline_median": {
+        "ns_per_op": 9965393.0,
+        "bytes_per_op": 2479369,
+        "allocs_per_op": 6675
+      },
+      "candidate_median": {
+        "ns_per_op": 6687326.0,
+        "bytes_per_op": 2389273,
+        "allocs_per_op": 6694
+      },
+      "speedup": 1.490190997119028
+    },
+    {
+      "benchmark": "BenchmarkSingleJSONPosts/posts512/decode-4",
+      "baseline_median": {
+        "ns_per_op": 10024634.0,
+        "bytes_per_op": 2481413,
+        "allocs_per_op": 6676
+      },
+      "candidate_median": {
+        "ns_per_op": 5409600.0,
+        "bytes_per_op": 2419056,
+        "allocs_per_op": 6724
+      },
+      "speedup": 1.8531192694469092
+    },
+    {
+      "benchmark": "BenchmarkSingleJSONPostsConcurrent/posts1/encode",
+      "baseline_median": {
+        "ns_per_op": 3598.0,
+        "bytes_per_op": 2048,
+        "allocs_per_op": 1
+      },
+      "candidate_median": {
+        "ns_per_op": 3299.0,
+        "bytes_per_op": 2048,
+        "allocs_per_op": 1
+      },
+      "speedup": 1.0906335253107002
+    },
+    {
+      "benchmark": "BenchmarkSingleJSONPostsConcurrent/posts1/encode-2",
+      "baseline_median": {
+        "ns_per_op": 1981.0,
+        "bytes_per_op": 2048,
+        "allocs_per_op": 1
+      },
+      "candidate_median": {
+        "ns_per_op": 1874.0,
+        "bytes_per_op": 2048,
+        "allocs_per_op": 1
+      },
+      "speedup": 1.0570971184631803
+    },
+    {
+      "benchmark": "BenchmarkSingleJSONPostsConcurrent/posts1/encode-4",
+      "baseline_median": {
+        "ns_per_op": 1174.0,
+        "bytes_per_op": 2048,
+        "allocs_per_op": 1
+      },
+      "candidate_median": {
+        "ns_per_op": 1178.0,
+        "bytes_per_op": 2048,
+        "allocs_per_op": 1
+      },
+      "speedup": 0.9966044142614601
+    },
+    {
+      "benchmark": "BenchmarkSingleJSONPostsConcurrent/posts1/decode",
+      "baseline_median": {
+        "ns_per_op": 18951.0,
+        "bytes_per_op": 4240,
+        "allocs_per_op": 17
+      },
+      "candidate_median": {
+        "ns_per_op": 18904.0,
+        "bytes_per_op": 4240,
+        "allocs_per_op": 17
+      },
+      "speedup": 1.00248624629708
+    },
+    {
+      "benchmark": "BenchmarkSingleJSONPostsConcurrent/posts1/decode-2",
+      "baseline_median": {
+        "ns_per_op": 11708.0,
+        "bytes_per_op": 4241,
+        "allocs_per_op": 17
+      },
+      "candidate_median": {
+        "ns_per_op": 10201.0,
+        "bytes_per_op": 4242,
+        "allocs_per_op": 17
+      },
+      "speedup": 1.147730614645623
+    },
+    {
+      "benchmark": "BenchmarkSingleJSONPostsConcurrent/posts1/decode-4",
+      "baseline_median": {
+        "ns_per_op": 6596.0,
+        "bytes_per_op": 4244,
+        "allocs_per_op": 17
+      },
+      "candidate_median": {
+        "ns_per_op": 5850.0,
+        "bytes_per_op": 4245,
+        "allocs_per_op": 17
+      },
+      "speedup": 1.1275213675213676
+    },
+    {
+      "benchmark": "BenchmarkSingleJSONPostsConcurrent/posts128/encode",
+      "baseline_median": {
+        "ns_per_op": 648266.0,
+        "bytes_per_op": 1183232,
+        "allocs_per_op": 18
+      },
+      "candidate_median": {
+        "ns_per_op": 660552.0,
+        "bytes_per_op": 1183232,
+        "allocs_per_op": 18
+      },
+      "speedup": 0.9814004045101673
+    },
+    {
+      "benchmark": "BenchmarkSingleJSONPostsConcurrent/posts128/encode-2",
+      "baseline_median": {
+        "ns_per_op": 480842.0,
+        "bytes_per_op": 1183232,
+        "allocs_per_op": 18
+      },
+      "candidate_median": {
+        "ns_per_op": 485821.0,
+        "bytes_per_op": 912721,
+        "allocs_per_op": 31
+      },
+      "speedup": 0.9897513693315028
+    },
+    {
+      "benchmark": "BenchmarkSingleJSONPostsConcurrent/posts128/encode-4",
+      "baseline_median": {
+        "ns_per_op": 375858.0,
+        "bytes_per_op": 1183242,
+        "allocs_per_op": 18
+      },
+      "candidate_median": {
+        "ns_per_op": 367672.0,
+        "bytes_per_op": 937534,
+        "allocs_per_op": 33
+      },
+      "speedup": 1.022264409582454
+    },
+    {
+      "benchmark": "BenchmarkSingleJSONPostsConcurrent/posts128/decode",
+      "baseline_median": {
+        "ns_per_op": 2430722.0,
+        "bytes_per_op": 598971,
+        "allocs_per_op": 1678
+      },
+      "candidate_median": {
+        "ns_per_op": 2339410.0,
+        "bytes_per_op": 598971,
+        "allocs_per_op": 1678
+      },
+      "speedup": 1.0390320636399777
+    },
+    {
+      "benchmark": "BenchmarkSingleJSONPostsConcurrent/posts128/decode-2",
+      "baseline_median": {
+        "ns_per_op": 1338019.0,
+        "bytes_per_op": 599179,
+        "allocs_per_op": 1678
+      },
+      "candidate_median": {
+        "ns_per_op": 1292124.0,
+        "bytes_per_op": 603597,
+        "allocs_per_op": 1688
+      },
+      "speedup": 1.0355190368726221
+    },
+    {
+      "benchmark": "BenchmarkSingleJSONPostsConcurrent/posts128/decode-4",
+      "baseline_median": {
+        "ns_per_op": 791018.0,
+        "bytes_per_op": 600153,
+        "allocs_per_op": 1679
+      },
+      "candidate_median": {
+        "ns_per_op": 814295.0,
+        "bytes_per_op": 599359,
+        "allocs_per_op": 1688
+      },
+      "speedup": 0.9714145365008996
+    }
+  ],
+  "baseline": {
+    "file": "var/json-single-parallel-20261025/product-baseline-v3.txt",
+    "raw": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/domain\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkSingleJSONPosts/posts1/encode           \t  109561\t      3357 ns/op\t 534.93 MB/s\t    2048 B/op\t       1 allocs/op\nBenchmarkSingleJSONPosts/posts1/encode           \t  104408\t      3311 ns/op\t 542.45 MB/s\t    2048 B/op\t       1 allocs/op\nBenchmarkSingleJSONPosts/posts1/encode           \t  106580\t      3360 ns/op\t 534.53 MB/s\t    2048 B/op\t       1 allocs/op\nBenchmarkSingleJSONPosts/posts1/encode-2         \t  107504\t      3430 ns/op\t 523.61 MB/s\t    2048 B/op\t       1 allocs/op\nBenchmarkSingleJSONPosts/posts1/encode-2         \t  104263\t      3472 ns/op\t 517.25 MB/s\t    2048 B/op\t       1 allocs/op\nBenchmarkSingleJSONPosts/posts1/encode-2         \t  100998\t      3263 ns/op\t 550.34 MB/s\t    2048 B/op\t       1 allocs/op\nBenchmarkSingleJSONPosts/posts1/encode-4         \t   93765\t      3517 ns/op\t 510.61 MB/s\t    2048 B/op\t       1 allocs/op\nBenchmarkSingleJSONPosts/posts1/encode-4         \t  113028\t      3267 ns/op\t 549.66 MB/s\t    2048 B/op\t       1 allocs/op\nBenchmarkSingleJSONPosts/posts1/encode-4         \t  106296\t      3255 ns/op\t 551.79 MB/s\t    2048 B/op\t       1 allocs/op\nBenchmarkSingleJSONPosts/posts1/decode           \t   19113\t     18695 ns/op\t  96.07 MB/s\t    4240 B/op\t      17 allocs/op\nBenchmarkSingleJSONPosts/posts1/decode           \t   18739\t     19353 ns/op\t  92.80 MB/s\t    4240 B/op\t      17 allocs/op\nBenchmarkSingleJSONPosts/posts1/decode           \t   17763\t     19260 ns/op\t  93.25 MB/s\t    4240 B/op\t      17 allocs/op\nBenchmarkSingleJSONPosts/posts1/decode-2         \t   19198\t     18673 ns/op\t  96.18 MB/s\t    4242 B/op\t      17 allocs/op\nBenchmarkSingleJSONPosts/posts1/decode-2         \t   18357\t     18799 ns/op\t  95.53 MB/s\t    4242 B/op\t      17 allocs/op\nBenchmarkSingleJSONPosts/posts1/decode-2         \t   19460\t     18337 ns/op\t  97.94 MB/s\t    4241 B/op\t      17 allocs/op\nBenchmarkSingleJSONPosts/posts1/decode-4         \t   18654\t     18472 ns/op\t  97.23 MB/s\t    4244 B/op\t      17 allocs/op\nBenchmarkSingleJSONPosts/posts1/decode-4         \t   19239\t     18457 ns/op\t  97.31 MB/s\t    4244 B/op\t      17 allocs/op\nBenchmarkSingleJSONPosts/posts1/decode-4         \t   19148\t     18392 ns/op\t  97.65 MB/s\t    4243 B/op\t      17 allocs/op\nBenchmarkSingleJSONPosts/posts128/encode         \t     612\t    583057 ns/op\t 392.64 MB/s\t 1183232 B/op\t      18 allocs/op\nBenchmarkSingleJSONPosts/posts128/encode         \t     614\t    579559 ns/op\t 395.01 MB/s\t 1183232 B/op\t      18 allocs/op\nBenchmarkSingleJSONPosts/posts128/encode         \t     615\t    633818 ns/op\t 361.20 MB/s\t 1183232 B/op\t      18 allocs/op\nBenchmarkSingleJSONPosts/posts128/encode-2       \t     598\t    627646 ns/op\t 364.75 MB/s\t 1183233 B/op\t      18 allocs/op\nBenchmarkSingleJSONPosts/posts128/encode-2       \t     547\t    587174 ns/op\t 389.89 MB/s\t 1183232 B/op\t      18 allocs/op\nBenchmarkSingleJSONPosts/posts128/encode-2       \t     586\t    633457 ns/op\t 361.40 MB/s\t 1183232 B/op\t      18 allocs/op\nBenchmarkSingleJSONPosts/posts128/encode-4       \t     592\t    571893 ns/op\t 400.31 MB/s\t 1183233 B/op\t      18 allocs/op\nBenchmarkSingleJSONPosts/posts128/encode-4       \t     607\t    569169 ns/op\t 402.22 MB/s\t 1183235 B/op\t      18 allocs/op\nBenchmarkSingleJSONPosts/posts128/encode-4       \t     606\t    604611 ns/op\t 378.64 MB/s\t 1183235 B/op\t      18 allocs/op\nBenchmarkSingleJSONPosts/posts128/decode         \t     148\t   2386691 ns/op\t  95.92 MB/s\t  598969 B/op\t    1678 allocs/op\nBenchmarkSingleJSONPosts/posts128/decode         \t     144\t   2450686 ns/op\t  93.42 MB/s\t  598970 B/op\t    1678 allocs/op\nBenchmarkSingleJSONPosts/posts128/decode         \t     146\t   2354774 ns/op\t  97.22 MB/s\t  598969 B/op\t    1678 allocs/op\nBenchmarkSingleJSONPosts/posts128/decode-2       \t     147\t   2330309 ns/op\t  98.24 MB/s\t  599132 B/op\t    1678 allocs/op\nBenchmarkSingleJSONPosts/posts128/decode-2       \t     154\t   2350560 ns/op\t  97.40 MB/s\t  599159 B/op\t    1678 allocs/op\nBenchmarkSingleJSONPosts/posts128/decode-2       \t     150\t   2442759 ns/op\t  93.72 MB/s\t  599093 B/op\t    1678 allocs/op\nBenchmarkSingleJSONPosts/posts128/decode-4       \t     142\t   2536007 ns/op\t  90.27 MB/s\t  599705 B/op\t    1678 allocs/op\nBenchmarkSingleJSONPosts/posts128/decode-4       \t     138\t   2447780 ns/op\t  93.53 MB/s\t  599609 B/op\t    1678 allocs/op\nBenchmarkSingleJSONPosts/posts128/decode-4       \t     151\t   2350608 ns/op\t  97.39 MB/s\t  599700 B/op\t    1678 allocs/op\nBenchmarkSingleJSONPosts/posts512/encode         \t     134\t   2679616 ns/op\t 342.09 MB/s\t 5238272 B/op\t      24 allocs/op\nBenchmarkSingleJSONPosts/posts512/encode         \t     139\t   2620607 ns/op\t 349.80 MB/s\t 5238272 B/op\t      24 allocs/op\nBenchmarkSingleJSONPosts/posts512/encode         \t     136\t   2532472 ns/op\t 361.97 MB/s\t 5238272 B/op\t      24 allocs/op\nBenchmarkSingleJSONPosts/posts512/encode-2       \t     100\t   3205041 ns/op\t 286.01 MB/s\t 5238280 B/op\t      24 allocs/op\nBenchmarkSingleJSONPosts/posts512/encode-2       \t      98\t   3389344 ns/op\t 270.46 MB/s\t 5238276 B/op\t      24 allocs/op\nBenchmarkSingleJSONPosts/posts512/encode-2       \t      96\t   3322404 ns/op\t 275.91 MB/s\t 5238273 B/op\t      24 allocs/op\nBenchmarkSingleJSONPosts/posts512/encode-4       \t     100\t   3033673 ns/op\t 302.17 MB/s\t 5238279 B/op\t      24 allocs/op\nBenchmarkSingleJSONPosts/posts512/encode-4       \t     115\t   3004494 ns/op\t 305.10 MB/s\t 5238278 B/op\t      24 allocs/op\nBenchmarkSingleJSONPosts/posts512/encode-4       \t     121\t   2999996 ns/op\t 305.56 MB/s\t 5238283 B/op\t      24 allocs/op\nBenchmarkSingleJSONPosts/posts512/decode         \t      34\t  10347229 ns/op\t  88.59 MB/s\t 2478270 B/op\t    6675 allocs/op\nBenchmarkSingleJSONPosts/posts512/decode         \t      38\t   9879178 ns/op\t  92.79 MB/s\t 2478120 B/op\t    6675 allocs/op\nBenchmarkSingleJSONPosts/posts512/decode         \t      38\t   9814164 ns/op\t  93.40 MB/s\t 2478124 B/op\t    6675 allocs/op\nBenchmarkSingleJSONPosts/posts512/decode-2       \t      32\t   9965393 ns/op\t  91.99 MB/s\t 2479772 B/op\t    6676 allocs/op\nBenchmarkSingleJSONPosts/posts512/decode-2       \t      36\t  10883781 ns/op\t  84.22 MB/s\t 2479157 B/op\t    6675 allocs/op\nBenchmarkSingleJSONPosts/posts512/decode-2       \t      38\t   9616738 ns/op\t  95.32 MB/s\t 2479369 B/op\t    6675 allocs/op\nBenchmarkSingleJSONPosts/posts512/decode-4       \t      39\t   9914116 ns/op\t  92.46 MB/s\t 2480952 B/op\t    6676 allocs/op\nBenchmarkSingleJSONPosts/posts512/decode-4       \t      39\t  10024634 ns/op\t  91.44 MB/s\t 2481413 B/op\t    6676 allocs/op\nBenchmarkSingleJSONPosts/posts512/decode-4       \t      39\t  10396126 ns/op\t  88.17 MB/s\t 2482707 B/op\t    6676 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts1/encode           \t   96513\t      3708 ns/op\t    2048 B/op\t       1 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts1/encode           \t   99196\t      3598 ns/op\t    2048 B/op\t       1 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts1/encode           \t  103058\t      3397 ns/op\t    2048 B/op\t       1 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts1/encode-2         \t  198712\t      1933 ns/op\t    2048 B/op\t       1 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts1/encode-2         \t  183597\t      1984 ns/op\t    2048 B/op\t       1 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts1/encode-2         \t  185466\t      1981 ns/op\t    2048 B/op\t       1 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts1/encode-4         \t  304377\t      1145 ns/op\t    2048 B/op\t       1 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts1/encode-4         \t  275262\t      1174 ns/op\t    2048 B/op\t       1 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts1/encode-4         \t  310369\t      1209 ns/op\t    2048 B/op\t       1 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts1/decode           \t   16741\t     18833 ns/op\t    4240 B/op\t      17 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts1/decode           \t   18970\t     18951 ns/op\t    4240 B/op\t      17 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts1/decode           \t   16611\t     19554 ns/op\t    4240 B/op\t      17 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts1/decode-2         \t   31720\t     11990 ns/op\t    4242 B/op\t      17 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts1/decode-2         \t   28293\t     11708 ns/op\t    4241 B/op\t      17 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts1/decode-2         \t   31484\t     11638 ns/op\t    4241 B/op\t      17 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts1/decode-4         \t   47001\t      7782 ns/op\t    4244 B/op\t      17 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts1/decode-4         \t   47300\t      6596 ns/op\t    4245 B/op\t      17 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts1/decode-4         \t   52309\t      6036 ns/op\t    4244 B/op\t      17 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts128/encode         \t     552\t    689266 ns/op\t 1183232 B/op\t      18 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts128/encode         \t     536\t    634656 ns/op\t 1183232 B/op\t      18 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts128/encode         \t     550\t    648266 ns/op\t 1183232 B/op\t      18 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts128/encode-2       \t     650\t    543368 ns/op\t 1183233 B/op\t      18 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts128/encode-2       \t     634\t    480842 ns/op\t 1183232 B/op\t      18 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts128/encode-2       \t     792\t    445656 ns/op\t 1183232 B/op\t      18 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts128/encode-4       \t     974\t    379237 ns/op\t 1183242 B/op\t      18 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts128/encode-4       \t    1002\t    367135 ns/op\t 1183238 B/op\t      18 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts128/encode-4       \t     937\t    375858 ns/op\t 1183245 B/op\t      18 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts128/decode         \t     147\t   2430722 ns/op\t  598971 B/op\t    1678 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts128/decode         \t     151\t   2428783 ns/op\t  598970 B/op\t    1678 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts128/decode         \t     147\t   2448201 ns/op\t  598971 B/op\t    1678 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts128/decode-2       \t     279\t   1338019 ns/op\t  599158 B/op\t    1678 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts128/decode-2       \t     264\t   1320058 ns/op\t  599264 B/op\t    1678 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts128/decode-2       \t     267\t   1341212 ns/op\t  599179 B/op\t    1678 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts128/decode-4       \t     396\t    809760 ns/op\t  600153 B/op\t    1679 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts128/decode-4       \t     456\t    791018 ns/op\t  600176 B/op\t    1679 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts128/decode-4       \t     447\t    779157 ns/op\t  600110 B/op\t    1679 allocs/op\nPASS\nok  \toimobbs/internal/domain\t41.580s\n",
+    "rows": {
+      "BenchmarkSingleJSONPosts/posts1/encode": [
+        {
+          "iterations": 109561,
+          "ns_per_op": 3357.0,
+          "bytes_per_op": 2048,
+          "allocs_per_op": 1
+        },
+        {
+          "iterations": 104408,
+          "ns_per_op": 3311.0,
+          "bytes_per_op": 2048,
+          "allocs_per_op": 1
+        },
+        {
+          "iterations": 106580,
+          "ns_per_op": 3360.0,
+          "bytes_per_op": 2048,
+          "allocs_per_op": 1
+        }
+      ],
+      "BenchmarkSingleJSONPosts/posts1/encode-2": [
+        {
+          "iterations": 107504,
+          "ns_per_op": 3430.0,
+          "bytes_per_op": 2048,
+          "allocs_per_op": 1
+        },
+        {
+          "iterations": 104263,
+          "ns_per_op": 3472.0,
+          "bytes_per_op": 2048,
+          "allocs_per_op": 1
+        },
+        {
+          "iterations": 100998,
+          "ns_per_op": 3263.0,
+          "bytes_per_op": 2048,
+          "allocs_per_op": 1
+        }
+      ],
+      "BenchmarkSingleJSONPosts/posts1/encode-4": [
+        {
+          "iterations": 93765,
+          "ns_per_op": 3517.0,
+          "bytes_per_op": 2048,
+          "allocs_per_op": 1
+        },
+        {
+          "iterations": 113028,
+          "ns_per_op": 3267.0,
+          "bytes_per_op": 2048,
+          "allocs_per_op": 1
+        },
+        {
+          "iterations": 106296,
+          "ns_per_op": 3255.0,
+          "bytes_per_op": 2048,
+          "allocs_per_op": 1
+        }
+      ],
+      "BenchmarkSingleJSONPosts/posts1/decode": [
+        {
+          "iterations": 19113,
+          "ns_per_op": 18695.0,
+          "bytes_per_op": 4240,
+          "allocs_per_op": 17
+        },
+        {
+          "iterations": 18739,
+          "ns_per_op": 19353.0,
+          "bytes_per_op": 4240,
+          "allocs_per_op": 17
+        },
+        {
+          "iterations": 17763,
+          "ns_per_op": 19260.0,
+          "bytes_per_op": 4240,
+          "allocs_per_op": 17
+        }
+      ],
+      "BenchmarkSingleJSONPosts/posts1/decode-2": [
+        {
+          "iterations": 19198,
+          "ns_per_op": 18673.0,
+          "bytes_per_op": 4242,
+          "allocs_per_op": 17
+        },
+        {
+          "iterations": 18357,
+          "ns_per_op": 18799.0,
+          "bytes_per_op": 4242,
+          "allocs_per_op": 17
+        },
+        {
+          "iterations": 19460,
+          "ns_per_op": 18337.0,
+          "bytes_per_op": 4241,
+          "allocs_per_op": 17
+        }
+      ],
+      "BenchmarkSingleJSONPosts/posts1/decode-4": [
+        {
+          "iterations": 18654,
+          "ns_per_op": 18472.0,
+          "bytes_per_op": 4244,
+          "allocs_per_op": 17
+        },
+        {
+          "iterations": 19239,
+          "ns_per_op": 18457.0,
+          "bytes_per_op": 4244,
+          "allocs_per_op": 17
+        },
+        {
+          "iterations": 19148,
+          "ns_per_op": 18392.0,
+          "bytes_per_op": 4243,
+          "allocs_per_op": 17
+        }
+      ],
+      "BenchmarkSingleJSONPosts/posts128/encode": [
+        {
+          "iterations": 612,
+          "ns_per_op": 583057.0,
+          "bytes_per_op": 1183232,
+          "allocs_per_op": 18
+        },
+        {
+          "iterations": 614,
+          "ns_per_op": 579559.0,
+          "bytes_per_op": 1183232,
+          "allocs_per_op": 18
+        },
+        {
+          "iterations": 615,
+          "ns_per_op": 633818.0,
+          "bytes_per_op": 1183232,
+          "allocs_per_op": 18
+        }
+      ],
+      "BenchmarkSingleJSONPosts/posts128/encode-2": [
+        {
+          "iterations": 598,
+          "ns_per_op": 627646.0,
+          "bytes_per_op": 1183233,
+          "allocs_per_op": 18
+        },
+        {
+          "iterations": 547,
+          "ns_per_op": 587174.0,
+          "bytes_per_op": 1183232,
+          "allocs_per_op": 18
+        },
+        {
+          "iterations": 586,
+          "ns_per_op": 633457.0,
+          "bytes_per_op": 1183232,
+          "allocs_per_op": 18
+        }
+      ],
+      "BenchmarkSingleJSONPosts/posts128/encode-4": [
+        {
+          "iterations": 592,
+          "ns_per_op": 571893.0,
+          "bytes_per_op": 1183233,
+          "allocs_per_op": 18
+        },
+        {
+          "iterations": 607,
+          "ns_per_op": 569169.0,
+          "bytes_per_op": 1183235,
+          "allocs_per_op": 18
+        },
+        {
+          "iterations": 606,
+          "ns_per_op": 604611.0,
+          "bytes_per_op": 1183235,
+          "allocs_per_op": 18
+        }
+      ],
+      "BenchmarkSingleJSONPosts/posts128/decode": [
+        {
+          "iterations": 148,
+          "ns_per_op": 2386691.0,
+          "bytes_per_op": 598969,
+          "allocs_per_op": 1678
+        },
+        {
+          "iterations": 144,
+          "ns_per_op": 2450686.0,
+          "bytes_per_op": 598970,
+          "allocs_per_op": 1678
+        },
+        {
+          "iterations": 146,
+          "ns_per_op": 2354774.0,
+          "bytes_per_op": 598969,
+          "allocs_per_op": 1678
+        }
+      ],
+      "BenchmarkSingleJSONPosts/posts128/decode-2": [
+        {
+          "iterations": 147,
+          "ns_per_op": 2330309.0,
+          "bytes_per_op": 599132,
+          "allocs_per_op": 1678
+        },
+        {
+          "iterations": 154,
+          "ns_per_op": 2350560.0,
+          "bytes_per_op": 599159,
+          "allocs_per_op": 1678
+        },
+        {
+          "iterations": 150,
+          "ns_per_op": 2442759.0,
+          "bytes_per_op": 599093,
+          "allocs_per_op": 1678
+        }
+      ],
+      "BenchmarkSingleJSONPosts/posts128/decode-4": [
+        {
+          "iterations": 142,
+          "ns_per_op": 2536007.0,
+          "bytes_per_op": 599705,
+          "allocs_per_op": 1678
+        },
+        {
+          "iterations": 138,
+          "ns_per_op": 2447780.0,
+          "bytes_per_op": 599609,
+          "allocs_per_op": 1678
+        },
+        {
+          "iterations": 151,
+          "ns_per_op": 2350608.0,
+          "bytes_per_op": 599700,
+          "allocs_per_op": 1678
+        }
+      ],
+      "BenchmarkSingleJSONPosts/posts512/encode": [
+        {
+          "iterations": 134,
+          "ns_per_op": 2679616.0,
+          "bytes_per_op": 5238272,
+          "allocs_per_op": 24
+        },
+        {
+          "iterations": 139,
+          "ns_per_op": 2620607.0,
+          "bytes_per_op": 5238272,
+          "allocs_per_op": 24
+        },
+        {
+          "iterations": 136,
+          "ns_per_op": 2532472.0,
+          "bytes_per_op": 5238272,
+          "allocs_per_op": 24
+        }
+      ],
+      "BenchmarkSingleJSONPosts/posts512/encode-2": [
+        {
+          "iterations": 100,
+          "ns_per_op": 3205041.0,
+          "bytes_per_op": 5238280,
+          "allocs_per_op": 24
+        },
+        {
+          "iterations": 98,
+          "ns_per_op": 3389344.0,
+          "bytes_per_op": 5238276,
+          "allocs_per_op": 24
+        },
+        {
+          "iterations": 96,
+          "ns_per_op": 3322404.0,
+          "bytes_per_op": 5238273,
+          "allocs_per_op": 24
+        }
+      ],
+      "BenchmarkSingleJSONPosts/posts512/encode-4": [
+        {
+          "iterations": 100,
+          "ns_per_op": 3033673.0,
+          "bytes_per_op": 5238279,
+          "allocs_per_op": 24
+        },
+        {
+          "iterations": 115,
+          "ns_per_op": 3004494.0,
+          "bytes_per_op": 5238278,
+          "allocs_per_op": 24
+        },
+        {
+          "iterations": 121,
+          "ns_per_op": 2999996.0,
+          "bytes_per_op": 5238283,
+          "allocs_per_op": 24
+        }
+      ],
+      "BenchmarkSingleJSONPosts/posts512/decode": [
+        {
+          "iterations": 34,
+          "ns_per_op": 10347229.0,
+          "bytes_per_op": 2478270,
+          "allocs_per_op": 6675
+        },
+        {
+          "iterations": 38,
+          "ns_per_op": 9879178.0,
+          "bytes_per_op": 2478120,
+          "allocs_per_op": 6675
+        },
+        {
+          "iterations": 38,
+          "ns_per_op": 9814164.0,
+          "bytes_per_op": 2478124,
+          "allocs_per_op": 6675
+        }
+      ],
+      "BenchmarkSingleJSONPosts/posts512/decode-2": [
+        {
+          "iterations": 32,
+          "ns_per_op": 9965393.0,
+          "bytes_per_op": 2479772,
+          "allocs_per_op": 6676
+        },
+        {
+          "iterations": 36,
+          "ns_per_op": 10883781.0,
+          "bytes_per_op": 2479157,
+          "allocs_per_op": 6675
+        },
+        {
+          "iterations": 38,
+          "ns_per_op": 9616738.0,
+          "bytes_per_op": 2479369,
+          "allocs_per_op": 6675
+        }
+      ],
+      "BenchmarkSingleJSONPosts/posts512/decode-4": [
+        {
+          "iterations": 39,
+          "ns_per_op": 9914116.0,
+          "bytes_per_op": 2480952,
+          "allocs_per_op": 6676
+        },
+        {
+          "iterations": 39,
+          "ns_per_op": 10024634.0,
+          "bytes_per_op": 2481413,
+          "allocs_per_op": 6676
+        },
+        {
+          "iterations": 39,
+          "ns_per_op": 10396126.0,
+          "bytes_per_op": 2482707,
+          "allocs_per_op": 6676
+        }
+      ],
+      "BenchmarkSingleJSONPostsConcurrent/posts1/encode": [
+        {
+          "iterations": 96513,
+          "ns_per_op": 3708.0,
+          "bytes_per_op": 2048,
+          "allocs_per_op": 1
+        },
+        {
+          "iterations": 99196,
+          "ns_per_op": 3598.0,
+          "bytes_per_op": 2048,
+          "allocs_per_op": 1
+        },
+        {
+          "iterations": 103058,
+          "ns_per_op": 3397.0,
+          "bytes_per_op": 2048,
+          "allocs_per_op": 1
+        }
+      ],
+      "BenchmarkSingleJSONPostsConcurrent/posts1/encode-2": [
+        {
+          "iterations": 198712,
+          "ns_per_op": 1933.0,
+          "bytes_per_op": 2048,
+          "allocs_per_op": 1
+        },
+        {
+          "iterations": 183597,
+          "ns_per_op": 1984.0,
+          "bytes_per_op": 2048,
+          "allocs_per_op": 1
+        },
+        {
+          "iterations": 185466,
+          "ns_per_op": 1981.0,
+          "bytes_per_op": 2048,
+          "allocs_per_op": 1
+        }
+      ],
+      "BenchmarkSingleJSONPostsConcurrent/posts1/encode-4": [
+        {
+          "iterations": 304377,
+          "ns_per_op": 1145.0,
+          "bytes_per_op": 2048,
+          "allocs_per_op": 1
+        },
+        {
+          "iterations": 275262,
+          "ns_per_op": 1174.0,
+          "bytes_per_op": 2048,
+          "allocs_per_op": 1
+        },
+        {
+          "iterations": 310369,
+          "ns_per_op": 1209.0,
+          "bytes_per_op": 2048,
+          "allocs_per_op": 1
+        }
+      ],
+      "BenchmarkSingleJSONPostsConcurrent/posts1/decode": [
+        {
+          "iterations": 16741,
+          "ns_per_op": 18833.0,
+          "bytes_per_op": 4240,
+          "allocs_per_op": 17
+        },
+        {
+          "iterations": 18970,
+          "ns_per_op": 18951.0,
+          "bytes_per_op": 4240,
+          "allocs_per_op": 17
+        },
+        {
+          "iterations": 16611,
+          "ns_per_op": 19554.0,
+          "bytes_per_op": 4240,
+          "allocs_per_op": 17
+        }
+      ],
+      "BenchmarkSingleJSONPostsConcurrent/posts1/decode-2": [
+        {
+          "iterations": 31720,
+          "ns_per_op": 11990.0,
+          "bytes_per_op": 4242,
+          "allocs_per_op": 17
+        },
+        {
+          "iterations": 28293,
+          "ns_per_op": 11708.0,
+          "bytes_per_op": 4241,
+          "allocs_per_op": 17
+        },
+        {
+          "iterations": 31484,
+          "ns_per_op": 11638.0,
+          "bytes_per_op": 4241,
+          "allocs_per_op": 17
+        }
+      ],
+      "BenchmarkSingleJSONPostsConcurrent/posts1/decode-4": [
+        {
+          "iterations": 47001,
+          "ns_per_op": 7782.0,
+          "bytes_per_op": 4244,
+          "allocs_per_op": 17
+        },
+        {
+          "iterations": 47300,
+          "ns_per_op": 6596.0,
+          "bytes_per_op": 4245,
+          "allocs_per_op": 17
+        },
+        {
+          "iterations": 52309,
+          "ns_per_op": 6036.0,
+          "bytes_per_op": 4244,
+          "allocs_per_op": 17
+        }
+      ],
+      "BenchmarkSingleJSONPostsConcurrent/posts128/encode": [
+        {
+          "iterations": 552,
+          "ns_per_op": 689266.0,
+          "bytes_per_op": 1183232,
+          "allocs_per_op": 18
+        },
+        {
+          "iterations": 536,
+          "ns_per_op": 634656.0,
+          "bytes_per_op": 1183232,
+          "allocs_per_op": 18
+        },
+        {
+          "iterations": 550,
+          "ns_per_op": 648266.0,
+          "bytes_per_op": 1183232,
+          "allocs_per_op": 18
+        }
+      ],
+      "BenchmarkSingleJSONPostsConcurrent/posts128/encode-2": [
+        {
+          "iterations": 650,
+          "ns_per_op": 543368.0,
+          "bytes_per_op": 1183233,
+          "allocs_per_op": 18
+        },
+        {
+          "iterations": 634,
+          "ns_per_op": 480842.0,
+          "bytes_per_op": 1183232,
+          "allocs_per_op": 18
+        },
+        {
+          "iterations": 792,
+          "ns_per_op": 445656.0,
+          "bytes_per_op": 1183232,
+          "allocs_per_op": 18
+        }
+      ],
+      "BenchmarkSingleJSONPostsConcurrent/posts128/encode-4": [
+        {
+          "iterations": 974,
+          "ns_per_op": 379237.0,
+          "bytes_per_op": 1183242,
+          "allocs_per_op": 18
+        },
+        {
+          "iterations": 1002,
+          "ns_per_op": 367135.0,
+          "bytes_per_op": 1183238,
+          "allocs_per_op": 18
+        },
+        {
+          "iterations": 937,
+          "ns_per_op": 375858.0,
+          "bytes_per_op": 1183245,
+          "allocs_per_op": 18
+        }
+      ],
+      "BenchmarkSingleJSONPostsConcurrent/posts128/decode": [
+        {
+          "iterations": 147,
+          "ns_per_op": 2430722.0,
+          "bytes_per_op": 598971,
+          "allocs_per_op": 1678
+        },
+        {
+          "iterations": 151,
+          "ns_per_op": 2428783.0,
+          "bytes_per_op": 598970,
+          "allocs_per_op": 1678
+        },
+        {
+          "iterations": 147,
+          "ns_per_op": 2448201.0,
+          "bytes_per_op": 598971,
+          "allocs_per_op": 1678
+        }
+      ],
+      "BenchmarkSingleJSONPostsConcurrent/posts128/decode-2": [
+        {
+          "iterations": 279,
+          "ns_per_op": 1338019.0,
+          "bytes_per_op": 599158,
+          "allocs_per_op": 1678
+        },
+        {
+          "iterations": 264,
+          "ns_per_op": 1320058.0,
+          "bytes_per_op": 599264,
+          "allocs_per_op": 1678
+        },
+        {
+          "iterations": 267,
+          "ns_per_op": 1341212.0,
+          "bytes_per_op": 599179,
+          "allocs_per_op": 1678
+        }
+      ],
+      "BenchmarkSingleJSONPostsConcurrent/posts128/decode-4": [
+        {
+          "iterations": 396,
+          "ns_per_op": 809760.0,
+          "bytes_per_op": 600153,
+          "allocs_per_op": 1679
+        },
+        {
+          "iterations": 456,
+          "ns_per_op": 791018.0,
+          "bytes_per_op": 600176,
+          "allocs_per_op": 1679
+        },
+        {
+          "iterations": 447,
+          "ns_per_op": 779157.0,
+          "bytes_per_op": 600110,
+          "allocs_per_op": 1679
+        }
+      ]
+    }
+  },
+  "candidate": {
+    "file": "var/json-single-parallel-20261025/product-candidate-v4.txt",
+    "raw": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/domain\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkSingleJSONPosts/posts1/encode           \t  114036\t      3177 ns/op\t 565.29 MB/s\t    2048 B/op\t       1 allocs/op\nBenchmarkSingleJSONPosts/posts1/encode           \t  108228\t      3186 ns/op\t 563.80 MB/s\t    2048 B/op\t       1 allocs/op\nBenchmarkSingleJSONPosts/posts1/encode           \t  108804\t      3259 ns/op\t 551.17 MB/s\t    2048 B/op\t       1 allocs/op\nBenchmarkSingleJSONPosts/posts1/encode-2         \t  110307\t      3153 ns/op\t 569.54 MB/s\t    2048 B/op\t       1 allocs/op\nBenchmarkSingleJSONPosts/posts1/encode-2         \t  118419\t      3317 ns/op\t 541.38 MB/s\t    2048 B/op\t       1 allocs/op\nBenchmarkSingleJSONPosts/posts1/encode-2         \t  114066\t      3266 ns/op\t 549.85 MB/s\t    2048 B/op\t       1 allocs/op\nBenchmarkSingleJSONPosts/posts1/encode-4         \t  110791\t      3249 ns/op\t 552.80 MB/s\t    2048 B/op\t       1 allocs/op\nBenchmarkSingleJSONPosts/posts1/encode-4         \t  104258\t      3311 ns/op\t 542.43 MB/s\t    2048 B/op\t       1 allocs/op\nBenchmarkSingleJSONPosts/posts1/encode-4         \t   95712\t      3498 ns/op\t 513.49 MB/s\t    2048 B/op\t       1 allocs/op\nBenchmarkSingleJSONPosts/posts1/decode           \t   19297\t     18074 ns/op\t  99.37 MB/s\t    4240 B/op\t      17 allocs/op\nBenchmarkSingleJSONPosts/posts1/decode           \t   19710\t     18144 ns/op\t  98.99 MB/s\t    4240 B/op\t      17 allocs/op\nBenchmarkSingleJSONPosts/posts1/decode           \t   19782\t     18103 ns/op\t  99.21 MB/s\t    4240 B/op\t      17 allocs/op\nBenchmarkSingleJSONPosts/posts1/decode-2         \t   19590\t     19018 ns/op\t  94.44 MB/s\t    4241 B/op\t      17 allocs/op\nBenchmarkSingleJSONPosts/posts1/decode-2         \t   19730\t     18026 ns/op\t  99.64 MB/s\t    4241 B/op\t      17 allocs/op\nBenchmarkSingleJSONPosts/posts1/decode-2         \t   20150\t     17991 ns/op\t  99.83 MB/s\t    4242 B/op\t      17 allocs/op\nBenchmarkSingleJSONPosts/posts1/decode-4         \t   19914\t     18898 ns/op\t  95.04 MB/s\t    4245 B/op\t      17 allocs/op\nBenchmarkSingleJSONPosts/posts1/decode-4         \t   19854\t     18277 ns/op\t  98.26 MB/s\t    4243 B/op\t      17 allocs/op\nBenchmarkSingleJSONPosts/posts1/decode-4         \t   18412\t     18477 ns/op\t  97.20 MB/s\t    4244 B/op\t      17 allocs/op\nBenchmarkSingleJSONPosts/posts128/encode         \t     538\t    637142 ns/op\t 359.31 MB/s\t 1183232 B/op\t      18 allocs/op\nBenchmarkSingleJSONPosts/posts128/encode         \t     598\t    596508 ns/op\t 383.79 MB/s\t 1183232 B/op\t      18 allocs/op\nBenchmarkSingleJSONPosts/posts128/encode         \t     591\t    591307 ns/op\t 387.16 MB/s\t 1183232 B/op\t      18 allocs/op\nBenchmarkSingleJSONPosts/posts128/encode-2       \t     925\t    433842 ns/op\t 527.69 MB/s\t  642956 B/op\t      27 allocs/op\nBenchmarkSingleJSONPosts/posts128/encode-2       \t     813\t    416111 ns/op\t 550.17 MB/s\t  642938 B/op\t      27 allocs/op\nBenchmarkSingleJSONPosts/posts128/encode-2       \t     884\t    427340 ns/op\t 535.72 MB/s\t  642938 B/op\t      27 allocs/op\nBenchmarkSingleJSONPosts/posts128/encode-4       \t    1099\t    345544 ns/op\t 662.53 MB/s\t  512025 B/op\t      29 allocs/op\nBenchmarkSingleJSONPosts/posts128/encode-4       \t    1048\t    350341 ns/op\t 653.46 MB/s\t  511995 B/op\t      29 allocs/op\nBenchmarkSingleJSONPosts/posts128/encode-4       \t    1065\t    344192 ns/op\t 665.13 MB/s\t  511997 B/op\t      29 allocs/op\nBenchmarkSingleJSONPosts/posts128/decode         \t     150\t   2857230 ns/op\t  80.12 MB/s\t  598970 B/op\t    1678 allocs/op\nBenchmarkSingleJSONPosts/posts128/decode         \t     141\t   2491655 ns/op\t  91.88 MB/s\t  598969 B/op\t    1678 allocs/op\nBenchmarkSingleJSONPosts/posts128/decode         \t     146\t   2490858 ns/op\t  91.91 MB/s\t  598970 B/op\t    1678 allocs/op\nBenchmarkSingleJSONPosts/posts128/decode-2       \t     214\t   1742808 ns/op\t 131.36 MB/s\t  607506 B/op\t    1695 allocs/op\nBenchmarkSingleJSONPosts/posts128/decode-2       \t     226\t   1661980 ns/op\t 137.75 MB/s\t  607443 B/op\t    1695 allocs/op\nBenchmarkSingleJSONPosts/posts128/decode-2       \t     234\t   1498684 ns/op\t 152.76 MB/s\t  607371 B/op\t    1695 allocs/op\nBenchmarkSingleJSONPosts/posts128/decode-4       \t     208\t   1546198 ns/op\t 148.06 MB/s\t  596222 B/op\t    1706 allocs/op\nBenchmarkSingleJSONPosts/posts128/decode-4       \t     236\t   1534133 ns/op\t 149.23 MB/s\t  596014 B/op\t    1706 allocs/op\nBenchmarkSingleJSONPosts/posts128/decode-4       \t     242\t   1467518 ns/op\t 156.00 MB/s\t  596026 B/op\t    1706 allocs/op\nBenchmarkSingleJSONPosts/posts512/encode         \t     126\t   2681481 ns/op\t 341.85 MB/s\t 5238272 B/op\t      24 allocs/op\nBenchmarkSingleJSONPosts/posts512/encode         \t     128\t   2661322 ns/op\t 344.44 MB/s\t 5238272 B/op\t      24 allocs/op\nBenchmarkSingleJSONPosts/posts512/encode         \t     140\t   2526313 ns/op\t 362.85 MB/s\t 5238272 B/op\t      24 allocs/op\nBenchmarkSingleJSONPosts/posts512/encode-2       \t     220\t   1761137 ns/op\t 520.50 MB/s\t 2453375 B/op\t      27 allocs/op\nBenchmarkSingleJSONPosts/posts512/encode-2       \t     210\t   1686562 ns/op\t 543.52 MB/s\t 2453375 B/op\t      27 allocs/op\nBenchmarkSingleJSONPosts/posts512/encode-2       \t     226\t   1585091 ns/op\t 578.31 MB/s\t 2453376 B/op\t      27 allocs/op\nBenchmarkSingleJSONPosts/posts512/encode-4       \t     360\t   1172749 ns/op\t 781.65 MB/s\t 2166914 B/op\t      33 allocs/op\nBenchmarkSingleJSONPosts/posts512/encode-4       \t     301\t   1139093 ns/op\t 804.74 MB/s\t 2166906 B/op\t      33 allocs/op\nBenchmarkSingleJSONPosts/posts512/encode-4       \t     321\t   1112885 ns/op\t 823.69 MB/s\t 2166898 B/op\t      33 allocs/op\nBenchmarkSingleJSONPosts/posts512/decode         \t      75\t   9711439 ns/op\t  94.39 MB/s\t 2478120 B/op\t    6675 allocs/op\nBenchmarkSingleJSONPosts/posts512/decode         \t      39\t   9751616 ns/op\t  94.00 MB/s\t 2478120 B/op\t    6675 allocs/op\nBenchmarkSingleJSONPosts/posts512/decode         \t      38\t   9735351 ns/op\t  94.16 MB/s\t 2478124 B/op\t    6675 allocs/op\nBenchmarkSingleJSONPosts/posts512/decode-2       \t      54\t   6678369 ns/op\t 137.26 MB/s\t 2389389 B/op\t    6694 allocs/op\nBenchmarkSingleJSONPosts/posts512/decode-2       \t      52\t   6742683 ns/op\t 135.95 MB/s\t 2389129 B/op\t    6694 allocs/op\nBenchmarkSingleJSONPosts/posts512/decode-2       \t      54\t   6687326 ns/op\t 137.08 MB/s\t 2389273 B/op\t    6694 allocs/op\nBenchmarkSingleJSONPosts/posts512/decode-4       \t      76\t   5396812 ns/op\t 169.86 MB/s\t 2419056 B/op\t    6724 allocs/op\nBenchmarkSingleJSONPosts/posts512/decode-4       \t      76\t   5438029 ns/op\t 168.57 MB/s\t 2419205 B/op\t    6725 allocs/op\nBenchmarkSingleJSONPosts/posts512/decode-4       \t      74\t   5409600 ns/op\t 169.45 MB/s\t 2418458 B/op\t    6724 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts1/encode           \t  107266\t      3299 ns/op\t    2048 B/op\t       1 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts1/encode           \t  105427\t      3290 ns/op\t    2048 B/op\t       1 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts1/encode           \t  105861\t      3303 ns/op\t    2048 B/op\t       1 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts1/encode-2         \t  188232\t      1874 ns/op\t    2048 B/op\t       1 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts1/encode-2         \t  196417\t      1823 ns/op\t    2048 B/op\t       1 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts1/encode-2         \t  192928\t      1947 ns/op\t    2048 B/op\t       1 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts1/encode-4         \t  302614\t      1180 ns/op\t    2048 B/op\t       1 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts1/encode-4         \t  265903\t      1178 ns/op\t    2048 B/op\t       1 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts1/encode-4         \t  317379\t      1144 ns/op\t    2048 B/op\t       1 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts1/decode           \t   19320\t     18904 ns/op\t    4240 B/op\t      17 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts1/decode           \t   18946\t     18902 ns/op\t    4240 B/op\t      17 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts1/decode           \t   19027\t     18964 ns/op\t    4240 B/op\t      17 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts1/decode-2         \t   34318\t     10201 ns/op\t    4242 B/op\t      17 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts1/decode-2         \t   35844\t     10291 ns/op\t    4242 B/op\t      17 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts1/decode-2         \t   35520\t      9886 ns/op\t    4242 B/op\t      17 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts1/decode-4         \t   62738\t      5724 ns/op\t    4245 B/op\t      17 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts1/decode-4         \t   63900\t      6074 ns/op\t    4245 B/op\t      17 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts1/decode-4         \t   62314\t      5850 ns/op\t    4246 B/op\t      17 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts128/encode         \t     536\t    660552 ns/op\t 1183232 B/op\t      18 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts128/encode         \t     561\t    678341 ns/op\t 1183232 B/op\t      18 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts128/encode         \t     560\t    653503 ns/op\t 1183232 B/op\t      18 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts128/encode-2       \t     748\t    499457 ns/op\t  912721 B/op\t      31 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts128/encode-2       \t     710\t    485821 ns/op\t  913394 B/op\t      31 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts128/encode-2       \t     735\t    464267 ns/op\t  908888 B/op\t      31 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts128/encode-4       \t     974\t    369437 ns/op\t  941074 B/op\t      33 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts128/encode-4       \t    1002\t    367672 ns/op\t  937534 B/op\t      33 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts128/encode-4       \t    1026\t    364240 ns/op\t  930335 B/op\t      33 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts128/decode         \t     154\t   2464319 ns/op\t  598971 B/op\t    1678 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts128/decode         \t     154\t   2339410 ns/op\t  598971 B/op\t    1678 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts128/decode         \t     150\t   2305517 ns/op\t  598971 B/op\t    1678 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts128/decode-2       \t     268\t   1345935 ns/op\t  603597 B/op\t    1688 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts128/decode-2       \t     270\t   1278019 ns/op\t  603526 B/op\t    1688 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts128/decode-2       \t     292\t   1292124 ns/op\t  603669 B/op\t    1688 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts128/decode-4       \t     414\t    850662 ns/op\t  599359 B/op\t    1689 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts128/decode-4       \t     447\t    814295 ns/op\t  599288 B/op\t    1688 allocs/op\nBenchmarkSingleJSONPostsConcurrent/posts128/decode-4       \t     447\t    745411 ns/op\t  599479 B/op\t    1688 allocs/op\nPASS\nok  \toimobbs/internal/domain\t42.606s\n",
+    "rows": {
+      "BenchmarkSingleJSONPosts/posts1/encode": [
+        {
+          "iterations": 114036,
+          "ns_per_op": 3177.0,
+          "bytes_per_op": 2048,
+          "allocs_per_op": 1
+        },
+        {
+          "iterations": 108228,
+          "ns_per_op": 3186.0,
+          "bytes_per_op": 2048,
+          "allocs_per_op": 1
+        },
+        {
+          "iterations": 108804,
+          "ns_per_op": 3259.0,
+          "bytes_per_op": 2048,
+          "allocs_per_op": 1
+        }
+      ],
+      "BenchmarkSingleJSONPosts/posts1/encode-2": [
+        {
+          "iterations": 110307,
+          "ns_per_op": 3153.0,
+          "bytes_per_op": 2048,
+          "allocs_per_op": 1
+        },
+        {
+          "iterations": 118419,
+          "ns_per_op": 3317.0,
+          "bytes_per_op": 2048,
+          "allocs_per_op": 1
+        },
+        {
+          "iterations": 114066,
+          "ns_per_op": 3266.0,
+          "bytes_per_op": 2048,
+          "allocs_per_op": 1
+        }
+      ],
+      "BenchmarkSingleJSONPosts/posts1/encode-4": [
+        {
+          "iterations": 110791,
+          "ns_per_op": 3249.0,
+          "bytes_per_op": 2048,
+          "allocs_per_op": 1
+        },
+        {
+          "iterations": 104258,
+          "ns_per_op": 3311.0,
+          "bytes_per_op": 2048,
+          "allocs_per_op": 1
+        },
+        {
+          "iterations": 95712,
+          "ns_per_op": 3498.0,
+          "bytes_per_op": 2048,
+          "allocs_per_op": 1
+        }
+      ],
+      "BenchmarkSingleJSONPosts/posts1/decode": [
+        {
+          "iterations": 19297,
+          "ns_per_op": 18074.0,
+          "bytes_per_op": 4240,
+          "allocs_per_op": 17
+        },
+        {
+          "iterations": 19710,
+          "ns_per_op": 18144.0,
+          "bytes_per_op": 4240,
+          "allocs_per_op": 17
+        },
+        {
+          "iterations": 19782,
+          "ns_per_op": 18103.0,
+          "bytes_per_op": 4240,
+          "allocs_per_op": 17
+        }
+      ],
+      "BenchmarkSingleJSONPosts/posts1/decode-2": [
+        {
+          "iterations": 19590,
+          "ns_per_op": 19018.0,
+          "bytes_per_op": 4241,
+          "allocs_per_op": 17
+        },
+        {
+          "iterations": 19730,
+          "ns_per_op": 18026.0,
+          "bytes_per_op": 4241,
+          "allocs_per_op": 17
+        },
+        {
+          "iterations": 20150,
+          "ns_per_op": 17991.0,
+          "bytes_per_op": 4242,
+          "allocs_per_op": 17
+        }
+      ],
+      "BenchmarkSingleJSONPosts/posts1/decode-4": [
+        {
+          "iterations": 19914,
+          "ns_per_op": 18898.0,
+          "bytes_per_op": 4245,
+          "allocs_per_op": 17
+        },
+        {
+          "iterations": 19854,
+          "ns_per_op": 18277.0,
+          "bytes_per_op": 4243,
+          "allocs_per_op": 17
+        },
+        {
+          "iterations": 18412,
+          "ns_per_op": 18477.0,
+          "bytes_per_op": 4244,
+          "allocs_per_op": 17
+        }
+      ],
+      "BenchmarkSingleJSONPosts/posts128/encode": [
+        {
+          "iterations": 538,
+          "ns_per_op": 637142.0,
+          "bytes_per_op": 1183232,
+          "allocs_per_op": 18
+        },
+        {
+          "iterations": 598,
+          "ns_per_op": 596508.0,
+          "bytes_per_op": 1183232,
+          "allocs_per_op": 18
+        },
+        {
+          "iterations": 591,
+          "ns_per_op": 591307.0,
+          "bytes_per_op": 1183232,
+          "allocs_per_op": 18
+        }
+      ],
+      "BenchmarkSingleJSONPosts/posts128/encode-2": [
+        {
+          "iterations": 925,
+          "ns_per_op": 433842.0,
+          "bytes_per_op": 642956,
+          "allocs_per_op": 27
+        },
+        {
+          "iterations": 813,
+          "ns_per_op": 416111.0,
+          "bytes_per_op": 642938,
+          "allocs_per_op": 27
+        },
+        {
+          "iterations": 884,
+          "ns_per_op": 427340.0,
+          "bytes_per_op": 642938,
+          "allocs_per_op": 27
+        }
+      ],
+      "BenchmarkSingleJSONPosts/posts128/encode-4": [
+        {
+          "iterations": 1099,
+          "ns_per_op": 345544.0,
+          "bytes_per_op": 512025,
+          "allocs_per_op": 29
+        },
+        {
+          "iterations": 1048,
+          "ns_per_op": 350341.0,
+          "bytes_per_op": 511995,
+          "allocs_per_op": 29
+        },
+        {
+          "iterations": 1065,
+          "ns_per_op": 344192.0,
+          "bytes_per_op": 511997,
+          "allocs_per_op": 29
+        }
+      ],
+      "BenchmarkSingleJSONPosts/posts128/decode": [
+        {
+          "iterations": 150,
+          "ns_per_op": 2857230.0,
+          "bytes_per_op": 598970,
+          "allocs_per_op": 1678
+        },
+        {
+          "iterations": 141,
+          "ns_per_op": 2491655.0,
+          "bytes_per_op": 598969,
+          "allocs_per_op": 1678
+        },
+        {
+          "iterations": 146,
+          "ns_per_op": 2490858.0,
+          "bytes_per_op": 598970,
+          "allocs_per_op": 1678
+        }
+      ],
+      "BenchmarkSingleJSONPosts/posts128/decode-2": [
+        {
+          "iterations": 214,
+          "ns_per_op": 1742808.0,
+          "bytes_per_op": 607506,
+          "allocs_per_op": 1695
+        },
+        {
+          "iterations": 226,
+          "ns_per_op": 1661980.0,
+          "bytes_per_op": 607443,
+          "allocs_per_op": 1695
+        },
+        {
+          "iterations": 234,
+          "ns_per_op": 1498684.0,
+          "bytes_per_op": 607371,
+          "allocs_per_op": 1695
+        }
+      ],
+      "BenchmarkSingleJSONPosts/posts128/decode-4": [
+        {
+          "iterations": 208,
+          "ns_per_op": 1546198.0,
+          "bytes_per_op": 596222,
+          "allocs_per_op": 1706
+        },
+        {
+          "iterations": 236,
+          "ns_per_op": 1534133.0,
+          "bytes_per_op": 596014,
+          "allocs_per_op": 1706
+        },
+        {
+          "iterations": 242,
+          "ns_per_op": 1467518.0,
+          "bytes_per_op": 596026,
+          "allocs_per_op": 1706
+        }
+      ],
+      "BenchmarkSingleJSONPosts/posts512/encode": [
+        {
+          "iterations": 126,
+          "ns_per_op": 2681481.0,
+          "bytes_per_op": 5238272,
+          "allocs_per_op": 24
+        },
+        {
+          "iterations": 128,
+          "ns_per_op": 2661322.0,
+          "bytes_per_op": 5238272,
+          "allocs_per_op": 24
+        },
+        {
+          "iterations": 140,
+          "ns_per_op": 2526313.0,
+          "bytes_per_op": 5238272,
+          "allocs_per_op": 24
+        }
+      ],
+      "BenchmarkSingleJSONPosts/posts512/encode-2": [
+        {
+          "iterations": 220,
+          "ns_per_op": 1761137.0,
+          "bytes_per_op": 2453375,
+          "allocs_per_op": 27
+        },
+        {
+          "iterations": 210,
+          "ns_per_op": 1686562.0,
+          "bytes_per_op": 2453375,
+          "allocs_per_op": 27
+        },
+        {
+          "iterations": 226,
+          "ns_per_op": 1585091.0,
+          "bytes_per_op": 2453376,
+          "allocs_per_op": 27
+        }
+      ],
+      "BenchmarkSingleJSONPosts/posts512/encode-4": [
+        {
+          "iterations": 360,
+          "ns_per_op": 1172749.0,
+          "bytes_per_op": 2166914,
+          "allocs_per_op": 33
+        },
+        {
+          "iterations": 301,
+          "ns_per_op": 1139093.0,
+          "bytes_per_op": 2166906,
+          "allocs_per_op": 33
+        },
+        {
+          "iterations": 321,
+          "ns_per_op": 1112885.0,
+          "bytes_per_op": 2166898,
+          "allocs_per_op": 33
+        }
+      ],
+      "BenchmarkSingleJSONPosts/posts512/decode": [
+        {
+          "iterations": 75,
+          "ns_per_op": 9711439.0,
+          "bytes_per_op": 2478120,
+          "allocs_per_op": 6675
+        },
+        {
+          "iterations": 39,
+          "ns_per_op": 9751616.0,
+          "bytes_per_op": 2478120,
+          "allocs_per_op": 6675
+        },
+        {
+          "iterations": 38,
+          "ns_per_op": 9735351.0,
+          "bytes_per_op": 2478124,
+          "allocs_per_op": 6675
+        }
+      ],
+      "BenchmarkSingleJSONPosts/posts512/decode-2": [
+        {
+          "iterations": 54,
+          "ns_per_op": 6678369.0,
+          "bytes_per_op": 2389389,
+          "allocs_per_op": 6694
+        },
+        {
+          "iterations": 52,
+          "ns_per_op": 6742683.0,
+          "bytes_per_op": 2389129,
+          "allocs_per_op": 6694
+        },
+        {
+          "iterations": 54,
+          "ns_per_op": 6687326.0,
+          "bytes_per_op": 2389273,
+          "allocs_per_op": 6694
+        }
+      ],
+      "BenchmarkSingleJSONPosts/posts512/decode-4": [
+        {
+          "iterations": 76,
+          "ns_per_op": 5396812.0,
+          "bytes_per_op": 2419056,
+          "allocs_per_op": 6724
+        },
+        {
+          "iterations": 76,
+          "ns_per_op": 5438029.0,
+          "bytes_per_op": 2419205,
+          "allocs_per_op": 6725
+        },
+        {
+          "iterations": 74,
+          "ns_per_op": 5409600.0,
+          "bytes_per_op": 2418458,
+          "allocs_per_op": 6724
+        }
+      ],
+      "BenchmarkSingleJSONPostsConcurrent/posts1/encode": [
+        {
+          "iterations": 107266,
+          "ns_per_op": 3299.0,
+          "bytes_per_op": 2048,
+          "allocs_per_op": 1
+        },
+        {
+          "iterations": 105427,
+          "ns_per_op": 3290.0,
+          "bytes_per_op": 2048,
+          "allocs_per_op": 1
+        },
+        {
+          "iterations": 105861,
+          "ns_per_op": 3303.0,
+          "bytes_per_op": 2048,
+          "allocs_per_op": 1
+        }
+      ],
+      "BenchmarkSingleJSONPostsConcurrent/posts1/encode-2": [
+        {
+          "iterations": 188232,
+          "ns_per_op": 1874.0,
+          "bytes_per_op": 2048,
+          "allocs_per_op": 1
+        },
+        {
+          "iterations": 196417,
+          "ns_per_op": 1823.0,
+          "bytes_per_op": 2048,
+          "allocs_per_op": 1
+        },
+        {
+          "iterations": 192928,
+          "ns_per_op": 1947.0,
+          "bytes_per_op": 2048,
+          "allocs_per_op": 1
+        }
+      ],
+      "BenchmarkSingleJSONPostsConcurrent/posts1/encode-4": [
+        {
+          "iterations": 302614,
+          "ns_per_op": 1180.0,
+          "bytes_per_op": 2048,
+          "allocs_per_op": 1
+        },
+        {
+          "iterations": 265903,
+          "ns_per_op": 1178.0,
+          "bytes_per_op": 2048,
+          "allocs_per_op": 1
+        },
+        {
+          "iterations": 317379,
+          "ns_per_op": 1144.0,
+          "bytes_per_op": 2048,
+          "allocs_per_op": 1
+        }
+      ],
+      "BenchmarkSingleJSONPostsConcurrent/posts1/decode": [
+        {
+          "iterations": 19320,
+          "ns_per_op": 18904.0,
+          "bytes_per_op": 4240,
+          "allocs_per_op": 17
+        },
+        {
+          "iterations": 18946,
+          "ns_per_op": 18902.0,
+          "bytes_per_op": 4240,
+          "allocs_per_op": 17
+        },
+        {
+          "iterations": 19027,
+          "ns_per_op": 18964.0,
+          "bytes_per_op": 4240,
+          "allocs_per_op": 17
+        }
+      ],
+      "BenchmarkSingleJSONPostsConcurrent/posts1/decode-2": [
+        {
+          "iterations": 34318,
+          "ns_per_op": 10201.0,
+          "bytes_per_op": 4242,
+          "allocs_per_op": 17
+        },
+        {
+          "iterations": 35844,
+          "ns_per_op": 10291.0,
+          "bytes_per_op": 4242,
+          "allocs_per_op": 17
+        },
+        {
+          "iterations": 35520,
+          "ns_per_op": 9886.0,
+          "bytes_per_op": 4242,
+          "allocs_per_op": 17
+        }
+      ],
+      "BenchmarkSingleJSONPostsConcurrent/posts1/decode-4": [
+        {
+          "iterations": 62738,
+          "ns_per_op": 5724.0,
+          "bytes_per_op": 4245,
+          "allocs_per_op": 17
+        },
+        {
+          "iterations": 63900,
+          "ns_per_op": 6074.0,
+          "bytes_per_op": 4245,
+          "allocs_per_op": 17
+        },
+        {
+          "iterations": 62314,
+          "ns_per_op": 5850.0,
+          "bytes_per_op": 4246,
+          "allocs_per_op": 17
+        }
+      ],
+      "BenchmarkSingleJSONPostsConcurrent/posts128/encode": [
+        {
+          "iterations": 536,
+          "ns_per_op": 660552.0,
+          "bytes_per_op": 1183232,
+          "allocs_per_op": 18
+        },
+        {
+          "iterations": 561,
+          "ns_per_op": 678341.0,
+          "bytes_per_op": 1183232,
+          "allocs_per_op": 18
+        },
+        {
+          "iterations": 560,
+          "ns_per_op": 653503.0,
+          "bytes_per_op": 1183232,
+          "allocs_per_op": 18
+        }
+      ],
+      "BenchmarkSingleJSONPostsConcurrent/posts128/encode-2": [
+        {
+          "iterations": 748,
+          "ns_per_op": 499457.0,
+          "bytes_per_op": 912721,
+          "allocs_per_op": 31
+        },
+        {
+          "iterations": 710,
+          "ns_per_op": 485821.0,
+          "bytes_per_op": 913394,
+          "allocs_per_op": 31
+        },
+        {
+          "iterations": 735,
+          "ns_per_op": 464267.0,
+          "bytes_per_op": 908888,
+          "allocs_per_op": 31
+        }
+      ],
+      "BenchmarkSingleJSONPostsConcurrent/posts128/encode-4": [
+        {
+          "iterations": 974,
+          "ns_per_op": 369437.0,
+          "bytes_per_op": 941074,
+          "allocs_per_op": 33
+        },
+        {
+          "iterations": 1002,
+          "ns_per_op": 367672.0,
+          "bytes_per_op": 937534,
+          "allocs_per_op": 33
+        },
+        {
+          "iterations": 1026,
+          "ns_per_op": 364240.0,
+          "bytes_per_op": 930335,
+          "allocs_per_op": 33
+        }
+      ],
+      "BenchmarkSingleJSONPostsConcurrent/posts128/decode": [
+        {
+          "iterations": 154,
+          "ns_per_op": 2464319.0,
+          "bytes_per_op": 598971,
+          "allocs_per_op": 1678
+        },
+        {
+          "iterations": 154,
+          "ns_per_op": 2339410.0,
+          "bytes_per_op": 598971,
+          "allocs_per_op": 1678
+        },
+        {
+          "iterations": 150,
+          "ns_per_op": 2305517.0,
+          "bytes_per_op": 598971,
+          "allocs_per_op": 1678
+        }
+      ],
+      "BenchmarkSingleJSONPostsConcurrent/posts128/decode-2": [
+        {
+          "iterations": 268,
+          "ns_per_op": 1345935.0,
+          "bytes_per_op": 603597,
+          "allocs_per_op": 1688
+        },
+        {
+          "iterations": 270,
+          "ns_per_op": 1278019.0,
+          "bytes_per_op": 603526,
+          "allocs_per_op": 1688
+        },
+        {
+          "iterations": 292,
+          "ns_per_op": 1292124.0,
+          "bytes_per_op": 603669,
+          "allocs_per_op": 1688
+        }
+      ],
+      "BenchmarkSingleJSONPostsConcurrent/posts128/decode-4": [
+        {
+          "iterations": 414,
+          "ns_per_op": 850662.0,
+          "bytes_per_op": 599359,
+          "allocs_per_op": 1689
+        },
+        {
+          "iterations": 447,
+          "ns_per_op": 814295.0,
+          "bytes_per_op": 599288,
+          "allocs_per_op": 1688
+        },
+        {
+          "iterations": 447,
+          "ns_per_op": 745411.0,
+          "bytes_per_op": 599479,
+          "allocs_per_op": 1688
+        }
+      ]
+    }
+  },
+  "excluded": {
+    "microbench-initial.txt": "b.Loop first run did not use the selected CPU count; exploratory only",
+    "product-baseline.txt": "earlier baseline; final uses product-baseline-v2.txt with concurrent cases",
+    "product-candidate.txt": "initial implementation allocated a decoder for small inputs",
+    "product-candidate-final.txt": "intermediate implementation; generation/build may overlap and excluded",
+    "product-candidate-v2.txt": "intermediate implementation copied deferred actions to parent; replaced with groups",
+    "product-candidate-v3.txt": "before CPU-count snapshot optimization",
+    "product-baseline-v2.txt": "earlier comparison; final comparison remeasured both versions",
+    "fuzz-decode-v3.txt": "before CPU-count snapshot optimization; final code fuzzed again"
+  },
+  "sources_sha256": {
+    "internal/domain/json_generated.go": "682f009f0b0a082ca83f2ab648c205a59facee1cb8d1c4a74f14c2d2a812b444",
+    "internal/domain/json_parallel_test.go": "068364316a62e9dd4c9ea995f28339eeb055c9e66dfdb3d8ab5557503d10080e",
+    "internal/evidence/json_generated.go": "211a8ba88f33c8b995a733c1adc4b1e8d1b25bc3ac36b3bfbd89f2737147a463",
+    "internal/jsonencode/array.go": "451573fab096302422124ed316ec2084099023455e4df43e70aab1ddfdfed2b8",
+    "internal/jsonencode/array_test.go": "7034e5ea68c2d7ae5c8e98248ebc1f6d03ffdd27b50f7153b87529b36dc60554",
+    "internal/jsonencode/writer.go": "1535235d77e88fc3cbcf29a191cdacb76af109fb37b351b35d5ef902f5332657",
+    "internal/parallel/try_cpu.go": "c25ff6309d72468be72ec2cca8eda006ec857f32ce53ca87aed69e5c73945498",
+    "internal/parallel/try_cpu_test.go": "5984e024749a1202fdd0917e0d4fc0ee862e22e3ea5cdc4c828f0df2b05f52c4",
+    "internal/postcapture/json_generated.go": "bb33b9c1c4754556ab644184e558a005033ea3730dbbcbc2df45eafa9d8b6ed8",
+    "internal/strictjson/decode_checked.go": "797435250f5e59a39877be84cd8b072aaeeaf7318b6dbe45697d4db6423240e2",
+    "internal/strictjson/decode_parallel.go": "ca151c8f5ee89b4efcd7d2227289c40b710025c20a01bd8a5363edf449b6e951",
+    "internal/strictjson/decode_parallel_test.go": "c444cda954a91b421a61c731cd314dede4a3dd9b7d8e32123f7a3acbd2f66dc3",
+    "tools/jsonencodegen/main.go": "6c8273d0432105d1534913db9292d463ba3356b6c4732093bb9db87b76b6830b"
+  },
+  "before_cpu_snapshot_sources_sha256": {
+    "internal/domain/json_generated.go": "682f009f0b0a082ca83f2ab648c205a59facee1cb8d1c4a74f14c2d2a812b444",
+    "internal/domain/json_parallel_test.go": "068364316a62e9dd4c9ea995f28339eeb055c9e66dfdb3d8ab5557503d10080e",
+    "internal/evidence/json_generated.go": "211a8ba88f33c8b995a733c1adc4b1e8d1b25bc3ac36b3bfbd89f2737147a463",
+    "internal/jsonencode/array.go": "451573fab096302422124ed316ec2084099023455e4df43e70aab1ddfdfed2b8",
+    "internal/jsonencode/array_test.go": "7034e5ea68c2d7ae5c8e98248ebc1f6d03ffdd27b50f7153b87529b36dc60554",
+    "internal/jsonencode/writer.go": "1535235d77e88fc3cbcf29a191cdacb76af109fb37b351b35d5ef902f5332657",
+    "internal/parallel/try_cpu.go": "c25ff6309d72468be72ec2cca8eda006ec857f32ce53ca87aed69e5c73945498",
+    "internal/parallel/try_cpu_test.go": "5984e024749a1202fdd0917e0d4fc0ee862e22e3ea5cdc4c828f0df2b05f52c4",
+    "internal/postcapture/json_generated.go": "bb33b9c1c4754556ab644184e558a005033ea3730dbbcbc2df45eafa9d8b6ed8",
+    "internal/strictjson/decode_checked.go": "d51162e998f37a3d765dec6888db1d8e5c99055790455f48cb9e0b469a144f96",
+    "internal/strictjson/decode_parallel.go": "1ab02a84d1c149c90c7149714bcd6493a48039ca7f88f082eeba282b8bb521bc",
+    "internal/strictjson/decode_parallel_test.go": "5b122b4c67c1478e3a17f85812903cdf36ed1b39f833c4ee6c06d7cbc1cfe86a",
+    "tools/jsonencodegen/main.go": "6c8273d0432105d1534913db9292d463ba3356b6c4732093bb9db87b76b6830b"
+  },
+  "checks_scope": {
+    "all-tests": "before CPU-count snapshot optimization",
+    "race-tests": "before CPU-count snapshot optimization",
+    "focused-tests-final": "final code",
+    "race-tests-final": "final code",
+    "bootstrap-race-final": "final code, representative posting/admin/network routes",
+    "fuzz-decode": "final code",
+    "fuzz-encode": "final code",
+    "fuzz-existing-decode": "final code",
+    "fuzz-existing-encode": "final code",
+    "vet-final": "final code",
+    "build-final": "final code"
+  },
+  "checks": {
+    "focused-tests": "ok  \toimobbs/internal/domain\t0.037s\nok  \toimobbs/internal/strictjson\t0.767s\nok  \toimobbs/internal/jsonencode\t0.921s\nok  \toimobbs/internal/parallel\t0.005s\nok  \toimobbs/tools/jsonencodegen\t0.008s\n",
+    "all-tests": "ok  \toimobbs/cmd/compatprobe\t0.051s\nok  \toimobbs/cmd/oimobbs\t25.446s\nok  \toimobbs/cmd/oimoedge\t(cached)\nok  \toimobbs/cmd/oimoseal\t(cached)\nok  \toimobbs/internal/abuse\t0.013s\nok  \toimobbs/internal/adminaccess\t(cached)\nok  \toimobbs/internal/adminauth\t3.215s\nok  \toimobbs/internal/app\t50.945s\nok  \toimobbs/internal/board\t0.018s\nok  \toimobbs/internal/bootstrap\t787.349s\nok  \toimobbs/internal/compat\t0.222s\nok  \toimobbs/internal/compatprobe\t0.062s\nok  \toimobbs/internal/delivery\t2.536s\nok  \toimobbs/internal/disclosure\t243.537s\nok  \toimobbs/internal/domain\t0.073s\nok  \toimobbs/internal/evidence\t113.627s\nok  \toimobbs/internal/identity\t0.149s\nok  \toimobbs/internal/jsonencode\t1.088s\nok  \toimobbs/internal/parallel\t0.016s\nok  \toimobbs/internal/platform\t0.011s\nok  \toimobbs/internal/postcapture\t0.088s\nok  \toimobbs/internal/postinput\t0.080s\nok  \toimobbs/internal/publicedge\t(cached)\nok  \toimobbs/internal/sealedbackup\t(cached)\nok  \toimobbs/internal/securityaudit\t(cached)\nok  \toimobbs/internal/store\t14.989s\nok  \toimobbs/internal/strictjson\t0.854s\n?   \toimobbs/internal/testutil\t[no test files]\nok  \toimobbs/internal/textcodec\t1.151s\nok  \toimobbs/internal/waf\t0.042s\nok  \toimobbs/internal/webui\t0.074s\nok  \toimobbs/internal/zstddecode\t0.998s\nok  \toimobbs/internal/zstdencode\t0.515s\n?   \toimobbs/tools/archivebench\t[no test files]\n?   \toimobbs/tools/burstprobe\t[no test files]\n?   \toimobbs/tools/codecbench\t[no test files]\n?   \toimobbs/tools/codecprobe\t[no test files]\n?   \toimobbs/tools/designcheck/contracts\t[no test files]\n?   \toimobbs/tools/designcheck/pack\t[no test files]\n?   \toimobbs/tools/designcheck/wal\t[no test files]\n?   \toimobbs/tools/gentables\t[no test files]\nok  \toimobbs/tools/jsonencodegen\t0.013s\nok  \toimobbs/tools/readload\t0.054s\nok  \toimobbs/tools/setup\t0.376s\n?   \toimobbs/tools/storagebench\t[no test files]\n?   \toimobbs/tools/trafficprobe\t[no test files]\n",
+    "race-tests": "ok  \toimobbs/internal/strictjson\t13.742s\nok  \toimobbs/internal/jsonencode\t11.539s\nok  \toimobbs/internal/parallel\t1.110s\nok  \toimobbs/internal/domain\t1.968s\nok  \toimobbs/internal/postcapture\t2.194s\nok  \toimobbs/internal/evidence\t312.763s\nok  \toimobbs/internal/store\t52.677s\nok  \toimobbs/tools/jsonencodegen\t1.117s\n",
+    "fuzz-decode": "fuzz: elapsed: 0s, gathering baseline coverage: 0/7 completed\nfuzz: elapsed: 0s, gathering baseline coverage: 7/7 completed, now fuzzing with 2 workers\nfuzz: elapsed: 3s, execs: 13 (4/sec), new interesting: 0 (total: 7)\nfuzz: elapsed: 6s, execs: 13 (0/sec), new interesting: 0 (total: 7)\nfuzz: elapsed: 9s, execs: 487 (158/sec), new interesting: 2 (total: 9)\nfuzz: elapsed: 12s, execs: 999 (171/sec), new interesting: 3 (total: 10)\nfuzz: elapsed: 15s, execs: 999 (0/sec), new interesting: 3 (total: 10)\nfuzz: elapsed: 18s, execs: 1215 (72/sec), new interesting: 4 (total: 11)\nfuzz: elapsed: 21s, execs: 1728 (171/sec), new interesting: 5 (total: 12)\nfuzz: elapsed: 21s, execs: 1728 (0/sec), new interesting: 5 (total: 12)\nPASS\nok  \toimobbs/internal/strictjson\t21.417s\n",
+    "fuzz-encode": "fuzz: elapsed: 0s, gathering baseline coverage: 0/2 completed\nfuzz: elapsed: 0s, gathering baseline coverage: 2/2 completed, now fuzzing with 2 workers\nfuzz: elapsed: 3s, execs: 433 (144/sec), new interesting: 1 (total: 3)\nfuzz: elapsed: 6s, execs: 2125 (564/sec), new interesting: 4 (total: 6)\nfuzz: elapsed: 9s, execs: 3414 (430/sec), new interesting: 7 (total: 9)\nfuzz: elapsed: 12s, execs: 4512 (366/sec), new interesting: 10 (total: 12)\nfuzz: elapsed: 15s, execs: 4909 (132/sec), new interesting: 11 (total: 13)\nfuzz: elapsed: 18s, execs: 5994 (362/sec), new interesting: 13 (total: 15)\nfuzz: elapsed: 21s, execs: 6488 (165/sec), new interesting: 15 (total: 17)\nfuzz: elapsed: 21s, execs: 6488 (0/sec), new interesting: 15 (total: 17)\nPASS\nok  \toimobbs/internal/jsonencode\t21.101s\n",
+    "fuzz-existing-decode": "fuzz: elapsed: 0s, gathering baseline coverage: 0/112 completed\nfuzz: elapsed: 0s, gathering baseline coverage: 112/112 completed, now fuzzing with 2 workers\nfuzz: elapsed: 3s, execs: 40630 (13541/sec), new interesting: 18 (total: 130)\nfuzz: elapsed: 6s, execs: 40630 (0/sec), new interesting: 18 (total: 130)\nfuzz: elapsed: 9s, execs: 40630 (0/sec), new interesting: 18 (total: 130)\nfuzz: elapsed: 12s, execs: 40630 (0/sec), new interesting: 18 (total: 130)\nfuzz: elapsed: 15s, execs: 40630 (0/sec), new interesting: 18 (total: 130)\nfuzz: elapsed: 16s, execs: 40630 (0/sec), new interesting: 18 (total: 130)\nPASS\nok  \toimobbs/internal/strictjson\t16.013s\n",
+    "fuzz-existing-encode": "fuzz: elapsed: 0s, gathering baseline coverage: 0/121 completed\nfuzz: elapsed: 0s, gathering baseline coverage: 121/121 completed, now fuzzing with 2 workers\nfuzz: elapsed: 3s, execs: 8819 (2938/sec), new interesting: 16 (total: 137)\nfuzz: elapsed: 6s, execs: 8819 (0/sec), new interesting: 16 (total: 137)\nfuzz: elapsed: 9s, execs: 8819 (0/sec), new interesting: 16 (total: 137)\nfuzz: elapsed: 12s, execs: 8819 (0/sec), new interesting: 16 (total: 137)\nfuzz: elapsed: 15s, execs: 8819 (0/sec), new interesting: 16 (total: 137)\nfuzz: elapsed: 16s, execs: 8819 (0/sec), new interesting: 16 (total: 137)\nPASS\nok  \toimobbs/internal/domain\t16.013s\n",
+    "vet": "",
+    "build": "",
+    "generated-check": "",
+    "doccheck": "PASS: 64 Markdown files, 75 JSON files, current documents, 594 local links including headings, fences and strict JSON\nPASS: standard Go CRC32C, header/frame offsets, dedup section, create DAT lengths and sample expiry\nPASS: pack offsets/CRC/SHA, raw+gzip blocks, compressed audit, 5 DAT ranges, current/prefix stability through seq=4, 4 invalid gzip samples\nPASS: control frame/snapshot/current bytes, CRC/SHA, JSON equality, 4 invalid control examples\nPASS: 26 HTTP decision examples (not a live HTTP server)\nPASS: independent HMAC ID/token vector, token tamper, 3 six-calendar-month boundaries\nPASS: design checks only; application, crash, device and load tests NOT RUN\n",
+    "doclinks": "......\n----------------------------------------------------------------------\nRan 6 tests in 0.004s\n\nOK\n",
+    "focused-tests-final": "ok  \toimobbs/internal/strictjson\t0.637s\nok  \toimobbs/internal/jsonencode\t0.825s\nok  \toimobbs/internal/parallel\t0.003s\nok  \toimobbs/internal/domain\t0.049s\nok  \toimobbs/internal/postcapture\t0.064s\nok  \toimobbs/internal/store\t20.326s\nok  \toimobbs/tools/jsonencodegen\t0.008s\n",
+    "race-tests-final": "ok  \toimobbs/internal/strictjson\t10.003s\nok  \toimobbs/internal/jsonencode\t8.582s\nok  \toimobbs/internal/parallel\t1.010s\nok  \toimobbs/internal/domain\t1.329s\nok  \toimobbs/internal/postcapture\t1.654s\nok  \toimobbs/internal/store\t49.999s\nok  \toimobbs/tools/jsonencodegen\t1.076s\n",
+    "vet-final": "",
+    "build-final": "",
+    "bootstrap-race-final": "ok  \toimobbs/internal/bootstrap\t9.339s\n"
+  },
+  "checks_passed": {
+    "focused-tests": true,
+    "all-tests": true,
+    "race-tests": true,
+    "fuzz-decode": true,
+    "fuzz-encode": true,
+    "fuzz-existing-decode": true,
+    "fuzz-existing-encode": true,
+    "vet": true,
+    "build": true,
+    "generated-check": true,
+    "doccheck": true,
+    "doclinks": true,
+    "focused-tests-final": true,
+    "race-tests-final": true,
+    "vet-final": true,
+    "build-final": true,
+    "bootstrap-race-final": true
+  },
+  "boundaries": [
+    "No deployment",
+    "No HTTP throughput claim",
+    "No dedicated CPU or cgroup memory claim",
+    "Small JSON and non-slice paths remain serial",
+    "Allocation totals are not peak memory or RSS"
+  ]
+}

@@ -1,0 +1,218 @@
+[
+  {
+    "input": "https://example.test/a",
+    "host": "example.test"
+  },
+  {
+    "input": "HTTPS://EXAMPLE.TEST.:443/a",
+    "host": "example.test"
+  },
+  {
+    "input": "https://example。test/a",
+    "host": "example.test"
+  },
+  {
+    "input": "https://ｅｘａｍｐｌｅ．ｔｅｓｔ/",
+    "host": "example.test"
+  },
+  {
+    "input": "https://%65xample%2etest/a",
+    "host": "example.test"
+  },
+  {
+    "input": "https:\\\\example.test\\p",
+    "host": "example.test"
+  },
+  {
+    "input": "https://example.test\\@attacker.test/p",
+    "host": "example.test"
+  },
+  {
+    "input": "https:example.test/p",
+    "host": "example.test"
+  },
+  {
+    "input": "https:///example.test/p",
+    "host": "example.test"
+  },
+  {
+    "input": "https://Bücher.test/p",
+    "host": "xn--bcher-kva.test"
+  },
+  {
+    "input": "https://é.test/p",
+    "host": "xn--9ca.test"
+  },
+  {
+    "input": "https://é.test/p",
+    "host": "xn--9ca.test"
+  },
+  {
+    "input": "https://例え.テスト/",
+    "host": "xn--r8jz45g.xn--zckzah"
+  },
+  {
+    "input": "https://가.test/",
+    "host": "xn--o39a.test"
+  },
+  {
+    "input": "https://가.test/",
+    "host": "xn--o39a.test"
+  },
+  {
+    "input": "https://­example.test/",
+    "host": "example.test"
+  },
+  {
+    "input": "https://e​xample.test/",
+    "host": "example.test"
+  },
+  {
+    "input": "https://ℯxample.test/",
+    "host": "example.test"
+  },
+  {
+    "input": "https://K.test/",
+    "host": "k.test"
+  },
+  {
+    "input": "https://aς.test/",
+    "host": "xn--a-ymb.test"
+  },
+  {
+    "input": "https://aσ.test/",
+    "host": "xn--a-0mb.test"
+  },
+  {
+    "input": "https://xn--example-.test/",
+    "host": "xn--example-.test"
+  },
+  {
+    "input": "http://0x7f000001/a",
+    "host": "127.0.0.1"
+  },
+  {
+    "input": "http://2130706433/a",
+    "host": "127.0.0.1"
+  },
+  {
+    "input": "http://0177.0.0.1/a",
+    "host": "127.0.0.1"
+  },
+  {
+    "input": "http://127.1/a",
+    "host": "127.0.0.1"
+  },
+  {
+    "input": "http://127.0x1/a",
+    "host": "127.0.0.1"
+  },
+  {
+    "input": "http://0xffffffff/a",
+    "host": "255.255.255.255"
+  },
+  {
+    "input": "http://0x100000000/a",
+    "host": null
+  },
+  {
+    "input": "http://1.2.3.256/a",
+    "host": null
+  },
+  {
+    "input": "http://example.1/a",
+    "host": null
+  },
+  {
+    "input": "http://09/a",
+    "host": null
+  },
+  {
+    "input": "http://0x/a",
+    "host": "0.0.0.0"
+  },
+  {
+    "input": "http://0/a",
+    "host": "0.0.0.0"
+  },
+  {
+    "input": "http://0./a",
+    "host": "0.0.0.0"
+  },
+  {
+    "input": "http://[::1]/",
+    "host": "[::1]"
+  },
+  {
+    "input": "http://[::ffff:127.0.0.1]/",
+    "host": "[::ffff:7f00:1]"
+  },
+  {
+    "input": "http://[::1%25zone]/",
+    "host": null
+  },
+  {
+    "input": "https://example.test:65535/",
+    "host": "example.test"
+  },
+  {
+    "input": "https://example.test:65536/",
+    "host": null
+  },
+  {
+    "input": "https://example.test:/",
+    "host": "example.test"
+  },
+  {
+    "input": "https://example.test:000443/",
+    "host": "example.test"
+  },
+  {
+    "input": "https://example.test@other.test/",
+    "host": "other.test"
+  },
+  {
+    "input": "https://other.test@example.test/",
+    "host": "example.test"
+  },
+  {
+    "input": "https://a@b@example.test/",
+    "host": "example.test"
+  },
+  {
+    "input": "https://example%2ftest/",
+    "host": null
+  },
+  {
+    "input": "https://example%00.test/",
+    "host": null
+  },
+  {
+    "input": "https://%ff.test/",
+    "host": null
+  },
+  {
+    "input": "https://exa\tmple.test/",
+    "host": "example.test"
+  },
+  {
+    "input": "https://exa\nmple.test/",
+    "host": "example.test"
+  },
+  {
+    "input": "https://foo_bar.test/",
+    "host": "foo_bar.test"
+  },
+  {
+    "input": "https://exa%25mple.test/",
+    "host": null
+  },
+  {
+    "input": "https://example.test.attacker.test/",
+    "host": "example.test.attacker.test"
+  },
+  {
+    "input": "https://attacker.test/?next=https://example.test/",
+    "host": "attacker.test"
+  }
+]

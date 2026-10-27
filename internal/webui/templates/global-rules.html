@@ -1,0 +1,20 @@
+<!-- 全板共通の投稿規制を追加・確認・解除する管理画面。 -->
+<!doctype html><html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>掲示板全体の投稿規制 — OimoBBS管理</title>{{template "admin-assets" .}}</head>
+<body class="admin">{{template "admin-header" .}}<main id="main" tabindex="-1">
+<h1>掲示板全体の投稿規制</h1><p>新設する板も含め、すべての板に適用します。板ごとの規制も引き続き適用されます。NGワードは投稿前に照合します。</p>
+<p><a href="{{adminBase}}/waf-events">WAF検出・拒否ログへ</a> · <a href="{{adminBase}}/abuse-guard">投稿間隔・類似文・埋め立ての設定へ</a></p>
+{{if not .Fresh}}<p class="notice">追加・解除には再認証が必要です。<a href="{{adminBase}}/reauth?return_to=%2Fglobal-rules">再認証する</a></p>{{end}}
+{{if .Message}}<p role="alert">{{.Message}}</p>{{end}}
+{{template "registered-rule-list" .Listing}}
+<details id="add-rule" class="card" {{if .Fields.Get "value"}}open{{end}}><summary>規制を追加する（NGワード・条件・期間）</summary><form method="post" action="{{adminBase}}/global-rules">
+<input type="hidden" name="csrf" value="{{.Fields.Get "csrf"}}"><input type="hidden" name="revision" value="{{.State.ETag}}"><input type="hidden" name="request_id" value="{{.Fields.Get "request_id"}}"><input type="hidden" name="action" value="add"><input type="hidden" name="id" value="">
+<p><label>対象 <select name="field"><option value="body">本文（NGワード）</option><option value="title">スレッド名</option><option value="name">名前</option><option value="mail">メール欄</option><option value="ip">IPアドレス</option><option value="network">IP範囲</option><option value="domain">本文内URLのドメイン</option><option value="all">すべての投稿（一時停止）</option></select></label></p>
+<p><label>一致条件 <select name="operator"><option value="contains">部分一致（NGワード）</option><option value="exact">完全一致</option><option value="regexp">正規表現</option><option value="cidr">IP範囲（CIDR）</option><option value="suffix">ドメイン一致（子ドメイン含む）</option></select></label></p>
+<p><label>規制する語句・値 <textarea name="value" rows="3" maxlength="1024">{{.Fields.Get "value"}}</textarea></label></p><p class="field-hint">本文などは大文字・小文字を区別します。IPは完全一致、IP範囲はCIDR、ドメインは完全一致または子ドメインを含む一致を選択してください。「すべての投稿」は値の入力不要です。</p>
+<p><label>投稿の種類 <select name="operation"><option value="both">スレ立て・返信の両方</option><option value="create">スレ立てのみ</option><option value="reply">返信のみ</option></select></label></p>
+<p><label>動作 <select name="mode"><option value="reject">拒否する</option><option value="observe">検出のみ</option></select></label></p>
+<p><label>期間（分、0は無期限） <input type="number" name="minutes" value="{{.Fields.Get "minutes"}}" min="0" max="525600" required></label></p><button type="submit">掲示板全体に規制を追加</button></form></details>
+
+</main>{{template "footer" .}}</body></html>
+
+{{define "page-assets"}}{{template "stylesheet" "admin-security.css"}}{{template "stylesheet" "admin-rules.css"}}{{end}}

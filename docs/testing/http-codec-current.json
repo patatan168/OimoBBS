@@ -1,0 +1,633 @@
+{
+  "measured_at": "2026-10-17",
+  "baseline_commit": "75bd00781a40186c4cd99f28f660620fc9d97428",
+  "scope": "現行HTTP圧縮のcache miss経路とサーバー内復号実装の単体比較。実HTTP・通信・ブラウザ・専ブラ・保存Write/Syncの測定ではない。",
+  "environment": {
+    "cpu": "AMD Ryzen 5 5500U",
+    "go": "go1.27.2 linux/amd64",
+    "GOMAXPROCS": 2,
+    "cpu_quota": "not set by this measurement",
+    "memory_limit": "not set by this measurement",
+    "host": "共有ホスト、他サービス稼働。ほかのbenchmark・build・testと並行せず。"
+  },
+  "method": {
+    "input": "testutil.DATFixture text/mixed/entropyの全文。それぞれ分割せず独立した1 frameへ圧縮。保存codec比較の64KiB chunkとは異なる。",
+    "compression": "compat.NewCompressionCache(0,1).Compress。保持0、同一keyでもcache hit 0を検査。worker再利用・初期圧縮器生成は計時外。gzipは実装通り16KiB以上でlevel6/1/9をすべて試し最小出力を選ぶ。Zstdは現行配信圧縮器。",
+    "decompression": "gzip.NewReader + io.ReadAll + Close / zstddecode.Decode。毎回新規出力。クライアント側のdecoderではない。",
+    "trials": 9,
+    "iterations_per_trial": 30,
+    "order": "奇数試行zstd→gzip、偶数試行gzip→zstd。各試行text→mixed→entropy。",
+    "validation": "各試行の計時前に両方式で入力一致を検査。Zstdは独立decoderとも照合。圧縮開始前にGC。",
+    "command": "GOMAXPROCS=2 <comparison-binary> <new-json>",
+    "temporary_helper_discarded": true
+  },
+  "sources_sha256": {
+    "internal/compat/compression_cache.go": "9fb01073d11f6d81aabb216b41c2a6124ecbe8217e4ff08f78d4175c7e8bf1af",
+    "internal/zstddecode/decode.go": "221323785f4a0057ebb76bc28d05cce1fa30fe58b9585ff598aefd6cd2436958",
+    "internal/zstddecode/literals.go": "9d826428d71ccf61bd1dff822cfdb5813fe74e8063b404ddecb63ccf28eeba4f",
+    "internal/zstddecode/huffman_stream.go": "648e9a55b62998b040d373a8d1e8e5e7041bfeb3b05864b1fcac300eac62a277",
+    "internal/zstdencode/encoder.go": "f8f85fa028e0f3110c40b72cefc167f1a27ead689573345b9721f6b027b3604b"
+  },
+  "comparison_binary_sha256": "918fddb683ce7300ff28d2318539e03e45879d24ed23038d5b4bc340407a1606",
+  "helper_source_sha256": "c527cfcd0f16ae2eea5adfbb58d09b4fadac55f8879c6f84e1d61744247197c3",
+  "summary": [
+    {
+      "sample": "text",
+      "zstd": {
+        "raw_bytes": 193755,
+        "stored_bytes": 12294,
+        "stored_fraction": 0.06345126577378649,
+        "encode": {
+          "median_ns": 340270,
+          "min_ns": 338191,
+          "max_ns": 359052
+        },
+        "decode": {
+          "median_ns": 378625,
+          "min_ns": 358645,
+          "max_ns": 411926
+        }
+      },
+      "gzip": {
+        "raw_bytes": 193755,
+        "stored_bytes": 15535,
+        "stored_fraction": 0.08017857603674744,
+        "encode": {
+          "median_ns": 3930072,
+          "min_ns": 3782889,
+          "max_ns": 4566466
+        },
+        "decode": {
+          "median_ns": 334820,
+          "min_ns": 300325,
+          "max_ns": 353327
+        }
+      },
+      "zstd_encode_speedup": 11.549863343815206,
+      "zstd_decode_speedup": 0.884305051172004
+    },
+    {
+      "sample": "mixed",
+      "zstd": {
+        "raw_bytes": 204125,
+        "stored_bytes": 31110,
+        "stored_fraction": 0.15240661359461113,
+        "encode": {
+          "median_ns": 526674,
+          "min_ns": 523885,
+          "max_ns": 547763
+        },
+        "decode": {
+          "median_ns": 594597,
+          "min_ns": 564845,
+          "max_ns": 633630
+        }
+      },
+      "gzip": {
+        "raw_bytes": 204125,
+        "stored_bytes": 37426,
+        "stored_fraction": 0.1833484384568279,
+        "encode": {
+          "median_ns": 5924329,
+          "min_ns": 5825163,
+          "max_ns": 6669479
+        },
+        "decode": {
+          "median_ns": 643087,
+          "min_ns": 605228,
+          "max_ns": 690236
+        }
+      },
+      "zstd_encode_speedup": 11.248569323718277,
+      "zstd_decode_speedup": 1.0815510337253635
+    },
+    {
+      "sample": "entropy",
+      "zstd": {
+        "raw_bytes": 435955,
+        "stored_bytes": 177334,
+        "stored_fraction": 0.40677134107878105,
+        "encode": {
+          "median_ns": 1417156,
+          "min_ns": 1399920,
+          "max_ns": 1528924
+        },
+        "decode": {
+          "median_ns": 1768285,
+          "min_ns": 1690916,
+          "max_ns": 1816884
+        }
+      },
+      "gzip": {
+        "raw_bytes": 435955,
+        "stored_bytes": 188813,
+        "stored_fraction": 0.4331020403482011,
+        "encode": {
+          "median_ns": 21767957,
+          "min_ns": 20946484,
+          "max_ns": 22487219
+        },
+        "decode": {
+          "median_ns": 2569314,
+          "min_ns": 2515654,
+          "max_ns": 2846386
+        }
+      },
+      "zstd_encode_speedup": 15.360311073727946,
+      "zstd_decode_speedup": 1.4529976785416379
+    }
+  ],
+  "trials": [
+    {
+      "sample": "text",
+      "codec": "zstd",
+      "trial": 1,
+      "raw_bytes": 193755,
+      "stored_bytes": 12294,
+      "encode_ns": 349593,
+      "decode_ns": 394955
+    },
+    {
+      "sample": "text",
+      "codec": "gzip",
+      "trial": 1,
+      "raw_bytes": 193755,
+      "stored_bytes": 15535,
+      "encode_ns": 3930072,
+      "decode_ns": 350086
+    },
+    {
+      "sample": "mixed",
+      "codec": "zstd",
+      "trial": 1,
+      "raw_bytes": 204125,
+      "stored_bytes": 31110,
+      "encode_ns": 527340,
+      "decode_ns": 594597
+    },
+    {
+      "sample": "mixed",
+      "codec": "gzip",
+      "trial": 1,
+      "raw_bytes": 204125,
+      "stored_bytes": 37426,
+      "encode_ns": 6669479,
+      "decode_ns": 682252
+    },
+    {
+      "sample": "entropy",
+      "codec": "zstd",
+      "trial": 1,
+      "raw_bytes": 435955,
+      "stored_bytes": 177334,
+      "encode_ns": 1528924,
+      "decode_ns": 1805253
+    },
+    {
+      "sample": "entropy",
+      "codec": "gzip",
+      "trial": 1,
+      "raw_bytes": 435955,
+      "stored_bytes": 188813,
+      "encode_ns": 22292618,
+      "decode_ns": 2557270
+    },
+    {
+      "sample": "text",
+      "codec": "gzip",
+      "trial": 2,
+      "raw_bytes": 193755,
+      "stored_bytes": 15535,
+      "encode_ns": 3936730,
+      "decode_ns": 328878
+    },
+    {
+      "sample": "text",
+      "codec": "zstd",
+      "trial": 2,
+      "raw_bytes": 193755,
+      "stored_bytes": 12294,
+      "encode_ns": 339421,
+      "decode_ns": 374018
+    },
+    {
+      "sample": "mixed",
+      "codec": "gzip",
+      "trial": 2,
+      "raw_bytes": 204125,
+      "stored_bytes": 37426,
+      "encode_ns": 5924329,
+      "decode_ns": 622415
+    },
+    {
+      "sample": "mixed",
+      "codec": "zstd",
+      "trial": 2,
+      "raw_bytes": 204125,
+      "stored_bytes": 31110,
+      "encode_ns": 529584,
+      "decode_ns": 564845
+    },
+    {
+      "sample": "entropy",
+      "codec": "gzip",
+      "trial": 2,
+      "raw_bytes": 435955,
+      "stored_bytes": 188813,
+      "encode_ns": 20946484,
+      "decode_ns": 2549231
+    },
+    {
+      "sample": "entropy",
+      "codec": "zstd",
+      "trial": 2,
+      "raw_bytes": 435955,
+      "stored_bytes": 177334,
+      "encode_ns": 1399920,
+      "decode_ns": 1750540
+    },
+    {
+      "sample": "text",
+      "codec": "zstd",
+      "trial": 3,
+      "raw_bytes": 193755,
+      "stored_bytes": 12294,
+      "encode_ns": 339118,
+      "decode_ns": 376239
+    },
+    {
+      "sample": "text",
+      "codec": "gzip",
+      "trial": 3,
+      "raw_bytes": 193755,
+      "stored_bytes": 15535,
+      "encode_ns": 3842349,
+      "decode_ns": 346063
+    },
+    {
+      "sample": "mixed",
+      "codec": "zstd",
+      "trial": 3,
+      "raw_bytes": 204125,
+      "stored_bytes": 31110,
+      "encode_ns": 526532,
+      "decode_ns": 590658
+    },
+    {
+      "sample": "mixed",
+      "codec": "gzip",
+      "trial": 3,
+      "raw_bytes": 204125,
+      "stored_bytes": 37426,
+      "encode_ns": 5875097,
+      "decode_ns": 605228
+    },
+    {
+      "sample": "entropy",
+      "codec": "zstd",
+      "trial": 3,
+      "raw_bytes": 435955,
+      "stored_bytes": 177334,
+      "encode_ns": 1417156,
+      "decode_ns": 1721057
+    },
+    {
+      "sample": "entropy",
+      "codec": "gzip",
+      "trial": 3,
+      "raw_bytes": 435955,
+      "stored_bytes": 188813,
+      "encode_ns": 21472267,
+      "decode_ns": 2515654
+    },
+    {
+      "sample": "text",
+      "codec": "gzip",
+      "trial": 4,
+      "raw_bytes": 193755,
+      "stored_bytes": 15535,
+      "encode_ns": 3782889,
+      "decode_ns": 331602
+    },
+    {
+      "sample": "text",
+      "codec": "zstd",
+      "trial": 4,
+      "raw_bytes": 193755,
+      "stored_bytes": 12294,
+      "encode_ns": 341786,
+      "decode_ns": 378625
+    },
+    {
+      "sample": "mixed",
+      "codec": "gzip",
+      "trial": 4,
+      "raw_bytes": 204125,
+      "stored_bytes": 37426,
+      "encode_ns": 5825163,
+      "decode_ns": 658367
+    },
+    {
+      "sample": "mixed",
+      "codec": "zstd",
+      "trial": 4,
+      "raw_bytes": 204125,
+      "stored_bytes": 31110,
+      "encode_ns": 526674,
+      "decode_ns": 600660
+    },
+    {
+      "sample": "entropy",
+      "codec": "gzip",
+      "trial": 4,
+      "raw_bytes": 435955,
+      "stored_bytes": 188813,
+      "encode_ns": 22034146,
+      "decode_ns": 2581852
+    },
+    {
+      "sample": "entropy",
+      "codec": "zstd",
+      "trial": 4,
+      "raw_bytes": 435955,
+      "stored_bytes": 177334,
+      "encode_ns": 1460982,
+      "decode_ns": 1784524
+    },
+    {
+      "sample": "text",
+      "codec": "zstd",
+      "trial": 5,
+      "raw_bytes": 193755,
+      "stored_bytes": 12294,
+      "encode_ns": 338191,
+      "decode_ns": 411926
+    },
+    {
+      "sample": "text",
+      "codec": "gzip",
+      "trial": 5,
+      "raw_bytes": 193755,
+      "stored_bytes": 15535,
+      "encode_ns": 3986037,
+      "decode_ns": 353327
+    },
+    {
+      "sample": "mixed",
+      "codec": "zstd",
+      "trial": 5,
+      "raw_bytes": 204125,
+      "stored_bytes": 31110,
+      "encode_ns": 523885,
+      "decode_ns": 633630
+    },
+    {
+      "sample": "mixed",
+      "codec": "gzip",
+      "trial": 5,
+      "raw_bytes": 204125,
+      "stored_bytes": 37426,
+      "encode_ns": 5976167,
+      "decode_ns": 690236
+    },
+    {
+      "sample": "entropy",
+      "codec": "zstd",
+      "trial": 5,
+      "raw_bytes": 435955,
+      "stored_bytes": 177334,
+      "encode_ns": 1437555,
+      "decode_ns": 1816884
+    },
+    {
+      "sample": "entropy",
+      "codec": "gzip",
+      "trial": 5,
+      "raw_bytes": 435955,
+      "stored_bytes": 188813,
+      "encode_ns": 22487219,
+      "decode_ns": 2654701
+    },
+    {
+      "sample": "text",
+      "codec": "gzip",
+      "trial": 6,
+      "raw_bytes": 193755,
+      "stored_bytes": 15535,
+      "encode_ns": 3926277,
+      "decode_ns": 300325
+    },
+    {
+      "sample": "text",
+      "codec": "zstd",
+      "trial": 6,
+      "raw_bytes": 193755,
+      "stored_bytes": 12294,
+      "encode_ns": 340270,
+      "decode_ns": 358645
+    },
+    {
+      "sample": "mixed",
+      "codec": "gzip",
+      "trial": 6,
+      "raw_bytes": 204125,
+      "stored_bytes": 37426,
+      "encode_ns": 5882300,
+      "decode_ns": 656810
+    },
+    {
+      "sample": "mixed",
+      "codec": "zstd",
+      "trial": 6,
+      "raw_bytes": 204125,
+      "stored_bytes": 31110,
+      "encode_ns": 547763,
+      "decode_ns": 609840
+    },
+    {
+      "sample": "entropy",
+      "codec": "gzip",
+      "trial": 6,
+      "raw_bytes": 435955,
+      "stored_bytes": 188813,
+      "encode_ns": 21247305,
+      "decode_ns": 2559096
+    },
+    {
+      "sample": "entropy",
+      "codec": "zstd",
+      "trial": 6,
+      "raw_bytes": 435955,
+      "stored_bytes": 177334,
+      "encode_ns": 1424308,
+      "decode_ns": 1703784
+    },
+    {
+      "sample": "text",
+      "codec": "zstd",
+      "trial": 7,
+      "raw_bytes": 193755,
+      "stored_bytes": 12294,
+      "encode_ns": 338729,
+      "decode_ns": 363722
+    },
+    {
+      "sample": "text",
+      "codec": "gzip",
+      "trial": 7,
+      "raw_bytes": 193755,
+      "stored_bytes": 15535,
+      "encode_ns": 3829439,
+      "decode_ns": 343653
+    },
+    {
+      "sample": "mixed",
+      "codec": "zstd",
+      "trial": 7,
+      "raw_bytes": 204125,
+      "stored_bytes": 31110,
+      "encode_ns": 524774,
+      "decode_ns": 593533
+    },
+    {
+      "sample": "mixed",
+      "codec": "gzip",
+      "trial": 7,
+      "raw_bytes": 204125,
+      "stored_bytes": 37426,
+      "encode_ns": 5881886,
+      "decode_ns": 622510
+    },
+    {
+      "sample": "entropy",
+      "codec": "zstd",
+      "trial": 7,
+      "raw_bytes": 435955,
+      "stored_bytes": 177334,
+      "encode_ns": 1408103,
+      "decode_ns": 1792780
+    },
+    {
+      "sample": "entropy",
+      "codec": "gzip",
+      "trial": 7,
+      "raw_bytes": 435955,
+      "stored_bytes": 188813,
+      "encode_ns": 21767957,
+      "decode_ns": 2723002
+    },
+    {
+      "sample": "text",
+      "codec": "gzip",
+      "trial": 8,
+      "raw_bytes": 193755,
+      "stored_bytes": 15535,
+      "encode_ns": 3961575,
+      "decode_ns": 334820
+    },
+    {
+      "sample": "text",
+      "codec": "zstd",
+      "trial": 8,
+      "raw_bytes": 193755,
+      "stored_bytes": 12294,
+      "encode_ns": 341441,
+      "decode_ns": 389473
+    },
+    {
+      "sample": "mixed",
+      "codec": "gzip",
+      "trial": 8,
+      "raw_bytes": 204125,
+      "stored_bytes": 37426,
+      "encode_ns": 5970379,
+      "decode_ns": 626173
+    },
+    {
+      "sample": "mixed",
+      "codec": "zstd",
+      "trial": 8,
+      "raw_bytes": 204125,
+      "stored_bytes": 31110,
+      "encode_ns": 525633,
+      "decode_ns": 611705
+    },
+    {
+      "sample": "entropy",
+      "codec": "gzip",
+      "trial": 8,
+      "raw_bytes": 435955,
+      "stored_bytes": 188813,
+      "encode_ns": 21660149,
+      "decode_ns": 2846386
+    },
+    {
+      "sample": "entropy",
+      "codec": "zstd",
+      "trial": 8,
+      "raw_bytes": 435955,
+      "stored_bytes": 177334,
+      "encode_ns": 1415868,
+      "decode_ns": 1768285
+    },
+    {
+      "sample": "text",
+      "codec": "zstd",
+      "trial": 9,
+      "raw_bytes": 193755,
+      "stored_bytes": 12294,
+      "encode_ns": 359052,
+      "decode_ns": 385787
+    },
+    {
+      "sample": "text",
+      "codec": "gzip",
+      "trial": 9,
+      "raw_bytes": 193755,
+      "stored_bytes": 15535,
+      "encode_ns": 4566466,
+      "decode_ns": 324101
+    },
+    {
+      "sample": "mixed",
+      "codec": "zstd",
+      "trial": 9,
+      "raw_bytes": 204125,
+      "stored_bytes": 31110,
+      "encode_ns": 538134,
+      "decode_ns": 567257
+    },
+    {
+      "sample": "mixed",
+      "codec": "gzip",
+      "trial": 9,
+      "raw_bytes": 204125,
+      "stored_bytes": 37426,
+      "encode_ns": 6139843,
+      "decode_ns": 643087
+    },
+    {
+      "sample": "entropy",
+      "codec": "zstd",
+      "trial": 9,
+      "raw_bytes": 435955,
+      "stored_bytes": 177334,
+      "encode_ns": 1401922,
+      "decode_ns": 1690916
+    },
+    {
+      "sample": "entropy",
+      "codec": "gzip",
+      "trial": 9,
+      "raw_bytes": 435955,
+      "stored_bytes": 188813,
+      "encode_ns": 22222445,
+      "decode_ns": 2569314
+    }
+  ],
+  "limitations": [
+    "圧縮cache hit時は再圧縮しないため、この圧縮時間は毎回発生しない。",
+    "DAT差分206は無圧縮のため、この圧縮率や速度を適用しない。",
+    "本番反映・実HTTP・100投稿/秒・I/O競合時の再測定は行っていない。"
+  ]
+}

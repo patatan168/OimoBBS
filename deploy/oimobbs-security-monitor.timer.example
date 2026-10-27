@@ -1,0 +1,9 @@
+# 認証異常を毎分検査する。
+[Unit]
+Description=OimoBBS authentication security monitor timer
+[Timer]
+OnBootSec=1min
+OnUnitActiveSec=1min
+Persistent=true
+[Install]
+WantedBy=timers.target

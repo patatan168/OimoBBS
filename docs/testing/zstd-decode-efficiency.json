@@ -1,0 +1,1262 @@
+{
+  "schema": "oimobbs-zstd-decode-efficiency-v1",
+  "date": "2026-10-25",
+  "baseline_commit": "5062131",
+  "baseline_note": "Previous turn parallel pack code is present in both versions. Only the single-frame decoder is changed; baseline decoder matches 5062131.",
+  "environment": {
+    "go": "1.27.3",
+    "cpu": "AMD Ryzen 5 5500U",
+    "os": "linux",
+    "arch": "amd64",
+    "gomaxprocs": [
+      1,
+      4
+    ],
+    "cgroup_limits_applied": false,
+    "live_service_modified": false
+  },
+  "method": "Separate processes with GOMAXPROCS environment fixed. Core: ABBA, 300ms x 3 each, six samples per version/CPU. Pack: ABBA, 250ms x 2 each, four samples per version/CPU. Shared host; no overlapping agent tests/builds/profiles during final measurements. CPU is process user+system across all threads. Allocations and GC included.",
+  "before_profile_benchmark_output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/zstddecode\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkDecode/text         \t    5202\t    229271 ns/op\t 845.09 MB/s\t    230583 cpu-ns/op\t  202752 B/op\t       2 allocs/op\nBenchmarkDecode/mixed        \t    3333\t    355719 ns/op\t 573.84 MB/s\t    357681 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nBenchmarkDecode/entropy      \t    1089\t   1114234 ns/op\t 391.26 MB/s\t   1119176 cpu-ns/op\t  548864 B/op\t       2 allocs/op\nBenchmarkDecode/raw          \t   13280\t     89841 ns/op\t5835.70 MB/s\t     90524 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/repeat       \t   13568\t     87794 ns/op\t5695.18 MB/s\t     88277 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nPASS\n",
+  "baseline_source_sha256": {
+    "decode.go": "92c80f604b5a2c7234ea50303c48e399cece55e3066baa38f11b41d2c66f8888",
+    "literals.go": "f925522fe1f41f16513dce51d55e4b4a0107abcd767a4340fbd910585b827803",
+    "huffman_four.go": "bf65f3fdea738cb5e7c8a8430c4ecf7c690aa17c3cec68585e09f6bc70d0658e"
+  },
+  "trials": {
+    "final-core": [
+      {
+        "version": "baseline",
+        "gomaxprocs": 1,
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/zstddecode\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkDecode/text    \t    1624\t    221453 ns/op\t 874.93 MB/s\t    222271 cpu-ns/op\t  202752 B/op\t       2 allocs/op\nBenchmarkDecode/text    \t    1652\t    220256 ns/op\t 879.68 MB/s\t    221090 cpu-ns/op\t  202752 B/op\t       2 allocs/op\nBenchmarkDecode/text    \t    1644\t    223098 ns/op\t 868.48 MB/s\t    224774 cpu-ns/op\t  202752 B/op\t       2 allocs/op\nBenchmarkDecode/mixed   \t    1035\t    342767 ns/op\t 595.52 MB/s\t    344114 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nBenchmarkDecode/mixed   \t    1017\t    348977 ns/op\t 584.92 MB/s\t    350313 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nBenchmarkDecode/mixed   \t    1004\t    352673 ns/op\t 578.79 MB/s\t    355177 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nBenchmarkDecode/entropy \t     310\t   1190314 ns/op\t 366.25 MB/s\t   1197748 cpu-ns/op\t  548864 B/op\t       2 allocs/op\nBenchmarkDecode/entropy \t     316\t   1119386 ns/op\t 389.46 MB/s\t   1123633 cpu-ns/op\t  548864 B/op\t       2 allocs/op\nBenchmarkDecode/entropy \t     325\t   1110741 ns/op\t 392.49 MB/s\t   1115077 cpu-ns/op\t  548864 B/op\t       2 allocs/op\nBenchmarkDecode/raw     \t    5787\t     59086 ns/op\t8873.35 MB/s\t     62918 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/raw     \t    6318\t     58274 ns/op\t8996.88 MB/s\t     63599 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/raw     \t    6379\t     58081 ns/op\t9026.85 MB/s\t     59588 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/repeat  \t    5768\t     54319 ns/op\t9204.80 MB/s\t     56494 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nBenchmarkDecode/repeat  \t    5708\t     54833 ns/op\t9118.68 MB/s\t     55790 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nBenchmarkDecode/repeat  \t    6771\t     59336 ns/op\t8426.53 MB/s\t     60623 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/text         \t    1484\t    239075 ns/op\t 810.43 MB/s\t    239943 cpu-ns/op\t  202752 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/text         \t    1512\t    235258 ns/op\t 823.58 MB/s\t    236096 cpu-ns/op\t  202752 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/text         \t    1489\t    230933 ns/op\t 839.01 MB/s\t    231804 cpu-ns/op\t  202752 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/mixed        \t    1002\t    378955 ns/op\t 538.65 MB/s\t    380882 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/mixed        \t     968\t    377284 ns/op\t 541.04 MB/s\t    378755 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/mixed        \t     982\t    345259 ns/op\t 591.22 MB/s\t    346547 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/entropy      \t     330\t   1083703 ns/op\t 402.28 MB/s\t   1087615 cpu-ns/op\t  548864 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/entropy      \t     328\t   1127997 ns/op\t 386.49 MB/s\t   1133912 cpu-ns/op\t  548864 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/entropy      \t     326\t   1093451 ns/op\t 398.70 MB/s\t   1097120 cpu-ns/op\t  548864 B/op\t       2 allocs/op\nPASS\n"
+      },
+      {
+        "version": "baseline",
+        "gomaxprocs": 4,
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/zstddecode\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkDecode/text-4      \t    1338\t    273808 ns/op\t 707.63 MB/s\t    311694 cpu-ns/op\t  202757 B/op\t       2 allocs/op\nBenchmarkDecode/text-4      \t    1312\t    269562 ns/op\t 718.78 MB/s\t    306669 cpu-ns/op\t  202752 B/op\t       2 allocs/op\nBenchmarkDecode/text-4      \t    1352\t    253210 ns/op\t 765.20 MB/s\t    290453 cpu-ns/op\t  202753 B/op\t       2 allocs/op\nBenchmarkDecode/mixed-4     \t     955\t    391681 ns/op\t 521.15 MB/s\t    438460 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nBenchmarkDecode/mixed-4     \t     919\t    400302 ns/op\t 509.93 MB/s\t    446457 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nBenchmarkDecode/mixed-4     \t     978\t    396075 ns/op\t 515.37 MB/s\t    442129 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nBenchmarkDecode/entropy-4   \t     303\t   1169922 ns/op\t 372.64 MB/s\t   1243063 cpu-ns/op\t  548866 B/op\t       2 allocs/op\nBenchmarkDecode/entropy-4   \t     297\t   1180458 ns/op\t 369.31 MB/s\t   1270374 cpu-ns/op\t  548864 B/op\t       2 allocs/op\nBenchmarkDecode/entropy-4   \t     316\t   1131318 ns/op\t 385.35 MB/s\t   1234367 cpu-ns/op\t  548864 B/op\t       2 allocs/op\nBenchmarkDecode/raw-4       \t    4279\t    114569 ns/op\t4576.19 MB/s\t    200906 cpu-ns/op\t  524289 B/op\t       1 allocs/op\nBenchmarkDecode/raw-4       \t    3276\t    110026 ns/op\t4765.15 MB/s\t    194171 cpu-ns/op\t  524289 B/op\t       1 allocs/op\nBenchmarkDecode/raw-4       \t    3430\t    113275 ns/op\t4628.46 MB/s\t    198692 cpu-ns/op\t  524289 B/op\t       1 allocs/op\nBenchmarkDecode/repeat-4    \t    3294\t    116603 ns/op\t4288.07 MB/s\t    217456 cpu-ns/op\t  507905 B/op\t       1 allocs/op\nBenchmarkDecode/repeat-4    \t    2888\t    115049 ns/op\t4345.99 MB/s\t    211948 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nBenchmarkDecode/repeat-4    \t    2870\t    119650 ns/op\t4178.84 MB/s\t    220869 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/text-4         \t    3962\t     86700 ns/op\t2234.79 MB/s\t    306109 cpu-ns/op\t  202752 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/text-4         \t    3945\t     88547 ns/op\t2188.17 MB/s\t    311775 cpu-ns/op\t  202752 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/text-4         \t    3703\t     93771 ns/op\t2066.25 MB/s\t    332825 cpu-ns/op\t  202752 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/mixed-4        \t    2232\t    141938 ns/op\t1438.13 MB/s\t    526372 cpu-ns/op\t  232065 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/mixed-4        \t    2685\t    135464 ns/op\t1506.85 MB/s\t    501443 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/mixed-4        \t    2293\t    142396 ns/op\t1433.50 MB/s\t    524193 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/entropy-4      \t     840\t    378229 ns/op\t1152.62 MB/s\t   1409262 cpu-ns/op\t  548866 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/entropy-4      \t     960\t    368785 ns/op\t1182.14 MB/s\t   1380596 cpu-ns/op\t  548865 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/entropy-4      \t     843\t    380689 ns/op\t1145.17 MB/s\t   1420407 cpu-ns/op\t  548866 B/op\t       2 allocs/op\nPASS\n"
+      },
+      {
+        "version": "final",
+        "gomaxprocs": 1,
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/zstddecode\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkDecode/text    \t    1497\t    239426 ns/op\t 809.25 MB/s\t    240248 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecode/text    \t    1574\t    226769 ns/op\t 854.42 MB/s\t    227667 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecode/text    \t    1615\t    227569 ns/op\t 851.41 MB/s\t    228361 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecode/mixed   \t    1039\t    342264 ns/op\t 596.40 MB/s\t    343801 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecode/mixed   \t    1044\t    342892 ns/op\t 595.30 MB/s\t    343867 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecode/mixed   \t    1044\t    342300 ns/op\t 596.33 MB/s\t    343208 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecode/entropy \t     334\t   1056767 ns/op\t 412.54 MB/s\t   1060180 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nBenchmarkDecode/entropy \t     343\t   1050652 ns/op\t 414.94 MB/s\t   1054574 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nBenchmarkDecode/entropy \t     340\t   1057091 ns/op\t 412.41 MB/s\t   1060741 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nBenchmarkDecode/raw     \t    4755\t     67344 ns/op\t7785.21 MB/s\t     69648 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/raw     \t    4674\t     69424 ns/op\t7551.97 MB/s\t     70218 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/raw     \t    5954\t     66787 ns/op\t7850.15 MB/s\t     70152 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/repeat  \t    4904\t     63334 ns/op\t7894.67 MB/s\t     64881 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nBenchmarkDecode/repeat  \t    5512\t     65309 ns/op\t7655.86 MB/s\t     65593 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nBenchmarkDecode/repeat  \t    5967\t     65312 ns/op\t7655.52 MB/s\t     65712 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/text         \t    1548\t    224476 ns/op\t 863.14 MB/s\t    225285 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/text         \t    1557\t    240097 ns/op\t 806.99 MB/s\t    240951 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/text         \t    1416\t    243703 ns/op\t 795.05 MB/s\t    244520 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/mixed        \t    1011\t    343963 ns/op\t 593.45 MB/s\t    345107 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/mixed        \t    1027\t    341597 ns/op\t 597.56 MB/s\t    343459 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/mixed        \t    1023\t    343717 ns/op\t 593.87 MB/s\t    346694 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/entropy      \t     340\t   1060373 ns/op\t 411.13 MB/s\t   1064209 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/entropy      \t     339\t   1048945 ns/op\t 415.61 MB/s\t   1052714 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/entropy      \t     337\t   1060690 ns/op\t 411.01 MB/s\t   1066409 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nPASS\n"
+      },
+      {
+        "version": "final",
+        "gomaxprocs": 4,
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/zstddecode\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkDecode/text-4      \t    1270\t    260640 ns/op\t 743.38 MB/s\t    297184 cpu-ns/op\t  196609 B/op\t       1 allocs/op\nBenchmarkDecode/text-4      \t    1230\t    263051 ns/op\t 736.57 MB/s\t    299260 cpu-ns/op\t  196613 B/op\t       1 allocs/op\nBenchmarkDecode/text-4      \t    1411\t    256998 ns/op\t 753.92 MB/s\t    295392 cpu-ns/op\t  196609 B/op\t       1 allocs/op\nBenchmarkDecode/mixed-4     \t     936\t    383144 ns/op\t 532.76 MB/s\t    422045 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecode/mixed-4     \t     864\t    388033 ns/op\t 526.05 MB/s\t    427366 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecode/mixed-4     \t     993\t    367558 ns/op\t 555.35 MB/s\t    406311 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecode/entropy-4   \t     337\t   1135462 ns/op\t 383.94 MB/s\t   1214285 cpu-ns/op\t  442369 B/op\t       1 allocs/op\nBenchmarkDecode/entropy-4   \t     326\t   1087289 ns/op\t 400.96 MB/s\t   1164046 cpu-ns/op\t  442369 B/op\t       1 allocs/op\nBenchmarkDecode/entropy-4   \t     302\t   1168530 ns/op\t 373.08 MB/s\t   1249152 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nBenchmarkDecode/raw-4       \t    4263\t     90279 ns/op\t5807.42 MB/s\t    143081 cpu-ns/op\t  524290 B/op\t       1 allocs/op\nBenchmarkDecode/raw-4       \t    3655\t     95828 ns/op\t5471.12 MB/s\t    161627 cpu-ns/op\t  524289 B/op\t       1 allocs/op\nBenchmarkDecode/raw-4       \t    3422\t     89765 ns/op\t5840.66 MB/s\t    152217 cpu-ns/op\t  524289 B/op\t       1 allocs/op\nBenchmarkDecode/repeat-4    \t    4298\t     84107 ns/op\t5944.83 MB/s\t    149149 cpu-ns/op\t  507907 B/op\t       1 allocs/op\nBenchmarkDecode/repeat-4    \t    3957\t     85444 ns/op\t5851.76 MB/s\t    157075 cpu-ns/op\t  507906 B/op\t       1 allocs/op\nBenchmarkDecode/repeat-4    \t    4074\t     81919 ns/op\t6103.57 MB/s\t    149002 cpu-ns/op\t  507907 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/text-4         \t    2988\t    100837 ns/op\t1921.47 MB/s\t    367311 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/text-4         \t    3328\t     91093 ns/op\t2127.00 MB/s\t    331297 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/text-4         \t    3968\t     95119 ns/op\t2036.97 MB/s\t    333039 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/mixed-4        \t    3057\t    120794 ns/op\t1689.87 MB/s\t    445170 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/mixed-4        \t    3007\t    127878 ns/op\t1596.25 MB/s\t    463512 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/mixed-4        \t    2463\t    133150 ns/op\t1533.05 MB/s\t    493080 cpu-ns/op\t  204801 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/entropy-4      \t     876\t    486256 ns/op\t 896.56 MB/s\t   1839978 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/entropy-4      \t     912\t    419759 ns/op\t1038.58 MB/s\t   1593055 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/entropy-4      \t     816\t    398729 ns/op\t1093.36 MB/s\t   1529108 cpu-ns/op\t  442369 B/op\t       1 allocs/op\nPASS\n"
+      },
+      {
+        "version": "final",
+        "gomaxprocs": 1,
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/zstddecode\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkDecode/text    \t    1431\t    247266 ns/op\t 783.59 MB/s\t    248196 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecode/text    \t    1435\t    244584 ns/op\t 792.18 MB/s\t    245381 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecode/text    \t    1611\t    228231 ns/op\t 848.94 MB/s\t    229887 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecode/mixed   \t    1011\t    344059 ns/op\t 593.29 MB/s\t    345238 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecode/mixed   \t    1057\t    350389 ns/op\t 582.57 MB/s\t    351585 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecode/mixed   \t    1017\t    377059 ns/op\t 541.36 MB/s\t    378358 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecode/entropy \t     342\t   1054782 ns/op\t 413.31 MB/s\t   1058418 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nBenchmarkDecode/entropy \t     340\t   1070238 ns/op\t 407.34 MB/s\t   1073788 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nBenchmarkDecode/entropy \t     344\t   1076986 ns/op\t 404.79 MB/s\t   1082782 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nBenchmarkDecode/raw     \t    6025\t     64353 ns/op\t8147.06 MB/s\t     67150 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/raw     \t    6010\t     59755 ns/op\t8773.93 MB/s\t     62017 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/raw     \t    5982\t     59606 ns/op\t8795.84 MB/s\t     66854 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/repeat  \t    6246\t     54596 ns/op\t9158.14 MB/s\t     54897 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nBenchmarkDecode/repeat  \t    6631\t     55275 ns/op\t9045.64 MB/s\t     55850 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nBenchmarkDecode/repeat  \t    6823\t     59675 ns/op\t8378.75 MB/s\t     60591 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/text         \t    1545\t    222466 ns/op\t 870.94 MB/s\t    223858 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/text         \t    1572\t    230606 ns/op\t 840.20 MB/s\t    231218 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/text         \t    1554\t    223480 ns/op\t 866.99 MB/s\t    224611 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/mixed        \t    1021\t    339177 ns/op\t 601.82 MB/s\t    340290 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/mixed        \t    1038\t    339192 ns/op\t 601.80 MB/s\t    340332 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/mixed        \t    1029\t    339572 ns/op\t 601.12 MB/s\t    340801 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/entropy      \t     340\t   1042282 ns/op\t 418.27 MB/s\t   1045732 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/entropy      \t     345\t   1046186 ns/op\t 416.71 MB/s\t   1052162 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/entropy      \t     340\t   1041082 ns/op\t 418.75 MB/s\t   1044553 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nPASS\n"
+      },
+      {
+        "version": "final",
+        "gomaxprocs": 4,
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/zstddecode\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkDecode/text-4      \t    1416\t    246352 ns/op\t 786.50 MB/s\t    280268 cpu-ns/op\t  196609 B/op\t       1 allocs/op\nBenchmarkDecode/text-4      \t    1436\t    250421 ns/op\t 773.72 MB/s\t    286477 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecode/text-4      \t    1358\t    246483 ns/op\t 786.08 MB/s\t    281920 cpu-ns/op\t  196609 B/op\t       1 allocs/op\nBenchmarkDecode/mixed-4     \t     970\t    367700 ns/op\t 555.14 MB/s\t    405826 cpu-ns/op\t  204801 B/op\t       1 allocs/op\nBenchmarkDecode/mixed-4     \t     921\t    376332 ns/op\t 542.41 MB/s\t    421180 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecode/mixed-4     \t     978\t    379051 ns/op\t 538.52 MB/s\t    423351 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecode/entropy-4   \t     313\t   1123329 ns/op\t 388.09 MB/s\t   1209990 cpu-ns/op\t  442369 B/op\t       1 allocs/op\nBenchmarkDecode/entropy-4   \t     314\t   1157269 ns/op\t 376.71 MB/s\t   1236920 cpu-ns/op\t  442369 B/op\t       1 allocs/op\nBenchmarkDecode/entropy-4   \t     312\t   1117858 ns/op\t 389.99 MB/s\t   1208920 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nBenchmarkDecode/raw-4       \t    3662\t     87720 ns/op\t5976.85 MB/s\t    148704 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/raw-4       \t    3465\t     88605 ns/op\t5917.15 MB/s\t    153024 cpu-ns/op\t  524289 B/op\t       1 allocs/op\nBenchmarkDecode/raw-4       \t    3891\t     91782 ns/op\t5712.34 MB/s\t    159440 cpu-ns/op\t  524289 B/op\t       1 allocs/op\nBenchmarkDecode/repeat-4    \t    4642\t     76621 ns/op\t6525.65 MB/s\t    141101 cpu-ns/op\t  507906 B/op\t       1 allocs/op\nBenchmarkDecode/repeat-4    \t    4692\t     71753 ns/op\t6968.38 MB/s\t    128435 cpu-ns/op\t  507906 B/op\t       1 allocs/op\nBenchmarkDecode/repeat-4    \t    4450\t     76760 ns/op\t6513.77 MB/s\t    142733 cpu-ns/op\t  507906 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/text-4         \t    3639\t     91812 ns/op\t2110.35 MB/s\t    330023 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/text-4         \t    3363\t     89596 ns/op\t2162.54 MB/s\t    318749 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/text-4         \t    3734\t     86148 ns/op\t2249.09 MB/s\t    296693 cpu-ns/op\t  196610 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/mixed-4        \t    2948\t    121302 ns/op\t1682.79 MB/s\t    435761 cpu-ns/op\t  204802 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/mixed-4        \t    2793\t    122177 ns/op\t1670.73 MB/s\t    442807 cpu-ns/op\t  204801 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/mixed-4        \t    2881\t    124860 ns/op\t1634.84 MB/s\t    450164 cpu-ns/op\t  204801 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/entropy-4      \t    1054\t    345038 ns/op\t1263.50 MB/s\t   1305518 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/entropy-4      \t    1035\t    350369 ns/op\t1244.27 MB/s\t   1329974 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/entropy-4      \t     844\t    380393 ns/op\t1146.06 MB/s\t   1452882 cpu-ns/op\t  442369 B/op\t       1 allocs/op\nPASS\n"
+      },
+      {
+        "version": "baseline",
+        "gomaxprocs": 1,
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/zstddecode\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkDecode/text    \t    1263\t    239180 ns/op\t 810.08 MB/s\t    239925 cpu-ns/op\t  202752 B/op\t       2 allocs/op\nBenchmarkDecode/text    \t    1610\t    225406 ns/op\t 859.58 MB/s\t    226029 cpu-ns/op\t  202752 B/op\t       2 allocs/op\nBenchmarkDecode/text    \t    1604\t    225790 ns/op\t 858.12 MB/s\t    226495 cpu-ns/op\t  202752 B/op\t       2 allocs/op\nBenchmarkDecode/mixed   \t     968\t    372009 ns/op\t 548.71 MB/s\t    374027 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nBenchmarkDecode/mixed   \t    1034\t    344383 ns/op\t 592.73 MB/s\t    346315 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nBenchmarkDecode/mixed   \t    1027\t    344361 ns/op\t 592.76 MB/s\t    345611 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nBenchmarkDecode/entropy \t     326\t   1102219 ns/op\t 395.52 MB/s\t   1105994 cpu-ns/op\t  548864 B/op\t       2 allocs/op\nBenchmarkDecode/entropy \t     324\t   1105335 ns/op\t 394.41 MB/s\t   1109028 cpu-ns/op\t  548864 B/op\t       2 allocs/op\nBenchmarkDecode/entropy \t     324\t   1138485 ns/op\t 382.93 MB/s\t   1142269 cpu-ns/op\t  548864 B/op\t       2 allocs/op\nBenchmarkDecode/raw     \t    5830\t     65992 ns/op\t7944.68 MB/s\t     68971 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/raw     \t    4822\t     64749 ns/op\t8097.28 MB/s\t     67001 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/raw     \t    5000\t     67322 ns/op\t7787.80 MB/s\t     69116 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/repeat  \t    5376\t     62474 ns/op\t8003.35 MB/s\t     63360 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nBenchmarkDecode/repeat  \t    5817\t     62509 ns/op\t7998.83 MB/s\t     67217 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nBenchmarkDecode/repeat  \t    5584\t     61336 ns/op\t8151.87 MB/s\t     62657 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/text         \t    1521\t    223277 ns/op\t 867.78 MB/s\t    224583 cpu-ns/op\t  202752 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/text         \t    1510\t    225036 ns/op\t 861.00 MB/s\t    225886 cpu-ns/op\t  202752 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/text         \t    1546\t    225573 ns/op\t 858.94 MB/s\t    226340 cpu-ns/op\t  202752 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/mixed        \t     985\t    349931 ns/op\t 583.33 MB/s\t    351255 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/mixed        \t     970\t    360864 ns/op\t 565.66 MB/s\t    362157 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/mixed        \t    1008\t    352144 ns/op\t 579.66 MB/s\t    353248 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/entropy      \t     319\t   1125538 ns/op\t 387.33 MB/s\t   1128602 cpu-ns/op\t  548864 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/entropy      \t     321\t   1112918 ns/op\t 391.72 MB/s\t   1115925 cpu-ns/op\t  548864 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/entropy      \t     259\t   1208839 ns/op\t 360.64 MB/s\t   1212606 cpu-ns/op\t  548864 B/op\t       2 allocs/op\nPASS\n"
+      },
+      {
+        "version": "baseline",
+        "gomaxprocs": 4,
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/zstddecode\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkDecode/text-4      \t    1369\t    273918 ns/op\t 707.35 MB/s\t    313129 cpu-ns/op\t  202757 B/op\t       2 allocs/op\nBenchmarkDecode/text-4      \t    1380\t    267824 ns/op\t 723.44 MB/s\t    303584 cpu-ns/op\t  202753 B/op\t       2 allocs/op\nBenchmarkDecode/text-4      \t    1365\t    260171 ns/op\t 744.72 MB/s\t    297037 cpu-ns/op\t  202752 B/op\t       2 allocs/op\nBenchmarkDecode/mixed-4     \t     997\t    373947 ns/op\t 545.87 MB/s\t    418488 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nBenchmarkDecode/mixed-4     \t     946\t    384796 ns/op\t 530.48 MB/s\t    429660 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nBenchmarkDecode/mixed-4     \t    1012\t    377382 ns/op\t 540.90 MB/s\t    419834 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nBenchmarkDecode/entropy-4   \t     308\t   1138069 ns/op\t 383.07 MB/s\t   1239338 cpu-ns/op\t  548864 B/op\t       2 allocs/op\nBenchmarkDecode/entropy-4   \t     315\t   1132572 ns/op\t 384.92 MB/s\t   1233651 cpu-ns/op\t  548864 B/op\t       2 allocs/op\nBenchmarkDecode/entropy-4   \t     314\t   1148218 ns/op\t 379.68 MB/s\t   1248519 cpu-ns/op\t  548864 B/op\t       2 allocs/op\nBenchmarkDecode/raw-4       \t    4812\t     93886 ns/op\t5584.31 MB/s\t    162888 cpu-ns/op\t  524290 B/op\t       1 allocs/op\nBenchmarkDecode/raw-4       \t    3927\t     95303 ns/op\t5501.27 MB/s\t    164557 cpu-ns/op\t  524289 B/op\t       1 allocs/op\nBenchmarkDecode/raw-4       \t    3517\t    101142 ns/op\t5183.67 MB/s\t    175915 cpu-ns/op\t  524289 B/op\t       1 allocs/op\nBenchmarkDecode/repeat-4    \t    4758\t     75324 ns/op\t6638.02 MB/s\t    136531 cpu-ns/op\t  507907 B/op\t       1 allocs/op\nBenchmarkDecode/repeat-4    \t    4935\t     73704 ns/op\t6783.89 MB/s\t    134297 cpu-ns/op\t  507907 B/op\t       1 allocs/op\nBenchmarkDecode/repeat-4    \t    4752\t     74367 ns/op\t6723.40 MB/s\t    135118 cpu-ns/op\t  507907 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/text-4         \t    3217\t     99585 ns/op\t1945.62 MB/s\t    353093 cpu-ns/op\t  202753 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/text-4         \t    3541\t    100922 ns/op\t1919.85 MB/s\t    358924 cpu-ns/op\t  202752 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/text-4         \t    3738\t     95556 ns/op\t2027.66 MB/s\t    339290 cpu-ns/op\t  202752 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/mixed-4        \t    2464\t    135011 ns/op\t1511.92 MB/s\t    485352 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/mixed-4        \t    2472\t    132212 ns/op\t1543.92 MB/s\t    475058 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/mixed-4        \t    2400\t    136712 ns/op\t1493.10 MB/s\t    492560 cpu-ns/op\t  232065 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/entropy-4      \t     890\t    381974 ns/op\t1141.32 MB/s\t   1428790 cpu-ns/op\t  548864 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/entropy-4      \t     946\t    367852 ns/op\t1185.14 MB/s\t   1367722 cpu-ns/op\t  548866 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/entropy-4      \t    1004\t    379865 ns/op\t1147.66 MB/s\t   1420737 cpu-ns/op\t  548867 B/op\t       2 allocs/op\nPASS\n"
+      }
+    ],
+    "final-store": [
+      {
+        "version": "before",
+        "gomaxprocs": 1,
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/store\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkPackDecode/snapshot         \t      45\t   6071127 ns/op\t  86.56 MB/s\t   6093422 cpu-ns/op\t 5133058 B/op\t    3724 allocs/op\nBenchmarkPackDecode/snapshot         \t      49\t   6165290 ns/op\t  85.24 MB/s\t   6182612 cpu-ns/op\t 5132894 B/op\t    3724 allocs/op\nBenchmarkPackDecode/dat              \t      86\t   3778844 ns/op\t 139.07 MB/s\t   3793767 cpu-ns/op\t 4284582 B/op\t    2661 allocs/op\nBenchmarkPackDecode/dat              \t      84\t   3964143 ns/op\t 132.57 MB/s\t   3988298 cpu-ns/op\t 4284588 B/op\t    2661 allocs/op\nBenchmarkPackFramesDecode/text/serial         \t     157\t   1903467 ns/op\t 814.32 MB/s\t   1910248 cpu-ns/op\t 1622016 B/op\t      16 allocs/op\nBenchmarkPackFramesDecode/text/serial         \t     156\t   1912383 ns/op\t 810.53 MB/s\t   1919083 cpu-ns/op\t 1622016 B/op\t      16 allocs/op\nBenchmarkPackFramesDecode/text/workers        \t     156\t   1933343 ns/op\t 801.74 MB/s\t   1940558 cpu-ns/op\t 1622016 B/op\t      16 allocs/op\nBenchmarkPackFramesDecode/text/workers        \t     156\t   1900732 ns/op\t 815.50 MB/s\t   1907500 cpu-ns/op\t 1622016 B/op\t      16 allocs/op\nBenchmarkPackFramesDecode/mixed/serial        \t     100\t   2949442 ns/op\t 553.66 MB/s\t   2959600 cpu-ns/op\t 1856512 B/op\t      16 allocs/op\nBenchmarkPackFramesDecode/mixed/serial        \t     100\t   2899038 ns/op\t 563.29 MB/s\t   2908480 cpu-ns/op\t 1856512 B/op\t      16 allocs/op\nBenchmarkPackFramesDecode/mixed/workers       \t     100\t   2886713 ns/op\t 565.70 MB/s\t   2897250 cpu-ns/op\t 1856512 B/op\t      16 allocs/op\nBenchmarkPackFramesDecode/mixed/workers       \t     100\t   2865936 ns/op\t 569.80 MB/s\t   2883650 cpu-ns/op\t 1856512 B/op\t      16 allocs/op\nBenchmarkPackFramesDecode/entropy/serial      \t      31\t   9182626 ns/op\t 379.81 MB/s\t   9215968 cpu-ns/op\t 4390912 B/op\t      16 allocs/op\nBenchmarkPackFramesDecode/entropy/serial      \t      32\t   9321203 ns/op\t 374.16 MB/s\t   9355094 cpu-ns/op\t 4390912 B/op\t      16 allocs/op\nBenchmarkPackFramesDecode/entropy/workers     \t      32\t   9144394 ns/op\t 381.40 MB/s\t   9177312 cpu-ns/op\t 4390912 B/op\t      16 allocs/op\nBenchmarkPackFramesDecode/entropy/workers     \t      32\t   9161626 ns/op\t 380.68 MB/s\t   9194500 cpu-ns/op\t 4390912 B/op\t      16 allocs/op\nPASS\n"
+      },
+      {
+        "version": "before",
+        "gomaxprocs": 4,
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/store\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkPackDecode/snapshot-4         \t      67\t   4961852 ns/op\t 105.91 MB/s\t  10270119 cpu-ns/op\t 5149160 B/op\t    3768 allocs/op\nBenchmarkPackDecode/snapshot-4         \t      64\t   4798950 ns/op\t 109.51 MB/s\t  10013938 cpu-ns/op\t 5149860 B/op\t    3769 allocs/op\nBenchmarkPackDecode/dat-4              \t     153\t   1948259 ns/op\t 269.74 MB/s\t   6245739 cpu-ns/op\t 4295221 B/op\t    2693 allocs/op\nBenchmarkPackDecode/dat-4              \t     150\t   1976114 ns/op\t 265.93 MB/s\t   6463147 cpu-ns/op\t 4294780 B/op\t    2693 allocs/op\nBenchmarkPackFramesDecode/text/serial-4         \t     142\t   2081492 ns/op\t 744.68 MB/s\t   2472697 cpu-ns/op\t 1622019 B/op\t      16 allocs/op\nBenchmarkPackFramesDecode/text/serial-4         \t     146\t   2065385 ns/op\t 750.48 MB/s\t   2491089 cpu-ns/op\t 1622019 B/op\t      16 allocs/op\nBenchmarkPackFramesDecode/text/workers-4        \t     306\t    979704 ns/op\t1582.15 MB/s\t   3062121 cpu-ns/op\t 1622424 B/op\t      26 allocs/op\nBenchmarkPackFramesDecode/text/workers-4        \t     331\t    966506 ns/op\t1603.76 MB/s\t   3019580 cpu-ns/op\t 1622379 B/op\t      26 allocs/op\nBenchmarkPackFramesDecode/mixed/serial-4        \t      86\t   3396838 ns/op\t 480.74 MB/s\t   4140395 cpu-ns/op\t 1856512 B/op\t      16 allocs/op\nBenchmarkPackFramesDecode/mixed/serial-4        \t      92\t   3433354 ns/op\t 475.63 MB/s\t   4058152 cpu-ns/op\t 1856512 B/op\t      16 allocs/op\nBenchmarkPackFramesDecode/mixed/workers-4       \t     235\t   1296457 ns/op\t1259.59 MB/s\t   4025800 cpu-ns/op\t 1856916 B/op\t      26 allocs/op\nBenchmarkPackFramesDecode/mixed/workers-4       \t     231\t   1273348 ns/op\t1282.45 MB/s\t   4112468 cpu-ns/op\t 1856874 B/op\t      26 allocs/op\nBenchmarkPackFramesDecode/entropy/serial-4      \t      28\t   9657608 ns/op\t 361.13 MB/s\t  10383929 cpu-ns/op\t 4390912 B/op\t      16 allocs/op\nBenchmarkPackFramesDecode/entropy/serial-4      \t      27\t   9749674 ns/op\t 357.72 MB/s\t  10462148 cpu-ns/op\t 4390912 B/op\t      16 allocs/op\nBenchmarkPackFramesDecode/entropy/workers-4     \t      78\t   4042855 ns/op\t 862.67 MB/s\t  13156474 cpu-ns/op\t 4391271 B/op\t      26 allocs/op\nBenchmarkPackFramesDecode/entropy/workers-4     \t      81\t   3836972 ns/op\t 908.96 MB/s\t  12750432 cpu-ns/op\t 4391277 B/op\t      26 allocs/op\nPASS\n"
+      },
+      {
+        "version": "after",
+        "gomaxprocs": 1,
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/store\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkPackDecode/snapshot         \t      44\t   6300495 ns/op\t  83.41 MB/s\t   6296182 cpu-ns/op\t 5127945 B/op\t    3715 allocs/op\nBenchmarkPackDecode/snapshot         \t      48\t   6219762 ns/op\t  84.49 MB/s\t   6242646 cpu-ns/op\t 5127763 B/op\t    3715 allocs/op\nBenchmarkPackDecode/dat              \t      81\t   4063297 ns/op\t 129.33 MB/s\t   4078765 cpu-ns/op\t 4279462 B/op\t    2652 allocs/op\nBenchmarkPackDecode/dat              \t      72\t   3964891 ns/op\t 132.54 MB/s\t   3979903 cpu-ns/op\t 4279455 B/op\t    2652 allocs/op\nBenchmarkPackFramesDecode/text/serial         \t     152\t   1963985 ns/op\t 789.23 MB/s\t   1971033 cpu-ns/op\t 1572864 B/op\t       8 allocs/op\nBenchmarkPackFramesDecode/text/serial         \t     154\t   1940036 ns/op\t 798.97 MB/s\t   1947188 cpu-ns/op\t 1572864 B/op\t       8 allocs/op\nBenchmarkPackFramesDecode/text/workers        \t     153\t   1949517 ns/op\t 795.09 MB/s\t   1956922 cpu-ns/op\t 1572864 B/op\t       8 allocs/op\nBenchmarkPackFramesDecode/text/workers        \t     154\t   1948191 ns/op\t 795.63 MB/s\t   1955701 cpu-ns/op\t 1572864 B/op\t       8 allocs/op\nBenchmarkPackFramesDecode/mixed/serial        \t     100\t   2834482 ns/op\t 576.12 MB/s\t   2845160 cpu-ns/op\t 1638400 B/op\t       8 allocs/op\nBenchmarkPackFramesDecode/mixed/serial        \t     100\t   2859979 ns/op\t 570.98 MB/s\t   2870880 cpu-ns/op\t 1638400 B/op\t       8 allocs/op\nBenchmarkPackFramesDecode/mixed/workers       \t     100\t   2866377 ns/op\t 569.71 MB/s\t   2877180 cpu-ns/op\t 1638400 B/op\t       8 allocs/op\nBenchmarkPackFramesDecode/mixed/workers       \t     100\t   2828001 ns/op\t 577.44 MB/s\t   2838590 cpu-ns/op\t 1638400 B/op\t       8 allocs/op\nBenchmarkPackFramesDecode/entropy/serial      \t      31\t   8935748 ns/op\t 390.30 MB/s\t   8968355 cpu-ns/op\t 3538944 B/op\t       8 allocs/op\nBenchmarkPackFramesDecode/entropy/serial      \t      33\t   8872216 ns/op\t 393.10 MB/s\t   8904364 cpu-ns/op\t 3538944 B/op\t       8 allocs/op\nBenchmarkPackFramesDecode/entropy/workers     \t      33\t   8784190 ns/op\t 397.04 MB/s\t   8815242 cpu-ns/op\t 3538944 B/op\t       8 allocs/op\nBenchmarkPackFramesDecode/entropy/workers     \t      33\t   8767609 ns/op\t 397.79 MB/s\t   8801485 cpu-ns/op\t 3538944 B/op\t       8 allocs/op\nPASS\n"
+      },
+      {
+        "version": "after",
+        "gomaxprocs": 4,
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/store\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkPackDecode/snapshot-4         \t      70\t   4723130 ns/op\t 111.26 MB/s\t  10319514 cpu-ns/op\t 5143543 B/op\t    3758 allocs/op\nBenchmarkPackDecode/snapshot-4         \t      72\t   4768437 ns/op\t 110.21 MB/s\t   9990597 cpu-ns/op\t 5143051 B/op\t    3757 allocs/op\nBenchmarkPackDecode/dat-4              \t     148\t   1995142 ns/op\t 263.40 MB/s\t   6519101 cpu-ns/op\t 4290044 B/op\t    2684 allocs/op\nBenchmarkPackDecode/dat-4              \t     148\t   2013869 ns/op\t 260.95 MB/s\t   6586493 cpu-ns/op\t 4289639 B/op\t    2683 allocs/op\nBenchmarkPackFramesDecode/text/serial-4         \t     132\t   2254399 ns/op\t 687.56 MB/s\t   2735205 cpu-ns/op\t 1572864 B/op\t       8 allocs/op\nBenchmarkPackFramesDecode/text/serial-4         \t     140\t   2120939 ns/op\t 730.83 MB/s\t   2569293 cpu-ns/op\t 1572868 B/op\t       8 allocs/op\nBenchmarkPackFramesDecode/text/workers-4        \t     306\t    939265 ns/op\t1650.27 MB/s\t   2814072 cpu-ns/op\t 1573296 B/op\t      18 allocs/op\nBenchmarkPackFramesDecode/text/workers-4        \t     337\t    944305 ns/op\t1641.46 MB/s\t   2948941 cpu-ns/op\t 1573249 B/op\t      18 allocs/op\nBenchmarkPackFramesDecode/mixed/serial-4        \t      79\t   3245201 ns/op\t 503.20 MB/s\t   3906380 cpu-ns/op\t 1638400 B/op\t       8 allocs/op\nBenchmarkPackFramesDecode/mixed/serial-4        \t     100\t   3171930 ns/op\t 514.83 MB/s\t   3750250 cpu-ns/op\t 1638400 B/op\t       8 allocs/op\nBenchmarkPackFramesDecode/mixed/workers-4       \t     217\t   1378645 ns/op\t1184.50 MB/s\t   4401014 cpu-ns/op\t 1638844 B/op\t      18 allocs/op\nBenchmarkPackFramesDecode/mixed/workers-4       \t     242\t   1285126 ns/op\t1270.69 MB/s\t   4082331 cpu-ns/op\t 1638760 B/op\t      18 allocs/op\nBenchmarkPackFramesDecode/entropy/serial-4      \t      28\t   9494791 ns/op\t 367.32 MB/s\t  10316107 cpu-ns/op\t 3538944 B/op\t       8 allocs/op\nBenchmarkPackFramesDecode/entropy/serial-4      \t      32\t   9232234 ns/op\t 377.77 MB/s\t  10101469 cpu-ns/op\t 3538944 B/op\t       8 allocs/op\nBenchmarkPackFramesDecode/entropy/workers-4     \t      73\t   3528201 ns/op\t 988.50 MB/s\t  11791849 cpu-ns/op\t 3539302 B/op\t      18 allocs/op\nBenchmarkPackFramesDecode/entropy/workers-4     \t      82\t   3252838 ns/op\t1072.18 MB/s\t  10936415 cpu-ns/op\t 3539304 B/op\t      18 allocs/op\nPASS\n"
+      },
+      {
+        "version": "after",
+        "gomaxprocs": 1,
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/store\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkPackDecode/snapshot         \t      43\t   6145872 ns/op\t  85.51 MB/s\t   6196047 cpu-ns/op\t 5127929 B/op\t    3715 allocs/op\nBenchmarkPackDecode/snapshot         \t      52\t   6350834 ns/op\t  82.75 MB/s\t   6374808 cpu-ns/op\t 5127760 B/op\t    3714 allocs/op\nBenchmarkPackDecode/dat              \t      82\t   4015015 ns/op\t 130.89 MB/s\t   4029939 cpu-ns/op\t 4279465 B/op\t    2652 allocs/op\nBenchmarkPackDecode/dat              \t      84\t   3994412 ns/op\t 131.56 MB/s\t   4010310 cpu-ns/op\t 4279460 B/op\t    2652 allocs/op\nBenchmarkPackFramesDecode/text/serial         \t     154\t   1933114 ns/op\t 801.84 MB/s\t   1943890 cpu-ns/op\t 1572864 B/op\t       8 allocs/op\nBenchmarkPackFramesDecode/text/serial         \t     156\t   1924726 ns/op\t 805.33 MB/s\t   1931032 cpu-ns/op\t 1572864 B/op\t       8 allocs/op\nBenchmarkPackFramesDecode/text/workers        \t     154\t   1927665 ns/op\t 804.10 MB/s\t   1934058 cpu-ns/op\t 1572864 B/op\t       8 allocs/op\nBenchmarkPackFramesDecode/text/workers        \t     153\t   1936926 ns/op\t 800.26 MB/s\t   1944020 cpu-ns/op\t 1572864 B/op\t       8 allocs/op\nBenchmarkPackFramesDecode/mixed/serial        \t     100\t   2834199 ns/op\t 576.18 MB/s\t   2844470 cpu-ns/op\t 1638400 B/op\t       8 allocs/op\nBenchmarkPackFramesDecode/mixed/serial        \t     100\t   2830353 ns/op\t 576.96 MB/s\t   2841070 cpu-ns/op\t 1638400 B/op\t       8 allocs/op\nBenchmarkPackFramesDecode/mixed/workers       \t     100\t   2823930 ns/op\t 578.27 MB/s\t   2833930 cpu-ns/op\t 1638400 B/op\t       8 allocs/op\nBenchmarkPackFramesDecode/mixed/workers       \t     100\t   2826540 ns/op\t 577.74 MB/s\t   2837300 cpu-ns/op\t 1638400 B/op\t       8 allocs/op\nBenchmarkPackFramesDecode/entropy/serial      \t      28\t  11558937 ns/op\t 301.73 MB/s\t  11592964 cpu-ns/op\t 3538944 B/op\t       8 allocs/op\nBenchmarkPackFramesDecode/entropy/serial      \t      33\t   9013001 ns/op\t 386.96 MB/s\t   9044939 cpu-ns/op\t 3538944 B/op\t       8 allocs/op\nBenchmarkPackFramesDecode/entropy/workers     \t      32\t   9001237 ns/op\t 387.46 MB/s\t   9060219 cpu-ns/op\t 3538944 B/op\t       8 allocs/op\nBenchmarkPackFramesDecode/entropy/workers     \t      33\t   8858672 ns/op\t 393.70 MB/s\t   8890333 cpu-ns/op\t 3538944 B/op\t       8 allocs/op\nPASS\n"
+      },
+      {
+        "version": "after",
+        "gomaxprocs": 4,
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/store\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkPackDecode/snapshot-4         \t      61\t   5263400 ns/op\t  99.84 MB/s\t  10757164 cpu-ns/op\t 5143849 B/op\t    3758 allocs/op\nBenchmarkPackDecode/snapshot-4         \t      55\t   5195699 ns/op\t 101.14 MB/s\t  10657618 cpu-ns/op\t 5141487 B/op\t    3754 allocs/op\nBenchmarkPackDecode/dat-4              \t     135\t   2167867 ns/op\t 242.41 MB/s\t   7114889 cpu-ns/op\t 4290446 B/op\t    2685 allocs/op\nBenchmarkPackDecode/dat-4              \t     148\t   2039925 ns/op\t 257.61 MB/s\t   6652689 cpu-ns/op\t 4290304 B/op\t    2685 allocs/op\nBenchmarkPackFramesDecode/text/serial-4         \t     135\t   2219179 ns/op\t 698.47 MB/s\t   2647415 cpu-ns/op\t 1572864 B/op\t       8 allocs/op\nBenchmarkPackFramesDecode/text/serial-4         \t     135\t   2146459 ns/op\t 722.14 MB/s\t   2545681 cpu-ns/op\t 1572864 B/op\t       8 allocs/op\nBenchmarkPackFramesDecode/text/workers-4        \t     315\t   1082306 ns/op\t1432.16 MB/s\t   3331441 cpu-ns/op\t 1573275 B/op\t      18 allocs/op\nBenchmarkPackFramesDecode/text/workers-4        \t     288\t    999719 ns/op\t1550.48 MB/s\t   3140205 cpu-ns/op\t 1573248 B/op\t      18 allocs/op\nBenchmarkPackFramesDecode/mixed/serial-4        \t     100\t   3154220 ns/op\t 517.72 MB/s\t   3680430 cpu-ns/op\t 1638405 B/op\t       8 allocs/op\nBenchmarkPackFramesDecode/mixed/serial-4        \t      96\t   3044838 ns/op\t 536.32 MB/s\t   3550667 cpu-ns/op\t 1638403 B/op\t       8 allocs/op\nBenchmarkPackFramesDecode/mixed/workers-4       \t     219\t   1362573 ns/op\t1198.47 MB/s\t   4332767 cpu-ns/op\t 1638851 B/op\t      18 allocs/op\nBenchmarkPackFramesDecode/mixed/workers-4       \t     242\t   1290522 ns/op\t1265.38 MB/s\t   4087636 cpu-ns/op\t 1638758 B/op\t      18 allocs/op\nBenchmarkPackFramesDecode/entropy/serial-4      \t      32\t   8936983 ns/op\t 390.25 MB/s\t   9777469 cpu-ns/op\t 3538944 B/op\t       8 allocs/op\nBenchmarkPackFramesDecode/entropy/serial-4      \t      32\t   9492224 ns/op\t 367.42 MB/s\t  10328656 cpu-ns/op\t 3538944 B/op\t       8 allocs/op\nBenchmarkPackFramesDecode/entropy/workers-4     \t      85\t   3528218 ns/op\t 988.50 MB/s\t  11738518 cpu-ns/op\t 3539302 B/op\t      18 allocs/op\nBenchmarkPackFramesDecode/entropy/workers-4     \t      80\t   3556516 ns/op\t 980.63 MB/s\t  11734900 cpu-ns/op\t 3539303 B/op\t      18 allocs/op\nPASS\n"
+      },
+      {
+        "version": "before",
+        "gomaxprocs": 1,
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/store\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkPackDecode/snapshot         \t      50\t   6218060 ns/op\t  84.51 MB/s\t   6239700 cpu-ns/op\t 5132886 B/op\t    3724 allocs/op\nBenchmarkPackDecode/snapshot         \t      48\t   6245341 ns/op\t  84.15 MB/s\t   6268250 cpu-ns/op\t 5132883 B/op\t    3724 allocs/op\nBenchmarkPackDecode/dat              \t      79\t   3993485 ns/op\t 131.59 MB/s\t   4036949 cpu-ns/op\t 4284576 B/op\t    2661 allocs/op\nBenchmarkPackDecode/dat              \t      73\t   4012075 ns/op\t 130.98 MB/s\t   4026616 cpu-ns/op\t 4284579 B/op\t    2661 allocs/op\nBenchmarkPackFramesDecode/text/serial         \t     157\t   1898060 ns/op\t 816.64 MB/s\t   1904732 cpu-ns/op\t 1622016 B/op\t      16 allocs/op\nBenchmarkPackFramesDecode/text/serial         \t     153\t   2008046 ns/op\t 771.91 MB/s\t   2014967 cpu-ns/op\t 1622016 B/op\t      16 allocs/op\nBenchmarkPackFramesDecode/text/workers        \t     153\t   1927065 ns/op\t 804.35 MB/s\t   1934281 cpu-ns/op\t 1622016 B/op\t      16 allocs/op\nBenchmarkPackFramesDecode/text/workers        \t     157\t   1903370 ns/op\t 814.37 MB/s\t   1915223 cpu-ns/op\t 1622016 B/op\t      16 allocs/op\nBenchmarkPackFramesDecode/mixed/serial        \t     100\t   2898723 ns/op\t 563.35 MB/s\t   2909060 cpu-ns/op\t 1856512 B/op\t      16 allocs/op\nBenchmarkPackFramesDecode/mixed/serial        \t     100\t   2867342 ns/op\t 569.52 MB/s\t   2877540 cpu-ns/op\t 1856512 B/op\t      16 allocs/op\nBenchmarkPackFramesDecode/mixed/workers       \t     100\t   2866983 ns/op\t 569.59 MB/s\t   2877330 cpu-ns/op\t 1856512 B/op\t      16 allocs/op\nBenchmarkPackFramesDecode/mixed/workers       \t     100\t   2903532 ns/op\t 562.42 MB/s\t   2914020 cpu-ns/op\t 1856512 B/op\t      16 allocs/op\nBenchmarkPackFramesDecode/entropy/serial      \t      31\t   9757894 ns/op\t 357.42 MB/s\t   9794129 cpu-ns/op\t 4390912 B/op\t      16 allocs/op\nBenchmarkPackFramesDecode/entropy/serial      \t      30\t   9777667 ns/op\t 356.69 MB/s\t   9813900 cpu-ns/op\t 4390912 B/op\t      16 allocs/op\nBenchmarkPackFramesDecode/entropy/workers     \t      31\t   9263499 ns/op\t 376.49 MB/s\t   9296613 cpu-ns/op\t 4390912 B/op\t      16 allocs/op\nBenchmarkPackFramesDecode/entropy/workers     \t      30\t   9203565 ns/op\t 378.94 MB/s\t   9238567 cpu-ns/op\t 4390912 B/op\t      16 allocs/op\nPASS\n"
+      },
+      {
+        "version": "before",
+        "gomaxprocs": 4,
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/store\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkPackDecode/snapshot-4         \t      64\t   4641593 ns/op\t 113.22 MB/s\t   9963844 cpu-ns/op\t 5148809 B/op\t    3768 allocs/op\nBenchmarkPackDecode/snapshot-4         \t      66\t   4735361 ns/op\t 110.98 MB/s\t   9929939 cpu-ns/op\t 5149126 B/op\t    3767 allocs/op\nBenchmarkPackDecode/dat-4              \t     150\t   1996741 ns/op\t 263.19 MB/s\t   6552653 cpu-ns/op\t 4295005 B/op\t    2693 allocs/op\nBenchmarkPackDecode/dat-4              \t     142\t   2092382 ns/op\t 251.16 MB/s\t   6883796 cpu-ns/op\t 4294679 B/op\t    2692 allocs/op\nBenchmarkPackFramesDecode/text/serial-4         \t     136\t   2154198 ns/op\t 719.54 MB/s\t   2605699 cpu-ns/op\t 1622016 B/op\t      16 allocs/op\nBenchmarkPackFramesDecode/text/serial-4         \t     141\t   2127583 ns/op\t 728.55 MB/s\t   2563121 cpu-ns/op\t 1622023 B/op\t      16 allocs/op\nBenchmarkPackFramesDecode/text/workers-4        \t     306\t    952589 ns/op\t1627.19 MB/s\t   2987768 cpu-ns/op\t 1622412 B/op\t      26 allocs/op\nBenchmarkPackFramesDecode/text/workers-4        \t     304\t    933398 ns/op\t1660.64 MB/s\t   2834562 cpu-ns/op\t 1622398 B/op\t      26 allocs/op\nBenchmarkPackFramesDecode/mixed/serial-4        \t      93\t   3381700 ns/op\t 482.89 MB/s\t   4059032 cpu-ns/op\t 1856512 B/op\t      16 allocs/op\nBenchmarkPackFramesDecode/mixed/serial-4        \t     100\t   3375402 ns/op\t 483.79 MB/s\t   3992520 cpu-ns/op\t 1856512 B/op\t      16 allocs/op\nBenchmarkPackFramesDecode/mixed/workers-4       \t     235\t   1321101 ns/op\t1236.09 MB/s\t   4255553 cpu-ns/op\t 1856890 B/op\t      26 allocs/op\nBenchmarkPackFramesDecode/mixed/workers-4       \t     200\t   1404427 ns/op\t1162.75 MB/s\t   4483160 cpu-ns/op\t 1856871 B/op\t      26 allocs/op\nBenchmarkPackFramesDecode/entropy/serial-4      \t      28\t  10316433 ns/op\t 338.07 MB/s\t  11123714 cpu-ns/op\t 4390912 B/op\t      16 allocs/op\nBenchmarkPackFramesDecode/entropy/serial-4      \t      31\t   9713453 ns/op\t 359.05 MB/s\t  10463323 cpu-ns/op\t 4390912 B/op\t      16 allocs/op\nBenchmarkPackFramesDecode/entropy/workers-4     \t      80\t   3521205 ns/op\t 990.47 MB/s\t  11830138 cpu-ns/op\t 4391288 B/op\t      26 allocs/op\nBenchmarkPackFramesDecode/entropy/workers-4     \t      69\t   3790360 ns/op\t 920.13 MB/s\t  12374826 cpu-ns/op\t 4391280 B/op\t      26 allocs/op\nPASS\n"
+      }
+    ],
+    "pinned": [
+      {
+        "version": "baseline",
+        "gomaxprocs": 1,
+        "cpu_affinity": "10",
+        "input": "text",
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/zstddecode\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkDecode/text         \t    2554\t    226607 ns/op\t 855.03 MB/s\t    226584 cpu-ns/op\t  202752 B/op\t       2 allocs/op\nBenchmarkDecode/text         \t    2608\t    229509 ns/op\t 844.22 MB/s\t    229485 cpu-ns/op\t  202752 B/op\t       2 allocs/op\nPASS\n"
+      },
+      {
+        "version": "baseline",
+        "gomaxprocs": 1,
+        "cpu_affinity": "10",
+        "input": "mixed",
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/zstddecode\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkDecode/mixed         \t    1651\t    359692 ns/op\t 567.50 MB/s\t    359657 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nBenchmarkDecode/mixed         \t    1665\t    356857 ns/op\t 572.01 MB/s\t    356740 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nPASS\n"
+      },
+      {
+        "version": "baseline",
+        "gomaxprocs": 1,
+        "cpu_affinity": "10",
+        "input": "entropy",
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/zstddecode\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkDecode/entropy         \t     546\t   1110363 ns/op\t 392.62 MB/s\t   1110137 cpu-ns/op\t  548864 B/op\t       2 allocs/op\nBenchmarkDecode/entropy         \t     549\t   1095177 ns/op\t 398.07 MB/s\t   1095064 cpu-ns/op\t  548864 B/op\t       2 allocs/op\nPASS\n"
+      },
+      {
+        "version": "baseline",
+        "gomaxprocs": 1,
+        "cpu_affinity": "10",
+        "input": "raw",
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/zstddecode\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkDecode/raw         \t   10000\t     64385 ns/op\t8142.98 MB/s\t     64317 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/raw         \t    8541\t     65041 ns/op\t8060.94 MB/s\t     65030 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nPASS\n"
+      },
+      {
+        "version": "baseline",
+        "gomaxprocs": 1,
+        "cpu_affinity": "10",
+        "input": "repeat",
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/zstddecode\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkDecode/repeat         \t   10000\t     60535 ns/op\t8259.65 MB/s\t     60524 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nBenchmarkDecode/repeat         \t    9897\t     60654 ns/op\t8243.52 MB/s\t     60644 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nPASS\n"
+      },
+      {
+        "version": "final",
+        "gomaxprocs": 1,
+        "cpu_affinity": "10",
+        "input": "text",
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/zstddecode\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkDecode/text         \t    2528\t    227473 ns/op\t 851.77 MB/s\t    227416 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecode/text         \t    2667\t    226790 ns/op\t 854.34 MB/s\t    226786 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nPASS\n"
+      },
+      {
+        "version": "final",
+        "gomaxprocs": 1,
+        "cpu_affinity": "10",
+        "input": "mixed",
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/zstddecode\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkDecode/mixed         \t    1713\t    338396 ns/op\t 603.21 MB/s\t    338346 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecode/mixed         \t    1747\t    343762 ns/op\t 593.80 MB/s\t    343711 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nPASS\n"
+      },
+      {
+        "version": "final",
+        "gomaxprocs": 1,
+        "cpu_affinity": "10",
+        "input": "entropy",
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/zstddecode\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkDecode/entropy         \t     564\t   1054710 ns/op\t 413.34 MB/s\t   1054608 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nBenchmarkDecode/entropy         \t     564\t   1055355 ns/op\t 413.09 MB/s\t   1055225 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nPASS\n"
+      },
+      {
+        "version": "final",
+        "gomaxprocs": 1,
+        "cpu_affinity": "10",
+        "input": "raw",
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/zstddecode\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkDecode/raw         \t   10000\t     62247 ns/op\t8422.69 MB/s\t     62233 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/raw         \t   10000\t     62735 ns/op\t8357.17 MB/s\t     62734 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nPASS\n"
+      },
+      {
+        "version": "final",
+        "gomaxprocs": 1,
+        "cpu_affinity": "10",
+        "input": "repeat",
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/zstddecode\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkDecode/repeat         \t    9634\t     55610 ns/op\t8991.14 MB/s\t     55594 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nBenchmarkDecode/repeat         \t   10000\t     56831 ns/op\t8797.99 MB/s\t     56822 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nPASS\n"
+      },
+      {
+        "version": "final",
+        "gomaxprocs": 1,
+        "cpu_affinity": "10",
+        "input": "text",
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/zstddecode\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkDecode/text         \t    2672\t    226955 ns/op\t 853.72 MB/s\t    226903 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecode/text         \t    2674\t    225942 ns/op\t 857.54 MB/s\t    225914 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nPASS\n"
+      },
+      {
+        "version": "final",
+        "gomaxprocs": 1,
+        "cpu_affinity": "10",
+        "input": "mixed",
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/zstddecode\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkDecode/mixed         \t    1717\t    339223 ns/op\t 601.74 MB/s\t    339153 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecode/mixed         \t    1765\t    394501 ns/op\t 517.43 MB/s\t    394367 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nPASS\n"
+      },
+      {
+        "version": "final",
+        "gomaxprocs": 1,
+        "cpu_affinity": "10",
+        "input": "entropy",
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/zstddecode\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkDecode/entropy         \t     572\t   1042307 ns/op\t 418.26 MB/s\t   1042269 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nBenchmarkDecode/entropy         \t     577\t   1047732 ns/op\t 416.09 MB/s\t   1047641 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nPASS\n"
+      },
+      {
+        "version": "final",
+        "gomaxprocs": 1,
+        "cpu_affinity": "10",
+        "input": "raw",
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/zstddecode\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkDecode/raw         \t    9444\t     66729 ns/op\t7857.02 MB/s\t     66708 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/raw         \t    8636\t     65182 ns/op\t8043.51 MB/s\t     65174 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nPASS\n"
+      },
+      {
+        "version": "final",
+        "gomaxprocs": 1,
+        "cpu_affinity": "10",
+        "input": "repeat",
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/zstddecode\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkDecode/repeat         \t    9711\t     60049 ns/op\t8326.50 MB/s\t     60037 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nBenchmarkDecode/repeat         \t    9024\t     61042 ns/op\t8191.07 MB/s\t     61026 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nPASS\n"
+      },
+      {
+        "version": "baseline",
+        "gomaxprocs": 1,
+        "cpu_affinity": "10",
+        "input": "text",
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/zstddecode\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkDecode/text         \t    2500\t    226265 ns/op\t 856.32 MB/s\t    226215 cpu-ns/op\t  202752 B/op\t       2 allocs/op\nBenchmarkDecode/text         \t    2709\t    229132 ns/op\t 845.60 MB/s\t    229112 cpu-ns/op\t  202752 B/op\t       2 allocs/op\nPASS\n"
+      },
+      {
+        "version": "baseline",
+        "gomaxprocs": 1,
+        "cpu_affinity": "10",
+        "input": "mixed",
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/zstddecode\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkDecode/mixed         \t    1566\t    371042 ns/op\t 550.14 MB/s\t    370974 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nBenchmarkDecode/mixed         \t    1700\t    375598 ns/op\t 543.47 MB/s\t    375511 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nPASS\n"
+      },
+      {
+        "version": "baseline",
+        "gomaxprocs": 1,
+        "cpu_affinity": "10",
+        "input": "entropy",
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/zstddecode\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkDecode/entropy         \t     542\t   1102525 ns/op\t 395.42 MB/s\t   1102428 cpu-ns/op\t  548864 B/op\t       2 allocs/op\nBenchmarkDecode/entropy         \t     549\t   1110031 ns/op\t 392.74 MB/s\t   1109792 cpu-ns/op\t  548864 B/op\t       2 allocs/op\nPASS\n"
+      },
+      {
+        "version": "baseline",
+        "gomaxprocs": 1,
+        "cpu_affinity": "10",
+        "input": "raw",
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/zstddecode\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkDecode/raw         \t    9228\t     62920 ns/op\t8332.66 MB/s\t     62902 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/raw         \t   10000\t     58217 ns/op\t9005.78 MB/s\t     58212 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nPASS\n"
+      },
+      {
+        "version": "baseline",
+        "gomaxprocs": 1,
+        "cpu_affinity": "10",
+        "input": "repeat",
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/zstddecode\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkDecode/repeat         \t   10000\t     54650 ns/op\t9149.05 MB/s\t     54633 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nBenchmarkDecode/repeat         \t   10000\t     55753 ns/op\t8968.19 MB/s\t     55739 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nPASS\n"
+      }
+    ]
+  },
+  "validation": [
+    {
+      "command": "GOMAXPROCS=4 mise exec -- go test -race ./internal/zstddecode ./internal/zstdencode ./internal/store",
+      "result": "passed",
+      "output": "zstddecode 11.634s; zstdencode cached; store 38.374s"
+    },
+    {
+      "command": "GOMAXPROCS=4 mise exec -- go test ./internal/zstddecode -run '^$' -fuzz '^FuzzDecode$' -fuzztime=30s -parallel=2",
+      "result": "passed",
+      "output": "4439 executions; PASS 31.112s"
+    },
+    {
+      "command": "GOMAXPROCS=4 mise exec -- go test ./internal/zstddecode -run '^$' -fuzz '^FuzzArchiveRoundTrip$' -fuzztime=30s -parallel=2",
+      "result": "passed",
+      "output": "317 executions; PASS 31.021s"
+    },
+    {
+      "command": "GOMAXPROCS=2 mise exec -- go vet ./internal/zstddecode ./internal/zstdencode ./internal/store",
+      "result": "passed"
+    },
+    {
+      "command": "CGO_ENABLED=0 GOMAXPROCS=2 mise exec -- go build ./cmd/... ./internal/... ./tools/...",
+      "result": "passed"
+    },
+    {
+      "command": "GOMAXPROCS=2 mise exec -- python3 tools/designcheck/check.py",
+      "result": "passed",
+      "output": "52 Markdown; 63 JSON; 537 local links and design fixture checks"
+    },
+    {
+      "command": "GOMAXPROCS=2 mise exec -- go test ./internal/store ./internal/app ./internal/evidence ./internal/disclosure ./internal/zstddecode ./internal/zstdencode && GOMAXPROCS=2 mise exec -- go test ./internal/bootstrap -run '^TestNetwork'",
+      "result": "passed",
+      "output": "store 5.715s; app 31.348s; evidence 88.771s; disclosure 155.984s; zstddecode cached; zstdencode cached; bootstrap TestNetwork 12.986s"
+    }
+  ],
+  "exploration": {
+    "huffman": [
+      {
+        "version": "before",
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/zstddecode\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkDecode/text         \t    1542\t    226458 ns/op\t 855.59 MB/s\t    227326 cpu-ns/op\t  202752 B/op\t       2 allocs/op\nBenchmarkDecode/text         \t    1598\t    225456 ns/op\t 859.39 MB/s\t    226283 cpu-ns/op\t  202752 B/op\t       2 allocs/op\nBenchmarkDecode/mixed        \t    1015\t    352089 ns/op\t 579.75 MB/s\t    353318 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nBenchmarkDecode/mixed        \t    1044\t    359024 ns/op\t 568.55 MB/s\t    360225 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nBenchmarkDecode/entropy      \t     321\t   1113309 ns/op\t 391.59 MB/s\t   1116243 cpu-ns/op\t  548864 B/op\t       2 allocs/op\nBenchmarkDecode/entropy      \t     321\t   1098264 ns/op\t 396.95 MB/s\t   1101408 cpu-ns/op\t  548864 B/op\t       2 allocs/op\nBenchmarkDecode/raw          \t    5826\t     61996 ns/op\t8456.80 MB/s\t     63488 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/raw          \t    5598\t     64186 ns/op\t8168.21 MB/s\t     64672 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/repeat       \t    6298\t     61607 ns/op\t8115.93 MB/s\t     62902 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nBenchmarkDecode/repeat       \t    6768\t     60504 ns/op\t8263.94 MB/s\t     62194 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nPASS\n"
+      },
+      {
+        "version": "huffman",
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/zstddecode\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkDecode/text         \t    1584\t    225199 ns/op\t 860.37 MB/s\t    226028 cpu-ns/op\t  202752 B/op\t       2 allocs/op\nBenchmarkDecode/text         \t    1594\t    227549 ns/op\t 851.49 MB/s\t    229264 cpu-ns/op\t  202752 B/op\t       2 allocs/op\nBenchmarkDecode/mixed        \t    1033\t    348815 ns/op\t 585.20 MB/s\t    350023 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nBenchmarkDecode/mixed        \t    1036\t    346567 ns/op\t 588.99 MB/s\t    347712 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nBenchmarkDecode/entropy      \t     337\t   1065932 ns/op\t 408.99 MB/s\t   1069650 cpu-ns/op\t  548864 B/op\t       2 allocs/op\nBenchmarkDecode/entropy      \t     328\t   1105457 ns/op\t 394.37 MB/s\t   1109503 cpu-ns/op\t  548864 B/op\t       2 allocs/op\nBenchmarkDecode/raw          \t    5317\t     66911 ns/op\t7835.59 MB/s\t     71032 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/raw          \t    5428\t     64669 ns/op\t8107.22 MB/s\t     71827 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/repeat       \t    5222\t     59498 ns/op\t8403.69 MB/s\t     62001 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nBenchmarkDecode/repeat       \t    6136\t     59902 ns/op\t8346.94 MB/s\t     61496 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nPASS\n"
+      },
+      {
+        "version": "huffman",
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/zstddecode\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkDecode/text         \t    1533\t    233369 ns/op\t 830.25 MB/s\t    234356 cpu-ns/op\t  202752 B/op\t       2 allocs/op\nBenchmarkDecode/text         \t    1564\t    227291 ns/op\t 852.45 MB/s\t    228214 cpu-ns/op\t  202752 B/op\t       2 allocs/op\nBenchmarkDecode/mixed        \t    1016\t    345716 ns/op\t 590.44 MB/s\t    347056 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nBenchmarkDecode/mixed        \t    1030\t    345167 ns/op\t 591.38 MB/s\t    349270 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nBenchmarkDecode/entropy      \t     332\t   1079306 ns/op\t 403.92 MB/s\t   1083627 cpu-ns/op\t  548864 B/op\t       2 allocs/op\nBenchmarkDecode/entropy      \t     331\t   1086768 ns/op\t 401.15 MB/s\t   1091027 cpu-ns/op\t  548864 B/op\t       2 allocs/op\nBenchmarkDecode/raw          \t    5247\t     67663 ns/op\t7748.53 MB/s\t     69867 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/raw          \t    5139\t     66338 ns/op\t7903.27 MB/s\t     68734 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/repeat       \t    6025\t     59232 ns/op\t8441.43 MB/s\t     60764 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nBenchmarkDecode/repeat       \t    6504\t     60660 ns/op\t8242.66 MB/s\t     62091 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nPASS\n"
+      },
+      {
+        "version": "before",
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/zstddecode\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkDecode/text         \t    1611\t    246437 ns/op\t 786.23 MB/s\t    247366 cpu-ns/op\t  202752 B/op\t       2 allocs/op\nBenchmarkDecode/text         \t    1587\t    226554 ns/op\t 855.23 MB/s\t    227390 cpu-ns/op\t  202752 B/op\t       2 allocs/op\nBenchmarkDecode/mixed        \t    1012\t    356939 ns/op\t 571.88 MB/s\t    359677 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nBenchmarkDecode/mixed        \t    1042\t    348538 ns/op\t 585.66 MB/s\t    350358 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nBenchmarkDecode/entropy      \t     328\t   1090373 ns/op\t 399.82 MB/s\t   1094509 cpu-ns/op\t  548864 B/op\t       2 allocs/op\nBenchmarkDecode/entropy      \t     328\t   1101002 ns/op\t 395.96 MB/s\t   1104726 cpu-ns/op\t  548864 B/op\t       2 allocs/op\nBenchmarkDecode/raw          \t    5245\t     63337 ns/op\t8277.70 MB/s\t     67045 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/raw          \t    5180\t     68764 ns/op\t7624.45 MB/s\t     72356 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/repeat       \t    5840\t     60288 ns/op\t8293.59 MB/s\t     61859 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nBenchmarkDecode/repeat       \t    6127\t     58853 ns/op\t8495.68 MB/s\t     60311 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nPASS\n"
+      }
+    ],
+    "tail": [
+      {
+        "version": "before",
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/zstddecode\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkDecode/text    \t    1480\t    239945 ns/op\t 807.50 MB/s\t    240874 cpu-ns/op\t  202752 B/op\t       2 allocs/op\nBenchmarkDecode/text    \t    1629\t    228388 ns/op\t 848.36 MB/s\t    229654 cpu-ns/op\t  202752 B/op\t       2 allocs/op\nBenchmarkDecode/mixed   \t    1030\t    349158 ns/op\t 584.62 MB/s\t    350477 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nBenchmarkDecode/mixed   \t    1032\t    352212 ns/op\t 579.55 MB/s\t    354952 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nBenchmarkDecode/entropy \t     326\t   1104068 ns/op\t 394.86 MB/s\t   1108015 cpu-ns/op\t  548864 B/op\t       2 allocs/op\nBenchmarkDecode/entropy \t     331\t   1098247 ns/op\t 396.96 MB/s\t   1102112 cpu-ns/op\t  548864 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/text         \t    1545\t    222199 ns/op\t 871.99 MB/s\t  202752 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/text         \t    1605\t    224184 ns/op\t 864.27 MB/s\t  202752 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/mixed        \t     990\t    347882 ns/op\t 586.77 MB/s\t  232064 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/mixed        \t    1010\t    349296 ns/op\t 584.39 MB/s\t  232064 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/entropy      \t     330\t   1085379 ns/op\t 401.66 MB/s\t  548864 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/entropy      \t     327\t   1087467 ns/op\t 400.89 MB/s\t  548864 B/op\t       2 allocs/op\nPASS\n"
+      },
+      {
+        "version": "tail",
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/zstddecode\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkDecode/text    \t    1648\t    220824 ns/op\t 877.42 MB/s\t    221660 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecode/text    \t    1608\t    222031 ns/op\t 872.65 MB/s\t    222838 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecode/mixed   \t    1033\t    340718 ns/op\t 599.10 MB/s\t    342005 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecode/mixed   \t    1068\t    339440 ns/op\t 601.36 MB/s\t    340739 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecode/entropy \t     339\t   1062297 ns/op\t 410.39 MB/s\t   1068581 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nBenchmarkDecode/entropy \t     339\t   1053473 ns/op\t 413.83 MB/s\t   1057531 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/text         \t    1540\t    219002 ns/op\t 884.72 MB/s\t  196608 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/text         \t    1585\t    220164 ns/op\t 880.05 MB/s\t  196608 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/mixed        \t    1042\t    343778 ns/op\t 593.77 MB/s\t  204800 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/mixed        \t     994\t    339844 ns/op\t 600.64 MB/s\t  204800 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/entropy      \t     343\t   1041491 ns/op\t 418.59 MB/s\t  442368 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/entropy      \t     348\t   1051977 ns/op\t 414.42 MB/s\t  442368 B/op\t       1 allocs/op\nPASS\n"
+      },
+      {
+        "version": "tail",
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/zstddecode\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkDecode/text    \t    1593\t    226606 ns/op\t 855.03 MB/s\t    227542 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecode/text    \t    1641\t    223223 ns/op\t 867.99 MB/s\t    224141 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecode/mixed   \t    1000\t    354301 ns/op\t 576.13 MB/s\t    355314 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecode/mixed   \t    1064\t    341423 ns/op\t 597.87 MB/s\t    343284 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecode/entropy \t     333\t   1059907 ns/op\t 411.31 MB/s\t   1063480 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nBenchmarkDecode/entropy \t     344\t   1051062 ns/op\t 414.78 MB/s\t   1054172 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/text         \t    1597\t    214994 ns/op\t 901.21 MB/s\t  196608 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/text         \t    1612\t    214367 ns/op\t 903.85 MB/s\t  196608 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/mixed        \t    1047\t    337948 ns/op\t 604.01 MB/s\t  204800 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/mixed        \t    1062\t    335764 ns/op\t 607.94 MB/s\t  204800 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/entropy      \t     337\t   1050393 ns/op\t 415.04 MB/s\t  442368 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/entropy      \t     342\t   1036962 ns/op\t 420.42 MB/s\t  442368 B/op\t       1 allocs/op\nPASS\n"
+      },
+      {
+        "version": "before",
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/zstddecode\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkDecode/text    \t    1549\t    223938 ns/op\t 865.22 MB/s\t    224650 cpu-ns/op\t  202752 B/op\t       2 allocs/op\nBenchmarkDecode/text    \t    1646\t    223071 ns/op\t 868.58 MB/s\t    223902 cpu-ns/op\t  202752 B/op\t       2 allocs/op\nBenchmarkDecode/mixed   \t    1021\t    346681 ns/op\t 588.80 MB/s\t    347974 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nBenchmarkDecode/mixed   \t    1051\t    342143 ns/op\t 596.61 MB/s\t    343342 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nBenchmarkDecode/entropy \t     320\t   1118870 ns/op\t 389.64 MB/s\t   1122550 cpu-ns/op\t  548864 B/op\t       2 allocs/op\nBenchmarkDecode/entropy \t     320\t   1133609 ns/op\t 384.57 MB/s\t   1140000 cpu-ns/op\t  548864 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/text         \t    1496\t    226356 ns/op\t 855.97 MB/s\t  202752 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/text         \t    1555\t    221941 ns/op\t 873.00 MB/s\t  202752 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/mixed        \t    1015\t    348732 ns/op\t 585.33 MB/s\t  232064 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/mixed        \t    1003\t    347956 ns/op\t 586.64 MB/s\t  232064 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/entropy      \t     328\t   1084193 ns/op\t 402.10 MB/s\t  548864 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/entropy      \t     328\t   1092677 ns/op\t 398.98 MB/s\t  548864 B/op\t       2 allocs/op\nPASS\n"
+      }
+    ],
+    "buffer": [
+      {
+        "version": "before",
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/zstddecode\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkDecode/text         \t    1568\t    223305 ns/op\t 867.67 MB/s\t    224092 cpu-ns/op\t  202752 B/op\t       2 allocs/op\nBenchmarkDecode/text         \t    1497\t    225149 ns/op\t 860.56 MB/s\t    225987 cpu-ns/op\t  202752 B/op\t       2 allocs/op\nBenchmarkDecode/mixed        \t    1032\t    349466 ns/op\t 584.11 MB/s\t    351572 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nBenchmarkDecode/mixed        \t    1011\t    348449 ns/op\t 585.81 MB/s\t    350517 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nBenchmarkDecode/entropy      \t     321\t   1108596 ns/op\t 393.25 MB/s\t   1112667 cpu-ns/op\t  548864 B/op\t       2 allocs/op\nBenchmarkDecode/entropy      \t     321\t   1104544 ns/op\t 394.69 MB/s\t   1108819 cpu-ns/op\t  548864 B/op\t       2 allocs/op\nBenchmarkDecode/raw          \t    5665\t     72065 ns/op\t7275.22 MB/s\t     73597 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/raw          \t    5802\t     69120 ns/op\t7585.22 MB/s\t     69612 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/repeat       \t    5389\t     61219 ns/op\t8167.40 MB/s\t     62157 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nBenchmarkDecode/repeat       \t    5340\t     63069 ns/op\t7927.88 MB/s\t     65773 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nPASS\n"
+      },
+      {
+        "version": "buffer",
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/zstddecode\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkDecode/text         \t    1591\t    243736 ns/op\t 794.94 MB/s\t    244579 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecode/text         \t    1576\t    224681 ns/op\t 862.36 MB/s\t    225533 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecode/mixed        \t    1004\t    374053 ns/op\t 545.71 MB/s\t    375428 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecode/mixed        \t    1012\t    355118 ns/op\t 574.81 MB/s\t    356047 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecode/entropy      \t     338\t   1072177 ns/op\t 406.61 MB/s\t   1075121 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nBenchmarkDecode/entropy      \t     340\t   1051909 ns/op\t 414.44 MB/s\t   1055388 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nBenchmarkDecode/raw          \t    5718\t     63821 ns/op\t8214.94 MB/s\t     67427 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/raw          \t    6303\t     64356 ns/op\t8146.72 MB/s\t     69837 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/repeat       \t    5679\t     59702 ns/op\t8374.98 MB/s\t     60549 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nBenchmarkDecode/repeat       \t    6537\t     57086 ns/op\t8758.72 MB/s\t     57618 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nPASS\n"
+      },
+      {
+        "version": "buffer",
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/zstddecode\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkDecode/text         \t    1580\t    226527 ns/op\t 855.33 MB/s\t    227350 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecode/text         \t    1658\t    222479 ns/op\t 870.89 MB/s\t    223420 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecode/mixed        \t     992\t    356723 ns/op\t 572.22 MB/s\t    358153 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecode/mixed        \t    1024\t    354179 ns/op\t 576.33 MB/s\t    355570 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecode/entropy      \t     337\t   1061645 ns/op\t 410.64 MB/s\t   1065736 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nBenchmarkDecode/entropy      \t     337\t   1053497 ns/op\t 413.82 MB/s\t   1057433 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nBenchmarkDecode/raw          \t    5560\t     66235 ns/op\t7915.59 MB/s\t     66507 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/raw          \t    4894\t     66762 ns/op\t7853.06 MB/s\t     71049 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/repeat       \t    5316\t     60930 ns/op\t8206.08 MB/s\t     61295 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nBenchmarkDecode/repeat       \t    5344\t     61884 ns/op\t8079.59 MB/s\t     65273 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nPASS\n"
+      },
+      {
+        "version": "before",
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/zstddecode\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkDecode/text         \t    1621\t    220821 ns/op\t 877.43 MB/s\t    221718 cpu-ns/op\t  202752 B/op\t       2 allocs/op\nBenchmarkDecode/text         \t    1662\t    222600 ns/op\t 870.42 MB/s\t    223436 cpu-ns/op\t  202752 B/op\t       2 allocs/op\nBenchmarkDecode/mixed        \t    1032\t    345652 ns/op\t 590.55 MB/s\t    346892 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nBenchmarkDecode/mixed        \t    1045\t    343582 ns/op\t 594.11 MB/s\t    345624 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nBenchmarkDecode/entropy      \t     328\t   1094495 ns/op\t 398.32 MB/s\t   1098646 cpu-ns/op\t  548864 B/op\t       2 allocs/op\nBenchmarkDecode/entropy      \t     324\t   1101904 ns/op\t 395.64 MB/s\t   1105608 cpu-ns/op\t  548864 B/op\t       2 allocs/op\nBenchmarkDecode/raw          \t    5656\t     62066 ns/op\t8447.32 MB/s\t     66271 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/raw          \t    5950\t     61452 ns/op\t8531.65 MB/s\t     65532 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/repeat       \t    6123\t     56996 ns/op\t8772.61 MB/s\t     57427 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nBenchmarkDecode/repeat       \t    5892\t     61857 ns/op\t8083.10 MB/s\t     62677 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nPASS\n"
+      }
+    ],
+    "copy": [
+      {
+        "version": "tail",
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/zstddecode\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkDecode/text         \t    1626\t    220431 ns/op\t 878.98 MB/s\t    221297 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecode/text         \t    1634\t    219512 ns/op\t 882.66 MB/s\t    220341 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecode/mixed        \t    1018\t    341577 ns/op\t 597.60 MB/s\t    342810 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecode/mixed        \t    1066\t    340437 ns/op\t 599.60 MB/s\t    341703 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecode/entropy      \t     338\t   1095522 ns/op\t 397.94 MB/s\t   1101426 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nBenchmarkDecode/entropy      \t     325\t   1068319 ns/op\t 408.08 MB/s\t   1071942 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nBenchmarkDecode/raw          \t    5550\t     63165 ns/op\t8300.32 MB/s\t     67764 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/raw          \t    5954\t     66170 ns/op\t7923.38 MB/s\t     68747 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/repeat       \t    6476\t     57156 ns/op\t8748.01 MB/s\t     57516 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nBenchmarkDecode/repeat       \t    6666\t     57671 ns/op\t8669.80 MB/s\t     60855 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nPASS\n"
+      },
+      {
+        "version": "copy",
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/zstddecode\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkDecode/text         \t    1462\t    242371 ns/op\t 799.42 MB/s\t    243231 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecode/text         \t    1551\t    235591 ns/op\t 822.42 MB/s\t    236279 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecode/mixed        \t     992\t    355966 ns/op\t 573.44 MB/s\t    356917 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecode/mixed        \t    1021\t    389484 ns/op\t 524.09 MB/s\t    390680 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecode/entropy      \t     338\t   1055210 ns/op\t 413.15 MB/s\t   1058663 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nBenchmarkDecode/entropy      \t     344\t   1055588 ns/op\t 413.00 MB/s\t   1059517 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nBenchmarkDecode/raw          \t    5508\t     75270 ns/op\t6965.41 MB/s\t     76057 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/raw          \t    5953\t     63100 ns/op\t8308.90 MB/s\t     70555 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/repeat       \t    6322\t     54291 ns/op\t9209.68 MB/s\t     54910 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nBenchmarkDecode/repeat       \t    6763\t     54171 ns/op\t9230.08 MB/s\t     54673 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nPASS\n"
+      },
+      {
+        "version": "copy",
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/zstddecode\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkDecode/text         \t    1422\t    242923 ns/op\t 797.60 MB/s\t    243752 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecode/text         \t    1561\t    233489 ns/op\t 829.83 MB/s\t    234837 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecode/mixed        \t     988\t    350995 ns/op\t 581.56 MB/s\t    352132 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecode/mixed        \t    1015\t    348477 ns/op\t 585.76 MB/s\t    349694 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecode/entropy      \t     338\t   1051976 ns/op\t 414.42 MB/s\t   1055509 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nBenchmarkDecode/entropy      \t     342\t   1056072 ns/op\t 412.81 MB/s\t   1059687 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nBenchmarkDecode/raw          \t    6022\t     58619 ns/op\t8944.06 MB/s\t     60662 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/raw          \t    6396\t     59001 ns/op\t8886.02 MB/s\t     60625 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/repeat       \t    6459\t     55685 ns/op\t8979.05 MB/s\t     55991 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nBenchmarkDecode/repeat       \t    6564\t     58516 ns/op\t8544.68 MB/s\t     59524 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nPASS\n"
+      },
+      {
+        "version": "tail",
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/zstddecode\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkDecode/text         \t    1622\t    219606 ns/op\t 882.28 MB/s\t    220376 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecode/text         \t    1636\t    218056 ns/op\t 888.55 MB/s\t    218900 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecode/mixed        \t    1039\t    341000 ns/op\t 598.61 MB/s\t    342241 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecode/mixed        \t    1052\t    339644 ns/op\t 601.00 MB/s\t    340962 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecode/entropy      \t     340\t   1050302 ns/op\t 415.08 MB/s\t   1053762 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nBenchmarkDecode/entropy      \t     342\t   1047436 ns/op\t 416.21 MB/s\t   1053094 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nBenchmarkDecode/raw          \t    6098\t     65589 ns/op\t7993.57 MB/s\t     65857 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/raw          \t    4960\t     65719 ns/op\t7977.74 MB/s\t     66926 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/repeat       \t    5173\t     59486 ns/op\t8405.38 MB/s\t     59751 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nBenchmarkDecode/repeat       \t    5749\t     59045 ns/op\t8468.13 MB/s\t     60711 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nPASS\n"
+      }
+    ],
+    "batch": [
+      {
+        "version": "tail",
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/zstddecode\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkDecode/text         \t    1632\t    222295 ns/op\t 871.61 MB/s\t    223066 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecode/text         \t    1614\t    218834 ns/op\t 885.40 MB/s\t    219625 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecode/mixed        \t    1042\t    340562 ns/op\t 599.38 MB/s\t    341812 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecode/mixed        \t    1051\t    338685 ns/op\t 602.70 MB/s\t    339907 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecode/entropy      \t     343\t   1045917 ns/op\t 416.82 MB/s\t   1049962 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nBenchmarkDecode/entropy      \t     340\t   1046197 ns/op\t 416.70 MB/s\t   1049882 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nBenchmarkDecode/raw          \t    5989\t     63169 ns/op\t8299.81 MB/s\t     66956 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/raw          \t    5012\t     63937 ns/op\t8200.13 MB/s\t     70352 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/repeat       \t    6445\t     58559 ns/op\t8538.45 MB/s\t     61142 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nBenchmarkDecode/repeat       \t    5097\t     60031 ns/op\t8329.03 MB/s\t     62501 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nPASS\n"
+      },
+      {
+        "version": "batch",
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/zstddecode\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkDecode/text         \t    1274\t    242016 ns/op\t 800.59 MB/s\t    243136 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecode/text         \t    1627\t    224891 ns/op\t 861.55 MB/s\t    225766 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecode/mixed        \t    1063\t    337754 ns/op\t 604.36 MB/s\t    338665 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecode/mixed        \t    1069\t    337854 ns/op\t 604.18 MB/s\t    338771 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecode/entropy      \t     342\t   1050455 ns/op\t 415.02 MB/s\t   1053535 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nBenchmarkDecode/entropy      \t     355\t   1016714 ns/op\t 428.79 MB/s\t   1020411 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nBenchmarkDecode/raw          \t    5506\t     63848 ns/op\t8211.52 MB/s\t     64902 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/raw          \t    6380\t     62736 ns/op\t8357.02 MB/s\t     66632 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/repeat       \t    5347\t     57405 ns/op\t8710.05 MB/s\t     58817 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nBenchmarkDecode/repeat       \t    6795\t     58452 ns/op\t8554.04 MB/s\t     58687 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nPASS\n"
+      },
+      {
+        "version": "batch",
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/zstddecode\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkDecode/text         \t    1632\t    225874 ns/op\t 857.80 MB/s\t    226745 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecode/text         \t    1574\t    227408 ns/op\t 852.02 MB/s\t    228742 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecode/mixed        \t    1045\t    338324 ns/op\t 603.34 MB/s\t    339544 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecode/mixed        \t    1070\t    337610 ns/op\t 604.62 MB/s\t    338823 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecode/entropy      \t     351\t   1017485 ns/op\t 428.46 MB/s\t   1020664 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nBenchmarkDecode/entropy      \t     351\t   1030976 ns/op\t 422.86 MB/s\t   1034749 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nBenchmarkDecode/raw          \t    5194\t     68868 ns/op\t7612.97 MB/s\t     73259 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/raw          \t    4273\t     73049 ns/op\t7177.21 MB/s\t     74458 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/repeat       \t    5134\t     66018 ns/op\t7573.72 MB/s\t     68518 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nBenchmarkDecode/repeat       \t    5798\t     65997 ns/op\t7576.11 MB/s\t     67208 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nPASS\n"
+      },
+      {
+        "version": "tail",
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/zstddecode\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkDecode/text         \t    1632\t    231628 ns/op\t 836.49 MB/s\t    232479 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecode/text         \t    1530\t    224080 ns/op\t 864.67 MB/s\t    224929 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecode/mixed        \t    1052\t    339804 ns/op\t 600.71 MB/s\t    341185 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecode/mixed        \t    1057\t    340824 ns/op\t 598.92 MB/s\t    342146 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecode/entropy      \t     342\t   1051349 ns/op\t 414.66 MB/s\t   1055401 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nBenchmarkDecode/entropy      \t     344\t   1045125 ns/op\t 417.13 MB/s\t   1048968 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nBenchmarkDecode/raw          \t    5662\t     61599 ns/op\t8511.24 MB/s\t     63927 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/raw          \t    5958\t     66499 ns/op\t7884.16 MB/s\t     69230 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/repeat       \t    5827\t     54219 ns/op\t9221.92 MB/s\t     54510 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nBenchmarkDecode/repeat       \t    6750\t     53946 ns/op\t9268.46 MB/s\t     54164 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nPASS\n"
+      }
+    ],
+    "unmerged-core": [
+      {
+        "version": "baseline",
+        "gomaxprocs": 1,
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/zstddecode\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkDecode/text    \t    1489\t    229021 ns/op\t 846.02 MB/s\t    230363 cpu-ns/op\t  202752 B/op\t       2 allocs/op\nBenchmarkDecode/text    \t    1612\t    222172 ns/op\t 872.10 MB/s\t    223690 cpu-ns/op\t  202752 B/op\t       2 allocs/op\nBenchmarkDecode/text    \t    1599\t    223258 ns/op\t 867.85 MB/s\t    225025 cpu-ns/op\t  202752 B/op\t       2 allocs/op\nBenchmarkDecode/mixed   \t    1002\t    354642 ns/op\t 575.58 MB/s\t    356654 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nBenchmarkDecode/mixed   \t     804\t    379746 ns/op\t 537.53 MB/s\t    381118 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nBenchmarkDecode/mixed   \t    1036\t    354668 ns/op\t 575.54 MB/s\t    355966 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nBenchmarkDecode/entropy \t     306\t   1131887 ns/op\t 385.16 MB/s\t   1135582 cpu-ns/op\t  548864 B/op\t       2 allocs/op\nBenchmarkDecode/entropy \t     325\t   1108493 ns/op\t 393.29 MB/s\t   1112425 cpu-ns/op\t  548864 B/op\t       2 allocs/op\nBenchmarkDecode/entropy \t     322\t   1100111 ns/op\t 396.28 MB/s\t   1103652 cpu-ns/op\t  548864 B/op\t       2 allocs/op\nBenchmarkDecode/raw     \t    5906\t     58821 ns/op\t8913.23 MB/s\t     64025 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/raw     \t    5400\t     59149 ns/op\t8863.80 MB/s\t     66283 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/raw     \t    6211\t     58537 ns/op\t8956.51 MB/s\t     62107 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/repeat  \t    6303\t     55661 ns/op\t8982.95 MB/s\t     55909 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nBenchmarkDecode/repeat  \t    5860\t     60094 ns/op\t8320.28 MB/s\t     63864 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nBenchmarkDecode/repeat  \t    5767\t     57889 ns/op\t8637.16 MB/s\t     58415 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/text         \t    1483\t    235269 ns/op\t 823.55 MB/s\t    236009 cpu-ns/op\t  202752 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/text         \t    1543\t    224685 ns/op\t 862.34 MB/s\t    225983 cpu-ns/op\t  202752 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/text         \t    1575\t    222754 ns/op\t 869.82 MB/s\t    223568 cpu-ns/op\t  202752 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/mixed        \t     997\t    350704 ns/op\t 582.04 MB/s\t    352981 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/mixed        \t    1000\t    364973 ns/op\t 559.29 MB/s\t    367809 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/mixed        \t    1028\t    353225 ns/op\t 577.89 MB/s\t    355235 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/entropy      \t     301\t   1133471 ns/op\t 384.62 MB/s\t   1137811 cpu-ns/op\t  548864 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/entropy      \t     327\t   1090884 ns/op\t 399.63 MB/s\t   1094162 cpu-ns/op\t  548864 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/entropy      \t     324\t   1136161 ns/op\t 383.71 MB/s\t   1139861 cpu-ns/op\t  548864 B/op\t       2 allocs/op\nPASS\n"
+      },
+      {
+        "version": "baseline",
+        "gomaxprocs": 4,
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/zstddecode\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkDecode/text-4      \t    1308\t    261941 ns/op\t 739.69 MB/s\t    298846 cpu-ns/op\t  202757 B/op\t       2 allocs/op\nBenchmarkDecode/text-4      \t    1484\t    257082 ns/op\t 753.67 MB/s\t    293993 cpu-ns/op\t  202752 B/op\t       2 allocs/op\nBenchmarkDecode/text-4      \t    1250\t    265445 ns/op\t 729.92 MB/s\t    301436 cpu-ns/op\t  202753 B/op\t       2 allocs/op\nBenchmarkDecode/mixed-4     \t     835\t    384461 ns/op\t 530.94 MB/s\t    430077 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nBenchmarkDecode/mixed-4     \t     916\t    386068 ns/op\t 528.73 MB/s\t    432559 cpu-ns/op\t  232065 B/op\t       2 allocs/op\nBenchmarkDecode/mixed-4     \t     818\t    400351 ns/op\t 509.87 MB/s\t    442137 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nBenchmarkDecode/entropy-4   \t     315\t   1150818 ns/op\t 378.82 MB/s\t   1251114 cpu-ns/op\t  548864 B/op\t       2 allocs/op\nBenchmarkDecode/entropy-4   \t     316\t   1137415 ns/op\t 383.29 MB/s\t   1241902 cpu-ns/op\t  548866 B/op\t       2 allocs/op\nBenchmarkDecode/entropy-4   \t     316\t   1121222 ns/op\t 388.82 MB/s\t   1218244 cpu-ns/op\t  548866 B/op\t       2 allocs/op\nBenchmarkDecode/raw-4       \t    4648\t     83297 ns/op\t6294.22 MB/s\t    134223 cpu-ns/op\t  524289 B/op\t       1 allocs/op\nBenchmarkDecode/raw-4       \t    3405\t     93545 ns/op\t5604.69 MB/s\t    160184 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/raw-4       \t    3590\t     92541 ns/op\t5665.50 MB/s\t    156731 cpu-ns/op\t  524289 B/op\t       1 allocs/op\nBenchmarkDecode/repeat-4    \t    4299\t     76377 ns/op\t6546.48 MB/s\t    137919 cpu-ns/op\t  507906 B/op\t       1 allocs/op\nBenchmarkDecode/repeat-4    \t    3908\t     77325 ns/op\t6466.22 MB/s\t    139172 cpu-ns/op\t  507907 B/op\t       1 allocs/op\nBenchmarkDecode/repeat-4    \t    4405\t     80064 ns/op\t6245.03 MB/s\t    143527 cpu-ns/op\t  507907 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/text-4         \t    3528\t     94657 ns/op\t2046.91 MB/s\t    330561 cpu-ns/op\t  202752 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/text-4         \t    4053\t     93910 ns/op\t2063.19 MB/s\t    331036 cpu-ns/op\t  202752 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/text-4         \t    4302\t     92427 ns/op\t2096.29 MB/s\t    321671 cpu-ns/op\t  202752 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/mixed-4        \t    2532\t    131937 ns/op\t1547.14 MB/s\t    469891 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/mixed-4        \t    2824\t    126204 ns/op\t1617.42 MB/s\t    453371 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/mixed-4        \t    2964\t    138244 ns/op\t1476.56 MB/s\t    500838 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/entropy-4      \t     834\t    380761 ns/op\t1144.96 MB/s\t   1431109 cpu-ns/op\t  548867 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/entropy-4      \t     937\t    387637 ns/op\t1124.65 MB/s\t   1454054 cpu-ns/op\t  548865 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/entropy-4      \t     819\t    367752 ns/op\t1185.46 MB/s\t   1371210 cpu-ns/op\t  548865 B/op\t       2 allocs/op\nPASS\n"
+      },
+      {
+        "version": "final",
+        "gomaxprocs": 1,
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/zstddecode\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkDecode/text    \t    1594\t    228721 ns/op\t 847.12 MB/s\t    229950 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecode/text    \t    1587\t    231085 ns/op\t 838.46 MB/s\t    232039 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecode/text    \t    1617\t    227291 ns/op\t 852.45 MB/s\t    228171 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecode/mixed   \t    1027\t    342979 ns/op\t 595.15 MB/s\t    344315 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecode/mixed   \t    1035\t    341852 ns/op\t 597.11 MB/s\t    343174 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecode/mixed   \t    1034\t    341585 ns/op\t 597.58 MB/s\t    342903 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecode/entropy \t     332\t   1068707 ns/op\t 407.93 MB/s\t   1072864 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nBenchmarkDecode/entropy \t     339\t   1064994 ns/op\t 409.35 MB/s\t   1068717 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nBenchmarkDecode/entropy \t     336\t   1064021 ns/op\t 409.72 MB/s\t   1067625 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nBenchmarkDecode/raw     \t    5896\t     66233 ns/op\t7915.80 MB/s\t     67964 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/raw     \t    6494\t     66228 ns/op\t7916.46 MB/s\t     68091 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/raw     \t    5869\t     75837 ns/op\t6913.33 MB/s\t     76444 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/repeat  \t    6136\t     70499 ns/op\t7092.32 MB/s\t     70997 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nBenchmarkDecode/repeat  \t    6619\t     66973 ns/op\t7465.68 MB/s\t     67372 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nBenchmarkDecode/repeat  \t    5756\t     64025 ns/op\t7809.42 MB/s\t     66778 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/text         \t    1516\t    220137 ns/op\t 880.16 MB/s\t    220987 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/text         \t    1587\t    216844 ns/op\t 893.52 MB/s\t    218482 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/text         \t    1628\t    217645 ns/op\t 890.24 MB/s\t    218401 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/mixed        \t    1052\t    339549 ns/op\t 601.16 MB/s\t    340783 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/mixed        \t    1026\t    338980 ns/op\t 602.17 MB/s\t    340186 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/mixed        \t     999\t    342937 ns/op\t 595.23 MB/s\t    344277 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/entropy      \t     332\t   1058028 ns/op\t 412.04 MB/s\t   1061913 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/entropy      \t     343\t   1044559 ns/op\t 417.36 MB/s\t   1048385 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/entropy      \t     343\t   1051496 ns/op\t 414.60 MB/s\t   1055079 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nPASS\n"
+      },
+      {
+        "version": "final",
+        "gomaxprocs": 4,
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/zstddecode\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkDecode/text-4      \t    1410\t    245302 ns/op\t 789.86 MB/s\t    283474 cpu-ns/op\t  196612 B/op\t       1 allocs/op\nBenchmarkDecode/text-4      \t    1400\t    244674 ns/op\t 791.89 MB/s\t    279070 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecode/text-4      \t    1527\t    259180 ns/op\t 747.57 MB/s\t    295727 cpu-ns/op\t  196609 B/op\t       1 allocs/op\nBenchmarkDecode/mixed-4     \t     991\t    381408 ns/op\t 535.19 MB/s\t    420665 cpu-ns/op\t  204801 B/op\t       1 allocs/op\nBenchmarkDecode/mixed-4     \t     943\t    390775 ns/op\t 522.36 MB/s\t    431291 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecode/mixed-4     \t     939\t    383688 ns/op\t 532.01 MB/s\t    427272 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecode/entropy-4   \t     312\t   1132617 ns/op\t 384.91 MB/s\t   1217013 cpu-ns/op\t  442369 B/op\t       1 allocs/op\nBenchmarkDecode/entropy-4   \t     322\t   1128097 ns/op\t 386.45 MB/s\t   1207186 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nBenchmarkDecode/entropy-4   \t     321\t   1122877 ns/op\t 388.25 MB/s\t   1201249 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nBenchmarkDecode/raw-4       \t    4245\t     91067 ns/op\t5757.19 MB/s\t    152626 cpu-ns/op\t  524289 B/op\t       1 allocs/op\nBenchmarkDecode/raw-4       \t    3870\t     93647 ns/op\t5598.55 MB/s\t    156542 cpu-ns/op\t  524289 B/op\t       1 allocs/op\nBenchmarkDecode/raw-4       \t    3754\t     93216 ns/op\t5624.42 MB/s\t    158635 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/repeat-4    \t    3841\t     84996 ns/op\t5882.62 MB/s\t    154741 cpu-ns/op\t  507906 B/op\t       1 allocs/op\nBenchmarkDecode/repeat-4    \t    3650\t     88327 ns/op\t5660.80 MB/s\t    163790 cpu-ns/op\t  507906 B/op\t       1 allocs/op\nBenchmarkDecode/repeat-4    \t    3675\t     89861 ns/op\t5564.17 MB/s\t    165203 cpu-ns/op\t  507907 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/text-4         \t    4014\t     87403 ns/op\t2216.81 MB/s\t    313564 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/text-4         \t    4471\t     89039 ns/op\t2176.06 MB/s\t    307728 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/text-4         \t    4281\t     91836 ns/op\t2109.79 MB/s\t    318448 cpu-ns/op\t  196610 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/mixed-4        \t    2914\t    122405 ns/op\t1667.62 MB/s\t    437428 cpu-ns/op\t  204801 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/mixed-4        \t    2950\t    119363 ns/op\t1710.12 MB/s\t    429977 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/mixed-4        \t    2842\t    130593 ns/op\t1563.06 MB/s\t    479095 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/entropy-4      \t    1020\t    392920 ns/op\t1109.53 MB/s\t   1512554 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/entropy-4      \t     988\t    349142 ns/op\t1248.65 MB/s\t   1330235 cpu-ns/op\t  442369 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/entropy-4      \t     992\t    368555 ns/op\t1182.88 MB/s\t   1399822 cpu-ns/op\t  442370 B/op\t       1 allocs/op\nPASS\n"
+      },
+      {
+        "version": "final",
+        "gomaxprocs": 1,
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/zstddecode\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkDecode/text    \t    1548\t    229608 ns/op\t 843.85 MB/s\t    230388 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecode/text    \t    1645\t    229210 ns/op\t 845.31 MB/s\t    230072 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecode/text    \t    1593\t    226389 ns/op\t 855.85 MB/s\t    227691 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecode/mixed   \t    1058\t    340174 ns/op\t 600.06 MB/s\t    341440 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecode/mixed   \t    1030\t    341870 ns/op\t 597.08 MB/s\t    343290 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecode/mixed   \t    1024\t    345742 ns/op\t 590.40 MB/s\t    347047 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecode/entropy \t     342\t   1048524 ns/op\t 415.78 MB/s\t   1052573 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nBenchmarkDecode/entropy \t     342\t   1046610 ns/op\t 416.54 MB/s\t   1050541 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nBenchmarkDecode/entropy \t     346\t   1044378 ns/op\t 417.43 MB/s\t   1048685 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nBenchmarkDecode/raw     \t    5640\t     64327 ns/op\t8150.30 MB/s\t     65084 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/raw     \t    5596\t     63200 ns/op\t8295.74 MB/s\t     64583 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/raw     \t    5978\t     62706 ns/op\t8361.09 MB/s\t     64771 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/repeat  \t    6214\t     61655 ns/op\t8109.63 MB/s\t     63971 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nBenchmarkDecode/repeat  \t    6050\t     61592 ns/op\t8117.88 MB/s\t     61845 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nBenchmarkDecode/repeat  \t    6546\t     56759 ns/op\t8809.23 MB/s\t     57431 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/text         \t    1536\t    219646 ns/op\t 882.12 MB/s\t    220484 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/text         \t    1599\t    221997 ns/op\t 872.78 MB/s\t    223936 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/text         \t    1590\t    220615 ns/op\t 878.25 MB/s\t    221382 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/mixed        \t    1008\t    341311 ns/op\t 598.06 MB/s\t    342560 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/mixed        \t    1050\t    341230 ns/op\t 598.20 MB/s\t    342510 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/mixed        \t    1023\t    344026 ns/op\t 593.34 MB/s\t    345060 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/entropy      \t     332\t   1052807 ns/op\t 414.09 MB/s\t   1056738 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/entropy      \t     342\t   1048540 ns/op\t 415.77 MB/s\t   1052336 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/entropy      \t     343\t   1047163 ns/op\t 416.32 MB/s\t   1051149 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nPASS\n"
+      },
+      {
+        "version": "final",
+        "gomaxprocs": 4,
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/zstddecode\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkDecode/text-4      \t    1418\t    264938 ns/op\t 731.32 MB/s\t    300958 cpu-ns/op\t  196613 B/op\t       1 allocs/op\nBenchmarkDecode/text-4      \t    1413\t    252322 ns/op\t 767.89 MB/s\t    289813 cpu-ns/op\t  196609 B/op\t       1 allocs/op\nBenchmarkDecode/text-4      \t    1327\t    260438 ns/op\t 743.96 MB/s\t    297050 cpu-ns/op\t  196609 B/op\t       1 allocs/op\nBenchmarkDecode/mixed-4     \t     984\t    390281 ns/op\t 523.02 MB/s\t    434640 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecode/mixed-4     \t     952\t    406550 ns/op\t 502.09 MB/s\t    451909 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecode/mixed-4     \t     939\t    377981 ns/op\t 540.04 MB/s\t    423194 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecode/entropy-4   \t     315\t   1139847 ns/op\t 382.47 MB/s\t   1224467 cpu-ns/op\t  442369 B/op\t       1 allocs/op\nBenchmarkDecode/entropy-4   \t     312\t   1156173 ns/op\t 377.07 MB/s\t   1236888 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nBenchmarkDecode/entropy-4   \t     314\t   1142275 ns/op\t 381.66 MB/s\t   1222726 cpu-ns/op\t  442369 B/op\t       1 allocs/op\nBenchmarkDecode/raw-4       \t    4128\t     96057 ns/op\t5458.06 MB/s\t    156404 cpu-ns/op\t  524289 B/op\t       1 allocs/op\nBenchmarkDecode/raw-4       \t    3630\t    103154 ns/op\t5082.58 MB/s\t    173486 cpu-ns/op\t  524289 B/op\t       1 allocs/op\nBenchmarkDecode/raw-4       \t    3364\t     98428 ns/op\t5326.60 MB/s\t    166150 cpu-ns/op\t  524289 B/op\t       1 allocs/op\nBenchmarkDecode/repeat-4    \t    4123\t     83801 ns/op\t5966.50 MB/s\t    153645 cpu-ns/op\t  507907 B/op\t       1 allocs/op\nBenchmarkDecode/repeat-4    \t    3436\t     87645 ns/op\t5704.85 MB/s\t    158395 cpu-ns/op\t  507907 B/op\t       1 allocs/op\nBenchmarkDecode/repeat-4    \t    3750\t     89265 ns/op\t5601.32 MB/s\t    163274 cpu-ns/op\t  507906 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/text-4         \t    3686\t     94911 ns/op\t2041.43 MB/s\t    335271 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/text-4         \t    3646\t     91508 ns/op\t2117.35 MB/s\t    316078 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/text-4         \t    3952\t     87104 ns/op\t2224.42 MB/s\t    294592 cpu-ns/op\t  196609 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/mixed-4        \t    2781\t    122154 ns/op\t1671.05 MB/s\t    439877 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/mixed-4        \t    2869\t    122416 ns/op\t1667.47 MB/s\t    448626 cpu-ns/op\t  204801 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/mixed-4        \t    3031\t    124098 ns/op\t1644.87 MB/s\t    456990 cpu-ns/op\t  204801 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/entropy-4      \t    1024\t    346686 ns/op\t1257.49 MB/s\t   1310680 cpu-ns/op\t  442370 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/entropy-4      \t    1023\t    351687 ns/op\t1239.61 MB/s\t   1322323 cpu-ns/op\t  442369 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/entropy-4      \t    1042\t    343400 ns/op\t1269.53 MB/s\t   1305315 cpu-ns/op\t  442369 B/op\t       1 allocs/op\nPASS\n"
+      },
+      {
+        "version": "baseline",
+        "gomaxprocs": 1,
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/zstddecode\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkDecode/text    \t    1609\t    227289 ns/op\t 852.46 MB/s\t    228157 cpu-ns/op\t  202752 B/op\t       2 allocs/op\nBenchmarkDecode/text    \t    1358\t    234955 ns/op\t 824.65 MB/s\t    235775 cpu-ns/op\t  202752 B/op\t       2 allocs/op\nBenchmarkDecode/text    \t    1603\t    223888 ns/op\t 865.41 MB/s\t    225702 cpu-ns/op\t  202752 B/op\t       2 allocs/op\nBenchmarkDecode/mixed   \t    1033\t    348019 ns/op\t 586.53 MB/s\t    349405 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nBenchmarkDecode/mixed   \t    1034\t    349642 ns/op\t 583.81 MB/s\t    350997 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nBenchmarkDecode/mixed   \t    1034\t    351820 ns/op\t 580.20 MB/s\t    353176 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nBenchmarkDecode/entropy \t     321\t   1136796 ns/op\t 383.49 MB/s\t   1141028 cpu-ns/op\t  548864 B/op\t       2 allocs/op\nBenchmarkDecode/entropy \t     330\t   1082752 ns/op\t 402.64 MB/s\t   1086658 cpu-ns/op\t  548864 B/op\t       2 allocs/op\nBenchmarkDecode/entropy \t     332\t   1081089 ns/op\t 403.26 MB/s\t   1084934 cpu-ns/op\t  548864 B/op\t       2 allocs/op\nBenchmarkDecode/raw     \t    5644\t     56215 ns/op\t9326.45 MB/s\t     61678 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/raw     \t    6273\t     56537 ns/op\t9273.35 MB/s\t     57028 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/raw     \t    6596\t     56637 ns/op\t9256.91 MB/s\t     59402 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/repeat  \t    6489\t     52534 ns/op\t9517.69 MB/s\t     55898 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nBenchmarkDecode/repeat  \t    6612\t     54393 ns/op\t9192.33 MB/s\t     55312 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nBenchmarkDecode/repeat  \t    6072\t     54355 ns/op\t9198.80 MB/s\t     55274 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/text         \t    1573\t    221222 ns/op\t 875.84 MB/s\t    222054 cpu-ns/op\t  202752 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/text         \t    1574\t    221148 ns/op\t 876.13 MB/s\t    222028 cpu-ns/op\t  202752 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/text         \t    1582\t    223049 ns/op\t 868.67 MB/s\t    224352 cpu-ns/op\t  202752 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/mixed        \t    1020\t    346710 ns/op\t 588.75 MB/s\t    348082 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/mixed        \t     994\t    379378 ns/op\t 538.05 MB/s\t    380799 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/mixed        \t     997\t    347467 ns/op\t 587.47 MB/s\t    348730 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/entropy      \t     328\t   1088825 ns/op\t 400.39 MB/s\t   1093046 cpu-ns/op\t  548864 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/entropy      \t     331\t   1089023 ns/op\t 400.32 MB/s\t   1096586 cpu-ns/op\t  548864 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/entropy      \t     327\t   1083810 ns/op\t 402.24 MB/s\t   1089829 cpu-ns/op\t  548864 B/op\t       2 allocs/op\nPASS\n"
+      },
+      {
+        "version": "baseline",
+        "gomaxprocs": 4,
+        "output": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/zstddecode\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkDecode/text-4      \t    1358\t    277400 ns/op\t 698.47 MB/s\t    313212 cpu-ns/op\t  202753 B/op\t       2 allocs/op\nBenchmarkDecode/text-4      \t    1267\t    268555 ns/op\t 721.47 MB/s\t    305959 cpu-ns/op\t  202752 B/op\t       2 allocs/op\nBenchmarkDecode/text-4      \t    1320\t    266815 ns/op\t 726.18 MB/s\t    303659 cpu-ns/op\t  202753 B/op\t       2 allocs/op\nBenchmarkDecode/mixed-4     \t     912\t    414241 ns/op\t 492.77 MB/s\t    462221 cpu-ns/op\t  232065 B/op\t       2 allocs/op\nBenchmarkDecode/mixed-4     \t     843\t    390883 ns/op\t 522.22 MB/s\t    439559 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nBenchmarkDecode/mixed-4     \t     862\t    391385 ns/op\t 521.54 MB/s\t    437346 cpu-ns/op\t  232065 B/op\t       2 allocs/op\nBenchmarkDecode/entropy-4   \t     326\t   1115144 ns/op\t 390.94 MB/s\t   1204000 cpu-ns/op\t  548865 B/op\t       2 allocs/op\nBenchmarkDecode/entropy-4   \t     320\t   1135880 ns/op\t 383.80 MB/s\t   1234091 cpu-ns/op\t  548865 B/op\t       2 allocs/op\nBenchmarkDecode/entropy-4   \t     318\t   1118963 ns/op\t 389.61 MB/s\t   1218575 cpu-ns/op\t  548864 B/op\t       2 allocs/op\nBenchmarkDecode/raw-4       \t    4455\t     87570 ns/op\t5987.10 MB/s\t    146894 cpu-ns/op\t  524289 B/op\t       1 allocs/op\nBenchmarkDecode/raw-4       \t    3249\t     97367 ns/op\t5384.67 MB/s\t    164868 cpu-ns/op\t  524289 B/op\t       1 allocs/op\nBenchmarkDecode/raw-4       \t    3238\t     95235 ns/op\t5505.18 MB/s\t    161199 cpu-ns/op\t  524289 B/op\t       1 allocs/op\nBenchmarkDecode/repeat-4    \t    4161\t     75804 ns/op\t6595.98 MB/s\t    136351 cpu-ns/op\t  507907 B/op\t       1 allocs/op\nBenchmarkDecode/repeat-4    \t    4159\t     75392 ns/op\t6632.03 MB/s\t    132089 cpu-ns/op\t  507907 B/op\t       1 allocs/op\nBenchmarkDecode/repeat-4    \t    4642\t     74074 ns/op\t6750.04 MB/s\t    133368 cpu-ns/op\t  507907 B/op\t       1 allocs/op\nBenchmarkDecodeParallel/text-4         \t    3796\t     94470 ns/op\t2050.97 MB/s\t    332257 cpu-ns/op\t  202753 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/text-4         \t    3634\t     93815 ns/op\t2065.28 MB/s\t    329817 cpu-ns/op\t  202752 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/text-4         \t    3675\t     92541 ns/op\t2093.72 MB/s\t    324233 cpu-ns/op\t  202752 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/mixed-4        \t    2365\t    146475 ns/op\t1393.58 MB/s\t    528766 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/mixed-4        \t    2420\t    131333 ns/op\t1554.25 MB/s\t    468068 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/mixed-4        \t    2569\t    151796 ns/op\t1344.73 MB/s\t    545105 cpu-ns/op\t  232064 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/entropy-4      \t     777\t    421154 ns/op\t1035.14 MB/s\t   1595955 cpu-ns/op\t  548866 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/entropy-4      \t     877\t    391024 ns/op\t1114.91 MB/s\t   1486607 cpu-ns/op\t  548864 B/op\t       2 allocs/op\nBenchmarkDecodeParallel/entropy-4      \t     880\t    418774 ns/op\t1041.03 MB/s\t   1569365 cpu-ns/op\t  548866 B/op\t       2 allocs/op\nPASS\n"
+      }
+    ],
+    "length_lookup": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/zstddecode\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkDecode/text         \t    1398\t    238830 ns/op\t 811.27 MB/s\t    239629 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecode/text         \t    1501\t    234311 ns/op\t 826.91 MB/s\t    235134 cpu-ns/op\t  196608 B/op\t       1 allocs/op\nBenchmarkDecode/mixed        \t    1002\t    357802 ns/op\t 570.50 MB/s\t    360080 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecode/mixed        \t    1015\t    357999 ns/op\t 570.18 MB/s\t    359371 cpu-ns/op\t  204800 B/op\t       1 allocs/op\nBenchmarkDecode/entropy      \t     339\t   1053555 ns/op\t 413.79 MB/s\t   1057499 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nBenchmarkDecode/entropy      \t     339\t   1053869 ns/op\t 413.67 MB/s\t   1057584 cpu-ns/op\t  442368 B/op\t       1 allocs/op\nBenchmarkDecode/raw          \t    4550\t     67666 ns/op\t7748.14 MB/s\t     68272 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/raw          \t    4622\t     68012 ns/op\t7708.74 MB/s\t     68298 cpu-ns/op\t  524288 B/op\t       1 allocs/op\nBenchmarkDecode/repeat       \t    6471\t     59341 ns/op\t8425.81 MB/s\t     61098 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nBenchmarkDecode/repeat       \t    6818\t     62690 ns/op\t7975.76 MB/s\t     64434 cpu-ns/op\t  507904 B/op\t       1 allocs/op\nPASS\n"
+  },
+  "final-core_summary": [
+    {
+      "version": "baseline",
+      "gomaxprocs": 1,
+      "benchmark": "BenchmarkDecode",
+      "input": "text",
+      "samples": 6,
+      "median_ns": 224252.0,
+      "median_cpu_ns": 225401.5,
+      "median_bytes": 202752.0,
+      "median_allocs": 2.0
+    },
+    {
+      "version": "baseline",
+      "gomaxprocs": 1,
+      "benchmark": "BenchmarkDecode",
+      "input": "mixed",
+      "samples": 6,
+      "median_ns": 346680.0,
+      "median_cpu_ns": 348314.0,
+      "median_bytes": 232064.0,
+      "median_allocs": 2.0
+    },
+    {
+      "version": "baseline",
+      "gomaxprocs": 1,
+      "benchmark": "BenchmarkDecode",
+      "input": "entropy",
+      "samples": 6,
+      "median_ns": 1115063.5,
+      "median_cpu_ns": 1119355.0,
+      "median_bytes": 548864.0,
+      "median_allocs": 2.0
+    },
+    {
+      "version": "baseline",
+      "gomaxprocs": 1,
+      "benchmark": "BenchmarkDecode",
+      "input": "raw",
+      "samples": 6,
+      "median_ns": 61917.5,
+      "median_cpu_ns": 65300.0,
+      "median_bytes": 524288.0,
+      "median_allocs": 1.0
+    },
+    {
+      "version": "baseline",
+      "gomaxprocs": 1,
+      "benchmark": "BenchmarkDecode",
+      "input": "repeat",
+      "samples": 6,
+      "median_ns": 60336.0,
+      "median_cpu_ns": 61640.0,
+      "median_bytes": 507904.0,
+      "median_allocs": 1.0
+    },
+    {
+      "version": "baseline",
+      "gomaxprocs": 1,
+      "benchmark": "BenchmarkDecodeParallel",
+      "input": "text",
+      "samples": 6,
+      "median_ns": 228253.0,
+      "median_cpu_ns": 229072.0,
+      "median_bytes": 202752.0,
+      "median_allocs": 2.0
+    },
+    {
+      "version": "baseline",
+      "gomaxprocs": 1,
+      "benchmark": "BenchmarkDecodeParallel",
+      "input": "mixed",
+      "samples": 6,
+      "median_ns": 356504.0,
+      "median_cpu_ns": 357702.5,
+      "median_bytes": 232064.0,
+      "median_allocs": 2.0
+    },
+    {
+      "version": "baseline",
+      "gomaxprocs": 1,
+      "benchmark": "BenchmarkDecodeParallel",
+      "input": "entropy",
+      "samples": 6,
+      "median_ns": 1119228.0,
+      "median_cpu_ns": 1122263.5,
+      "median_bytes": 548864.0,
+      "median_allocs": 2.0
+    },
+    {
+      "version": "baseline",
+      "gomaxprocs": 4,
+      "benchmark": "BenchmarkDecode",
+      "input": "text",
+      "samples": 6,
+      "median_ns": 268693.0,
+      "median_cpu_ns": 305126.5,
+      "median_bytes": 202753.0,
+      "median_allocs": 2.0
+    },
+    {
+      "version": "baseline",
+      "gomaxprocs": 4,
+      "benchmark": "BenchmarkDecode",
+      "input": "mixed",
+      "samples": 6,
+      "median_ns": 388238.5,
+      "median_cpu_ns": 434060.0,
+      "median_bytes": 232064.0,
+      "median_allocs": 2.0
+    },
+    {
+      "version": "baseline",
+      "gomaxprocs": 4,
+      "benchmark": "BenchmarkDecode",
+      "input": "entropy",
+      "samples": 6,
+      "median_ns": 1143143.5,
+      "median_cpu_ns": 1241200.5,
+      "median_bytes": 548864.0,
+      "median_allocs": 2.0
+    },
+    {
+      "version": "baseline",
+      "gomaxprocs": 4,
+      "benchmark": "BenchmarkDecode",
+      "input": "raw",
+      "samples": 6,
+      "median_ns": 105584.0,
+      "median_cpu_ns": 185043.0,
+      "median_bytes": 524289.0,
+      "median_allocs": 1.0
+    },
+    {
+      "version": "baseline",
+      "gomaxprocs": 4,
+      "benchmark": "BenchmarkDecode",
+      "input": "repeat",
+      "samples": 6,
+      "median_ns": 95186.5,
+      "median_cpu_ns": 174239.5,
+      "median_bytes": 507906.0,
+      "median_allocs": 1.0
+    },
+    {
+      "version": "baseline",
+      "gomaxprocs": 4,
+      "benchmark": "BenchmarkDecodeParallel",
+      "input": "text",
+      "samples": 6,
+      "median_ns": 94663.5,
+      "median_cpu_ns": 336057.5,
+      "median_bytes": 202752.0,
+      "median_allocs": 2.0
+    },
+    {
+      "version": "baseline",
+      "gomaxprocs": 4,
+      "benchmark": "BenchmarkDecodeParallel",
+      "input": "mixed",
+      "samples": 6,
+      "median_ns": 136088.0,
+      "median_cpu_ns": 497001.5,
+      "median_bytes": 232064.0,
+      "median_allocs": 2.0
+    },
+    {
+      "version": "baseline",
+      "gomaxprocs": 4,
+      "benchmark": "BenchmarkDecodeParallel",
+      "input": "entropy",
+      "samples": 6,
+      "median_ns": 379047.0,
+      "median_cpu_ns": 1414834.5,
+      "median_bytes": 548866.0,
+      "median_allocs": 2.0
+    },
+    {
+      "version": "final",
+      "gomaxprocs": 1,
+      "benchmark": "BenchmarkDecode",
+      "input": "text",
+      "samples": 6,
+      "median_ns": 233828.5,
+      "median_cpu_ns": 235067.5,
+      "median_bytes": 196608.0,
+      "median_allocs": 1.0
+    },
+    {
+      "version": "final",
+      "gomaxprocs": 1,
+      "benchmark": "BenchmarkDecode",
+      "input": "mixed",
+      "samples": 6,
+      "median_ns": 343475.5,
+      "median_cpu_ns": 344552.5,
+      "median_bytes": 204800.0,
+      "median_allocs": 1.0
+    },
+    {
+      "version": "final",
+      "gomaxprocs": 1,
+      "benchmark": "BenchmarkDecode",
+      "input": "entropy",
+      "samples": 6,
+      "median_ns": 1056929.0,
+      "median_cpu_ns": 1060460.5,
+      "median_bytes": 442368.0,
+      "median_allocs": 1.0
+    },
+    {
+      "version": "final",
+      "gomaxprocs": 1,
+      "benchmark": "BenchmarkDecode",
+      "input": "raw",
+      "samples": 6,
+      "median_ns": 65570.0,
+      "median_cpu_ns": 68399.0,
+      "median_bytes": 524288.0,
+      "median_allocs": 1.0
+    },
+    {
+      "version": "final",
+      "gomaxprocs": 1,
+      "benchmark": "BenchmarkDecode",
+      "input": "repeat",
+      "samples": 6,
+      "median_ns": 61504.5,
+      "median_cpu_ns": 62736.0,
+      "median_bytes": 507904.0,
+      "median_allocs": 1.0
+    },
+    {
+      "version": "final",
+      "gomaxprocs": 1,
+      "benchmark": "BenchmarkDecodeParallel",
+      "input": "text",
+      "samples": 6,
+      "median_ns": 227541.0,
+      "median_cpu_ns": 228251.5,
+      "median_bytes": 196608.0,
+      "median_allocs": 1.0
+    },
+    {
+      "version": "final",
+      "gomaxprocs": 1,
+      "benchmark": "BenchmarkDecodeParallel",
+      "input": "mixed",
+      "samples": 6,
+      "median_ns": 340584.5,
+      "median_cpu_ns": 342130.0,
+      "median_bytes": 204800.0,
+      "median_allocs": 1.0
+    },
+    {
+      "version": "final",
+      "gomaxprocs": 1,
+      "benchmark": "BenchmarkDecodeParallel",
+      "input": "entropy",
+      "samples": 6,
+      "median_ns": 1047565.5,
+      "median_cpu_ns": 1052438.0,
+      "median_bytes": 442368.0,
+      "median_allocs": 1.0
+    },
+    {
+      "version": "final",
+      "gomaxprocs": 4,
+      "benchmark": "BenchmarkDecode",
+      "input": "text",
+      "samples": 6,
+      "median_ns": 253709.5,
+      "median_cpu_ns": 290934.5,
+      "median_bytes": 196609.0,
+      "median_allocs": 1.0
+    },
+    {
+      "version": "final",
+      "gomaxprocs": 4,
+      "benchmark": "BenchmarkDecode",
+      "input": "mixed",
+      "samples": 6,
+      "median_ns": 377691.5,
+      "median_cpu_ns": 421612.5,
+      "median_bytes": 204800.0,
+      "median_allocs": 1.0
+    },
+    {
+      "version": "final",
+      "gomaxprocs": 4,
+      "benchmark": "BenchmarkDecode",
+      "input": "entropy",
+      "samples": 6,
+      "median_ns": 1129395.5,
+      "median_cpu_ns": 1212137.5,
+      "median_bytes": 442369.0,
+      "median_allocs": 1.0
+    },
+    {
+      "version": "final",
+      "gomaxprocs": 4,
+      "benchmark": "BenchmarkDecode",
+      "input": "raw",
+      "samples": 6,
+      "median_ns": 90022.0,
+      "median_cpu_ns": 152620.5,
+      "median_bytes": 524289.0,
+      "median_allocs": 1.0
+    },
+    {
+      "version": "final",
+      "gomaxprocs": 4,
+      "benchmark": "BenchmarkDecode",
+      "input": "repeat",
+      "samples": 6,
+      "median_ns": 79339.5,
+      "median_cpu_ns": 145867.5,
+      "median_bytes": 507906.0,
+      "median_allocs": 1.0
+    },
+    {
+      "version": "final",
+      "gomaxprocs": 4,
+      "benchmark": "BenchmarkDecodeParallel",
+      "input": "text",
+      "samples": 6,
+      "median_ns": 91452.5,
+      "median_cpu_ns": 330660.0,
+      "median_bytes": 196608.0,
+      "median_allocs": 1.0
+    },
+    {
+      "version": "final",
+      "gomaxprocs": 4,
+      "benchmark": "BenchmarkDecodeParallel",
+      "input": "mixed",
+      "samples": 6,
+      "median_ns": 123518.5,
+      "median_cpu_ns": 447667.0,
+      "median_bytes": 204801.0,
+      "median_allocs": 1.0
+    },
+    {
+      "version": "final",
+      "gomaxprocs": 4,
+      "benchmark": "BenchmarkDecodeParallel",
+      "input": "entropy",
+      "samples": 6,
+      "median_ns": 389561.0,
+      "median_cpu_ns": 1490995.0,
+      "median_bytes": 442368.0,
+      "median_allocs": 1.0
+    }
+  ],
+  "final-store_summary": [
+    {
+      "version": "before",
+      "gomaxprocs": 1,
+      "benchmark": "BenchmarkPackDecode",
+      "input": "snapshot",
+      "samples": 4,
+      "median_ns": 6191675.0,
+      "median_cpu_ns": 6211156.0,
+      "median_bytes": 5132890.0,
+      "median_allocs": 3724.0
+    },
+    {
+      "version": "before",
+      "gomaxprocs": 1,
+      "benchmark": "BenchmarkPackDecode",
+      "input": "dat",
+      "samples": 4,
+      "median_ns": 3978814.0,
+      "median_cpu_ns": 4007457.0,
+      "median_bytes": 4284580.5,
+      "median_allocs": 2661.0
+    },
+    {
+      "version": "before",
+      "gomaxprocs": 1,
+      "benchmark": "BenchmarkPackFramesDecode/text",
+      "input": "serial",
+      "samples": 4,
+      "median_ns": 1907925.0,
+      "median_cpu_ns": 1914665.5,
+      "median_bytes": 1622016.0,
+      "median_allocs": 16.0
+    },
+    {
+      "version": "before",
+      "gomaxprocs": 1,
+      "benchmark": "BenchmarkPackFramesDecode/text",
+      "input": "workers",
+      "samples": 4,
+      "median_ns": 1915217.5,
+      "median_cpu_ns": 1924752.0,
+      "median_bytes": 1622016.0,
+      "median_allocs": 16.0
+    },
+    {
+      "version": "before",
+      "gomaxprocs": 1,
+      "benchmark": "BenchmarkPackFramesDecode/mixed",
+      "input": "serial",
+      "samples": 4,
+      "median_ns": 2898880.5,
+      "median_cpu_ns": 2908770.0,
+      "median_bytes": 1856512.0,
+      "median_allocs": 16.0
+    },
+    {
+      "version": "before",
+      "gomaxprocs": 1,
+      "benchmark": "BenchmarkPackFramesDecode/mixed",
+      "input": "workers",
+      "samples": 4,
+      "median_ns": 2876848.0,
+      "median_cpu_ns": 2890450.0,
+      "median_bytes": 1856512.0,
+      "median_allocs": 16.0
+    },
+    {
+      "version": "before",
+      "gomaxprocs": 1,
+      "benchmark": "BenchmarkPackFramesDecode/entropy",
+      "input": "serial",
+      "samples": 4,
+      "median_ns": 9539548.5,
+      "median_cpu_ns": 9574611.5,
+      "median_bytes": 4390912.0,
+      "median_allocs": 16.0
+    },
+    {
+      "version": "before",
+      "gomaxprocs": 1,
+      "benchmark": "BenchmarkPackFramesDecode/entropy",
+      "input": "workers",
+      "samples": 4,
+      "median_ns": 9182595.5,
+      "median_cpu_ns": 9216533.5,
+      "median_bytes": 4390912.0,
+      "median_allocs": 16.0
+    },
+    {
+      "version": "before",
+      "gomaxprocs": 4,
+      "benchmark": "BenchmarkPackDecode",
+      "input": "snapshot",
+      "samples": 4,
+      "median_ns": 4767155.5,
+      "median_cpu_ns": 9988891.0,
+      "median_bytes": 5149143.0,
+      "median_allocs": 3768.0
+    },
+    {
+      "version": "before",
+      "gomaxprocs": 4,
+      "benchmark": "BenchmarkPackDecode",
+      "input": "dat",
+      "samples": 4,
+      "median_ns": 1986427.5,
+      "median_cpu_ns": 6507900.0,
+      "median_bytes": 4294892.5,
+      "median_allocs": 2693.0
+    },
+    {
+      "version": "before",
+      "gomaxprocs": 4,
+      "benchmark": "BenchmarkPackFramesDecode/text",
+      "input": "serial",
+      "samples": 4,
+      "median_ns": 2104537.5,
+      "median_cpu_ns": 2527105.0,
+      "median_bytes": 1622019.0,
+      "median_allocs": 16.0
+    },
+    {
+      "version": "before",
+      "gomaxprocs": 4,
+      "benchmark": "BenchmarkPackFramesDecode/text",
+      "input": "workers",
+      "samples": 4,
+      "median_ns": 959547.5,
+      "median_cpu_ns": 3003674.0,
+      "median_bytes": 1622405.0,
+      "median_allocs": 26.0
+    },
+    {
+      "version": "before",
+      "gomaxprocs": 4,
+      "benchmark": "BenchmarkPackFramesDecode/mixed",
+      "input": "serial",
+      "samples": 4,
+      "median_ns": 3389269.0,
+      "median_cpu_ns": 4058592.0,
+      "median_bytes": 1856512.0,
+      "median_allocs": 16.0
+    },
+    {
+      "version": "before",
+      "gomaxprocs": 4,
+      "benchmark": "BenchmarkPackFramesDecode/mixed",
+      "input": "workers",
+      "samples": 4,
+      "median_ns": 1308779.0,
+      "median_cpu_ns": 4184010.5,
+      "median_bytes": 1856882.0,
+      "median_allocs": 26.0
+    },
+    {
+      "version": "before",
+      "gomaxprocs": 4,
+      "benchmark": "BenchmarkPackFramesDecode/entropy",
+      "input": "serial",
+      "samples": 4,
+      "median_ns": 9731563.5,
+      "median_cpu_ns": 10462735.5,
+      "median_bytes": 4390912.0,
+      "median_allocs": 16.0
+    },
+    {
+      "version": "before",
+      "gomaxprocs": 4,
+      "benchmark": "BenchmarkPackFramesDecode/entropy",
+      "input": "workers",
+      "samples": 4,
+      "median_ns": 3813666.0,
+      "median_cpu_ns": 12562629.0,
+      "median_bytes": 4391278.5,
+      "median_allocs": 26.0
+    },
+    {
+      "version": "after",
+      "gomaxprocs": 1,
+      "benchmark": "BenchmarkPackDecode",
+      "input": "snapshot",
+      "samples": 4,
+      "median_ns": 6260128.5,
+      "median_cpu_ns": 6269414.0,
+      "median_bytes": 5127846.0,
+      "median_allocs": 3715.0
+    },
+    {
+      "version": "after",
+      "gomaxprocs": 1,
+      "benchmark": "BenchmarkPackDecode",
+      "input": "dat",
+      "samples": 4,
+      "median_ns": 4004713.5,
+      "median_cpu_ns": 4020124.5,
+      "median_bytes": 4279461.0,
+      "median_allocs": 2652.0
+    },
+    {
+      "version": "after",
+      "gomaxprocs": 1,
+      "benchmark": "BenchmarkPackFramesDecode/text",
+      "input": "serial",
+      "samples": 4,
+      "median_ns": 1936575.0,
+      "median_cpu_ns": 1945539.0,
+      "median_bytes": 1572864.0,
+      "median_allocs": 8.0
+    },
+    {
+      "version": "after",
+      "gomaxprocs": 1,
+      "benchmark": "BenchmarkPackFramesDecode/text",
+      "input": "workers",
+      "samples": 4,
+      "median_ns": 1942558.5,
+      "median_cpu_ns": 1949860.5,
+      "median_bytes": 1572864.0,
+      "median_allocs": 8.0
+    },
+    {
+      "version": "after",
+      "gomaxprocs": 1,
+      "benchmark": "BenchmarkPackFramesDecode/mixed",
+      "input": "serial",
+      "samples": 4,
+      "median_ns": 2834340.5,
+      "median_cpu_ns": 2844815.0,
+      "median_bytes": 1638400.0,
+      "median_allocs": 8.0
+    },
+    {
+      "version": "after",
+      "gomaxprocs": 1,
+      "benchmark": "BenchmarkPackFramesDecode/mixed",
+      "input": "workers",
+      "samples": 4,
+      "median_ns": 2827270.5,
+      "median_cpu_ns": 2837945.0,
+      "median_bytes": 1638400.0,
+      "median_allocs": 8.0
+    },
+    {
+      "version": "after",
+      "gomaxprocs": 1,
+      "benchmark": "BenchmarkPackFramesDecode/entropy",
+      "input": "serial",
+      "samples": 4,
+      "median_ns": 8974374.5,
+      "median_cpu_ns": 9006647.0,
+      "median_bytes": 3538944.0,
+      "median_allocs": 8.0
+    },
+    {
+      "version": "after",
+      "gomaxprocs": 1,
+      "benchmark": "BenchmarkPackFramesDecode/entropy",
+      "input": "workers",
+      "samples": 4,
+      "median_ns": 8821431.0,
+      "median_cpu_ns": 8852787.5,
+      "median_bytes": 3538944.0,
+      "median_allocs": 8.0
+    },
+    {
+      "version": "after",
+      "gomaxprocs": 4,
+      "benchmark": "BenchmarkPackDecode",
+      "input": "snapshot",
+      "samples": 4,
+      "median_ns": 4982068.0,
+      "median_cpu_ns": 10488566.0,
+      "median_bytes": 5143297.0,
+      "median_allocs": 3757.5
+    },
+    {
+      "version": "after",
+      "gomaxprocs": 4,
+      "benchmark": "BenchmarkPackDecode",
+      "input": "dat",
+      "samples": 4,
+      "median_ns": 2026897.0,
+      "median_cpu_ns": 6619591.0,
+      "median_bytes": 4290174.0,
+      "median_allocs": 2684.5
+    },
+    {
+      "version": "after",
+      "gomaxprocs": 4,
+      "benchmark": "BenchmarkPackFramesDecode/text",
+      "input": "serial",
+      "samples": 4,
+      "median_ns": 2182819.0,
+      "median_cpu_ns": 2608354.0,
+      "median_bytes": 1572864.0,
+      "median_allocs": 8.0
+    },
+    {
+      "version": "after",
+      "gomaxprocs": 4,
+      "benchmark": "BenchmarkPackFramesDecode/text",
+      "input": "workers",
+      "samples": 4,
+      "median_ns": 972012.0,
+      "median_cpu_ns": 3044573.0,
+      "median_bytes": 1573262.0,
+      "median_allocs": 18.0
+    },
+    {
+      "version": "after",
+      "gomaxprocs": 4,
+      "benchmark": "BenchmarkPackFramesDecode/mixed",
+      "input": "serial",
+      "samples": 4,
+      "median_ns": 3163075.0,
+      "median_cpu_ns": 3715340.0,
+      "median_bytes": 1638401.5,
+      "median_allocs": 8.0
+    },
+    {
+      "version": "after",
+      "gomaxprocs": 4,
+      "benchmark": "BenchmarkPackFramesDecode/mixed",
+      "input": "workers",
+      "samples": 4,
+      "median_ns": 1326547.5,
+      "median_cpu_ns": 4210201.5,
+      "median_bytes": 1638802.0,
+      "median_allocs": 18.0
+    },
+    {
+      "version": "after",
+      "gomaxprocs": 4,
+      "benchmark": "BenchmarkPackFramesDecode/entropy",
+      "input": "serial",
+      "samples": 4,
+      "median_ns": 9362229.0,
+      "median_cpu_ns": 10208788.0,
+      "median_bytes": 3538944.0,
+      "median_allocs": 8.0
+    },
+    {
+      "version": "after",
+      "gomaxprocs": 4,
+      "benchmark": "BenchmarkPackFramesDecode/entropy",
+      "input": "workers",
+      "samples": 4,
+      "median_ns": 3528209.5,
+      "median_cpu_ns": 11736709.0,
+      "median_bytes": 3539302.5,
+      "median_allocs": 18.0
+    }
+  ],
+  "pinned_summary": [
+    {
+      "version": "baseline",
+      "gomaxprocs": 1,
+      "benchmark": "BenchmarkDecode",
+      "input": "text",
+      "samples": 4,
+      "median_ns": 227869.5,
+      "median_cpu_ns": 227848.0,
+      "median_bytes": 202752.0,
+      "median_allocs": 2.0
+    },
+    {
+      "version": "baseline",
+      "gomaxprocs": 1,
+      "benchmark": "BenchmarkDecode",
+      "input": "mixed",
+      "samples": 4,
+      "median_ns": 365367.0,
+      "median_cpu_ns": 365315.5,
+      "median_bytes": 232064.0,
+      "median_allocs": 2.0
+    },
+    {
+      "version": "baseline",
+      "gomaxprocs": 1,
+      "benchmark": "BenchmarkDecode",
+      "input": "entropy",
+      "samples": 4,
+      "median_ns": 1106278.0,
+      "median_cpu_ns": 1106110.0,
+      "median_bytes": 548864.0,
+      "median_allocs": 2.0
+    },
+    {
+      "version": "baseline",
+      "gomaxprocs": 1,
+      "benchmark": "BenchmarkDecode",
+      "input": "raw",
+      "samples": 4,
+      "median_ns": 63652.5,
+      "median_cpu_ns": 63609.5,
+      "median_bytes": 524288.0,
+      "median_allocs": 1.0
+    },
+    {
+      "version": "baseline",
+      "gomaxprocs": 1,
+      "benchmark": "BenchmarkDecode",
+      "input": "repeat",
+      "samples": 4,
+      "median_ns": 58144.0,
+      "median_cpu_ns": 58131.5,
+      "median_bytes": 507904.0,
+      "median_allocs": 1.0
+    },
+    {
+      "version": "final",
+      "gomaxprocs": 1,
+      "benchmark": "BenchmarkDecode",
+      "input": "text",
+      "samples": 4,
+      "median_ns": 226872.5,
+      "median_cpu_ns": 226844.5,
+      "median_bytes": 196608.0,
+      "median_allocs": 1.0
+    },
+    {
+      "version": "final",
+      "gomaxprocs": 1,
+      "benchmark": "BenchmarkDecode",
+      "input": "mixed",
+      "samples": 4,
+      "median_ns": 341492.5,
+      "median_cpu_ns": 341432.0,
+      "median_bytes": 204800.0,
+      "median_allocs": 1.0
+    },
+    {
+      "version": "final",
+      "gomaxprocs": 1,
+      "benchmark": "BenchmarkDecode",
+      "input": "entropy",
+      "samples": 4,
+      "median_ns": 1051221.0,
+      "median_cpu_ns": 1051124.5,
+      "median_bytes": 442368.0,
+      "median_allocs": 1.0
+    },
+    {
+      "version": "final",
+      "gomaxprocs": 1,
+      "benchmark": "BenchmarkDecode",
+      "input": "raw",
+      "samples": 4,
+      "median_ns": 63958.5,
+      "median_cpu_ns": 63954.0,
+      "median_bytes": 524288.0,
+      "median_allocs": 1.0
+    },
+    {
+      "version": "final",
+      "gomaxprocs": 1,
+      "benchmark": "BenchmarkDecode",
+      "input": "repeat",
+      "samples": 4,
+      "median_ns": 58440.0,
+      "median_cpu_ns": 58429.5,
+      "median_bytes": 507904.0,
+      "median_allocs": 1.0
+    }
+  ],
+  "pinned_method": "Each input and each version in a separate process, GOMAXPROCS=1, taskset -c 10 (physical core 5), ABBA, 500ms x 2 per process, four samples per version/input. Shared host, not an exclusive core reservation. Main evidence for single-core CPU change.",
+  "final_source_sha256": {
+    "decode.go": "86c3d14034c67284b0a4f4b4baf8843b7a19d7ed07346222c5a1dedf6c5ca9fb",
+    "literals.go": "2dde129b5b10d48c2a2fcbfee5bf8dd6810d935a7c747af468853e4cd028ccc7",
+    "huffman_four.go": "8ab7443e5e0641539ad0ee377e9adbe02ef61e0afdfbe10565876bf899b53ed6"
+  },
+  "findings": {
+    "accepted": [
+      "Reuse unconsumed output tail as Huffman literal storage; combine literal-preservation and output bounds check",
+      "Track unbuffered Huffman bit positions only on refill, removing per-symbol position updates"
+    ],
+    "rejected": [
+      "Length-code lookup and additional FSE buffering: little gain and regressions on text/mixed inputs",
+      "Explicit small-copy fast paths: slower text; removed",
+      "Variable Huffman batch size and length-code fast paths: no consistent overall gain",
+      "Simpler copy source slice: not retained after mixed results; original copyMatch kept"
+    ],
+    "limits": "No HTTP, live service, constrained-memory or sustained production load measurements. Unpinned 4-core concurrent entropy CPU was 5.4% higher in the final trials, while earlier trials showed a reduction; no universal multicore efficiency claim."
+  }
+}

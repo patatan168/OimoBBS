@@ -1,0 +1,1087 @@
+{
+  "date": "2026-10-24",
+  "scope": "Same isolated WAF/TLS workload at2CPU/512MiB. Two ordinary runs, one SIGKILL variant; no production modification or WAN/device/long-duration claim.",
+  "baseline_commit": "d8153ea273349f4a53aa79a976d73fa285e5cef8",
+  "baseline": "Prior high-compression implementation plus opt-in numeric diagnostics, original early-GC predicate.",
+  "root_cause": {
+    "observed": {
+      "limit_bytes": 402653184,
+      "managed_bytes": 339245384,
+      "headroom_bytes": 63407800,
+      "live_bytes": 166240544,
+      "allocated_bytes": 313679560,
+      "reserved_bytes_at_rejection": 20971520,
+      "requested_bytes": 1048576,
+      "progress_bytes": 16777216
+    },
+    "uncollected_increase_bytes": 147439016,
+    "original_rule": "Only collect at zero reservations and headroom below margin plus title-search reservation. Both conditions prevented early collection before admission failed.",
+    "fixed_rule": "When new-work and generation headroom plus existing reservations are scarce, collect only if allocated-live is at least max(16MiB,limit/16). Keep reservations and admission limits intact; observe again after GC."
+  },
+  "method": {
+    "cpus": 2,
+    "memory_bytes": 536870912,
+    "swap": "disabled",
+    "waf": "enabled",
+    "egress_bits_per_second": 80000000,
+    "prepare": "1000 posts at10/s",
+    "workload": "40 bounded readers,80% dedicated/20%Web;4s at200 reads/s,12s at2000/s,5s at200/s;20 planned posts/s with5 posting actors; no capacity burst",
+    "encoding": "zstd full/Web, identity DAT ranges",
+    "host": "shared services continued; no build/test overlapped with load trials",
+    "observability": "OIMO_RESOURCE_DIAGNOSTICS=1 logs numeric memory observations/rejections only. No production IPs or credentials captured."
+  },
+  "source_sha256": {
+    "internal/bootstrap/resource_defaults.go": "90f6aa4520ae4b32befd13cb7617d026146c946a7e1d5007600b5116a07e3cef",
+    "internal/bootstrap/resource_defaults_test.go": "612567311b4820234bce76361582a2d4d4992965c0d207abe00c4f090cdbfd13",
+    "internal/bootstrap/resource_pressure_test.go": "c826c734cba2a4f9faec0214aa635586332e746ae2c813440689beeff399dd45"
+  },
+  "compression_sources_unchanged": {
+    "internal/zstdencode/encoder.go": true,
+    "internal/zstdencode/entropy_choice.go": true,
+    "internal/store/archive_codec.go": true,
+    "internal/compat/compression_cache.go": true
+  },
+  "http": [
+    {
+      "name": "diag",
+      "phase": "before fix",
+      "source_sha256": "52f29f6cde9473568e8ce18599c2913a2f1aeecb063496badb2e263e5db3b8fd",
+      "image": "sha256:bc9ea1351142b0151a889d9e5ddebc7fb117f39e5a599a2b63c8369db3003512",
+      "cpu_max": "200000 100000",
+      "memory_max": "536870912",
+      "memory_peak_bytes": 416272384,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "peak_interval_cpu_cores": 0.5227917321991036,
+      "peak_sample_cpu_cores": 0.8234280783618433,
+      "memory_reservation_rejections": 60,
+      "explicit_pressure_collections": 0,
+      "posting_success": 420,
+      "posting_planned": 420,
+      "post_numbers_match": true,
+      "acknowledged_missing_post_numbers": [],
+      "invalid_prefixes": 0,
+      "final_lines": 461,
+      "read_errors": 60,
+      "read_success": 7942,
+      "read_planned": 25800,
+      "phases": [
+        {
+          "name": "normal",
+          "seconds": 4,
+          "read_rate": 200,
+          "legacy": {
+            "planned": 640,
+            "sent": 640,
+            "success": 640,
+            "errors": 0,
+            "skipped": 0,
+            "success_per_second": 160.0,
+            "body_mbps": 2.866734,
+            "http_p95_ms": 3.3291662111878395,
+            "scheduled_p95_ms": 3.497464582324028,
+            "completed_in_window": 640,
+            "completed_per_second": 160.0,
+            "completed_body_mbps": 2.866734
+          },
+          "web": {
+            "planned": 160,
+            "sent": 160,
+            "success": 160,
+            "errors": 0,
+            "skipped": 0,
+            "success_per_second": 40.0,
+            "body_mbps": 3.641386,
+            "http_p95_ms": 3.320156130939722,
+            "scheduled_p95_ms": 3.8183038122951984,
+            "completed_in_window": 160,
+            "completed_per_second": 40.0,
+            "completed_body_mbps": 3.641386
+          },
+          "posting": {
+            "legacy": {
+              "planned": 64,
+              "sent": 64,
+              "success": 64,
+              "errors": 0,
+              "skipped": 0,
+              "success_per_second": 16.0,
+              "body_mbps": 0.0,
+              "http_p95_ms": 28.320190962404013,
+              "scheduled_p95_ms": 28.904758859425783,
+              "completed_in_window": 64,
+              "completed_per_second": 16.0
+            },
+            "web": {
+              "planned": 16,
+              "sent": 16,
+              "success": 16,
+              "errors": 0,
+              "skipped": 0,
+              "success_per_second": 4.0,
+              "body_mbps": 0.0,
+              "http_p95_ms": 38.23742363601923,
+              "scheduled_p95_ms": 38.35171274840832,
+              "completed_in_window": 16,
+              "completed_per_second": 4.0
+            }
+          }
+        },
+        {
+          "name": "peak",
+          "seconds": 12,
+          "read_rate": 2000,
+          "legacy": {
+            "planned": 19200,
+            "sent": 4035,
+            "success": 4035,
+            "errors": 0,
+            "skipped": 15165,
+            "success_per_second": 336.25,
+            "body_mbps": 52.18553333333334,
+            "http_p95_ms": 742.8197367116809,
+            "scheduled_p95_ms": 743.3277335949242,
+            "completed_in_window": 4014,
+            "completed_per_second": 334.5,
+            "completed_body_mbps": 49.719363333333334
+          },
+          "web": {
+            "planned": 4800,
+            "sent": 2173,
+            "success": 2173,
+            "errors": 0,
+            "skipped": 2627,
+            "success_per_second": 181.08333333333334,
+            "body_mbps": 16.576607333333335,
+            "http_p95_ms": 58.770913165062666,
+            "scheduled_p95_ms": 59.01831714436412,
+            "completed_in_window": 2165,
+            "completed_per_second": 180.41666666666666,
+            "completed_body_mbps": 16.515794
+          },
+          "posting": {
+            "legacy": {
+              "planned": 192,
+              "sent": 192,
+              "success": 192,
+              "errors": 0,
+              "skipped": 0,
+              "success_per_second": 16.0,
+              "body_mbps": 0.0,
+              "http_p95_ms": 30.16909910365939,
+              "scheduled_p95_ms": 30.642708763480186,
+              "completed_in_window": 192,
+              "completed_per_second": 16.0
+            },
+            "web": {
+              "planned": 48,
+              "sent": 48,
+              "success": 48,
+              "errors": 0,
+              "skipped": 0,
+              "success_per_second": 4.0,
+              "body_mbps": 0.0,
+              "http_p95_ms": 90.1927100494504,
+              "scheduled_p95_ms": 90.30472859740257,
+              "completed_in_window": 47,
+              "completed_per_second": 3.9166666666666665
+            }
+          }
+        },
+        {
+          "name": "recovery",
+          "seconds": 5,
+          "read_rate": 200,
+          "legacy": {
+            "planned": 800,
+            "sent": 794,
+            "success": 744,
+            "errors": 50,
+            "skipped": 6,
+            "success_per_second": 148.8,
+            "body_mbps": 2.0320368,
+            "http_p95_ms": 1.0928893461823463,
+            "scheduled_p95_ms": 1.5528029762208462,
+            "completed_in_window": 765,
+            "completed_per_second": 153.0,
+            "completed_body_mbps": 7.9508448
+          },
+          "web": {
+            "planned": 200,
+            "sent": 200,
+            "success": 190,
+            "errors": 10,
+            "skipped": 0,
+            "success_per_second": 38.0,
+            "body_mbps": 3.474536,
+            "http_p95_ms": 3.259807825088501,
+            "scheduled_p95_ms": 3.514436073601246,
+            "completed_in_window": 198,
+            "completed_per_second": 39.6,
+            "completed_body_mbps": 3.620488
+          },
+          "posting": {
+            "legacy": {
+              "planned": 80,
+              "sent": 80,
+              "success": 80,
+              "errors": 0,
+              "skipped": 0,
+              "success_per_second": 16.0,
+              "body_mbps": 0.0,
+              "http_p95_ms": 28.33192702382803,
+              "scheduled_p95_ms": 28.857361990958452,
+              "completed_in_window": 80,
+              "completed_per_second": 16.0
+            },
+            "web": {
+              "planned": 20,
+              "sent": 20,
+              "success": 20,
+              "errors": 0,
+              "skipped": 0,
+              "success_per_second": 4.0,
+              "body_mbps": 0.0,
+              "http_p95_ms": 40.53446790203452,
+              "scheduled_p95_ms": 40.656616911292076,
+              "completed_in_window": 21,
+              "completed_per_second": 4.2
+            }
+          }
+        }
+      ],
+      "crash_recovery": null,
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 11284,
+          "saved": 11284,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 5815112,
+        "day_file_bytes": {
+          "20261024": 5815112
+        }
+      },
+      "fixture_sha256": "0fb5a4dee0c9e27e355cac28ba909c811430883bf36eb95be6754d5365389d81"
+    },
+    {
+      "name": "fixed1",
+      "phase": "after fix",
+      "source_sha256": "342f6f30f9a78f105c782051b70c85f35c20b77292b47bc78e3df7d0bb555e7c",
+      "image": "sha256:2aade3da4de7a89cf91ff1b50cb770e20f2df4b84380a35fc35055f0326e9e5b",
+      "cpu_max": "200000 100000",
+      "memory_max": "536870912",
+      "memory_peak_bytes": 391778304,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "peak_interval_cpu_cores": 0.5537153141022035,
+      "peak_sample_cpu_cores": 0.8447119172173102,
+      "memory_reservation_rejections": 0,
+      "explicit_pressure_collections": 0,
+      "posting_success": 420,
+      "posting_planned": 420,
+      "post_numbers_match": true,
+      "acknowledged_missing_post_numbers": [],
+      "invalid_prefixes": 0,
+      "final_lines": 461,
+      "read_errors": 0,
+      "read_success": 7946,
+      "read_planned": 25800,
+      "phases": [
+        {
+          "name": "normal",
+          "seconds": 4,
+          "read_rate": 200,
+          "legacy": {
+            "planned": 640,
+            "sent": 640,
+            "success": 640,
+            "errors": 0,
+            "skipped": 0,
+            "success_per_second": 160.0,
+            "body_mbps": 2.778932,
+            "http_p95_ms": 1.9509540870785713,
+            "scheduled_p95_ms": 2.689913846552372,
+            "completed_in_window": 640,
+            "completed_per_second": 160.0,
+            "completed_body_mbps": 2.778932
+          },
+          "web": {
+            "planned": 160,
+            "sent": 160,
+            "success": 160,
+            "errors": 0,
+            "skipped": 0,
+            "success_per_second": 40.0,
+            "body_mbps": 3.6229,
+            "http_p95_ms": 3.3872793428599834,
+            "scheduled_p95_ms": 3.6205858923494816,
+            "completed_in_window": 160,
+            "completed_per_second": 40.0,
+            "completed_body_mbps": 3.6229
+          },
+          "posting": {
+            "legacy": {
+              "planned": 64,
+              "sent": 64,
+              "success": 64,
+              "errors": 0,
+              "skipped": 0,
+              "success_per_second": 16.0,
+              "body_mbps": 0.0,
+              "http_p95_ms": 245.51920033991337,
+              "scheduled_p95_ms": 245.7653651945293,
+              "completed_in_window": 63,
+              "completed_per_second": 15.75
+            },
+            "web": {
+              "planned": 16,
+              "sent": 16,
+              "success": 16,
+              "errors": 0,
+              "skipped": 0,
+              "success_per_second": 4.0,
+              "body_mbps": 0.0,
+              "http_p95_ms": 250.84458105266094,
+              "scheduled_p95_ms": 252.98620015382767,
+              "completed_in_window": 15,
+              "completed_per_second": 3.75
+            }
+          }
+        },
+        {
+          "name": "peak",
+          "seconds": 12,
+          "read_rate": 2000,
+          "legacy": {
+            "planned": 19200,
+            "sent": 3912,
+            "success": 3912,
+            "errors": 0,
+            "skipped": 15288,
+            "success_per_second": 326.0,
+            "body_mbps": 51.32877333333334,
+            "http_p95_ms": 775.7330727763474,
+            "scheduled_p95_ms": 777.1484670229256,
+            "completed_in_window": 3880,
+            "completed_per_second": 323.3333333333333,
+            "completed_body_mbps": 47.565808
+          },
+          "web": {
+            "planned": 4800,
+            "sent": 2257,
+            "success": 2257,
+            "errors": 0,
+            "skipped": 2543,
+            "success_per_second": 188.08333333333334,
+            "body_mbps": 17.12243,
+            "http_p95_ms": 60.70993700996041,
+            "scheduled_p95_ms": 60.87646400555968,
+            "completed_in_window": 2249,
+            "completed_per_second": 187.41666666666666,
+            "completed_body_mbps": 17.062275333333332
+          },
+          "posting": {
+            "legacy": {
+              "planned": 192,
+              "sent": 192,
+              "success": 192,
+              "errors": 0,
+              "skipped": 0,
+              "success_per_second": 16.0,
+              "body_mbps": 0.0,
+              "http_p95_ms": 254.49092080816627,
+              "scheduled_p95_ms": 269.66677233576775,
+              "completed_in_window": 193,
+              "completed_per_second": 16.083333333333332
+            },
+            "web": {
+              "planned": 48,
+              "sent": 48,
+              "success": 48,
+              "errors": 0,
+              "skipped": 0,
+              "success_per_second": 4.0,
+              "body_mbps": 0.0,
+              "http_p95_ms": 321.30621699616313,
+              "scheduled_p95_ms": 921.031987760216,
+              "completed_in_window": 48,
+              "completed_per_second": 4.0
+            }
+          }
+        },
+        {
+          "name": "recovery",
+          "seconds": 5,
+          "read_rate": 200,
+          "legacy": {
+            "planned": 800,
+            "sent": 777,
+            "success": 777,
+            "errors": 0,
+            "skipped": 23,
+            "success_per_second": 155.4,
+            "body_mbps": 2.0601072,
+            "http_p95_ms": 1.0755667462944984,
+            "scheduled_p95_ms": 1.7276783473789692,
+            "completed_in_window": 809,
+            "completed_per_second": 161.8,
+            "completed_body_mbps": 11.091224
+          },
+          "web": {
+            "planned": 200,
+            "sent": 200,
+            "success": 200,
+            "errors": 0,
+            "skipped": 0,
+            "success_per_second": 40.0,
+            "body_mbps": 3.6272864,
+            "http_p95_ms": 4.029588308185339,
+            "scheduled_p95_ms": 4.234624095261097,
+            "completed_in_window": 208,
+            "completed_per_second": 41.6,
+            "completed_body_mbps": 3.7716576
+          },
+          "posting": {
+            "legacy": {
+              "planned": 80,
+              "sent": 80,
+              "success": 80,
+              "errors": 0,
+              "skipped": 0,
+              "success_per_second": 16.0,
+              "body_mbps": 0.0,
+              "http_p95_ms": 28.654134832322598,
+              "scheduled_p95_ms": 28.952361084520817,
+              "completed_in_window": 80,
+              "completed_per_second": 16.0
+            },
+            "web": {
+              "planned": 20,
+              "sent": 20,
+              "success": 20,
+              "errors": 0,
+              "skipped": 0,
+              "success_per_second": 4.0,
+              "body_mbps": 0.0,
+              "http_p95_ms": 34.39489286392927,
+              "scheduled_p95_ms": 34.50898686423898,
+              "completed_in_window": 21,
+              "completed_per_second": 4.2
+            }
+          }
+        }
+      ],
+      "crash_recovery": null,
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 11228,
+          "saved": 11228,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 5770754,
+        "day_file_bytes": {
+          "20261024": 5770754
+        }
+      },
+      "fixture_sha256": "207cec0532760c32313fee88934acddc15c318c723a48c3f83909a476d731fa2"
+    },
+    {
+      "name": "fixed2",
+      "phase": "after fix",
+      "source_sha256": "4aa05a3dbdd2bf3c679ba4cfe4f3c3863747bdbac612a318712521edd44a6bfa",
+      "image": "sha256:2aade3da4de7a89cf91ff1b50cb770e20f2df4b84380a35fc35055f0326e9e5b",
+      "cpu_max": "200000 100000",
+      "memory_max": "536870912",
+      "memory_peak_bytes": 376053760,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "peak_interval_cpu_cores": 0.5375072633440912,
+      "peak_sample_cpu_cores": 1.0818213846975322,
+      "memory_reservation_rejections": 0,
+      "explicit_pressure_collections": 0,
+      "posting_success": 420,
+      "posting_planned": 420,
+      "post_numbers_match": true,
+      "acknowledged_missing_post_numbers": [],
+      "invalid_prefixes": 0,
+      "final_lines": 461,
+      "read_errors": 0,
+      "read_success": 8001,
+      "read_planned": 25800,
+      "phases": [
+        {
+          "name": "normal",
+          "seconds": 4,
+          "read_rate": 200,
+          "legacy": {
+            "planned": 640,
+            "sent": 640,
+            "success": 640,
+            "errors": 0,
+            "skipped": 0,
+            "success_per_second": 160.0,
+            "body_mbps": 2.866734,
+            "http_p95_ms": 2.639292273670435,
+            "scheduled_p95_ms": 3.583529032766819,
+            "completed_in_window": 640,
+            "completed_per_second": 160.0,
+            "completed_body_mbps": 2.866734
+          },
+          "web": {
+            "planned": 160,
+            "sent": 160,
+            "success": 160,
+            "errors": 0,
+            "skipped": 0,
+            "success_per_second": 40.0,
+            "body_mbps": 3.637008,
+            "http_p95_ms": 3.436730708926916,
+            "scheduled_p95_ms": 3.6497171968221664,
+            "completed_in_window": 160,
+            "completed_per_second": 40.0,
+            "completed_body_mbps": 3.637008
+          },
+          "posting": {
+            "legacy": {
+              "planned": 64,
+              "sent": 64,
+              "success": 64,
+              "errors": 0,
+              "skipped": 0,
+              "success_per_second": 16.0,
+              "body_mbps": 0.0,
+              "http_p95_ms": 29.557742178440094,
+              "scheduled_p95_ms": 30.896511860191822,
+              "completed_in_window": 64,
+              "completed_per_second": 16.0
+            },
+            "web": {
+              "planned": 16,
+              "sent": 16,
+              "success": 16,
+              "errors": 0,
+              "skipped": 0,
+              "success_per_second": 4.0,
+              "body_mbps": 0.0,
+              "http_p95_ms": 40.73836328461766,
+              "scheduled_p95_ms": 41.081842966377735,
+              "completed_in_window": 16,
+              "completed_per_second": 4.0
+            }
+          }
+        },
+        {
+          "name": "peak",
+          "seconds": 12,
+          "read_rate": 2000,
+          "legacy": {
+            "planned": 19200,
+            "sent": 3913,
+            "success": 3913,
+            "errors": 0,
+            "skipped": 15287,
+            "success_per_second": 326.0833333333333,
+            "body_mbps": 51.26183733333333,
+            "http_p95_ms": 767.8308449685574,
+            "scheduled_p95_ms": 769.2101909779012,
+            "completed_in_window": 3888,
+            "completed_per_second": 324.0,
+            "completed_body_mbps": 48.309404
+          },
+          "web": {
+            "planned": 4800,
+            "sent": 2289,
+            "success": 2289,
+            "errors": 0,
+            "skipped": 2511,
+            "success_per_second": 190.75,
+            "body_mbps": 17.421878,
+            "http_p95_ms": 59.218299109488726,
+            "scheduled_p95_ms": 59.40835503861308,
+            "completed_in_window": 2282,
+            "completed_per_second": 190.16666666666666,
+            "completed_body_mbps": 17.368724
+          },
+          "posting": {
+            "legacy": {
+              "planned": 192,
+              "sent": 192,
+              "success": 192,
+              "errors": 0,
+              "skipped": 0,
+              "success_per_second": 16.0,
+              "body_mbps": 0.0,
+              "http_p95_ms": 29.658600687980652,
+              "scheduled_p95_ms": 29.986463021486998,
+              "completed_in_window": 192,
+              "completed_per_second": 16.0
+            },
+            "web": {
+              "planned": 48,
+              "sent": 48,
+              "success": 48,
+              "errors": 0,
+              "skipped": 0,
+              "success_per_second": 4.0,
+              "body_mbps": 0.0,
+              "http_p95_ms": 96.06278454884887,
+              "scheduled_p95_ms": 96.58260177820921,
+              "completed_in_window": 47,
+              "completed_per_second": 3.9166666666666665
+            }
+          }
+        },
+        {
+          "name": "recovery",
+          "seconds": 5,
+          "read_rate": 200,
+          "legacy": {
+            "planned": 800,
+            "sent": 799,
+            "success": 799,
+            "errors": 0,
+            "skipped": 1,
+            "success_per_second": 159.8,
+            "body_mbps": 2.0931168,
+            "http_p95_ms": 1.0852073319256306,
+            "scheduled_p95_ms": 1.6130250878632069,
+            "completed_in_window": 824,
+            "completed_per_second": 164.8,
+            "completed_body_mbps": 9.1789568
+          },
+          "web": {
+            "planned": 200,
+            "sent": 200,
+            "success": 200,
+            "errors": 0,
+            "skipped": 0,
+            "success_per_second": 40.0,
+            "body_mbps": 3.651016,
+            "http_p95_ms": 3.39908292517066,
+            "scheduled_p95_ms": 3.615358844399452,
+            "completed_in_window": 207,
+            "completed_per_second": 41.4,
+            "completed_body_mbps": 3.7785856
+          },
+          "posting": {
+            "legacy": {
+              "planned": 80,
+              "sent": 80,
+              "success": 80,
+              "errors": 0,
+              "skipped": 0,
+              "success_per_second": 16.0,
+              "body_mbps": 0.0,
+              "http_p95_ms": 27.972993906587362,
+              "scheduled_p95_ms": 28.306945227086544,
+              "completed_in_window": 80,
+              "completed_per_second": 16.0
+            },
+            "web": {
+              "planned": 20,
+              "sent": 20,
+              "success": 20,
+              "errors": 0,
+              "skipped": 0,
+              "success_per_second": 4.0,
+              "body_mbps": 0.0,
+              "http_p95_ms": 36.80153004825115,
+              "scheduled_p95_ms": 36.923759151250124,
+              "completed_in_window": 21,
+              "completed_per_second": 4.2
+            }
+          }
+        }
+      ],
+      "crash_recovery": null,
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 11283,
+          "saved": 11283,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 5772296,
+        "day_file_bytes": {
+          "20261024": 5772296
+        }
+      },
+      "fixture_sha256": "0d0193ef0f41d4981ecc87f535c05738a9d8c9667ed111c8bf7914a35913f7d0"
+    },
+    {
+      "name": "fixed-crash",
+      "phase": "after fix",
+      "source_sha256": "679b65f4f2d3d4ee54d142fa7cb8617e13abac20857bc6ccc455a2b5e016e22a",
+      "image": "sha256:2aade3da4de7a89cf91ff1b50cb770e20f2df4b84380a35fc35055f0326e9e5b",
+      "cpu_max": "200000 100000",
+      "memory_max": "536870912",
+      "memory_peak_bytes": 383160320,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "peak_interval_cpu_cores": 0.5313926786690893,
+      "peak_sample_cpu_cores": 0.8568990894472244,
+      "memory_reservation_rejections": 0,
+      "explicit_pressure_collections": 0,
+      "posting_success": 420,
+      "posting_planned": 420,
+      "post_numbers_match": true,
+      "acknowledged_missing_post_numbers": [],
+      "invalid_prefixes": 0,
+      "final_lines": 461,
+      "read_errors": 0,
+      "read_success": 8061,
+      "read_planned": 25800,
+      "phases": [
+        {
+          "name": "normal",
+          "seconds": 4,
+          "read_rate": 200,
+          "legacy": {
+            "planned": 640,
+            "sent": 640,
+            "success": 640,
+            "errors": 0,
+            "skipped": 0,
+            "success_per_second": 160.0,
+            "body_mbps": 2.866734,
+            "http_p95_ms": 3.6347461864352226,
+            "scheduled_p95_ms": 4.138064105063677,
+            "completed_in_window": 640,
+            "completed_per_second": 160.0,
+            "completed_body_mbps": 2.866734
+          },
+          "web": {
+            "planned": 160,
+            "sent": 160,
+            "success": 160,
+            "errors": 0,
+            "skipped": 0,
+            "success_per_second": 40.0,
+            "body_mbps": 3.622618,
+            "http_p95_ms": 3.459291998296976,
+            "scheduled_p95_ms": 3.685730043798685,
+            "completed_in_window": 160,
+            "completed_per_second": 40.0,
+            "completed_body_mbps": 3.622618
+          },
+          "posting": {
+            "legacy": {
+              "planned": 64,
+              "sent": 64,
+              "success": 64,
+              "errors": 0,
+              "skipped": 0,
+              "success_per_second": 16.0,
+              "body_mbps": 0.0,
+              "http_p95_ms": 28.092361986637115,
+              "scheduled_p95_ms": 29.462447855621576,
+              "completed_in_window": 64,
+              "completed_per_second": 16.0
+            },
+            "web": {
+              "planned": 16,
+              "sent": 16,
+              "success": 16,
+              "errors": 0,
+              "skipped": 0,
+              "success_per_second": 4.0,
+              "body_mbps": 0.0,
+              "http_p95_ms": 38.27480599284172,
+              "scheduled_p95_ms": 38.52275386452675,
+              "completed_in_window": 16,
+              "completed_per_second": 4.0
+            }
+          }
+        },
+        {
+          "name": "peak",
+          "seconds": 12,
+          "read_rate": 2000,
+          "legacy": {
+            "planned": 19200,
+            "sent": 4013,
+            "success": 4013,
+            "errors": 0,
+            "skipped": 15187,
+            "success_per_second": 334.4166666666667,
+            "body_mbps": 52.27245466666666,
+            "http_p95_ms": 751.9906521774828,
+            "scheduled_p95_ms": 752.6113269850612,
+            "completed_in_window": 3985,
+            "completed_per_second": 332.0833333333333,
+            "completed_body_mbps": 48.978366666666666
+          },
+          "web": {
+            "planned": 4800,
+            "sent": 2261,
+            "success": 2261,
+            "errors": 0,
+            "skipped": 2539,
+            "success_per_second": 188.41666666666666,
+            "body_mbps": 17.140007333333333,
+            "http_p95_ms": 58.85328399017453,
+            "scheduled_p95_ms": 59.189029969275,
+            "completed_in_window": 2255,
+            "completed_per_second": 187.91666666666666,
+            "completed_body_mbps": 17.094683333333332
+          },
+          "posting": {
+            "legacy": {
+              "planned": 192,
+              "sent": 192,
+              "success": 192,
+              "errors": 0,
+              "skipped": 0,
+              "success_per_second": 16.0,
+              "body_mbps": 0.0,
+              "http_p95_ms": 29.855709057301283,
+              "scheduled_p95_ms": 30.412915162742138,
+              "completed_in_window": 192,
+              "completed_per_second": 16.0
+            },
+            "web": {
+              "planned": 48,
+              "sent": 48,
+              "success": 48,
+              "errors": 0,
+              "skipped": 0,
+              "success_per_second": 4.0,
+              "body_mbps": 0.0,
+              "http_p95_ms": 91.64953278377652,
+              "scheduled_p95_ms": 92.05928165465593,
+              "completed_in_window": 47,
+              "completed_per_second": 3.9166666666666665
+            }
+          }
+        },
+        {
+          "name": "recovery",
+          "seconds": 5,
+          "read_rate": 200,
+          "legacy": {
+            "planned": 800,
+            "sent": 787,
+            "success": 787,
+            "errors": 0,
+            "skipped": 13,
+            "success_per_second": 157.4,
+            "body_mbps": 2.0384864,
+            "http_p95_ms": 1.0776622220873833,
+            "scheduled_p95_ms": 1.4820131473243237,
+            "completed_in_window": 815,
+            "completed_per_second": 163.0,
+            "completed_body_mbps": 9.9442976
+          },
+          "web": {
+            "planned": 200,
+            "sent": 200,
+            "success": 200,
+            "errors": 0,
+            "skipped": 0,
+            "success_per_second": 40.0,
+            "body_mbps": 3.641704,
+            "http_p95_ms": 3.2463991083204746,
+            "scheduled_p95_ms": 3.4674271009862423,
+            "completed_in_window": 206,
+            "completed_per_second": 41.2,
+            "completed_body_mbps": 3.7504816
+          },
+          "posting": {
+            "legacy": {
+              "planned": 80,
+              "sent": 80,
+              "success": 80,
+              "errors": 0,
+              "skipped": 0,
+              "success_per_second": 16.0,
+              "body_mbps": 0.0,
+              "http_p95_ms": 28.145377058535814,
+              "scheduled_p95_ms": 28.57405599206686,
+              "completed_in_window": 80,
+              "completed_per_second": 16.0
+            },
+            "web": {
+              "planned": 20,
+              "sent": 20,
+              "success": 20,
+              "errors": 0,
+              "skipped": 0,
+              "success_per_second": 4.0,
+              "body_mbps": 0.0,
+              "http_p95_ms": 34.97043438255787,
+              "scheduled_p95_ms": 35.06830893456936,
+              "completed_in_window": 21,
+              "completed_per_second": 4.2
+            }
+          }
+        }
+      ],
+      "crash_recovery": {
+        "scope": "SIGKILL of isolated container after 1000 acknowledged posts; no power-loss/media-failure proof",
+        "signal_exit": "137 false",
+        "acknowledged_posts": 1000,
+        "dat_lines": 1001,
+        "dat_bytes_equal": true,
+        "etag_equal": true,
+        "crash_to_verified_dat_ms": 3358.050461858511,
+        "start_to_verified_dat_ms": 3253.2141748815775,
+        "start_to_verified_dat_cpu_ms": 3661.892,
+        "start_to_verified_dat_throttled_ms": 0.0,
+        "waf_block_persisted": true,
+        "memory_events_before_crash": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+        "optional_log_stats_scope": "last process only; queued optional records may be lost at SIGKILL"
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 9261,
+          "saved": 9261,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 5775007,
+        "day_file_bytes": {
+          "20261024": 5775007
+        }
+      },
+      "fixture_sha256": "55f3567dec4eafa1b2823c9aa19e6952d90c1d87e332ae0454fb9bb6962fbc08"
+    }
+  ],
+  "cgroup_collection_proof": {
+    "headroom_before_bytes": 78386856,
+    "headroom_after_bytes": 187496104,
+    "gc_before": 3,
+    "gc_after": 4,
+    "reserved_bytes_preserved": 67108864,
+    "asserted_http_before": 503,
+    "asserted_http_after": 204,
+    "live_data_preserved": true,
+    "gogc": "disabled during fixture construction; explicit collection verifies actual reclaimed heap",
+    "scope": "Separate network-disabled512MiB Docker process, production memory handler and runtime metrics. No simulated memory state or discarded work."
+  },
+  "validation": [
+    {
+      "name": "related normal tests",
+      "outcome": "passed"
+    },
+    {
+      "name": "related race tests",
+      "outcome": "passed"
+    },
+    {
+      "name": "all product vet",
+      "outcome": "passed"
+    },
+    {
+      "name": "CGO-disabled all product build",
+      "outcome": "passed"
+    },
+    {
+      "name": "real 512MiB active reservation collection and HTTP recovery",
+      "outcome": "passed"
+    },
+    {
+      "name": "real 512MiB genuine pressure rejection and recovery",
+      "outcome": "passed"
+    },
+    {
+      "name": "captured-state regression",
+      "outcome": "passed"
+    },
+    {
+      "name": "regression against original GC predicate",
+      "outcome": "expected failure",
+      "log": "red.log"
+    },
+    {
+      "name": "final design and documentation checks",
+      "outcome": "passed"
+    },
+    {
+      "name": "final bootstrap vet",
+      "outcome": "passed"
+    }
+  ],
+  "listed_related_parent_tests": 26,
+  "notes": [
+    "All three repeated HTTP trials had zero explicit early-GC calls; ordinary GC timing did not reproduce the pressure state in these runs. The new trigger is directly verified by the captured-state regression and the separate real-cgroup collection/admission proof.",
+    "The diagnostic reproduction failed with60 read errors, all420 posts persisted. It is retained as a failed trial.",
+    "Planned2000 reads/s was not achieved; many arrivals were skipped by bounded actors. Zero errors means issued requests only.",
+    "Crash-run optional-log summaries cover the last boot only; queued optional records may be lost at SIGKILL.",
+    "Full bootstrap suite was not rerun. Related tests and both explicit cgroup processes completed."
+  ],
+  "artifacts_sha256": {
+    "var/measurements/memory512-20261024/report.py": "d7ed86d35bf0704673bb149c002bbba01f7a10dcaf11e955d65e761fe7b11d73",
+    "var/measurements/memory512-20261024/unit.log": "629f9ca1edf596b247352762fa9e50df71e8229cfbbe0b2ef21f0781bc5f11af",
+    "var/measurements/memory512-20261024/resource-before.go": "211a8438a09281e14671cd278f5c9c73146ba048ec10cd6af31909e14d87da50",
+    "var/measurements/memory512-20261024/TestResourceCollectionWithReservedWorkProcess-final.log": "14120369fee53be2b36369e1c6d8610216aa2ff59dcaa758bd80774aab820051",
+    "var/measurements/memory512-20261024/build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "var/measurements/memory512-20261024/fixed-crash.log": "943d7789a80d7b207a3bda00644b7baea794d10e25dfc80a75b541ea54891132",
+    "var/measurements/memory512-20261024/diag.log": "d890f12bffe63e57fb11e3cb236e55efc00075b7ab067293feb6131cab3a3317",
+    "var/measurements/memory512-20261024/related.log": "d0f7fdd2b179d62d6ce7dd4f9e1704d027e0f9c13005893e9cc6be49be803e2e",
+    "var/measurements/memory512-20261024/fixed2.json.server.log": "4107d10dc20549698bfe4d79c7b4d87f0d1c74bbd49da3c76e3f48f89f92243a",
+    "var/measurements/memory512-20261024/before-overlay.json": "475ebfedac68f28e8930211b2c9ba4a480f3ed2926e31c44c4b578549e086a86",
+    "var/measurements/memory512-20261024/fixed2.log": "3837c1c81de9441d7fc763af2f1f9db6f081c0c742fe1881120c2cc0f9d50f64",
+    "var/measurements/memory512-20261024/fixed-crash.json.server.log": "893c983f2839552400b46aeed5a653ccfe192e582a6a0c60d0496501d5f98ebc",
+    "var/measurements/memory512-20261024/build-fixed.log": "7c5fb892a0455555c83f980d42f89077a89bcc6ce1cb05cb91ee5ba0afb0667a",
+    "var/measurements/memory512-20261024/fixed-crash.json": "679b65f4f2d3d4ee54d142fa7cb8617e13abac20857bc6ccc455a2b5e016e22a",
+    "var/measurements/memory512-20261024/red.log": "62023d8a91d0a29ace4d8857dbce7b2e3740e387111f1a758378f005da440649",
+    "var/measurements/memory512-20261024/fixed1.json": "342f6f30f9a78f105c782051b70c85f35c20b77292b47bc78e3df7d0bb555e7c",
+    "var/measurements/memory512-20261024/build-diag.log": "b29edfcf1a8ae773fdaa62e42492d58186aeffecb66c4c36cfe96ecbe810c98c",
+    "var/measurements/memory512-20261024/diag.json.server.log": "6fe01386b271281224688cdd092fe45538ad26d8857a8b3fe9e571dce0df0e73",
+    "var/measurements/memory512-20261024/diag.json": "52f29f6cde9473568e8ce18599c2913a2f1aeecb063496badb2e263e5db3b8fd",
+    "var/measurements/memory512-20261024/TestResourceCollectionWithReservedWorkProcess.log": "42264cd6501529965483044fe4125c18f96cd38c3d21ec6072a1e0de20fa4b0d",
+    "var/measurements/memory512-20261024/unit-final.log": "83fb0864ae06008f4cf979a5ab2d6d1426e2e27ab80bda086d42074607b4635c",
+    "var/measurements/memory512-20261024/vet-final.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "var/measurements/memory512-20261024/vet.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "var/measurements/memory512-20261024/fixed1.json.server.log": "cb4de0cf459d95ed58681666e228634805df096c042a765410710ec83c7b74b4",
+    "var/measurements/memory512-20261024/fixed2.json": "4aa05a3dbdd2bf3c679ba4cfe4f3c3863747bdbac612a318712521edd44a6bfa",
+    "var/measurements/memory512-20261024/fixed1.log": "bcace48bbdd24b1a6b06198030cb6c997ebf8fc5498f9b47d539829e6f23d781",
+    "var/measurements/memory512-20261024/related-list.txt": "6cb1f1c4cea4523ffe086fb286527eeb6a321f72fd3e1db4591903df5f4cb565",
+    "var/measurements/memory512-20261024/TestResourcePressureProcess.log": "b2ccb3aeb7f2d34de5bd020cf4860bb3ceda6687336371a817265071f79e6326",
+    "var/measurements/memory512-20261024/race.log": "a04ff09955c374d5958c3dc4c2c83e6e8b1300cecc8bed9f710d9d0225367911",
+    "var/measurements/memory512-20261024/design.log": "cf37302fd80de811e1cce6ea916c8c40edfc40417dd52b6d5fca04a369c42285"
+  }
+}

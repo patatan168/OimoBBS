@@ -1,0 +1,3029 @@
+{
+  "date": "2026-10-18",
+  "before_commit": "04e3490",
+  "scope": "隔離Docker、Go1.27.2、3CPU quota・4GiB、1板16スレッド、80主体、予定500投稿/秒を15秒、専ブラ80%・Web20%、TLS HTTP/1.1、fsync等の耐久同期あり、WAF無効、100Mbps送信予算。各試行は新規データ。ビルド・Goテストと重ねず直列測定。共有SSDの変動を含み、実3コア専有ホスト・WAN・本番の保証ではない。cache_bytes=268435456、Goメモリ目標は自動。",
+  "metric": "15秒の窓内で正常完了した投稿/秒。Webはフォーム・有効な303受理・遷移先表示まで。未発行、拒否、窓外完了を成功へ混ぜない。",
+  "groups": {
+    "cpu_before": {
+      "trials": [
+        {
+          "raw": "var/cpu-scaling-20261018/before-1.json",
+          "image": "sha256:14898b5150e6f9478ba937eacf8f8a38d8f8cb97f869b798c959d72157b9e8a2",
+          "cpu_max": "300000 100000",
+          "memory_max": "4294967296",
+          "completed_per_second": 222.86666666666667,
+          "summary": {
+            "planned": 7500,
+            "sent": 3437,
+            "success": 3437,
+            "acknowledged": 3437,
+            "completion_errors_after_ack": 0,
+            "errors": 0,
+            "skipped": 4063,
+            "http_p95_ms": 533.4739268291742,
+            "scheduled_p95_ms": 620.9488050080836,
+            "issuance_wait_p95_ms": 153.00100995227695
+          },
+          "recovery": {
+            "planned": 100,
+            "sent": 100,
+            "success": 100,
+            "acknowledged": 100,
+            "completion_errors_after_ack": 0,
+            "errors": 0,
+            "skipped": 0,
+            "http_p95_ms": 22.877355106174946,
+            "scheduled_p95_ms": 252.48761475086212,
+            "issuance_wait_p95_ms": null
+          },
+          "resources": {
+            "cpu_cores_average": 1.4254623564646194,
+            "generator_cpu_seconds": 5.317418818,
+            "wbytes_delta": 29216768,
+            "wios_delta": 3235,
+            "oom_kill_delta": 0,
+            "throttled_usec_delta": 0,
+            "io_some_usec_delta": 288389
+          },
+          "memory_peak_bytes": 472965120,
+          "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+          "stable_at_tested_rate": false,
+          "integrity": {
+            "ok": true,
+            "unavailable_threads": 0,
+            "read_retries": 0,
+            "read_retry_window_seconds": 5
+          },
+          "optional_shutdown": null,
+          "scheduled_max_ms": 893.6934650409967,
+          "write_bytes_per_ack": 8500.659877800408,
+          "write_ios_per_ack": 0.9412278149549025
+        },
+        {
+          "raw": "var/cpu-scaling-20261018/before-2.json",
+          "image": "sha256:14898b5150e6f9478ba937eacf8f8a38d8f8cb97f869b798c959d72157b9e8a2",
+          "cpu_max": "300000 100000",
+          "memory_max": "4294967296",
+          "completed_per_second": 224.4,
+          "summary": {
+            "planned": 7500,
+            "sent": 3453,
+            "success": 3453,
+            "acknowledged": 3453,
+            "completion_errors_after_ack": 0,
+            "errors": 0,
+            "skipped": 4047,
+            "http_p95_ms": 529.0063780266792,
+            "scheduled_p95_ms": 616.965158842504,
+            "issuance_wait_p95_ms": 151.41027979552746
+          },
+          "recovery": {
+            "planned": 100,
+            "sent": 100,
+            "success": 100,
+            "acknowledged": 100,
+            "completion_errors_after_ack": 0,
+            "errors": 0,
+            "skipped": 0,
+            "http_p95_ms": 21.341989981010556,
+            "scheduled_p95_ms": 21.48199500516057,
+            "issuance_wait_p95_ms": null
+          },
+          "resources": {
+            "cpu_cores_average": 1.4518550464254998,
+            "generator_cpu_seconds": 5.379473337,
+            "wbytes_delta": 29491200,
+            "wios_delta": 3265,
+            "oom_kill_delta": 0,
+            "throttled_usec_delta": 0,
+            "io_some_usec_delta": 269391
+          },
+          "memory_peak_bytes": 473743360,
+          "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+          "stable_at_tested_rate": false,
+          "integrity": {
+            "ok": true,
+            "unavailable_threads": 0,
+            "read_retries": 0,
+            "read_retry_window_seconds": 5
+          },
+          "optional_shutdown": null,
+          "scheduled_max_ms": 746.5197648853064,
+          "write_bytes_per_ack": 8540.747176368375,
+          "write_ios_per_ack": 0.9455545902114104
+        },
+        {
+          "raw": "var/cpu-scaling-20261018/before-3.json",
+          "image": "sha256:14898b5150e6f9478ba937eacf8f8a38d8f8cb97f869b798c959d72157b9e8a2",
+          "cpu_max": "300000 100000",
+          "memory_max": "4294967296",
+          "completed_per_second": 219.06666666666666,
+          "summary": {
+            "planned": 7500,
+            "sent": 3385,
+            "success": 3385,
+            "acknowledged": 3385,
+            "completion_errors_after_ack": 0,
+            "errors": 0,
+            "skipped": 4115,
+            "http_p95_ms": 543.2344889268279,
+            "scheduled_p95_ms": 628.0959660653025,
+            "issuance_wait_p95_ms": 152.29078312404454
+          },
+          "recovery": {
+            "planned": 100,
+            "sent": 100,
+            "success": 100,
+            "acknowledged": 100,
+            "completion_errors_after_ack": 0,
+            "errors": 0,
+            "skipped": 0,
+            "http_p95_ms": 159.21963495202363,
+            "scheduled_p95_ms": 2116.468808846548,
+            "issuance_wait_p95_ms": null
+          },
+          "resources": {
+            "cpu_cores_average": 1.4602450193346395,
+            "generator_cpu_seconds": 5.343116214999999,
+            "wbytes_delta": 28954624,
+            "wios_delta": 3216,
+            "oom_kill_delta": 0,
+            "throttled_usec_delta": 0,
+            "io_some_usec_delta": 254748
+          },
+          "memory_peak_bytes": 474927104,
+          "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+          "stable_at_tested_rate": false,
+          "integrity": {
+            "ok": true,
+            "unavailable_threads": 0,
+            "read_retries": 0,
+            "read_retry_window_seconds": 5
+          },
+          "optional_shutdown": null,
+          "scheduled_max_ms": 766.9785290490836,
+          "write_bytes_per_ack": 8553.803249630724,
+          "write_ios_per_ack": 0.9500738552437223
+        }
+      ],
+      "median_posts_per_second": 222.86666666666667,
+      "range_posts_per_second": [
+        219.06666666666666,
+        224.4
+      ],
+      "median_http_p95_ms": 533.4739268291742,
+      "median_scheduled_p95_ms": 620.9488050080836,
+      "median_cpu_cores": 1.4518550464254998,
+      "median_peak_mib": 451.796875,
+      "median_write_bytes_per_ack": 8540.747176368375,
+      "median_write_ios_per_ack": 0.9455545902114104,
+      "median_io_pressure_us": 269391
+    },
+    "cpu_after": {
+      "trials": [
+        {
+          "raw": "var/cpu-scaling-20261018/candidate-1.json",
+          "image": "sha256:08d0d6076abe3d59a8e71e6a006824d8f83e4d8e7443c86597a15a2406853062",
+          "cpu_max": "300000 100000",
+          "memory_max": "4294967296",
+          "completed_per_second": 225.53333333333333,
+          "summary": {
+            "planned": 7500,
+            "sent": 3584,
+            "success": 3453,
+            "acknowledged": 3453,
+            "completion_errors_after_ack": 0,
+            "errors": 131,
+            "skipped": 3916,
+            "http_p95_ms": 518.241740996018,
+            "scheduled_p95_ms": 597.6543619763106,
+            "issuance_wait_p95_ms": 152.55709318444133
+          },
+          "recovery": {
+            "planned": 100,
+            "sent": 100,
+            "success": 100,
+            "acknowledged": 100,
+            "completion_errors_after_ack": 0,
+            "errors": 0,
+            "skipped": 0,
+            "http_p95_ms": 19.47827893309295,
+            "scheduled_p95_ms": 19.591205986216664,
+            "issuance_wait_p95_ms": null
+          },
+          "resources": {
+            "cpu_cores_average": 1.4906508672745638,
+            "generator_cpu_seconds": 5.559560373,
+            "wbytes_delta": 30113792,
+            "wios_delta": 3376,
+            "oom_kill_delta": 0,
+            "throttled_usec_delta": 0,
+            "io_some_usec_delta": 215871
+          },
+          "memory_peak_bytes": 471314432,
+          "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+          "stable_at_tested_rate": false,
+          "integrity": {
+            "ok": true,
+            "unavailable_threads": 0,
+            "read_retries": 0,
+            "read_retry_window_seconds": 5
+          },
+          "optional_shutdown": null,
+          "scheduled_max_ms": 737.1919059660286,
+          "write_bytes_per_ack": 8721.051838980597,
+          "write_ios_per_ack": 0.9777005502461628
+        },
+        {
+          "raw": "var/cpu-scaling-20261018/candidate-2.json",
+          "image": "sha256:08d0d6076abe3d59a8e71e6a006824d8f83e4d8e7443c86597a15a2406853062",
+          "cpu_max": "300000 100000",
+          "memory_max": "4294967296",
+          "completed_per_second": 135.6,
+          "summary": {
+            "planned": 7500,
+            "sent": 2132,
+            "success": 2132,
+            "acknowledged": 2132,
+            "completion_errors_after_ack": 0,
+            "errors": 0,
+            "skipped": 5368,
+            "http_p95_ms": 1026.345178950578,
+            "scheduled_p95_ms": 1102.1396268624812,
+            "issuance_wait_p95_ms": 152.0977569743991
+          },
+          "recovery": {
+            "planned": 100,
+            "sent": 100,
+            "success": 100,
+            "acknowledged": 100,
+            "completion_errors_after_ack": 0,
+            "errors": 0,
+            "skipped": 0,
+            "http_p95_ms": 150.82263993099332,
+            "scheduled_p95_ms": 1262.592633254826,
+            "issuance_wait_p95_ms": null
+          },
+          "resources": {
+            "cpu_cores_average": 0.8897976237737595,
+            "generator_cpu_seconds": 3.316694321,
+            "wbytes_delta": 18100224,
+            "wios_delta": 2021,
+            "oom_kill_delta": 0,
+            "throttled_usec_delta": 0,
+            "io_some_usec_delta": 1054383
+          },
+          "memory_peak_bytes": 359530496,
+          "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+          "stable_at_tested_rate": false,
+          "integrity": {
+            "ok": true,
+            "unavailable_threads": 0,
+            "read_retries": 0,
+            "read_retry_window_seconds": 5
+          },
+          "optional_shutdown": null,
+          "scheduled_max_ms": 1412.139835068956,
+          "write_bytes_per_ack": 8489.786116322703,
+          "write_ios_per_ack": 0.9479362101313321
+        },
+        {
+          "raw": "var/cpu-scaling-20261018/candidate-3.json",
+          "image": "sha256:08d0d6076abe3d59a8e71e6a006824d8f83e4d8e7443c86597a15a2406853062",
+          "cpu_max": "300000 100000",
+          "memory_max": "4294967296",
+          "completed_per_second": 225.46666666666667,
+          "summary": {
+            "planned": 7500,
+            "sent": 3519,
+            "success": 3452,
+            "acknowledged": 3452,
+            "completion_errors_after_ack": 0,
+            "errors": 67,
+            "skipped": 3981,
+            "http_p95_ms": 519.3474239204079,
+            "scheduled_p95_ms": 598.7421290483326,
+            "issuance_wait_p95_ms": 153.01347500644624
+          },
+          "recovery": {
+            "planned": 100,
+            "sent": 100,
+            "success": 100,
+            "acknowledged": 100,
+            "completion_errors_after_ack": 0,
+            "errors": 0,
+            "skipped": 0,
+            "http_p95_ms": 18.98076105862856,
+            "scheduled_p95_ms": 19.096048083156347,
+            "issuance_wait_p95_ms": null
+          },
+          "resources": {
+            "cpu_cores_average": 1.4924232129481534,
+            "generator_cpu_seconds": 5.533049882,
+            "wbytes_delta": 29958144,
+            "wios_delta": 3332,
+            "oom_kill_delta": 0,
+            "throttled_usec_delta": 0,
+            "io_some_usec_delta": 204286
+          },
+          "memory_peak_bytes": 477458432,
+          "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+          "stable_at_tested_rate": false,
+          "integrity": {
+            "ok": true,
+            "unavailable_threads": 0,
+            "read_retries": 0,
+            "read_retry_window_seconds": 5
+          },
+          "optional_shutdown": null,
+          "scheduled_max_ms": 718.4370781760663,
+          "write_bytes_per_ack": 8678.48899188876,
+          "write_ios_per_ack": 0.9652375434530707
+        }
+      ],
+      "median_posts_per_second": 225.46666666666667,
+      "range_posts_per_second": [
+        135.6,
+        225.53333333333333
+      ],
+      "median_http_p95_ms": 519.3474239204079,
+      "median_scheduled_p95_ms": 598.7421290483326,
+      "median_cpu_cores": 1.4906508672745638,
+      "median_peak_mib": 449.48046875,
+      "median_write_bytes_per_ack": 8678.48899188876,
+      "median_write_ios_per_ack": 0.9652375434530707,
+      "median_io_pressure_us": 215871
+    },
+    "trip_before": {
+      "trials": [
+        {
+          "raw": "var/cpu-scaling-20261018/trip-before-1.json",
+          "image": "sha256:14898b5150e6f9478ba937eacf8f8a38d8f8cb97f869b798c959d72157b9e8a2",
+          "cpu_max": "300000 100000",
+          "memory_max": "4294967296",
+          "completed_per_second": 220.53333333333333,
+          "summary": {
+            "planned": 7500,
+            "sent": 3404,
+            "success": 3404,
+            "acknowledged": 3404,
+            "completion_errors_after_ack": 0,
+            "errors": 0,
+            "skipped": 4096,
+            "http_p95_ms": 536.9247540365905,
+            "scheduled_p95_ms": 627.2337511181831,
+            "issuance_wait_p95_ms": 152.3510159458965
+          },
+          "recovery": {
+            "planned": 100,
+            "sent": 100,
+            "success": 100,
+            "acknowledged": 100,
+            "completion_errors_after_ack": 0,
+            "errors": 0,
+            "skipped": 0,
+            "http_p95_ms": 20.62739012762904,
+            "scheduled_p95_ms": 20.751999923959374,
+            "issuance_wait_p95_ms": null
+          },
+          "resources": {
+            "cpu_cores_average": 1.4479520986346281,
+            "generator_cpu_seconds": 5.236440765999999,
+            "wbytes_delta": 28807168,
+            "wios_delta": 3165,
+            "oom_kill_delta": 0,
+            "throttled_usec_delta": 0,
+            "io_some_usec_delta": 262434
+          },
+          "memory_peak_bytes": 465735680,
+          "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+          "stable_at_tested_rate": false,
+          "integrity": {
+            "ok": true,
+            "unavailable_threads": 0,
+            "read_retries": 0,
+            "read_retry_window_seconds": 5
+          },
+          "optional_shutdown": null,
+          "scheduled_max_ms": 750.4518970381469,
+          "write_bytes_per_ack": 8462.740305522913,
+          "write_ios_per_ack": 0.9297884841363102
+        },
+        {
+          "raw": "var/cpu-scaling-20261018/trip-before-2.json",
+          "image": "sha256:14898b5150e6f9478ba937eacf8f8a38d8f8cb97f869b798c959d72157b9e8a2",
+          "cpu_max": "300000 100000",
+          "memory_max": "4294967296",
+          "completed_per_second": 218.93333333333334,
+          "summary": {
+            "planned": 7500,
+            "sent": 3393,
+            "success": 3393,
+            "acknowledged": 3393,
+            "completion_errors_after_ack": 0,
+            "errors": 0,
+            "skipped": 4107,
+            "http_p95_ms": 537.1937840245664,
+            "scheduled_p95_ms": 626.0439429897815,
+            "issuance_wait_p95_ms": 152.1900009829551
+          },
+          "recovery": {
+            "planned": 100,
+            "sent": 100,
+            "success": 100,
+            "acknowledged": 100,
+            "completion_errors_after_ack": 0,
+            "errors": 0,
+            "skipped": 0,
+            "http_p95_ms": 19.632706185802817,
+            "scheduled_p95_ms": 20.018097013235092,
+            "issuance_wait_p95_ms": null
+          },
+          "resources": {
+            "cpu_cores_average": 1.4249568530962131,
+            "generator_cpu_seconds": 5.2303963940000004,
+            "wbytes_delta": 28966912,
+            "wios_delta": 3217,
+            "oom_kill_delta": 0,
+            "throttled_usec_delta": 0,
+            "io_some_usec_delta": 263682
+          },
+          "memory_peak_bytes": 467099648,
+          "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+          "stable_at_tested_rate": false,
+          "integrity": {
+            "ok": true,
+            "unavailable_threads": 0,
+            "read_retries": 0,
+            "read_retry_window_seconds": 5
+          },
+          "optional_shutdown": null,
+          "scheduled_max_ms": 752.342764986679,
+          "write_bytes_per_ack": 8537.256704980842,
+          "write_ios_per_ack": 0.9481284998526378
+        },
+        {
+          "raw": "var/cpu-scaling-20261018/trip-before-3.json",
+          "image": "sha256:14898b5150e6f9478ba937eacf8f8a38d8f8cb97f869b798c959d72157b9e8a2",
+          "cpu_max": "300000 100000",
+          "memory_max": "4294967296",
+          "completed_per_second": 218.66666666666666,
+          "summary": {
+            "planned": 7500,
+            "sent": 3383,
+            "success": 3383,
+            "acknowledged": 3383,
+            "completion_errors_after_ack": 0,
+            "errors": 0,
+            "skipped": 4117,
+            "http_p95_ms": 539.3727719783783,
+            "scheduled_p95_ms": 629.6309209428728,
+            "issuance_wait_p95_ms": 152.3834289982915
+          },
+          "recovery": {
+            "planned": 100,
+            "sent": 100,
+            "success": 100,
+            "acknowledged": 100,
+            "completion_errors_after_ack": 0,
+            "errors": 0,
+            "skipped": 0,
+            "http_p95_ms": 20.336129004135728,
+            "scheduled_p95_ms": 20.470906980335712,
+            "issuance_wait_p95_ms": null
+          },
+          "resources": {
+            "cpu_cores_average": 1.4294529598564778,
+            "generator_cpu_seconds": 5.1851386690000005,
+            "wbytes_delta": 28745728,
+            "wios_delta": 3164,
+            "oom_kill_delta": 0,
+            "throttled_usec_delta": 0,
+            "io_some_usec_delta": 263011
+          },
+          "memory_peak_bytes": 461930496,
+          "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+          "stable_at_tested_rate": false,
+          "integrity": {
+            "ok": true,
+            "unavailable_threads": 0,
+            "read_retries": 0,
+            "read_retry_window_seconds": 5
+          },
+          "optional_shutdown": null,
+          "scheduled_max_ms": 755.3964878898114,
+          "write_bytes_per_ack": 8497.111439550694,
+          "write_ios_per_ack": 0.9352645580845403
+        }
+      ],
+      "median_posts_per_second": 218.93333333333334,
+      "range_posts_per_second": [
+        218.66666666666666,
+        220.53333333333333
+      ],
+      "median_http_p95_ms": 537.1937840245664,
+      "median_scheduled_p95_ms": 627.2337511181831,
+      "median_cpu_cores": 1.4294529598564778,
+      "median_peak_mib": 444.16015625,
+      "median_write_bytes_per_ack": 8497.111439550694,
+      "median_write_ios_per_ack": 0.9352645580845403,
+      "median_io_pressure_us": 263011
+    },
+    "trip_after": {
+      "trials": [
+        {
+          "raw": "var/cpu-scaling-20261018/trip-candidate-1.json",
+          "image": "sha256:08d0d6076abe3d59a8e71e6a006824d8f83e4d8e7443c86597a15a2406853062",
+          "cpu_max": "300000 100000",
+          "memory_max": "4294967296",
+          "completed_per_second": 122.86666666666666,
+          "summary": {
+            "planned": 7500,
+            "sent": 1924,
+            "success": 1924,
+            "acknowledged": 1924,
+            "completion_errors_after_ack": 0,
+            "errors": 0,
+            "skipped": 5576,
+            "http_p95_ms": 1048.0590560473502,
+            "scheduled_p95_ms": 1136.7695350199938,
+            "issuance_wait_p95_ms": 151.96510194800794
+          },
+          "recovery": {
+            "planned": 100,
+            "sent": 100,
+            "success": 100,
+            "acknowledged": 100,
+            "completion_errors_after_ack": 0,
+            "errors": 0,
+            "skipped": 0,
+            "http_p95_ms": 20.94525983557105,
+            "scheduled_p95_ms": 190.0200208183378,
+            "issuance_wait_p95_ms": null
+          },
+          "resources": {
+            "cpu_cores_average": 0.8120293456275723,
+            "generator_cpu_seconds": 3.0897479299999997,
+            "wbytes_delta": 16240640,
+            "wios_delta": 1837,
+            "oom_kill_delta": 0,
+            "throttled_usec_delta": 0,
+            "io_some_usec_delta": 1205299
+          },
+          "memory_peak_bytes": 329904128,
+          "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+          "stable_at_tested_rate": false,
+          "integrity": {
+            "ok": true,
+            "unavailable_threads": 0,
+            "read_retries": 0,
+            "read_retry_window_seconds": 5
+          },
+          "optional_shutdown": null,
+          "scheduled_max_ms": 1379.091358045116,
+          "write_bytes_per_ack": 8441.081081081082,
+          "write_ios_per_ack": 0.9547817047817048
+        },
+        {
+          "raw": "var/cpu-scaling-20261018/trip-candidate-2.json",
+          "image": "sha256:08d0d6076abe3d59a8e71e6a006824d8f83e4d8e7443c86597a15a2406853062",
+          "cpu_max": "300000 100000",
+          "memory_max": "4294967296",
+          "completed_per_second": 222.2,
+          "summary": {
+            "planned": 7500,
+            "sent": 3447,
+            "success": 3447,
+            "acknowledged": 3447,
+            "completion_errors_after_ack": 0,
+            "errors": 0,
+            "skipped": 4053,
+            "http_p95_ms": 529.9018251243979,
+            "scheduled_p95_ms": 615.5996760353446,
+            "issuance_wait_p95_ms": 152.8856079094112
+          },
+          "recovery": {
+            "planned": 100,
+            "sent": 100,
+            "success": 100,
+            "acknowledged": 100,
+            "completion_errors_after_ack": 0,
+            "errors": 0,
+            "skipped": 0,
+            "http_p95_ms": 19.962380873039365,
+            "scheduled_p95_ms": 20.08663909509778,
+            "issuance_wait_p95_ms": null
+          },
+          "resources": {
+            "cpu_cores_average": 1.5061593896296257,
+            "generator_cpu_seconds": 5.455267764,
+            "wbytes_delta": 29339648,
+            "wios_delta": 3246,
+            "oom_kill_delta": 0,
+            "throttled_usec_delta": 0,
+            "io_some_usec_delta": 215486
+          },
+          "memory_peak_bytes": 464580608,
+          "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+          "stable_at_tested_rate": false,
+          "integrity": {
+            "ok": true,
+            "unavailable_threads": 0,
+            "read_retries": 0,
+            "read_retry_window_seconds": 5
+          },
+          "optional_shutdown": null,
+          "scheduled_max_ms": 720.2879579272121,
+          "write_bytes_per_ack": 8511.647229474906,
+          "write_ios_per_ack": 0.9416884247171453
+        },
+        {
+          "raw": "var/cpu-scaling-20261018/trip-candidate-3.json",
+          "image": "sha256:08d0d6076abe3d59a8e71e6a006824d8f83e4d8e7443c86597a15a2406853062",
+          "cpu_max": "300000 100000",
+          "memory_max": "4294967296",
+          "completed_per_second": 222.93333333333334,
+          "summary": {
+            "planned": 7500,
+            "sent": 3446,
+            "success": 3446,
+            "acknowledged": 3446,
+            "completion_errors_after_ack": 0,
+            "errors": 0,
+            "skipped": 4054,
+            "http_p95_ms": 532.3839380871505,
+            "scheduled_p95_ms": 613.2011159788817,
+            "issuance_wait_p95_ms": 152.5147669017315
+          },
+          "recovery": {
+            "planned": 100,
+            "sent": 100,
+            "success": 100,
+            "acknowledged": 100,
+            "completion_errors_after_ack": 0,
+            "errors": 0,
+            "skipped": 0,
+            "http_p95_ms": 20.099628949537873,
+            "scheduled_p95_ms": 20.224862964823842,
+            "issuance_wait_p95_ms": null
+          },
+          "resources": {
+            "cpu_cores_average": 1.5026221049934372,
+            "generator_cpu_seconds": 5.431085723,
+            "wbytes_delta": 29368320,
+            "wios_delta": 3282,
+            "oom_kill_delta": 0,
+            "throttled_usec_delta": 0,
+            "io_some_usec_delta": 202876
+          },
+          "memory_peak_bytes": 473014272,
+          "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+          "stable_at_tested_rate": false,
+          "integrity": {
+            "ok": true,
+            "unavailable_threads": 0,
+            "read_retries": 0,
+            "read_retry_window_seconds": 5
+          },
+          "optional_shutdown": null,
+          "scheduled_max_ms": 722.1479348372668,
+          "write_bytes_per_ack": 8522.437608821823,
+          "write_ios_per_ack": 0.9524085896691816
+        }
+      ],
+      "median_posts_per_second": 222.2,
+      "range_posts_per_second": [
+        122.86666666666666,
+        222.93333333333334
+      ],
+      "median_http_p95_ms": 532.3839380871505,
+      "median_scheduled_p95_ms": 615.5996760353446,
+      "median_cpu_cores": 1.5026221049934372,
+      "median_peak_mib": 443.05859375,
+      "median_write_bytes_per_ack": 8511.647229474906,
+      "median_write_ios_per_ack": 0.9524085896691816,
+      "median_io_pressure_us": 215486
+    },
+    "io_before": {
+      "trials": [
+        {
+          "raw": "var/cpu-scaling-20261018/io-before-1.json",
+          "image": "sha256:08d0d6076abe3d59a8e71e6a006824d8f83e4d8e7443c86597a15a2406853062",
+          "cpu_max": "300000 100000",
+          "memory_max": "4294967296",
+          "completed_per_second": 222.73333333333332,
+          "summary": {
+            "planned": 7500,
+            "sent": 3577,
+            "success": 3418,
+            "acknowledged": 3418,
+            "completion_errors_after_ack": 0,
+            "errors": 159,
+            "skipped": 3923,
+            "http_p95_ms": 511.0524860210717,
+            "scheduled_p95_ms": 598.9213350694627,
+            "issuance_wait_p95_ms": 152.15052501298487
+          },
+          "recovery": {
+            "planned": 100,
+            "sent": 100,
+            "success": 100,
+            "acknowledged": 100,
+            "completion_errors_after_ack": 0,
+            "errors": 0,
+            "skipped": 0,
+            "http_p95_ms": 20.059437956660986,
+            "scheduled_p95_ms": 20.311669912189245,
+            "issuance_wait_p95_ms": null
+          },
+          "resources": {
+            "cpu_cores_average": 1.4920699430387367,
+            "generator_cpu_seconds": 5.546570073000001,
+            "wbytes_delta": 30228480,
+            "wios_delta": 3300,
+            "oom_kill_delta": 0,
+            "throttled_usec_delta": 0,
+            "io_some_usec_delta": 230242
+          },
+          "memory_peak_bytes": 469397504,
+          "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+          "stable_at_tested_rate": false,
+          "integrity": {
+            "ok": true,
+            "unavailable_threads": 0,
+            "read_retries": 0,
+            "read_retry_window_seconds": 5
+          },
+          "optional_shutdown": {
+            "clean": true,
+            "queue": {
+              "accepted": 16171,
+              "saved": 16171,
+              "failed": 0,
+              "dropped_capacity": 0,
+              "dropped_invalid": 0,
+              "dropped_closed": 0,
+              "dropped_shutdown": 0,
+              "loss_started_at_ns": "0",
+              "loss_finished_at_ns": "0",
+              "pending": 0,
+              "pending_bytes": 0,
+              "closed": true
+            }
+          },
+          "scheduled_max_ms": 738.2538230158389,
+          "write_bytes_per_ack": 8843.908718548859,
+          "write_ios_per_ack": 0.9654768870684611
+        },
+        {
+          "raw": "var/cpu-scaling-20261018/io-before-2.json",
+          "image": "sha256:08d0d6076abe3d59a8e71e6a006824d8f83e4d8e7443c86597a15a2406853062",
+          "cpu_max": "300000 100000",
+          "memory_max": "4294967296",
+          "completed_per_second": 222.86666666666667,
+          "summary": {
+            "planned": 7500,
+            "sent": 3450,
+            "success": 3450,
+            "acknowledged": 3450,
+            "completion_errors_after_ack": 0,
+            "errors": 0,
+            "skipped": 4050,
+            "http_p95_ms": 527.0891028922051,
+            "scheduled_p95_ms": 612.9985470324755,
+            "issuance_wait_p95_ms": 151.84950595721602
+          },
+          "recovery": {
+            "planned": 100,
+            "sent": 100,
+            "success": 100,
+            "acknowledged": 100,
+            "completion_errors_after_ack": 0,
+            "errors": 0,
+            "skipped": 0,
+            "http_p95_ms": 19.858273910358548,
+            "scheduled_p95_ms": 19.98997898772359,
+            "issuance_wait_p95_ms": null
+          },
+          "resources": {
+            "cpu_cores_average": 1.4538302399245966,
+            "generator_cpu_seconds": 5.376103670999999,
+            "wbytes_delta": 29347840,
+            "wios_delta": 3251,
+            "oom_kill_delta": 0,
+            "throttled_usec_delta": 0,
+            "io_some_usec_delta": 225671
+          },
+          "memory_peak_bytes": 461381632,
+          "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+          "stable_at_tested_rate": false,
+          "integrity": {
+            "ok": true,
+            "unavailable_threads": 0,
+            "read_retries": 0,
+            "read_retry_window_seconds": 5
+          },
+          "optional_shutdown": {
+            "clean": true,
+            "queue": {
+              "accepted": 15651,
+              "saved": 15651,
+              "failed": 0,
+              "dropped_capacity": 0,
+              "dropped_invalid": 0,
+              "dropped_closed": 0,
+              "dropped_shutdown": 0,
+              "loss_started_at_ns": "0",
+              "loss_finished_at_ns": "0",
+              "pending": 0,
+              "pending_bytes": 0,
+              "closed": true
+            }
+          },
+          "scheduled_max_ms": 761.1373278778046,
+          "write_bytes_per_ack": 8506.620289855073,
+          "write_ios_per_ack": 0.9423188405797102
+        },
+        {
+          "raw": "var/cpu-scaling-20261018/io-before-3.json",
+          "image": "sha256:08d0d6076abe3d59a8e71e6a006824d8f83e4d8e7443c86597a15a2406853062",
+          "cpu_max": "300000 100000",
+          "memory_max": "4294967296",
+          "completed_per_second": 225.46666666666667,
+          "summary": {
+            "planned": 7500,
+            "sent": 3557,
+            "success": 3452,
+            "acknowledged": 3452,
+            "completion_errors_after_ack": 0,
+            "errors": 105,
+            "skipped": 3943,
+            "http_p95_ms": 517.0061979442835,
+            "scheduled_p95_ms": 602.5968918111175,
+            "issuance_wait_p95_ms": 150.8763339370489
+          },
+          "recovery": {
+            "planned": 100,
+            "sent": 100,
+            "success": 100,
+            "acknowledged": 100,
+            "completion_errors_after_ack": 0,
+            "errors": 0,
+            "skipped": 0,
+            "http_p95_ms": 20.623090909793973,
+            "scheduled_p95_ms": 20.754337077960372,
+            "issuance_wait_p95_ms": null
+          },
+          "resources": {
+            "cpu_cores_average": 1.4898075795423615,
+            "generator_cpu_seconds": 5.554850978,
+            "wbytes_delta": 30023680,
+            "wios_delta": 3360,
+            "oom_kill_delta": 0,
+            "throttled_usec_delta": 0,
+            "io_some_usec_delta": 228127
+          },
+          "memory_peak_bytes": 477290496,
+          "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+          "stable_at_tested_rate": false,
+          "integrity": {
+            "ok": true,
+            "unavailable_threads": 0,
+            "read_retries": 0,
+            "read_retry_window_seconds": 5
+          },
+          "optional_shutdown": {
+            "clean": true,
+            "queue": {
+              "accepted": 16100,
+              "saved": 16100,
+              "failed": 0,
+              "dropped_capacity": 0,
+              "dropped_invalid": 0,
+              "dropped_closed": 0,
+              "dropped_shutdown": 0,
+              "loss_started_at_ns": "0",
+              "loss_finished_at_ns": "0",
+              "pending": 0,
+              "pending_bytes": 0,
+              "closed": true
+            }
+          },
+          "scheduled_max_ms": 712.7221119590104,
+          "write_bytes_per_ack": 8697.47392815759,
+          "write_ios_per_ack": 0.9733487833140209
+        }
+      ],
+      "median_posts_per_second": 222.86666666666667,
+      "range_posts_per_second": [
+        222.73333333333332,
+        225.46666666666667
+      ],
+      "median_http_p95_ms": 517.0061979442835,
+      "median_scheduled_p95_ms": 602.5968918111175,
+      "median_cpu_cores": 1.4898075795423615,
+      "median_peak_mib": 447.65234375,
+      "median_write_bytes_per_ack": 8697.47392815759,
+      "median_write_ios_per_ack": 0.9654768870684611,
+      "median_io_pressure_us": 228127
+    },
+    "io_after": {
+      "trials": [
+        {
+          "raw": "var/cpu-scaling-20261018/io-after-1.json",
+          "image": "sha256:32911c3969197a90c6804e8a41491e21c1bb7d45ee5dd78ca525722b9fc712a7",
+          "cpu_max": "300000 100000",
+          "memory_max": "4294967296",
+          "completed_per_second": 224.66666666666666,
+          "summary": {
+            "planned": 7500,
+            "sent": 3496,
+            "success": 3464,
+            "acknowledged": 3464,
+            "completion_errors_after_ack": 0,
+            "errors": 32,
+            "skipped": 4004,
+            "http_p95_ms": 528.047360945493,
+            "scheduled_p95_ms": 619.9475990142673,
+            "issuance_wait_p95_ms": 152.38597802817822
+          },
+          "recovery": {
+            "planned": 100,
+            "sent": 100,
+            "success": 100,
+            "acknowledged": 100,
+            "completion_errors_after_ack": 0,
+            "errors": 0,
+            "skipped": 0,
+            "http_p95_ms": 166.95507802069187,
+            "scheduled_p95_ms": 7185.318179195747,
+            "issuance_wait_p95_ms": null
+          },
+          "resources": {
+            "cpu_cores_average": 1.4659275567260523,
+            "generator_cpu_seconds": 5.637438932,
+            "wbytes_delta": 29679616,
+            "wios_delta": 3310,
+            "oom_kill_delta": 0,
+            "throttled_usec_delta": 0,
+            "io_some_usec_delta": 279505
+          },
+          "memory_peak_bytes": 469872640,
+          "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+          "stable_at_tested_rate": false,
+          "integrity": {
+            "ok": true,
+            "unavailable_threads": 0,
+            "read_retries": 0,
+            "read_retry_window_seconds": 5
+          },
+          "optional_shutdown": {
+            "clean": true,
+            "queue": {
+              "accepted": 15859,
+              "saved": 15859,
+              "failed": 0,
+              "dropped_capacity": 0,
+              "dropped_invalid": 0,
+              "dropped_closed": 0,
+              "dropped_shutdown": 0,
+              "loss_started_at_ns": "0",
+              "loss_finished_at_ns": "0",
+              "pending": 0,
+              "pending_bytes": 0,
+              "closed": true
+            }
+          },
+          "scheduled_max_ms": 1011.030935915187,
+          "write_bytes_per_ack": 8568.018475750578,
+          "write_ios_per_ack": 0.9555427251732102
+        },
+        {
+          "raw": "var/cpu-scaling-20261018/io-after-2.json",
+          "image": "sha256:32911c3969197a90c6804e8a41491e21c1bb7d45ee5dd78ca525722b9fc712a7",
+          "cpu_max": "300000 100000",
+          "memory_max": "4294967296",
+          "completed_per_second": 225.46666666666667,
+          "summary": {
+            "planned": 7500,
+            "sent": 3560,
+            "success": 3457,
+            "acknowledged": 3457,
+            "completion_errors_after_ack": 0,
+            "errors": 103,
+            "skipped": 3940,
+            "http_p95_ms": 515.0243351235986,
+            "scheduled_p95_ms": 601.0633572004735,
+            "issuance_wait_p95_ms": 150.9850991424173
+          },
+          "recovery": {
+            "planned": 100,
+            "sent": 100,
+            "success": 100,
+            "acknowledged": 100,
+            "completion_errors_after_ack": 0,
+            "errors": 0,
+            "skipped": 0,
+            "http_p95_ms": 19.94530390948057,
+            "scheduled_p95_ms": 20.084793213754892,
+            "issuance_wait_p95_ms": null
+          },
+          "resources": {
+            "cpu_cores_average": 1.4830519115536698,
+            "generator_cpu_seconds": 5.498160390000001,
+            "wbytes_delta": 30085120,
+            "wios_delta": 3370,
+            "oom_kill_delta": 0,
+            "throttled_usec_delta": 0,
+            "io_some_usec_delta": 235030
+          },
+          "memory_peak_bytes": 479531008,
+          "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+          "stable_at_tested_rate": false,
+          "integrity": {
+            "ok": true,
+            "unavailable_threads": 0,
+            "read_retries": 0,
+            "read_retry_window_seconds": 5
+          },
+          "optional_shutdown": {
+            "clean": true,
+            "queue": {
+              "accepted": 16109,
+              "saved": 16109,
+              "failed": 0,
+              "dropped_capacity": 0,
+              "dropped_invalid": 0,
+              "dropped_closed": 0,
+              "dropped_shutdown": 0,
+              "loss_started_at_ns": "0",
+              "loss_finished_at_ns": "0",
+              "pending": 0,
+              "pending_bytes": 0,
+              "closed": true
+            }
+          },
+          "scheduled_max_ms": 705.0549450796098,
+          "write_bytes_per_ack": 8702.667052357536,
+          "write_ios_per_ack": 0.9748336708128436
+        },
+        {
+          "raw": "var/cpu-scaling-20261018/io-after-3.json",
+          "image": "sha256:32911c3969197a90c6804e8a41491e21c1bb7d45ee5dd78ca525722b9fc712a7",
+          "cpu_max": "300000 100000",
+          "memory_max": "4294967296",
+          "completed_per_second": 222.93333333333334,
+          "summary": {
+            "planned": 7500,
+            "sent": 3441,
+            "success": 3441,
+            "acknowledged": 3441,
+            "completion_errors_after_ack": 0,
+            "errors": 0,
+            "skipped": 4059,
+            "http_p95_ms": 531.8617429584265,
+            "scheduled_p95_ms": 617.3472329974174,
+            "issuance_wait_p95_ms": 151.9564490299672
+          },
+          "recovery": {
+            "planned": 100,
+            "sent": 100,
+            "success": 100,
+            "acknowledged": 100,
+            "completion_errors_after_ack": 0,
+            "errors": 0,
+            "skipped": 0,
+            "http_p95_ms": 19.850655924528837,
+            "scheduled_p95_ms": 19.979501143097878,
+            "issuance_wait_p95_ms": null
+          },
+          "resources": {
+            "cpu_cores_average": 1.4653751756246276,
+            "generator_cpu_seconds": 5.4576347929999995,
+            "wbytes_delta": 29442048,
+            "wios_delta": 3284,
+            "oom_kill_delta": 0,
+            "throttled_usec_delta": 0,
+            "io_some_usec_delta": 213287
+          },
+          "memory_peak_bytes": 473026560,
+          "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+          "stable_at_tested_rate": false,
+          "integrity": {
+            "ok": true,
+            "unavailable_threads": 0,
+            "read_retries": 0,
+            "read_retry_window_seconds": 5
+          },
+          "optional_shutdown": {
+            "clean": true,
+            "queue": {
+              "accepted": 15611,
+              "saved": 15611,
+              "failed": 0,
+              "dropped_capacity": 0,
+              "dropped_invalid": 0,
+              "dropped_closed": 0,
+              "dropped_shutdown": 0,
+              "loss_started_at_ns": "0",
+              "loss_finished_at_ns": "0",
+              "pending": 0,
+              "pending_bytes": 0,
+              "closed": true
+            }
+          },
+          "scheduled_max_ms": 741.5733488742262,
+          "write_bytes_per_ack": 8556.247602441152,
+          "write_ios_per_ack": 0.954373728567277
+        }
+      ],
+      "median_posts_per_second": 224.66666666666666,
+      "range_posts_per_second": [
+        222.93333333333334,
+        225.46666666666667
+      ],
+      "median_http_p95_ms": 528.047360945493,
+      "median_scheduled_p95_ms": 617.3472329974174,
+      "median_cpu_cores": 1.4659275567260523,
+      "median_peak_mib": 451.11328125,
+      "median_write_bytes_per_ack": 8568.018475750578,
+      "median_write_ios_per_ack": 0.9555427251732102,
+      "median_io_pressure_us": 235030
+    },
+    "alloc_before": {
+      "trials": [
+        {
+          "raw": "var/cpu-scaling-20261018/alloc-before-1.json",
+          "image": "sha256:32911c3969197a90c6804e8a41491e21c1bb7d45ee5dd78ca525722b9fc712a7",
+          "cpu_max": "300000 100000",
+          "memory_max": "4294967296",
+          "completed_per_second": 224.6,
+          "summary": {
+            "planned": 7500,
+            "sent": 3563,
+            "success": 3451,
+            "acknowledged": 3451,
+            "completion_errors_after_ack": 0,
+            "errors": 112,
+            "skipped": 3937,
+            "http_p95_ms": 518.9618689473718,
+            "scheduled_p95_ms": 595.9954620338976,
+            "issuance_wait_p95_ms": 151.83839993551373
+          },
+          "recovery": {
+            "planned": 100,
+            "sent": 100,
+            "success": 100,
+            "acknowledged": 100,
+            "completion_errors_after_ack": 0,
+            "errors": 0,
+            "skipped": 0,
+            "http_p95_ms": 20.10894101113081,
+            "scheduled_p95_ms": 20.226696971803904,
+            "issuance_wait_p95_ms": null
+          },
+          "resources": {
+            "cpu_cores_average": 1.494307126973059,
+            "generator_cpu_seconds": 5.591318021,
+            "wbytes_delta": 29995008,
+            "wios_delta": 3339,
+            "oom_kill_delta": 0,
+            "throttled_usec_delta": 0,
+            "io_some_usec_delta": 217463
+          },
+          "memory_peak_bytes": 474877952,
+          "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+          "stable_at_tested_rate": false,
+          "integrity": {
+            "ok": true,
+            "unavailable_threads": 0,
+            "read_retries": 0,
+            "read_retry_window_seconds": 5
+          },
+          "optional_shutdown": {
+            "clean": true,
+            "queue": {
+              "accepted": 16122,
+              "saved": 16122,
+              "failed": 0,
+              "dropped_capacity": 0,
+              "dropped_invalid": 0,
+              "dropped_closed": 0,
+              "dropped_shutdown": 0,
+              "loss_started_at_ns": "0",
+              "loss_finished_at_ns": "0",
+              "pending": 0,
+              "pending_bytes": 0,
+              "closed": true
+            }
+          },
+          "scheduled_max_ms": 722.329675918445,
+          "write_bytes_per_ack": 8691.685888148362,
+          "write_ios_per_ack": 0.9675456389452333
+        },
+        {
+          "raw": "var/cpu-scaling-20261018/alloc-before-2.json",
+          "image": "sha256:32911c3969197a90c6804e8a41491e21c1bb7d45ee5dd78ca525722b9fc712a7",
+          "cpu_max": "300000 100000",
+          "memory_max": "4294967296",
+          "completed_per_second": 225.46666666666667,
+          "summary": {
+            "planned": 7500,
+            "sent": 3622,
+            "success": 3451,
+            "acknowledged": 3451,
+            "completion_errors_after_ack": 0,
+            "errors": 171,
+            "skipped": 3878,
+            "http_p95_ms": 511.6767189465463,
+            "scheduled_p95_ms": 593.6783389188349,
+            "issuance_wait_p95_ms": 151.21299191378057
+          },
+          "recovery": {
+            "planned": 100,
+            "sent": 100,
+            "success": 100,
+            "acknowledged": 100,
+            "completion_errors_after_ack": 0,
+            "errors": 0,
+            "skipped": 0,
+            "http_p95_ms": 18.943130038678646,
+            "scheduled_p95_ms": 19.075399031862617,
+            "issuance_wait_p95_ms": null
+          },
+          "resources": {
+            "cpu_cores_average": 1.493824108483316,
+            "generator_cpu_seconds": 5.500234253,
+            "wbytes_delta": 30130176,
+            "wios_delta": 3362,
+            "oom_kill_delta": 0,
+            "throttled_usec_delta": 0,
+            "io_some_usec_delta": 235545
+          },
+          "memory_peak_bytes": 486207488,
+          "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+          "stable_at_tested_rate": false,
+          "integrity": {
+            "ok": true,
+            "unavailable_threads": 0,
+            "read_retries": 0,
+            "read_retry_window_seconds": 5
+          },
+          "optional_shutdown": {
+            "clean": true,
+            "queue": {
+              "accepted": 16373,
+              "saved": 16373,
+              "failed": 0,
+              "dropped_capacity": 0,
+              "dropped_invalid": 0,
+              "dropped_closed": 0,
+              "dropped_shutdown": 0,
+              "loss_started_at_ns": "0",
+              "loss_finished_at_ns": "0",
+              "pending": 0,
+              "pending_bytes": 0,
+              "closed": true
+            }
+          },
+          "scheduled_max_ms": 709.5535679254681,
+          "write_bytes_per_ack": 8730.853665604172,
+          "write_ios_per_ack": 0.9742103738046943
+        }
+      ],
+      "median_posts_per_second": 225.03333333333333,
+      "range_posts_per_second": [
+        224.6,
+        225.46666666666667
+      ],
+      "median_http_p95_ms": 515.3192939469591,
+      "median_scheduled_p95_ms": 594.8369004763663,
+      "median_cpu_cores": 1.4940656177281875,
+      "median_peak_mib": 458.28125,
+      "median_write_bytes_per_ack": 8711.269776876266,
+      "median_write_ios_per_ack": 0.9708780063749638,
+      "median_io_pressure_us": 226504.0
+    },
+    "alloc_after": {
+      "trials": [
+        {
+          "raw": "var/cpu-scaling-20261018/alloc-after-1.json",
+          "image": "sha256:9dbb7ff0b1104293ba6d1f69296988743dfd04606747c84e067a29f9c06a5524",
+          "cpu_max": "300000 100000",
+          "memory_max": "4294967296",
+          "completed_per_second": 224.4,
+          "summary": {
+            "planned": 7500,
+            "sent": 3595,
+            "success": 3445,
+            "acknowledged": 3445,
+            "completion_errors_after_ack": 0,
+            "errors": 150,
+            "skipped": 3905,
+            "http_p95_ms": 513.0686878692359,
+            "scheduled_p95_ms": 596.1592060048133,
+            "issuance_wait_p95_ms": 152.04265504144132
+          },
+          "recovery": {
+            "planned": 100,
+            "sent": 100,
+            "success": 100,
+            "acknowledged": 100,
+            "completion_errors_after_ack": 0,
+            "errors": 0,
+            "skipped": 0,
+            "http_p95_ms": 164.79758988134563,
+            "scheduled_p95_ms": 4052.8676661197096,
+            "issuance_wait_p95_ms": null
+          },
+          "resources": {
+            "cpu_cores_average": 1.479066783148486,
+            "generator_cpu_seconds": 5.536424617,
+            "wbytes_delta": 30056448,
+            "wios_delta": 3529,
+            "oom_kill_delta": 0,
+            "throttled_usec_delta": 0,
+            "io_some_usec_delta": 217113
+          },
+          "memory_peak_bytes": 484843520,
+          "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+          "stable_at_tested_rate": false,
+          "integrity": {
+            "ok": true,
+            "unavailable_threads": 0,
+            "read_retries": 0,
+            "read_retry_window_seconds": 5
+          },
+          "optional_shutdown": {
+            "clean": true,
+            "queue": {
+              "accepted": 16261,
+              "saved": 16261,
+              "failed": 0,
+              "dropped_capacity": 0,
+              "dropped_invalid": 0,
+              "dropped_closed": 0,
+              "dropped_shutdown": 0,
+              "loss_started_at_ns": "0",
+              "loss_finished_at_ns": "0",
+              "pending": 0,
+              "pending_bytes": 0,
+              "closed": true
+            }
+          },
+          "scheduled_max_ms": 711.3108700141311,
+          "write_bytes_per_ack": 8724.658345428157,
+          "write_ios_per_ack": 1.0243831640058054
+        },
+        {
+          "raw": "var/cpu-scaling-20261018/alloc-after-2.json",
+          "image": "sha256:9dbb7ff0b1104293ba6d1f69296988743dfd04606747c84e067a29f9c06a5524",
+          "cpu_max": "300000 100000",
+          "memory_max": "4294967296",
+          "completed_per_second": 225.33333333333334,
+          "summary": {
+            "planned": 7500,
+            "sent": 3547,
+            "success": 3442,
+            "acknowledged": 3442,
+            "completion_errors_after_ack": 0,
+            "errors": 105,
+            "skipped": 3953,
+            "http_p95_ms": 523.2802019454539,
+            "scheduled_p95_ms": 600.555740762502,
+            "issuance_wait_p95_ms": 150.64225578680634
+          },
+          "recovery": {
+            "planned": 100,
+            "sent": 100,
+            "success": 100,
+            "acknowledged": 100,
+            "completion_errors_after_ack": 0,
+            "errors": 0,
+            "skipped": 0,
+            "http_p95_ms": 19.875720841810107,
+            "scheduled_p95_ms": 20.002858014777303,
+            "issuance_wait_p95_ms": null
+          },
+          "resources": {
+            "cpu_cores_average": 1.4853101871102552,
+            "generator_cpu_seconds": 5.534631366,
+            "wbytes_delta": 29904896,
+            "wios_delta": 3482,
+            "oom_kill_delta": 0,
+            "throttled_usec_delta": 0,
+            "io_some_usec_delta": 227439
+          },
+          "memory_peak_bytes": 470831104,
+          "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+          "stable_at_tested_rate": false,
+          "integrity": {
+            "ok": true,
+            "unavailable_threads": 0,
+            "read_retries": 0,
+            "read_retry_window_seconds": 5
+          },
+          "optional_shutdown": {
+            "clean": true,
+            "queue": {
+              "accepted": 16051,
+              "saved": 16051,
+              "failed": 0,
+              "dropped_capacity": 0,
+              "dropped_invalid": 0,
+              "dropped_closed": 0,
+              "dropped_shutdown": 0,
+              "loss_started_at_ns": "0",
+              "loss_finished_at_ns": "0",
+              "pending": 0,
+              "pending_bytes": 0,
+              "closed": true
+            }
+          },
+          "scheduled_max_ms": 719.680676003918,
+          "write_bytes_per_ack": 8688.232423009878,
+          "write_ios_per_ack": 1.011621150493899
+        }
+      ],
+      "median_posts_per_second": 224.86666666666667,
+      "range_posts_per_second": [
+        224.4,
+        225.33333333333334
+      ],
+      "median_http_p95_ms": 518.1744449073449,
+      "median_scheduled_p95_ms": 598.3574733836576,
+      "median_cpu_cores": 1.4821884851293707,
+      "median_peak_mib": 455.701171875,
+      "median_write_bytes_per_ack": 8706.445384219018,
+      "median_write_ios_per_ack": 1.0180021572498523,
+      "median_io_pressure_us": 222276.0
+    }
+  },
+  "changes_percent": {
+    "cpu": {
+      "median_posts_per_second": 1.1666168112473896,
+      "median_write_bytes_per_ack": 1.612760718424111,
+      "median_write_ios_per_ack": 2.081630552632552
+    },
+    "trip": {
+      "median_posts_per_second": 1.4920828258221608,
+      "median_write_bytes_per_ack": 0.1710674271794721,
+      "median_write_ios_per_ack": 1.8330675995841261
+    },
+    "io": {
+      "median_posts_per_second": 0.8076577924020167,
+      "median_write_bytes_per_ack": -1.4884258748727786,
+      "median_write_ios_per_ack": -1.0289383441808408
+    },
+    "allocation": {
+      "median_posts_per_second": -0.07406310176270026,
+      "median_write_bytes_per_ack": -0.055381049844815955,
+      "median_write_ios_per_ack": 4.853766442896301
+    }
+  },
+  "control_microbenchmark": {
+    "scope": "GOMAXPROCS=3、合成制御操作、メモリ内faultWriter。実Sync・実HTTP・ディスクを含まない。before/after/after/before、各2試行。初期のcontrol-final-bench.txtはビルドと重なったため比較に使わず保持。",
+    "samples": {
+      "1": {
+        "before": {
+          "samples": [
+            {
+              "raw": "var/cpu-scaling-20261018/isolated-control-before-1.txt",
+              "ns_per_op": 34714,
+              "bytes_per_op": 20899,
+              "allocs_per_op": 17
+            },
+            {
+              "raw": "var/cpu-scaling-20261018/isolated-control-before-1.txt",
+              "ns_per_op": 34706,
+              "bytes_per_op": 20897,
+              "allocs_per_op": 17
+            },
+            {
+              "raw": "var/cpu-scaling-20261018/isolated-control-before-2.txt",
+              "ns_per_op": 33905,
+              "bytes_per_op": 20898,
+              "allocs_per_op": 17
+            },
+            {
+              "raw": "var/cpu-scaling-20261018/isolated-control-before-2.txt",
+              "ns_per_op": 33885,
+              "bytes_per_op": 20898,
+              "allocs_per_op": 17
+            }
+          ],
+          "median_ns_per_op": 34305.5
+        },
+        "candidate": {
+          "samples": [
+            {
+              "raw": "var/cpu-scaling-20261018/isolated-control-candidate-1.txt",
+              "ns_per_op": 34965,
+              "bytes_per_op": 20914,
+              "allocs_per_op": 17
+            },
+            {
+              "raw": "var/cpu-scaling-20261018/isolated-control-candidate-1.txt",
+              "ns_per_op": 32666,
+              "bytes_per_op": 20914,
+              "allocs_per_op": 17
+            },
+            {
+              "raw": "var/cpu-scaling-20261018/isolated-control-candidate-2.txt",
+              "ns_per_op": 33646,
+              "bytes_per_op": 20912,
+              "allocs_per_op": 17
+            },
+            {
+              "raw": "var/cpu-scaling-20261018/isolated-control-candidate-2.txt",
+              "ns_per_op": 33180,
+              "bytes_per_op": 20914,
+              "allocs_per_op": 17
+            }
+          ],
+          "median_ns_per_op": 33413.0
+        },
+        "time_change_percent": -2.6016236463540787
+      },
+      "16": {
+        "before": {
+          "samples": [
+            {
+              "raw": "var/cpu-scaling-20261018/isolated-control-before-1.txt",
+              "ns_per_op": 600147,
+              "bytes_per_op": 270908,
+              "allocs_per_op": 186
+            },
+            {
+              "raw": "var/cpu-scaling-20261018/isolated-control-before-1.txt",
+              "ns_per_op": 628693,
+              "bytes_per_op": 272982,
+              "allocs_per_op": 187
+            },
+            {
+              "raw": "var/cpu-scaling-20261018/isolated-control-before-2.txt",
+              "ns_per_op": 579700,
+              "bytes_per_op": 272411,
+              "allocs_per_op": 186
+            },
+            {
+              "raw": "var/cpu-scaling-20261018/isolated-control-before-2.txt",
+              "ns_per_op": 601350,
+              "bytes_per_op": 269860,
+              "allocs_per_op": 186
+            }
+          ],
+          "median_ns_per_op": 600748.5
+        },
+        "candidate": {
+          "samples": [
+            {
+              "raw": "var/cpu-scaling-20261018/isolated-control-candidate-1.txt",
+              "ns_per_op": 470507,
+              "bytes_per_op": 280097,
+              "allocs_per_op": 194
+            },
+            {
+              "raw": "var/cpu-scaling-20261018/isolated-control-candidate-1.txt",
+              "ns_per_op": 465943,
+              "bytes_per_op": 280328,
+              "allocs_per_op": 194
+            },
+            {
+              "raw": "var/cpu-scaling-20261018/isolated-control-candidate-2.txt",
+              "ns_per_op": 473435,
+              "bytes_per_op": 274978,
+              "allocs_per_op": 194
+            },
+            {
+              "raw": "var/cpu-scaling-20261018/isolated-control-candidate-2.txt",
+              "ns_per_op": 467995,
+              "bytes_per_op": 281309,
+              "allocs_per_op": 194
+            }
+          ],
+          "median_ns_per_op": 469251.0
+        },
+        "time_change_percent": -21.888943542930196
+      },
+      "64": {
+        "before": {
+          "samples": [
+            {
+              "raw": "var/cpu-scaling-20261018/isolated-control-before-1.txt",
+              "ns_per_op": 2657804,
+              "bytes_per_op": 1083612,
+              "allocs_per_op": 692
+            },
+            {
+              "raw": "var/cpu-scaling-20261018/isolated-control-before-1.txt",
+              "ns_per_op": 2535404,
+              "bytes_per_op": 1111896,
+              "allocs_per_op": 693
+            },
+            {
+              "raw": "var/cpu-scaling-20261018/isolated-control-before-2.txt",
+              "ns_per_op": 2456668,
+              "bytes_per_op": 1085311,
+              "allocs_per_op": 691
+            },
+            {
+              "raw": "var/cpu-scaling-20261018/isolated-control-before-2.txt",
+              "ns_per_op": 2522448,
+              "bytes_per_op": 1098712,
+              "allocs_per_op": 692
+            }
+          ],
+          "median_ns_per_op": 2528926.0
+        },
+        "candidate": {
+          "samples": [
+            {
+              "raw": "var/cpu-scaling-20261018/isolated-control-candidate-1.txt",
+              "ns_per_op": 1774060,
+              "bytes_per_op": 1204294,
+              "allocs_per_op": 709
+            },
+            {
+              "raw": "var/cpu-scaling-20261018/isolated-control-candidate-1.txt",
+              "ns_per_op": 1677962,
+              "bytes_per_op": 1214465,
+              "allocs_per_op": 710
+            },
+            {
+              "raw": "var/cpu-scaling-20261018/isolated-control-candidate-2.txt",
+              "ns_per_op": 1864825,
+              "bytes_per_op": 1197667,
+              "allocs_per_op": 708
+            },
+            {
+              "raw": "var/cpu-scaling-20261018/isolated-control-candidate-2.txt",
+              "ns_per_op": 1785641,
+              "bytes_per_op": 1202629,
+              "allocs_per_op": 710
+            }
+          ],
+          "median_ns_per_op": 1779850.5
+        },
+        "time_change_percent": -29.62030126622922
+      }
+    }
+  },
+  "profile": {
+    "raw": "var/cpu-scaling-20261018/diagnostic-before.json.profiles",
+    "summary": "var/cpu-scaling-20261018/cpu-before.txt",
+    "scope": "起動・準備・負荷・回復を含む診断専用プロセス。通常イメージへプロファイル取得機能を含めない。",
+    "board_worker_cumulative_cpu_percent": 55.52,
+    "strict_json_cumulative_cpu_percent": 35.02,
+    "note": "累積割合には包含関係があり加算しない。CPU待ち・I/O待ち時間の割合ではない。"
+  },
+  "policy": {
+    "control_decode": "8件以上・合計32KiB以上だけmin(GOMAXPROCS, 件数/4)枠で独立デコード。小さいバッチは追加goroutineなし。完全型・重複キー・CRCの検査を保ち、エラーは入力順で返す。全デコード後の連番・CAS・値検証・状態適用・書込みは所有列。64/256件・8MiB上限を維持。",
+    "form_preparation": "不変入力と用途鍵だけに依存する正規化・trip生成をHTTP側で並行準備。認可・停止・最新設定・受理枠の検査は所有列に残す。準備エラーは従来位置で返し、バッチ再試行では元の準備値から資格HMACを作る。",
+    "rejected_io_candidate": "Linux実WALの初回はfsync、以後はfdatasync。読取りに必要なdata・長さは同期。directory/current/復旧時のfsyncは維持。未対応FSはfsyncへ戻し、I/O失敗はUnknownで停止。"
+  },
+  "io_reference": "https://www.man7.org/linux/man-pages/man2/fsync.2.html",
+  "limitations": [
+    "両側の最小〜最大は重なるため、中央値の小差から安定した実HTTP改善を断定しない。",
+    "通常名とtripの各6試行にはI/O待ちが増えた低速試行があり、除外していない。",
+    "一部の過負荷試行に通常の投稿間隔制限429あり。WAFを無効化しても板側の制限は保ち、拒否を成功へ数えない。",
+    "Syncを省く、応答を先に成功させる、3つの保存境界をまとめる変更はしていない。SIGKILL検査は電源断・媒体故障の証明ではない。",
+    "ホスト全体の物理I/Oではなく、対象cgroupへ計上された書込みとI/O pressureを記録。",
+    "拒否件数・非必須ログ量も試行ごとに異なる。I/O bytes/ACKの中央値差をfdatasyncだけの効果と断定しない。",
+    "本番コンテナは再作成していない。"
+  ],
+  "code_sha256": {
+    "internal/store/control_log.go": "23d9906b50fd0f8f7108aebcc4fb138d98dca81260f2e87282e97e35c92289f1",
+    "internal/store/control_batch_decode.go": "b5dcd0ab32023a586cb46cafdec4d6cedbe54de30b8cddb56d961a0e8d1134f5",
+    "internal/bootstrap/posting_form.go": "ae1584f67bf19a2d2cdd8829f36e5f0de54a6dc6c90bed1b770b6006eee0035c",
+    "internal/store/durable.go": "ab6b67deb5f7fcfb4f5c127e9b6de69350c07b20bcdc961c80511d9d56a5d39f"
+  },
+  "experimental_validation": [
+    {
+      "raw": "var/cpu-scaling-20261018/final-low-memory.json",
+      "image": "sha256:0d7d689551b7e95134afb0d5091da6d719488e7105bb16ebd404ab7077e208bb",
+      "cpu_max": "100000 100000",
+      "memory_max": "268435456",
+      "summary": {
+        "planned": 400,
+        "sent": 389,
+        "success": 339,
+        "acknowledged": 339,
+        "completion_errors_after_ack": 0,
+        "errors": 50,
+        "skipped": 11,
+        "http_p95_ms": 370.9611699450761,
+        "scheduled_p95_ms": 446.17251213639975,
+        "issuance_wait_p95_ms": 168.2429132051766
+      },
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 130.09412423707545,
+        "scheduled_p95_ms": 5246.909502893686,
+        "issuance_wait_p95_ms": null
+      },
+      "resources": {
+        "cpu_cores_average": 0.2902127010377141,
+        "generator_cpu_seconds": 0.627748686,
+        "wbytes_delta": 8163328,
+        "wios_delta": 1446,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 0,
+        "io_some_usec_delta": 1115025
+      },
+      "memory_peak_bytes": 156659712,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "integrity": {
+        "ok": true,
+        "threads": [
+          {
+            "key": "1792288345",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 59,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "d937f7ab7261bf08cdff643e5d5be1a4f54cf680a38f8dcf63e2fcf57b86a966"
+          },
+          {
+            "key": "1792288346",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 58,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "a4d1a28757574fb68844219007da93cb6c8ec32c0ce9d1a7310f6e8e9ded790a"
+          },
+          {
+            "key": "1792288347",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 56,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "b984895b13bc1b7132b953eb149d1a0ad8a724773d37083c5ebfceb044847e14"
+          },
+          {
+            "key": "1792288348",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 58,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "32e8cfc3a99162ca1a66231fd7db93b663c583ab4918b2e535d06ee1a11b8e01"
+          },
+          {
+            "key": "1792288349",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 56,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "ffe64fd7c3deb44902b7aa9e8959bf3f19f482c916a0c9c6b5e4ce8cd5f7b330"
+          },
+          {
+            "key": "1792288350",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 58,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "07d7a51286ca48ece5f7a3446e12a2659e42661f3408a15a1cab0ee314b487e4"
+          },
+          {
+            "key": "1792288351",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 55,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "8709ee3ad2d55ed119c2c8ec8eefb3d6f4027d2b376e5a8a8d702077586bb441"
+          },
+          {
+            "key": "1792288352",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 57,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "1d213166058f4d183294fbda9a3d0418f97d7d8732ff6a7f6e8b75e59d7f6ee9"
+          }
+        ],
+        "unavailable_threads": 0,
+        "read_retries": 0,
+        "read_retry_window_seconds": 5
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 2132,
+          "saved": 2132,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      }
+    },
+    {
+      "raw": "var/cpu-scaling-20261018/final-3c4g.json",
+      "image": "sha256:0d7d689551b7e95134afb0d5091da6d719488e7105bb16ebd404ab7077e208bb",
+      "cpu_max": "300000 100000",
+      "memory_max": "4294967296",
+      "summary": {
+        "planned": 2000,
+        "sent": 2000,
+        "success": 2000,
+        "acknowledged": 2000,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 170.40055501274765,
+        "scheduled_p95_ms": 170.88169418275356,
+        "issuance_wait_p95_ms": 1.2720341328531504
+      },
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 20.024209981784225,
+        "scheduled_p95_ms": 20.17961605452001,
+        "issuance_wait_p95_ms": null
+      },
+      "resources": {
+        "cpu_cores_average": 1.335912210843152,
+        "generator_cpu_seconds": 3.401406521,
+        "wbytes_delta": 21499904,
+        "wios_delta": 2985,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 0,
+        "io_some_usec_delta": 172594
+      },
+      "memory_peak_bytes": 336875520,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "integrity": {
+        "ok": true,
+        "threads": [
+          {
+            "key": "1792288368",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 136,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "2d1f3ec7a8aabf040112cd4b223a9d62f6ea3daa7927c1b72338ead8ad920cbd"
+          },
+          {
+            "key": "1792288369",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 136,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "7df8ff07a22d01e3ccebb599e2abf22bc15ebb7d2cfe72fcacad8f55ed5cb2a2"
+          },
+          {
+            "key": "1792288370",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 136,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "da3a23063ba8fdbb84ecabfc4fa149ffef077f0115cb90a593240462da23f1e8"
+          },
+          {
+            "key": "1792288371",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 136,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "d54f7a0e47f035d1aa6f693262700eff886f364966899931258add0b2da7b2b7"
+          },
+          {
+            "key": "1792288372",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 135,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "d4eefd708ad2ca2717c67a2b86e358fd34b0ea3d0d4446cd87179aea16e1d9da"
+          },
+          {
+            "key": "1792288373",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 135,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "68adb130c00602a8437b81694c8246960373c13bd78fbf953aba7b0cc2183707"
+          },
+          {
+            "key": "1792288374",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 135,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "d239abd02f538819caccd9a8ffb6216872dc2a80bbfc18bc4fb075ccb708ae93"
+          },
+          {
+            "key": "1792288375",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 135,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "e89ec8a8adb87d8cff0d0c940529a11d8bbb1a0edf7d2c85bcde0d6b47e91f9d"
+          },
+          {
+            "key": "1792288376",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 134,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "537dafc31ba63f72a7cdbcfc7b814a93500f5aba67280bc2d8e3ff9299f93862"
+          },
+          {
+            "key": "1792288377",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 134,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "3099aca7734afd7a92e2cbca018fee4cd3a920423f62e1ec351af0f6ff991133"
+          },
+          {
+            "key": "1792288378",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 134,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "4425f223826626345b467d9882e19d2786059e152549202f8f4cb7cddb5e35e1"
+          },
+          {
+            "key": "1792288379",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 134,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "5f2bed5152d54975cc73ea780519cec6b275fc24207fbc49e97b38650708e067"
+          },
+          {
+            "key": "1792288380",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 134,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "f9acae691b12f7d66cae76a0e7b9bc106fc00075565112631a8d48a66a3d810a"
+          },
+          {
+            "key": "1792288381",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 134,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "1a8985d85c1644b4882480faba447bf6aa7c281accd3b556cfbf1055346e563e"
+          },
+          {
+            "key": "1792288382",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 134,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "d9ad5daa4ac1b62e62b4a38c79304c1881ff6e90083d1aece4ddeca8d14aa677"
+          },
+          {
+            "key": "1792288383",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 134,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "5d9af5483a2f0548225a1538dea4235b8703fb0059abe701768995d77dbf832c"
+          }
+        ],
+        "unavailable_threads": 0,
+        "read_retries": 0,
+        "read_retry_window_seconds": 5
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 9513,
+          "saved": 9513,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      }
+    },
+    {
+      "raw": "var/cpu-scaling-20261018/low-before-check.json",
+      "image": "sha256:14898b5150e6f9478ba937eacf8f8a38d8f8cb97f869b798c959d72157b9e8a2",
+      "cpu_max": "100000 100000",
+      "memory_max": "268435456",
+      "summary": {
+        "planned": 400,
+        "sent": 400,
+        "success": 399,
+        "acknowledged": 399,
+        "completion_errors_after_ack": 0,
+        "errors": 1,
+        "skipped": 0,
+        "http_p95_ms": 56.9499300327152,
+        "scheduled_p95_ms": 57.12672299705446,
+        "issuance_wait_p95_ms": 0.12664683163166046
+      },
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 19.062842009589076,
+        "scheduled_p95_ms": 19.33481195010245,
+        "issuance_wait_p95_ms": null
+      },
+      "resources": {
+        "cpu_cores_average": 0.44971271635871374,
+        "generator_cpu_seconds": 0.724200302,
+        "wbytes_delta": 12492800,
+        "wios_delta": 2138,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 571791,
+        "io_some_usec_delta": 38568
+      },
+      "memory_peak_bytes": 167948288,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "integrity": {
+        "ok": true,
+        "threads": [
+          {
+            "key": "1792288452",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 66,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "5178371fe3d77859fabdc666aba8cef48f08e72f7af37b8de8643ea0189563bb"
+          },
+          {
+            "key": "1792288453",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 66,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "4caceac99c9689375853e41c17da9196fba41161c6ef665ec0c5d948c003b55a"
+          },
+          {
+            "key": "1792288454",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 65,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "ede491196394864e76bd950bea574e4e84e8a857dfb920404fb21ec7c089af10"
+          },
+          {
+            "key": "1792288455",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 65,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "0322482f45202906130a79f0520a1e3d4da799cabef6d650d0d1bd7504e5cb88"
+          },
+          {
+            "key": "1792288456",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 64,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "e8dc35f09918ffc90155cdf1aeba4b7b468cafde8ac97f3646d4fb820057d95d"
+          },
+          {
+            "key": "1792288457",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 63,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "6a25d7e5106194664db9e0af95478cb67db7f0bab47ac2aefefcbe54f9d363f4"
+          },
+          {
+            "key": "1792288458",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 64,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "1ad3ef3c4a5078273bf2b368e9d703abf0839238f8408c3c72008430d0ff0c60"
+          },
+          {
+            "key": "1792288459",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 64,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "c6acee7363768aa34a58f75bcf9b00ed3b36850f25891786510ed0f329128428"
+          }
+        ],
+        "unavailable_threads": 0,
+        "read_retries": 0,
+        "read_retry_window_seconds": 5
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 2291,
+          "saved": 2291,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      }
+    },
+    {
+      "raw": "var/cpu-scaling-20261018/low-after-check.json",
+      "image": "sha256:0d7d689551b7e95134afb0d5091da6d719488e7105bb16ebd404ab7077e208bb",
+      "cpu_max": "100000 100000",
+      "memory_max": "268435456",
+      "summary": {
+        "planned": 400,
+        "sent": 385,
+        "success": 350,
+        "acknowledged": 350,
+        "completion_errors_after_ack": 0,
+        "errors": 35,
+        "skipped": 15,
+        "http_p95_ms": 384.1538510750979,
+        "scheduled_p95_ms": 487.86628688685596,
+        "issuance_wait_p95_ms": 184.76985697634518
+      },
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 154.70387297682464,
+        "scheduled_p95_ms": 4172.46710206382,
+        "issuance_wait_p95_ms": null
+      },
+      "resources": {
+        "cpu_cores_average": 0.27873632131622145,
+        "generator_cpu_seconds": 0.606611561,
+        "wbytes_delta": 6922240,
+        "wios_delta": 1193,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 0,
+        "io_some_usec_delta": 1032335
+      },
+      "memory_peak_bytes": 164200448,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "integrity": {
+        "ok": true,
+        "threads": [
+          {
+            "key": "1792288470",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 62,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "3b333d7ecb28eb603545bd2fbc4441c2e531cbd2a95fb365887a1c430b381ac5"
+          },
+          {
+            "key": "1792288471",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 59,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "fe035ef2aa9392f885ef2ddead9b46cf6dfaced9d1232f810e22892670354d58"
+          },
+          {
+            "key": "1792288472",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 57,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "b5dcbacd10ffdcc70a2d2b04fdc9bd206cdaa74f2bd5efa2682dd4a37320bb39"
+          },
+          {
+            "key": "1792288473",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 59,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "b1688641b844f84f7f6d1b320ee822823a33e4c8a81076c3f7d2533d8cee46e5"
+          },
+          {
+            "key": "1792288474",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 57,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "405d90c9c934797ea13259b1c8e9947f3e4bd4f0fb1aa7d90920fa8d7bfda2d4"
+          },
+          {
+            "key": "1792288475",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 55,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "adb89544b37ec898860e57a2125b56c0a2cb9310b3c116baacde32ff1b0dbc40"
+          },
+          {
+            "key": "1792288476",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 59,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "417ebeb1fcafb14d356811300dee7f28a645c88fa93336473612354482d06eb6"
+          },
+          {
+            "key": "1792288477",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 60,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "2ed8974b1e7d5ffd71c4eec8b6973d9f916f8681a678ce614629436808513b27"
+          }
+        ],
+        "unavailable_threads": 0,
+        "read_retries": 0,
+        "read_retry_window_seconds": 5
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 2142,
+          "saved": 2142,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      }
+    }
+  ],
+  "final_validation": [
+    {
+      "raw": "var/cpu-scaling-20261018/accepted-low-memory.json",
+      "image": "sha256:08d0d6076abe3d59a8e71e6a006824d8f83e4d8e7443c86597a15a2406853062",
+      "cpu_max": "100000 100000",
+      "memory_max": "268435456",
+      "summary": {
+        "planned": 400,
+        "sent": 400,
+        "success": 400,
+        "acknowledged": 400,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 20.19958896562457,
+        "scheduled_p95_ms": 20.317271817475557,
+        "issuance_wait_p95_ms": 0.2575148828327656
+      },
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 20.452921045944095,
+        "scheduled_p95_ms": 20.57794714346528,
+        "issuance_wait_p95_ms": null
+      },
+      "resources": {
+        "cpu_cores_average": 0.37354078860123135,
+        "generator_cpu_seconds": 0.7123886580000001,
+        "wbytes_delta": 12201984,
+        "wios_delta": 2195,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 0,
+        "io_some_usec_delta": 39715
+      },
+      "memory_peak_bytes": 174231552,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "integrity": {
+        "ok": true,
+        "threads": [
+          {
+            "key": "1792288713",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 66,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "f57aba7c67250c4582a744d6c3d5745bf9801bc798bee608c07a9b027421d4cd"
+          },
+          {
+            "key": "1792288714",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 66,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "a9145b25969d4d93a357a3558795a9590637e15c398c9761065bdd90a35c9447"
+          },
+          {
+            "key": "1792288715",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 65,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "ffc0c19eb07bd4c28a3b439834903c87f111297fbef3108890bd216c1aafc6fd"
+          },
+          {
+            "key": "1792288716",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 65,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "93b849dc627dac4b879c697b852121fc994c048cdb7b15e570649efa4d7a38be"
+          },
+          {
+            "key": "1792288717",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 64,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "f9a52ad6a3b405c9f82ad82e860be5087202b09c5a5da08243336156948f901f"
+          },
+          {
+            "key": "1792288718",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 64,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "8daaba078341a0625a37918c8805c2871281ac45bc8c55c696bab915394e2f24"
+          },
+          {
+            "key": "1792288719",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 64,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "01742caa903402741fb3f978e9ca654299d76356d554391214065969abc7bb02"
+          },
+          {
+            "key": "1792288720",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 64,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "9e071f5ff6f32abe6050d054fb9229a86719377370c7960ef5fecb880b311144"
+          }
+        ],
+        "unavailable_threads": 0,
+        "read_retries": 0,
+        "read_retry_window_seconds": 5
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 2293,
+          "saved": 2293,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      }
+    },
+    {
+      "raw": "var/cpu-scaling-20261018/accepted-3c4g.json",
+      "image": "sha256:08d0d6076abe3d59a8e71e6a006824d8f83e4d8e7443c86597a15a2406853062",
+      "cpu_max": "300000 100000",
+      "memory_max": "4294967296",
+      "summary": {
+        "planned": 2000,
+        "sent": 1679,
+        "success": 1679,
+        "acknowledged": 1679,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 321,
+        "http_p95_ms": 522.9372319299728,
+        "scheduled_p95_ms": 604.6271848026663,
+        "issuance_wait_p95_ms": 152.28663384914398
+      },
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 164.3497699405998,
+        "scheduled_p95_ms": 6522.087843157351,
+        "issuance_wait_p95_ms": null
+      },
+      "resources": {
+        "cpu_cores_average": 1.0931324486622536,
+        "generator_cpu_seconds": 2.797407229,
+        "wbytes_delta": 17858560,
+        "wios_delta": 2471,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 0,
+        "io_some_usec_delta": 431377
+      },
+      "memory_peak_bytes": 313049088,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "integrity": {
+        "ok": true,
+        "threads": [
+          {
+            "key": "1792288731",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 116,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "3b1b692c76a0ec8716663ebc829f798403823a27c2d7cdcb00d6102491b6ccee"
+          },
+          {
+            "key": "1792288732",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 122,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "2683698a738c74b74e0fa9683ef5cd9244c61249f7695e879505705792fcb205"
+          },
+          {
+            "key": "1792288733",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 117,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "4535cd05a29e8d9831d52952c38731b5c5c4185c9e00544e59a4b9b63c02c919"
+          },
+          {
+            "key": "1792288734",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 116,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "2ce7678954c4c386a277d86e378efd108df84a48dd614cf014f2da854f41ac44"
+          },
+          {
+            "key": "1792288735",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 117,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "0a00fe3729cae282a43ba952a194695654eb9d415c8184d252643ace5709daf3"
+          },
+          {
+            "key": "1792288736",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 115,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "7e0e900a076f16e0c2dccbb051079ac9f492c05cf8cc9baa223a51f805ab8557"
+          },
+          {
+            "key": "1792288737",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 113,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "070c2fdf2587e492eb370d8b3a57f80cd22eff70d929bed805be1f711def4bfa"
+          },
+          {
+            "key": "1792288738",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 112,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "82b6beba7b736481108d7251fd1e43497cf6285b70f8d4112038d4375227d85b"
+          },
+          {
+            "key": "1792288739",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 114,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "fd89d336f49a9df0aa8a19c81a33255631fdbcfc246bf580d7790e7b6a04bdd1"
+          },
+          {
+            "key": "1792288740",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 113,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "1fcf933235a8824139fd6835d0cd76c88dd66f4980d54e8027bfa37d09369c74"
+          },
+          {
+            "key": "1792288741",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 114,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "0a567db4681203a94db72579b9ffdf4ba9fc906d2bf5acd4d881f7bd592b13bb"
+          },
+          {
+            "key": "1792288742",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 112,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "f59ef68e792c3fb32baabacdfb4ad8ebba06f8057e5d36aa39b35dc4a217347d"
+          },
+          {
+            "key": "1792288743",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 113,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "295f97c675ff0b29fd8ab011db5bf56baa6b4b06a61db1b4ae73d40dad94e07f"
+          },
+          {
+            "key": "1792288744",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 111,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "20689ce00875f75b4b7ffeb51124690e942578be83cdb6b20fb2dde759932500"
+          },
+          {
+            "key": "1792288745",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 116,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "f6a4433965a148b465b731ed5a9cc0cfe8c0bb06828cf053cb72be37a2901591"
+          },
+          {
+            "key": "1792288746",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 114,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "b5ed2b64616c385bcf1add69a020643c656bcdd1fd82068d14a9da08956c69e7"
+          }
+        ],
+        "unavailable_threads": 0,
+        "read_retries": 0,
+        "read_retry_window_seconds": 5
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 8053,
+          "saved": 8053,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      }
+    }
+  ],
+  "adopted": [
+    "independent control-frame decoding across CPU workers",
+    "HTTP-side immutable form normalization and trip preparation"
+  ],
+  "rejected_datasync": {
+    "source": "var/cpu-scaling-20261018/fdatasync-wal_sync_linux.go",
+    "reason": "3CPU/4GiBの差は小幅で、1CPU/256MiB追加比較では元399/400、同期候補350/400。I/O待ちの差もあり原因を断定できないが、改善を採用する根拠が足りない。製品は従来のfsyncを維持。"
+  },
+  "rejected_preallocation": {
+    "candidate_image": "sha256:9dbb7ff0b1104293ba6d1f69296988743dfd04606747c84e067a29f9c06a5524",
+    "source": "var/cpu-scaling-20261018/prealloc-source/internal/store/wal_sync_linux.go",
+    "policy": "64KiBを超えたWALをKEEP_SIZEで64KiB粒度に先行確保。EOF・読戻し・エラー後の停止をraceで検査。",
+    "reason": "投稿速度は横ばい、1投稿あたりI/O回数増。追加のディスク予約と処理を採用する根拠がなく、製品ソースへ取り込まない。",
+    "raw_test": "var/cpu-scaling-20261018/prealloc-test-fixed-fixtures.txt",
+    "preparation_failure": "最初のコピーではfixtureがなくThreadBatch試験が失敗。fixtureをコピーして再実行し成功。最初の失敗ログも保持。",
+    "reference": "https://man7.org/linux/man-pages/man2/fallocate.2.html"
+  },
+  "checks": {
+    "store_evidence_app_full_normal": "passed on final CPU-only version",
+    "posting_batch_journal_process_crash_race": "passed",
+    "bootstrap_form_cap_batch_race": "passed",
+    "experimental_actual_file_sync_failure_and_parallel_decode_race": "passed",
+    "vet": "passed",
+    "python_probe_tests": 9,
+    "full_go_suite": "not run",
+    "cli_tests": "passed on CPU+fdatasync candidate",
+    "final_cpu_store_bootstrap_race": "passed",
+    "final_cpu_vet": "passed",
+    "designcheck": "passed; design-only checks"
+  },
+  "reproduce": "PYTHONDONTWRITEBYTECODE=1 mise exec -- python3 scripts/probe-thread-resources.py --image oimobbs-performance:cpu-scaling-final-20261018 --cpus 3 --memory 4g --cache-bytes 268435456 --egress-bps 100000000 --posting-capacity-rate 500 --posting-capacity-seconds 15 --posting-capacity-workers 80 --posting-capacity-threads 16 --optional-log-stats --output var/cpu-scaling-recheck.json",
+  "final_image": "sha256:08d0d6076abe3d59a8e71e6a006824d8f83e4d8e7443c86597a15a2406853062"
+}

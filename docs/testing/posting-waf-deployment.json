@@ -1,0 +1,458 @@
+{
+  "date": "2026-10-26",
+  "scope": "BBS-only deployment of the verified normal-runtime image; production posting/load/authenticated-admin operations not tested",
+  "deployment": {
+    "commit": "f12cf24b3f74b35d4fd32c3f9dca05dc06767fb9",
+    "image": "oimobbs:posting-waf-20261026",
+    "image_id": "sha256:931497975da636554c9c8664c366419662fcedbabb94b2bac9ef0a7f12050208",
+    "old_image_id": "sha256:785d57bc85aab211471b1a6e4c6ea4b0d003be38df89c19a98fb208da3d8cac4",
+    "rollback_image": "oimobbs:rollback-before-posting-waf-20261026",
+    "container": "0c5eabf95fdecd3940a0a7c29bad69bed8c7fe1fe916bd0b49cf1fa84894bc8a",
+    "health": "healthy",
+    "restarts": 0,
+    "oom": false,
+    "data_volume": "oimobbs-posting-waf-20261026",
+    "old_volume_retained": "oimobbs-compression-memory512-20261025",
+    "restored_inventory_entries_identical": 540,
+    "edge_and_certificates_unchanged": true,
+    "cpu_memory_pid_limits_preserved": true,
+    "non_root": true,
+    "read_only_root": true,
+    "cutover_to_healthy_seconds": 48.89,
+    "control_owners_unchanged": 4,
+    "control_rows_unchanged": 58,
+    "site_board_settings_and_credential_records_unchanged": true,
+    "protected_files_unchanged": 73,
+    "protected_file_modes_ownership_preserved": true,
+    "backup_checksum_verified": true,
+    "public_routes_verified": 11,
+    "body_etag_304_head_range_preserved": true,
+    "browser_public_login_page_and_unauthenticated_boundaries": true,
+    "authenticated_admin_verified": false,
+    "authenticated_admin_reason": "not attempted: credentials not supplied; real form POST intercepted before transmission, credentials unchanged",
+    "stability_seconds": 30.1
+  },
+  "backup": {
+    "path": "var/backups/deployments/posting-waf-20261026/before-data.tar",
+    "bytes": 426146816,
+    "sha256": "95a9ea82eff39c4ec3420047980aeadfeac6cde688b276337eb86ae4e20195b3",
+    "inventory_entries": 540,
+    "new_volume_inventory_identical": true
+  },
+  "rehearsal": {
+    "backup_restored": true,
+    "new_image_startup": true,
+    "external_edge_healthcheck": "not applicable in network-none rehearsal",
+    "clean_shutdown": true,
+    "isolated_volume": "oimobbs-posting-waf-20261026-rehearsal-r2",
+    "old_image_after_new_startup": {
+      "startup": true,
+      "clean_shutdown": true
+    }
+  },
+  "waf_settings": {
+    "enabled": true,
+    "traffic_enabled": true,
+    "settings_will_be_preserved": true
+  },
+  "live_user_agent_boundary_before": [
+    {
+      "route": "/bbsmenu.json",
+      "user_agent_bytes": 1024,
+      "status": 200,
+      "expected": 200
+    },
+    {
+      "route": "/bbsmenu.json",
+      "user_agent_bytes": 1025,
+      "status": 200,
+      "expected": 200
+    },
+    {
+      "route": "/admin/login",
+      "user_agent_bytes": 1024,
+      "status": 200,
+      "expected": 200
+    },
+    {
+      "route": "/admin/login",
+      "user_agent_bytes": 1025,
+      "status": 200,
+      "expected": 200
+    }
+  ],
+  "live_user_agent_boundary_after": [
+    {
+      "route": "/bbsmenu.json",
+      "user_agent_bytes": 1024,
+      "status": 200,
+      "expected": 200
+    },
+    {
+      "route": "/bbsmenu.json",
+      "user_agent_bytes": 1025,
+      "status": 403,
+      "expected": 403
+    },
+    {
+      "route": "/admin/login",
+      "user_agent_bytes": 1024,
+      "status": 200,
+      "expected": 200
+    },
+    {
+      "route": "/admin/login",
+      "user_agent_bytes": 1025,
+      "status": 403,
+      "expected": 403
+    }
+  ],
+  "public_paths": {
+    "/bbsmenu.json": {
+      "status": 200,
+      "sha256": "dce5377729557864823a497d72fe630c4a09c0a4c841682e74a7cd4aebc63c7f",
+      "etag": "\"feed-3OU3dylVeGSCOkl9cv5jDEoJwKTIQWgudKfNSuvGPH8-identity\""
+    },
+    "/bbsmenu.html": {
+      "status": 200,
+      "sha256": "11b21c447d19dbbdd96925685a1f382e94463d78476758b0c5d5be69c3d54f0f",
+      "etag": "\"feed-EbIcRH0Z273ZaSVoWh84LpRGPXhHZ1iwxdW-acPVTw8-identity\""
+    },
+    "/report/SETTING.TXT": {
+      "status": 200,
+      "sha256": "e151d9c66e20ef0797557cb102f042801fb5490bc94e4a6c900d021ed6c29abd",
+      "etag": "\"feed-4VHZxm4g7weXVXyxAvBCgB-1SQvJTkpskA0CHtbCmr0-identity\""
+    },
+    "/report/subject.txt": {
+      "status": 200,
+      "sha256": "4aa217a075a03731d991e4717f8df417a2f1addcb58b8814e1d428b3cf14581b",
+      "etag": "\"feed-SqIXoHWgNzHZkeRxf430F6Lxrdy1i4gU4dQos88UWBs-identity\""
+    },
+    "/report/dat/1791605101.dat": {
+      "status": 200,
+      "sha256": "a65f710d25cec2255d984f538d29994c0fead7af6f2119a729552f3ead898772",
+      "etag": "\"544ce626f18285d59d69d415af2fd94e-1791605101-1-1-identity\""
+    },
+    "/oimo/SETTING.TXT": {
+      "status": 200,
+      "sha256": "309023164947fe7613916af1bfe480f0d24e3a6b8b4ba10e35e62290495e3387",
+      "etag": "\"feed-MJAjFklH_nYTkWrxv-SA8NJOOmuLS6EONeYikEleM4c-identity\""
+    },
+    "/oimo/subject.txt": {
+      "status": 200,
+      "sha256": "4a527154214f8ae1baf12a29aa343109dcb9132c2d5cbcfa9da799d8d9d58511",
+      "etag": "\"feed-SlJxVCFPiuG68SopqjQxCdy5EywtXLz6naeZ2NnVhRE-identity\""
+    },
+    "/oimo/dat/1791605101.dat": {
+      "status": 200,
+      "sha256": "c0db7f3d9ee3d32b04f2350216227b44287bef11ba3d79a992f654edd9067c5e",
+      "etag": "\"3f33936b5e7119957e76cb0ec55c1bb2-1791605101-2-29-identity\""
+    },
+    "/senbura/SETTING.TXT": {
+      "status": 200,
+      "sha256": "8b423799f139234423f4797a7d24203cc8210e1c8eb2720b863023dbfc03bbe7",
+      "etag": "\"feed-i0I3mfE5I0Qj9Hl6fSQgPMghDhyOsnILhjAj2_wDu-c-identity\""
+    },
+    "/senbura/subject.txt": {
+      "status": 200,
+      "sha256": "a9444ba7dde3e3a17162e3b60f6bcea560a523250a00b6cdddfcdfc94f67c7a1",
+      "etag": "\"feed-qURLp93j46FxYuO2D2vOpWClIyUKALbN3fzfyU9nx6E-identity\""
+    },
+    "/senbura/dat/1.dat": {
+      "status": 200,
+      "sha256": "c571e73f72730d5703bae4efa2b6f79e0d7e26988a6120062dcd2226e8ef9514",
+      "etag": "\"5db18ece157bc7953282bc03d6007fd2-1-1-6272796790532567493-identity\""
+    }
+  },
+  "compression": {
+    "/report/dat/1791605101.dat": {
+      "identity_sha256": "a65f710d25cec2255d984f538d29994c0fead7af6f2119a729552f3ead898772",
+      "identity_etag": "\"544ce626f18285d59d69d415af2fd94e-1791605101-1-1-identity\"",
+      "identity_bytes": 167,
+      "codings": {
+        "gzip": {
+          "bytes": 192,
+          "etag": "\"544ce626f18285d59d69d415af2fd94e-1791605101-1-1-gzip-v3\"",
+          "decoded_matches_identity": true,
+          "conditional_304": true,
+          "HEAD": true
+        },
+        "zstd": {
+          "bytes": 176,
+          "etag": "\"544ce626f18285d59d69d415af2fd94e-1791605101-1-1-zstd-v8\"",
+          "decoded_matches_identity": true,
+          "conditional_304": true,
+          "HEAD": true
+        }
+      }
+    },
+    "/test/read.cgi/report/1791605101/l50": {
+      "identity_sha256": "083cc9c9e0c628fd22f102ecc738560a734b16b7032e13bcd81367547b2e6e99",
+      "identity_etag": "\"feed-CDzJyeDGKP0i8QLsxzhWCnNLFrcDLhO82BNnVHsubpk-identity\"",
+      "identity_bytes": 4735,
+      "codings": {
+        "gzip": {
+          "bytes": 2332,
+          "etag": "\"feed-CDzJyeDGKP0i8QLsxzhWCnNLFrcDLhO82BNnVHsubpk-gzip-live-v1\"",
+          "decoded_matches_identity": true,
+          "conditional_304": true,
+          "HEAD": true
+        },
+        "zstd": {
+          "bytes": 2278,
+          "etag": "\"feed-CDzJyeDGKP0i8QLsxzhWCnNLFrcDLhO82BNnVHsubpk-zstd-v8\"",
+          "decoded_matches_identity": true,
+          "conditional_304": true,
+          "HEAD": true
+        }
+      }
+    }
+  },
+  "browser": {
+    "authenticated_admin_verified": false,
+    "login_origin": "https://patatanmc.f5.si",
+    "login_referer": "https://patatanmc.f5.si/admin/login",
+    "authenticated_api_status": null,
+    "public": true,
+    "login_page": true,
+    "live_css_matches_source": true,
+    "login_hover_both_themes": true,
+    "unauthenticated_api_and_sample_rejected": true,
+    "authenticated_admin": "not attempted: credentials not supplied; real form POST intercepted before transmission, credentials unchanged"
+  },
+  "stability": [
+    {
+      "elapsed_seconds": 0.0,
+      "container": "0c5eabf95fdecd3940a0a7c29bad69bed8c7fe1fe916bd0b49cf1fa84894bc8a",
+      "health": "healthy",
+      "restarts": 0,
+      "oom": false
+    },
+    {
+      "elapsed_seconds": 15.0,
+      "container": "0c5eabf95fdecd3940a0a7c29bad69bed8c7fe1fe916bd0b49cf1fa84894bc8a",
+      "health": "healthy",
+      "restarts": 0,
+      "oom": false
+    },
+    {
+      "elapsed_seconds": 30.1,
+      "container": "0c5eabf95fdecd3940a0a7c29bad69bed8c7fe1fe916bd0b49cf1fa84894bc8a",
+      "health": "healthy",
+      "restarts": 0,
+      "oom": false
+    }
+  ],
+  "public_cutover_observation": {
+    "scope": "0.5-second sequential public GET observations; response completion times, not exact service downtime",
+    "samples": 61,
+    "status_counts": {
+      "200": 5,
+      "TimeoutError": 3,
+      "503": 53
+    },
+    "last_success_before": {
+      "elapsed_seconds": 0.057712054811418056,
+      "request_seconds": 0.05740263592451811,
+      "status": 200
+    },
+    "first_failure": {
+      "elapsed_seconds": 4.617753536906093,
+      "request_seconds": 4.0599198821000755,
+      "status": "TimeoutError"
+    },
+    "last_failure": {
+      "elapsed_seconds": 46.35940326564014,
+      "request_seconds": 0.059837969951331615,
+      "status": 503
+    },
+    "first_success_after": {
+      "elapsed_seconds": 46.9487675386481,
+      "request_seconds": 0.0892195557244122,
+      "status": 200
+    }
+  },
+  "verification_commands": [
+    {
+      "name": "waf-live",
+      "command": [
+        "python3",
+        "var/backups/deployments/posting-waf-20261026/waf_live.py",
+        "after"
+      ],
+      "exit_code": 0,
+      "seconds": 1.7171277808956802
+    },
+    {
+      "name": "compression",
+      "command": [
+        "python3",
+        "var/backups/deployments/posting-waf-20261026/compression_probe.py",
+        "after"
+      ],
+      "exit_code": 0,
+      "seconds": 0.9268024261109531
+    },
+    {
+      "name": "control",
+      "command": [
+        "python3",
+        "var/backups/deployments/posting-waf-20261026/state_compare.py",
+        "after"
+      ],
+      "exit_code": 0,
+      "seconds": 1.2868176619522274
+    },
+    {
+      "name": "verification",
+      "command": [
+        "python3",
+        "var/backups/deployments/posting-waf-20261026/verify.py"
+      ],
+      "exit_code": 0,
+      "seconds": 34.38388688210398
+    }
+  ],
+  "source_manifest_sha256": "2745aab3282741ddfcf838de0cbf0104a7b940fce24c0a17a506d42b037be3f1",
+  "config_unchanged": true,
+  "runtime_compose_sha256": "92b9772e7f11d56be01a73f335a70545f280ac861f1577ade0e1110a05b43b2d",
+  "documentation_checks": [
+    {
+      "name": "doclinks",
+      "command": [
+        "mise",
+        "exec",
+        "--",
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools/designcheck",
+        "-p",
+        "test_doclinks.py"
+      ],
+      "exit_code": 0,
+      "seconds": 0.0741601251065731,
+      "output": "......\n----------------------------------------------------------------------\nRan 6 tests in 0.005s\n\nOK\n"
+    },
+    {
+      "name": "designcheck",
+      "command": [
+        "mise",
+        "exec",
+        "--",
+        "python3",
+        "-B",
+        "tools/designcheck/check.py"
+      ],
+      "exit_code": 0,
+      "seconds": 0.4542577569372952,
+      "output": "PASS: 67 Markdown files, 78 JSON files, current documents, 611 local links including headings, fences and strict JSON\nPASS: standard Go CRC32C, header/frame offsets, dedup section, create DAT lengths and sample expiry\nPASS: pack offsets/CRC/SHA, raw+gzip blocks, compressed audit, 5 DAT ranges, current/prefix stability through seq=4, 4 invalid gzip samples\nPASS: control frame/snapshot/current bytes, CRC/SHA, JSON equality, 4 invalid control examples\nPASS: 26 HTTP decision examples (not a live HTTP server)\nPASS: independent HMAC ID/token vector, token tamper, 3 six-calendar-month boundaries\nPASS: design checks only; application, crash, device and load tests NOT RUN\n"
+    },
+    {
+      "name": "render",
+      "command": [
+        "mise",
+        "exec",
+        "node@24",
+        "--",
+        "node",
+        "var/backups/deployments/posting-waf-20261026/render-docs.mjs"
+      ],
+      "exit_code": 0,
+      "seconds": 3.293571875896305,
+      "output": "{\"layouts\":8,\"widths\":[390,1280],\"localAnchorsChecked\":12,\"successfulClicks\":8,\"screenshots\":\"/home/patatan/OimoBBS/var/backups/deployments/posting-waf-20261026/\"}\n"
+    },
+    {
+      "name": "diff",
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit_code": 0,
+      "seconds": 0.005078299902379513,
+      "output": ""
+    }
+  ],
+  "artifacts_sha256": {
+    "var/backups/deployments/posting-waf-20261026/after-compression.json": "aafd7e4891c85a626c9b9a2d2d0762b96960c959f8925e0a8de9f738d374a1db",
+    "var/backups/deployments/posting-waf-20261026/after-control-paths.txt": "dafd7ef593d85ac68f8a90321355fdbb4ae47d8f5ee42a8aa4189a206a3e9ee3",
+    "var/backups/deployments/posting-waf-20261026/after-control-row-hashes.json": "0eabd8144b2077a9d46a3a03c2536c1c404119bfc8b2405ccae46e0d88e94e4b",
+    "var/backups/deployments/posting-waf-20261026/after-public.json": "a3f4f5e3377966a32e381adbb5c86a8b11ed831fb563fa5a34c9b0a52413d645",
+    "var/backups/deployments/posting-waf-20261026/after-waf-live.json": "b0eee0f6bbe03ac2290beed6b794695a3d6f0473b8233045e0a315b64ffd3d1d",
+    "var/backups/deployments/posting-waf-20261026/before-bbs.json": "0bb2a058ffa259dd4d2582f3d9b608a055d45b58d4a33c00e32bbd914788649d",
+    "var/backups/deployments/posting-waf-20261026/before-certificates.json": "48a0bc4d1cc569fc6ca47a88658cdce920e0fac46a9df5540fb644a99ed44ca4",
+    "var/backups/deployments/posting-waf-20261026/before-compression.json": "aafd7e4891c85a626c9b9a2d2d0762b96960c959f8925e0a8de9f738d374a1db",
+    "var/backups/deployments/posting-waf-20261026/before-control-row-hashes.json": "0eabd8144b2077a9d46a3a03c2536c1c404119bfc8b2405ccae46e0d88e94e4b",
+    "var/backups/deployments/posting-waf-20261026/before-data.tar.list": "301056d629aa0f317aa1b306d41beac2302a81f66997391d7e34a28d4fdd2f7e",
+    "var/backups/deployments/posting-waf-20261026/before-data.tar.sha256": "2b315fd91fc8139a13b7cc470c2350fe56d5b238cb873ef74b3fdf35f195615d",
+    "var/backups/deployments/posting-waf-20261026/before-inventory.json": "c157450b649190eda39ec47fcc396593d0f5faf4c3cee2973791ddc56187659e",
+    "var/backups/deployments/posting-waf-20261026/before-probe-retry-note.json": "11cab74b124fb49cb3a55f19c668e2080b5761f9e213bd98008f5150472aa569",
+    "var/backups/deployments/posting-waf-20261026/before-public-edge.json": "74b62b2e8adac654a5721b82ee4af84b727cf6a9fb1606c1ce9b95d15e34e975",
+    "var/backups/deployments/posting-waf-20261026/before-public.json": "a3f4f5e3377966a32e381adbb5c86a8b11ed831fb563fa5a34c9b0a52413d645",
+    "var/backups/deployments/posting-waf-20261026/before-waf-live.json": "b0a717cad65127c355276eee0f624d61306e6adec11623db17d1fff4dfa68071",
+    "var/backups/deployments/posting-waf-20261026/browser-public.mjs": "c6ec276454f5e601cbf4e4e69aca951709d612a94f69f5cdad93c75a1e77a51b",
+    "var/backups/deployments/posting-waf-20261026/browser-result.json": "eb0791ecf46bee29ee3a228953816c807f0cba94cd2e645238639a88d8a673c2",
+    "var/backups/deployments/posting-waf-20261026/compose.slip-before.yaml": "d9317a221081472765b964b693a913486c7eac3a4463f9e32595ceeeaf70337e",
+    "var/backups/deployments/posting-waf-20261026/compression-after.log": "8a5fd0d90324ddb524185a86cdac779bf82b94343a213a5764d567a8008770c7",
+    "var/backups/deployments/posting-waf-20261026/compression_probe.py": "550e4d00a23f07b55ba686fd5d4c7ce1d9221d6202efd802d6ecaf18f55d467a",
+    "var/backups/deployments/posting-waf-20261026/config-before.json": "65f16ba95a675772efba552a3d1f2aacab1ea40eed54a1bf0ec1b7d09696600c",
+    "var/backups/deployments/posting-waf-20261026/control-after.log": "a06c5c7bfe917e2c4dcfeed1f200ce09f2edf3fc74ca43c1552e3d05c133b61f",
+    "var/backups/deployments/posting-waf-20261026/cutover-run.log": "aecd7ea24812eac3fb795632cef2fa9938afb82440f32fc038ccf625337b9077",
+    "var/backups/deployments/posting-waf-20261026/cutover.log": "020c9b9f1671cd442e5d51161a09fef8f780f89a1bc85874eed1be047ac3f2bc",
+    "var/backups/deployments/posting-waf-20261026/cutover.py": "8708e748379aec3d16de4fd556ecbd76b6979b7a3e12a6218c2eafa7fb52c9dd",
+    "var/backups/deployments/posting-waf-20261026/deployment-result.json": "5ddc2aff0742fc63a88fa7d6f80701823a6e53ff9f6d1cb74b05ddfd85060b74",
+    "var/backups/deployments/posting-waf-20261026/docs-testing-measurements.md-1280.png": "abd3000671efc11c5ccabdf833538b028ca38a4a9838ad300ced50d499cac49a",
+    "var/backups/deployments/posting-waf-20261026/docs-testing-measurements.md-390.png": "ecabcace92bcf15b945f3545ce4f156c0e607869265e7263425f8e6ac5722c49",
+    "var/backups/deployments/posting-waf-20261026/docs-testing-posting-multicore.md-1280.png": "4d9b6abd3135d0a0305425348c5ce1b19221857121156f86124c39f2f023c5d4",
+    "var/backups/deployments/posting-waf-20261026/docs-testing-posting-multicore.md-390.png": "723ad5bbfbac8acfb907e8fbac077567bc0c4be0bb2b4b9ec8bba15240f43e4c",
+    "var/backups/deployments/posting-waf-20261026/docs-testing-posting-waf-deployment.md-1280.png": "1f2468a92a00337221bea10292cf850e16ae0a9788eca00d2a3a553a0230361c",
+    "var/backups/deployments/posting-waf-20261026/docs-testing-posting-waf-deployment.md-390.png": "f93a5eeb9c39933ba83cf39608210495b7393d0e5081d96670dda27e4b175fd8",
+    "var/backups/deployments/posting-waf-20261026/docs-testing-waf-ingress.md-1280.png": "9f152385d82e06ef87d4c4d3a0e07102512287349d44dbacad78075b959f7e8a",
+    "var/backups/deployments/posting-waf-20261026/docs-testing-waf-ingress.md-390.png": "0bf07724435436c767fef1a49e2bb6df416ee45e22e64d11071d3f1835c4ef9a",
+    "var/backups/deployments/posting-waf-20261026/documentation-designcheck.log": "109aff789e63f094766c1ab88c2f026e9f5fbce7073666d233d720abe5b4c62b",
+    "var/backups/deployments/posting-waf-20261026/documentation-diff.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "var/backups/deployments/posting-waf-20261026/documentation-doclinks.log": "b95b5805bef96b568b1b2424b637003cd6f306e6312d682e4f2e4e23f635b26a",
+    "var/backups/deployments/posting-waf-20261026/documentation-render.log": "68bd8426d121a2ed4aee2f0d20f30f82cddbcc4df3e92057c88a78af04b5c2fd",
+    "var/backups/deployments/posting-waf-20261026/inspect.go": "7d123ab5c1d515e644021adfb0cdeec8f6cd1519c367f7dda390f08dbf9734a4",
+    "var/backups/deployments/posting-waf-20261026/io-table-1280.png": "c46ac7b718fffb490f293e7fc256c3b878b47f3faa4095cbc8a3b708645e5e1a",
+    "var/backups/deployments/posting-waf-20261026/io-table-390.png": "f0d850b3642d2eccfd7a516dc9dc3912df0a5727a8fe6d57648fb6793ac7f86b",
+    "var/backups/deployments/posting-waf-20261026/live-login-dark.png": "2d6071c16c40d2e56c94467a2fc0a4e7ff20eb3fb496ed8766ef71d4ad960a36",
+    "var/backups/deployments/posting-waf-20261026/live-login-light.png": "a545d18cd7edb921a95ffaea19b10f599839d0564854f139da6744ce79325b08",
+    "var/backups/deployments/posting-waf-20261026/live-stability.json": "f6eae759cbf7a711b58d081e25fffb8785534fccebbe1ad9ff45b0ba66dc5bdd",
+    "var/backups/deployments/posting-waf-20261026/menu-before.json": "dce5377729557864823a497d72fe630c4a09c0a4c841682e74a7cd4aebc63c7f",
+    "var/backups/deployments/posting-waf-20261026/plan.json": "5545070f8b93778500e53cb5733ab0f9ee553195d3d6f5e36eac5a36eb0129a4",
+    "var/backups/deployments/posting-waf-20261026/probe.py": "4ff6c31f215405603d8fb0b5bda8edb6cdeb2b5272a9e82c7d96c431d51d07d0",
+    "var/backups/deployments/posting-waf-20261026/public-cutover-observations.json": "b2eb0f99b23407b53e1cea2cae6faece660d1c83e976e1846133239973a52823",
+    "var/backups/deployments/posting-waf-20261026/public-cutover-summary.json": "290eb9fa41913ed8f79f9d44bf07d0ffe8b25861b6e04bfdffbf1e428777ab9b",
+    "var/backups/deployments/posting-waf-20261026/recovery-rehearsal.json": "88f032b5b7ebd4423733d0f2edca24c0095c51ddf3243566106b5c7518bd2542",
+    "var/backups/deployments/posting-waf-20261026/rehearsal-data.tar.list": "5c3c16bd7c755ed09956076c9bd03f334b6da65cd4db117a826a3b1222d11dc7",
+    "var/backups/deployments/posting-waf-20261026/rehearsal-data.tar.sha256": "04c9d2b500ea2eb66227fc80c763f520e77b86c2cede3f9fc80e41fe921522ce",
+    "var/backups/deployments/posting-waf-20261026/rehearsal-inventory.json": "436a8ae8f99635d1158c2ad202dcab823f9b1654b703b720e1fbba66a4044ccc",
+    "var/backups/deployments/posting-waf-20261026/rehearsal.log": "3b8d803910cc1023c0056d347cbf73ea0f09f46e12fee28e905e4d8d20809777",
+    "var/backups/deployments/posting-waf-20261026/rehearse.py": "b15461688d60c2eef910cbe191556638061420a0637d873b762dd9fc1b65a934",
+    "var/backups/deployments/posting-waf-20261026/render-docs.mjs": "ae4845677597971d8d349ec732bd91dd9d42bea65accc5d4820d95b5b0d33361",
+    "var/backups/deployments/posting-waf-20261026/report.py": "7a1dd58edf7fbf8d3a488a687c2ee0ac9f339925a02e9c0c18249e56847d7c8b",
+    "var/backups/deployments/posting-waf-20261026/restored-inventory.json": "8bcfbb3ca0181b9516dcbf48243e4d56653923dc60f397a3887bb2b24e78f7d4",
+    "var/backups/deployments/posting-waf-20261026/rollback-rehearsal.log": "3b8d803910cc1023c0056d347cbf73ea0f09f46e12fee28e905e4d8d20809777",
+    "var/backups/deployments/posting-waf-20261026/rollback_rehearse.py": "d868d475adef267a8caaa2f100e9f9d9ff269066c37cd86f1165bdac61833fc5",
+    "var/backups/deployments/posting-waf-20261026/snapshot.py": "07c82064e0262ab8bfa2468fa12a863bd3120f5fbe30e213cd7ff06a94d3bd0a",
+    "var/backups/deployments/posting-waf-20261026/source-manifest.json": "2745aab3282741ddfcf838de0cbf0104a7b940fce24c0a17a506d42b037be3f1",
+    "var/backups/deployments/posting-waf-20261026/state_compare.py": "ad30d226edf85dce0547ff45137a5ea95cd8e7659bfb38a474b43647954f7ea3",
+    "var/backups/deployments/posting-waf-20261026/verification-after.log": "ae9eb5d3cbf5c714e597b69e689784e1619faa9911c2d02b91b17b1ac9a89c87",
+    "var/backups/deployments/posting-waf-20261026/verification-commands.json": "71fc0a973d95f0cd0e590a9108c29e7b2ded4c6fafd4b2f23d05ab2fb945b74d",
+    "var/backups/deployments/posting-waf-20261026/verify.py": "7f7bf21a5c8f38f2c6d275dbeef4384ffe3f595685cc3cdba8dacac5fd5d32ac",
+    "var/backups/deployments/posting-waf-20261026/waf-live-after.log": "ff67911c67253d3b50ce236c798fb1b2305c5a231f26e2ad7205ada468088f29",
+    "var/backups/deployments/posting-waf-20261026/waf-setting-before.json": "7b8fc86d7264571f5cc277cfc240580062c0e85303b4af0ad75504b95df251a7",
+    "var/backups/deployments/posting-waf-20261026/waf_live.py": "076ccfffd5dd421fb728460647f80b59c9876307a99ad67cf257efd2d0cce85d"
+  },
+  "incomplete": [
+    "authenticated administrator login and operations",
+    "production test posts and load",
+    "power-loss/media failure recovery",
+    "WAN/NIC throughput and DDoS resilience"
+  ]
+}

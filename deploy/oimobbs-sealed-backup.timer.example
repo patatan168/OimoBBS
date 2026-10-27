@@ -1,0 +1,9 @@
+# 暗号化と期限回収を5分ごとに行う。コピー作成は保存サーバーが12時間ごとに行う。
+[Unit]
+Description=OimoBBS encrypted backup timer
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=5min
+Persistent=true
+[Install]
+WantedBy=timers.target

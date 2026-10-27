@@ -1,0 +1,4 @@
+# 管理者登録後、公開サイトと同じ待受で管理画面を有効にする。管理用の別ポートは開かない。
+services:
+  bbs:
+    command: ["validation-serve", "--config", "/etc/oimobbs/config.json", "--init-if-missing", "--board-key", "oimo", "--board-name", "検証板", "--admin"]

@@ -1,0 +1,97 @@
+<!-- WAFの有効状態・共通枠・処理別枠・稼働集計を分け、標準HTMLだけで編集する。 -->
+<!doctype html>
+<html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>WAF — OimoBBS管理</title>{{template "admin-assets" .}}</head>
+<body class="admin">{{template "admin-header" .}}
+<main id="main" tabindex="-1">
+<h1>WAF</h1><p><a href="{{adminBase}}/waf-events">WAF検出・拒否ログを見る（7日間保存）</a></p>
+<p>要求の検査とアクセス量の制限を管理します。現在の状態を確認し、必要な上限だけを調整してください。</p>
+<nav class="action-group" aria-label="WAFページ内の移動"><a href="#waf-settings">設定</a><a href="#waf-status">稼働状況</a><a href="#waf-scope">検査の範囲</a></nav>
+<section class="admin-panel" aria-labelledby="waf-current-heading"><div class="admin-section-heading"><h2 id="waf-current-heading">{{template "shield-icon"}}現在の稼働状況</h2><a class="tonal-link" href="{{adminBase}}/waf">最新の状況を取得</a></div>
+<dl class="admin-status-grid">
+<div><dt>要求の検査</dt><dd class="admin-status-copy"><span class="admin-badge {{if .State.Settings.Enabled}}admin-badge-on{{else}}admin-badge-off{{end}}">{{if .State.Settings.Enabled}}ON{{else}}OFF{{end}}</span></dd><p>URL・ヘッダーの検査</p></div>
+<div><dt>大量アクセス制限</dt><dd class="admin-status-copy"><span class="admin-badge {{if and .State.Settings.Enabled .State.Settings.Traffic.Enabled}}admin-badge-on{{else}}admin-badge-off{{end}}">{{if and .State.Settings.Enabled .State.Settings.Traffic.Enabled}}ON{{else}}OFF{{end}}</span></dd><p>{{if and (not .State.Settings.Enabled) .State.Settings.Traffic.Enabled}}WAFがOFFのため停止中{{else}}頻度・同時処理の上限{{end}}</p></div>
+<div><dt>同一ネットワークの制限</dt><dd class="admin-status-copy"><span class="admin-badge {{if and .State.Settings.Enabled .State.Settings.Traffic.Enabled .State.Settings.Traffic.ClientEnabled}}admin-badge-on{{else}}admin-badge-off{{end}}">{{if and .State.Settings.Enabled .State.Settings.Traffic.Enabled .State.Settings.Traffic.ClientEnabled}}ON{{else}}OFF{{end}}</span></dd><p>IPv4アドレス・IPv6 /64単位</p></div>
+</dl><h3>現在の処理中要求</h3><dl class="admin-status-grid"><div><dt>公開側</dt><dd>{{.State.PublicTraffic.Active}}<small>件</small></dd></div><div><dt>管理側</dt><dd>{{.State.AdminTraffic.Active}}<small>件</small></dd></div></dl>
+<p class="field-hint">取得時点の稼働設定です。下の選択を変えても、保存するまで反映されません。</p></section>
+
+<p class="settings-impact">WAFをONにし、必要に応じて大量アクセス制限を追加します。変更は保存後に反映します。</p><form data-settings-form method="post" action="{{adminBase}}/waf" id="waf-settings">
+<input type="hidden" name="csrf" value="{{.CSRF}}"><input type="hidden" name="revision" value="{{.State.ETag}}"><input type="hidden" name="request_id" value="{{.RequestID}}">
+<section class="admin-form-section" aria-labelledby="waf-mode-heading"><h2 id="waf-mode-heading">1. 動作を選ぶ</h2>
+<div class="waf-mode-grid">
+<p><label for="waf-enabled">要求の検査（WAF）<select name="enabled" id="waf-enabled"><option value="false" {{if not .State.Settings.Enabled}}selected{{end}}>OFF</option><option value="true" {{if .State.Settings.Enabled}}selected{{end}}>ON</option></select><small class="field-hint">URL・ヘッダーの検査を有効にします。</small></label></p>
+<p><label for="waf-traffic-enabled">大量アクセス制限<select name="traffic_enabled" id="waf-traffic-enabled"><option value="true" {{if .State.Settings.Traffic.Enabled}}selected{{end}}>ON</option><option value="false" {{if not .State.Settings.Traffic.Enabled}}selected{{end}}>OFF</option></select><small class="field-hint">要求頻度と同時処理数を制限します。WAFがONのときに使えます。</small></label></p>
+<p><label for="waf-client-enabled">同一ネットワークの制限<select name="client_enabled" id="waf-client-enabled"><option value="true" {{if .State.Settings.Traffic.ClientEnabled}}selected{{end}}>ON</option><option value="false" {{if not .State.Settings.Traffic.ClientEnabled}}selected{{end}}>OFF</option></select><small class="field-hint">共有回線ごとの上限です。大量アクセス制限がONのときに使えます。</small></label></p>
+</div><div class="waf-result" data-waf-draft-status role="status" aria-live="polite"><h3>保存後の動作</h3><dl class="protection-list"><div><dt>要求の検査</dt><dd data-waf-result="inspection" class="admin-badge {{if .State.Settings.Enabled}}admin-badge-on{{else}}admin-badge-off{{end}}">{{if .State.Settings.Enabled}}ON{{else}}OFF{{end}}</dd></div><div><dt>全体のアクセス上限</dt><dd data-waf-result="global" class="admin-badge {{if and .State.Settings.Enabled .State.Settings.Traffic.Enabled}}admin-badge-on{{else}}admin-badge-off{{end}}">{{if and .State.Settings.Enabled .State.Settings.Traffic.Enabled}}ON{{else}}OFF{{end}}</dd></div><div><dt>同一ネットワークの上限</dt><dd data-waf-result="client" class="admin-badge {{if and .State.Settings.Enabled .State.Settings.Traffic.Enabled .State.Settings.Traffic.ClientEnabled}}admin-badge-on{{else}}admin-badge-off{{end}}">{{if and .State.Settings.Enabled .State.Settings.Traffic.Enabled .State.Settings.Traffic.ClientEnabled}}ON{{else}}OFF{{end}}</dd></div></dl><p class="field-hint" data-waf-result-note>停止中の選択・数値も保持し、再開すると使います。</p></div></section>
+<section class="admin-form-section" aria-labelledby="waf-ordinary-heading"><h2 id="waf-ordinary-heading">2. 通常アクセスの上限</h2>
+<p class="field-hint">閲覧・投稿・静的ファイルを含む共通の枠です。同一回線はIPv4の1アドレス、IPv6の/64単位で、共有回線の利用者は枠も共有します。</p>
+<div class="field-grid">
+<div><fieldset data-waf-limit="client"><legend>同一回線</legend>
+<p><label for="client_rate">毎秒の要求数<input type="number" name="client_rate" id="client_rate" min="1" max="10000" required value="{{.State.Settings.Traffic.ClientRate}}"></label></p>
+<p><label for="client_burst">瞬間的に許可する要求数<input type="number" name="client_burst" id="client_burst" min="1" max="100000" required value="{{.State.Settings.Traffic.ClientBurst}}"></label></p>
+<p><label for="client_concurrent">同時処理数<input type="number" name="client_concurrent" id="client_concurrent" min="1" max="128" required value="{{.State.Settings.Traffic.ClientConcurrent}}"></label></p>
+</fieldset></div>
+<div><fieldset data-waf-limit="global"><legend>全体</legend>
+<p><label for="global_rate">毎秒の要求数<input type="number" name="global_rate" id="global_rate" min="1" max="100000" required value="{{.State.Settings.Traffic.GlobalRate}}"></label></p>
+<p><label for="global_burst">瞬間的に許可する要求数<input type="number" name="global_burst" id="global_burst" min="1" max="200000" required value="{{.State.Settings.Traffic.GlobalBurst}}"></label></p>
+<p><label for="global_concurrent">同時処理数<input type="number" name="global_concurrent" id="global_concurrent" min="1" max="2048" required value="{{.State.Settings.Traffic.GlobalConcurrent}}"></label></p>
+</fieldset></div>
+</div>
+<p class="field-hint">「毎秒」は補充速度、「瞬間」は蓄積できる枠、「同時」は処理中の上限です。全体の値は同一回線以上、瞬間の値は毎秒以上にします。</p></section>
+<section class="admin-form-section" aria-labelledby="waf-work-heading"><h2 id="waf-work-heading">3. 処理別の追加上限</h2>
+<p class="field-hint">検索・投稿には共通枠に加えて次の枠も適用し、小さい方の上限を使います。必要な項目を開いて編集してください。</p>
+<details id="waf-search-limits"><summary>検索の上限</summary>
+<div class="field-grid">
+<div><fieldset data-waf-limit="client"><legend>同一回線の検索</legend>
+<p><label for="search_rate">毎秒の検索数<input type="number" name="search_rate" id="search_rate" min="1" max="10000" required value="{{.State.Settings.Traffic.SearchRate}}"></label></p>
+<p><label for="search_burst">瞬間的に許可する検索数<input type="number" name="search_burst" id="search_burst" min="1" max="100000" required value="{{.State.Settings.Traffic.SearchBurst}}"></label></p>
+</fieldset></div>
+<div><fieldset data-waf-limit="global"><legend>全体の検索</legend>
+<p><label for="search_global_rate">毎秒の検索数<input type="number" name="search_global_rate" id="search_global_rate" min="1" max="100000" required value="{{.State.Settings.Traffic.SearchGlobalRate}}"></label></p>
+<p><label for="search_global_burst">瞬間的に許可する検索数<input type="number" name="search_global_burst" id="search_global_burst" min="1" max="200000" required value="{{.State.Settings.Traffic.SearchGlobalBurst}}"></label></p>
+<p><label for="search_concurrent">同時処理数<input type="number" name="search_concurrent" id="search_concurrent" min="1" max="2048" required value="{{.State.Settings.Traffic.SearchConcurrent}}"></label></p>
+</fieldset></div>
+</div></details>
+<details id="waf-posting-limits"><summary>投稿の追加上限</summary>
+<p class="field-hint">専ブラとWebで共有します。確認と送信が別要求のときは、1投稿で2要求分を使います。たとえば毎秒60要求は、確認往復だけなら毎秒約30投稿が目安です。</p>
+<div class="field-grid">
+<div><fieldset data-waf-limit="client"><legend>同一回線の投稿</legend>
+<p><label for="posting_client_rate">毎秒の投稿要求数<input type="number" name="posting_client_rate" id="posting_client_rate" min="1" max="10000" required value="{{.State.Settings.Traffic.Posting.ClientRate}}"></label></p>
+<p><label for="posting_client_burst">瞬間的に許可する投稿要求数<input type="number" name="posting_client_burst" id="posting_client_burst" min="1" max="100000" required value="{{.State.Settings.Traffic.Posting.ClientBurst}}"></label></p>
+<p><label for="posting_client_concurrent">同時処理数<input type="number" name="posting_client_concurrent" id="posting_client_concurrent" min="1" max="128" required value="{{.State.Settings.Traffic.Posting.ClientConcurrent}}"></label></p>
+</fieldset></div>
+<div><fieldset data-waf-limit="global"><legend>全体の投稿</legend>
+<p><label for="posting_global_rate">毎秒の投稿要求数<input type="number" name="posting_global_rate" id="posting_global_rate" min="1" max="100000" required value="{{.State.Settings.Traffic.Posting.GlobalRate}}"></label></p>
+<p><label for="posting_global_burst">瞬間的に許可する投稿要求数<input type="number" name="posting_global_burst" id="posting_global_burst" min="1" max="200000" required value="{{.State.Settings.Traffic.Posting.GlobalBurst}}"></label></p>
+<p><label for="posting_global_concurrent">同時処理数<input type="number" name="posting_global_concurrent" id="posting_global_concurrent" min="1" max="2048" required value="{{.State.Settings.Traffic.Posting.GlobalConcurrent}}"></label></p>
+</fieldset></div>
+</div></details>
+<details><summary>削除依頼・管理認証の固定上限</summary>
+<p class="field-hint">値は「毎秒 ／ 瞬間 ／ 同時処理」です。通常要求の枠も適用します。</p>
+<dl><dt>削除依頼・照会</dt><dd><span data-waf-limit="client">同一回線 2 ／ 6 ／ 2</span><br><span data-waf-limit="global">全体 8 ／ 16 ／ 4</span></dd><dt>管理ログイン・再認証</dt><dd><span data-waf-limit="client">同一回線 1 ／ 3 ／ 1</span><br><span data-waf-limit="global">全体 4 ／ 8 ／ 2</span></dd></dl>
+</details></section>
+{{template "settings-review" .}}{{if .Fresh}}<button type="submit">WAFの設定を保存する</button>{{else}}<p><a class="action-button" href="{{adminBase}}/reauth?return_to=%2Fwaf">パスワードを再確認して変更する</a></p>{{end}}
+<p class="field-hint">保存後すぐに反映し、再起動後も引き継ぎます。ON/OFFや設定変更で消費済みの枠をリセットしません。</p>
+</form>
+<section class="admin-panel" id="waf-status"><h2>起動後の累計</h2><dl class="admin-status-grid"><div><dt>WAFによる遮断</dt><dd>{{.State.Blocked}}<small>件</small></dd></div></dl>
+<p>公開側と管理側の枠は独立しています。頻度超過は429、全体の混雑は503で案内します。</p>
+<div class="field-grid">
+<div><h3>公開側</h3><dl class="admin-totals"><div><dt>要求頻度による制限</dt><dd>{{.State.PublicTraffic.RateLimited}}件</dd></div><div><dt>全体の混雑</dt><dd>{{.State.PublicTraffic.Overloaded}}件</dd></div></dl></div>
+<div><h3>管理側</h3><dl class="admin-totals"><div><dt>要求頻度による制限</dt><dd>{{.State.AdminTraffic.RateLimited}}件</dd></div><div><dt>全体の混雑</dt><dd>{{.State.AdminTraffic.Overloaded}}件</dd></div></dl></div>
+</div>
+<details><summary>処理別の集計を見る</summary><div class="field-grid">
+<div><h3>公開の投稿</h3><dl><dt>処理中</dt><dd>{{.State.PublicTraffic.Posting.Active}}件</dd><dt>回線別の制限</dt><dd>{{.State.PublicTraffic.Posting.RateLimited}}件</dd><dt>全体の混雑</dt><dd>{{.State.PublicTraffic.Posting.Overloaded}}件</dd></dl></div>
+<div><h3>削除依頼・照会</h3><dl><dt>処理中</dt><dd>{{.State.PublicTraffic.Reports.Active}}件</dd><dt>回線別の制限</dt><dd>{{.State.PublicTraffic.Reports.RateLimited}}件</dd><dt>全体の混雑</dt><dd>{{.State.PublicTraffic.Reports.Overloaded}}件</dd></dl></div>
+<div><h3>管理ログイン・再認証</h3><dl><dt>処理中</dt><dd>{{.State.AdminTraffic.Authentication.Active}}件</dd><dt>回線別の制限</dt><dd>{{.State.AdminTraffic.Authentication.RateLimited}}件</dd><dt>全体の混雑</dt><dd>{{.State.AdminTraffic.Authentication.Overloaded}}件</dd></dl></div>
+</div></details>
+<p class="field-hint">処理別の集計には、その追加枠による拒否を表示します。通常枠で先に拒否した要求は公開側・管理側の全体集計に含めます。すべての件数は再起動で0に戻り、ページの再読込みで表示を更新します。</p></section>
+<section class="admin-panel" id="waf-scope"><h2>検査の範囲</h2>
+<details><summary>遮断する要求と検査しない情報</summary>
+<ul><li>パストラバーサルと秘密ファイルの探索</li><li>TRACE・CONNECTなど未使用のHTTPメソッド</li><li>URL内の既知のSQL・スクリプト・コマンド注入パターン</li><li>ヘッダー内のJNDI参照パターンと既知の難読化</li><li>URL・対象ヘッダーの16KiB超過、クエリ128項目超過</li></ul>
+<p>クエリの項目数は、解析用のメモリを確保する前に検査します。同名や空の項目も数えます。投稿本文・JSON本文・Cookie・認証情報と検索ページの検索語は文字列検査しません。</p>
+<p>WAF専用のIP・Cookie・本文・攻撃文字列は保存しません。WAFがOFFなら、この画面の頻度・同時処理の上限も停止します。認証、利用者の投稿間隔、板の接続許可、運用設定の通信量・処理数の上限は継続します。初期状態はOFFです。</p>
+<p>永久BANは行いません。回線帯域が埋まる規模の攻撃は上流側の対策が必要です。</p>
+</details></section>
+<p><a href="{{adminBase}}/operations">運用設定へ戻る</a></p>
+</main>{{template "footer" .}}</body></html>
+
+{{define "page-assets"}}{{template "stylesheet" "admin-settings.css"}}{{template "stylesheet" "protection.css"}}{{template "stylesheet" "admin-waf.css"}}{{template "javascript" "admin-waf.js"}}{{template "javascript" "admin-settings.js"}}{{end}}

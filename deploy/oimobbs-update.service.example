@@ -1,0 +1,27 @@
+# Groupは掲示板が接続できるGIDに合わせる。Dockerの既定実行GIDは10001。
+[Unit]
+Description=OimoBBS software update agent
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=exec
+User=root
+Group=10001
+Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ExecStart=/usr/local/libexec/oimoupdate --config /etc/oimobbs-update/agent.json
+RuntimeDirectory=oimobbs-update
+RuntimeDirectoryMode=0750
+RuntimeDirectoryPreserve=yes
+StateDirectory=oimobbs-update
+StateDirectoryMode=0700
+UMask=0077
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=45
+KillMode=control-group
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

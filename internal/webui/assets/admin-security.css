@@ -1,0 +1,36 @@
+/* 検出ログを行で比較し、本文と識別子は必要なときだけ詳細に表示する。 */
+.security-body {white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;max-width:100%;font:inherit;background:var(--canvas);padding:12px;border-radius:8px;}
+.security-reference {overflow-wrap:anywhere;word-break:break-word;}
+.security-table,.security-reasons {display:table;overflow:visible;width:100%;table-layout:fixed;border-collapse:collapse;background:var(--paper);}
+.security-table th,.security-table td,.security-reasons th,.security-reasons td {padding:12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line);overflow-wrap:anywhere;}
+.security-table th {font-size:13px;color:var(--muted);}
+.security-table {display:block;}
+.security-table thead,.security-table tbody {display:block;}
+.security-table tr {display:grid;grid-template-columns:18% 12% 14% 34% 8% 14%;border-bottom:1px solid var(--line);}
+.security-table th,.security-table td {display:block;min-width:0;border:0;}
+.security-table td:last-child:has(details[open]) {grid-column:1/-1;}
+.security-details[open] > summary {width:fit-content;}
+.security-event time {font-size:13px;font-variant-numeric:tabular-nums;}
+.security-event .admin-badge {white-space:nowrap;}
+.security-details {margin:0;font-size:14px;}
+.security-details > summary {cursor:pointer;min-height:44px;padding:10px;}
+.security-details pre {min-width:0;}
+.security-reasons th:first-child {width:70%;}
+.security-reasons td {font-variant-numeric:tabular-nums;white-space:nowrap;}
+.admin .security-filter {display:flex;flex-wrap:wrap;align-items:end;gap:12px;}
+.admin .security-filter label {min-width:min(140px,100%);flex:1;}
+.admin .security-filter > label,.admin .security-filter > button {margin:0;}
+.admin .security-filter select {width:100%;max-width:100%;}
+@media(max-width:700px) {
+ .security-table,.security-table tbody {display:block;}
+ .security-table thead {display:none;}
+ .security-table tr {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-bottom:1px solid var(--line);padding-block:12px;}
+ .security-table td {display:block;min-width:0;border:0;padding:6px 10px;}
+ .security-table td:first-child,.security-table td:nth-child(4) {grid-column:span 2;}
+ .security-table td:nth-child(3) {grid-column:1;grid-row:2;}
+ .security-table td:nth-child(4) {grid-row:2;}
+ .security-table td:last-child {grid-column:span 2;}
+ .security-table td[data-label]::before {content:attr(data-label);display:block;font-size:12px;color:var(--muted);margin-bottom:4px;}
+ .security-reasons th:first-child {width:60%;}
+ .security-reasons th,.security-reasons td {padding:8px;font-size:13px;}
+}

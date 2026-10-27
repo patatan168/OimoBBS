@@ -1,0 +1,17 @@
+{
+  "feature": "board_no_reprint",
+  "minimum_reader": 75,
+  "default": false,
+  "legacy_omission": "preserve",
+  "notice_locations": ["board_index", "subback", "head.txt", "web_confirmation", "legacy_confirmation"],
+  "quotation": {"article": 32, "published": true, "fair_practice": true, "justified_purpose_scope": true, "clear_separation_and_subordination": "assessment_guidance", "source_article": 48},
+  "protected_crawler_status": 403,
+  "ordinary_dat_status": 200,
+  "ordinary_range_status": 206,
+  "ordinary_conditional_status": 304,
+  "rewrite_existing_dat": false,
+  "rewrite_custom_rules": false,
+  "invalidate_old_confirmation": true,
+  "spoofed_user_agent_prevented": false,
+  "immediate_search_removal_guaranteed": false
+}

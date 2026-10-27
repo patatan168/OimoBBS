@@ -1,0 +1,20 @@
+{
+  "feature": "hidden_board",
+  "minimum_reader": 76,
+  "default": false,
+  "legacy_omission": "preserve",
+  "discovery": {"site_index": true, "bbsmenu_html": true, "bbsmenu_json": true, "global_search": false, "scoped_search_status": 404, "admin_list": true},
+  "web_thread_status": 403,
+  "web_post_status": 403,
+  "dedicated_ua_web_thread_status": 403,
+  "direct_board_status": 200,
+  "subject_status": 200,
+  "dat_status": 200,
+  "dat_conditional_status": 304,
+  "dat_range_status": 206,
+  "legacy_posting": true,
+  "crawler_policy": "shared_with_no_reprint",
+  "reprint_notice_requires_no_reprint": true,
+  "url_authentication": false,
+  "rewrite_existing_dat": false
+}

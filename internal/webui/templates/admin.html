@@ -1,0 +1,83 @@
+<!-- 管理画面。動的な値はhtml/templateでエスケープする。 -->
+<!doctype html>
+<html lang="ja">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>{{.Title}} — OimoBBS管理</title>{{template "admin-assets" .}}
+</head>
+<body class="admin">{{template "admin-header" .}}
+<main id="main" tabindex="-1">
+<h1>{{.Title}}
+</h1>{{if .Message}}
+<p role="alert">{{.Message}}
+</p>{{end}}
+{{if .Login}}
+<form class="login-form" data-login-form method="post" action="{{adminBase}}/login">
+<input type="hidden" name="csrf" value="{{.CSRF}}">
+<button class="passkey-login-button" type="button" data-passkey-login data-csrf="{{.CSRF}}"><span class="passkey-login-icon">{{template "passkey-icon"}}</span><span class="passkey-login-copy"><strong>パスキーでログイン</strong><small>ID入力不要・指紋・顔認証・PINで本人確認</small></span><span class="passkey-login-arrow" aria-hidden="true">→</span></button>
+<div class="auth-divider"><span>パスワードでログイン</span></div>
+<p><label>ログイン名 
+<input name="login" autocomplete="username" maxlength="64" required></label>
+</p>
+
+<p><label>パスワード<input type="password" name="password" autocomplete="current-password" required></label></p>
+<p><label>認証アプリのOTPコード<input data-otp-code inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" placeholder="登録済みの場合は6桁を入力" aria-describedby="otp-login-help"></label></p>
+<p id="otp-login-help" class="auth-help">OTPを登録済みの場合は、パスワードとOTPコードの両方が必要です。</p>
+<button type="submit" data-otp-login data-csrf="{{.CSRF}}">パスワードでログイン</button>
+<p role="status" data-passkey-status aria-live="polite"></p></form>{{end}}
+{{if .ActionLabel}}<nav class="page-actions" aria-label="次の操作"><a class="action-button" href="{{adminURL (.ActionPath)}}">{{.ActionLabel}}</a></nav>{{end}}
+{{if .Reauth}}
+<p><strong>続きの画面：{{.ReauthDestination}}</strong></p><p>重要な操作の前に本人確認を行います。再認証は10分間有効です。</p>
+<button class="passkey-button" type="button" data-passkey-reauth data-csrf="{{.PasskeyCSRF}}" data-return="{{.BackPath}}">{{template "passkey-icon"}}<span>パスキーで再認証</span></button>
+{{if .OTPEnabled}}
+<form class="login-form" method="post" action="{{adminURL (.ReauthAction)}}" data-otp-auth-form>
+<div class="auth-divider"><span>パスワードとOTPで再認証</span></div>
+<p><label>パスワード<input type="password" name="password" autocomplete="current-password" maxlength="512" required></label></p>
+<p><label>認証アプリのOTPコード<input data-otp-code inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required></label></p>
+<button type="submit" data-otp-reauth data-csrf="{{.OTPCSRF}}" data-return="{{.BackPath}}">パスワードとOTPで再認証</button>
+</form>
+{{else if not .PasswordDisabled}}
+<form class="login-form" method="post" action="{{adminURL (.ReauthAction)}}"><input type="hidden" name="csrf" value="{{.CSRF}}"><p><label>パスワード <input type="password" name="password" autocomplete="current-password" maxlength="512" required></label></p><button type="submit">再認証して{{.ReauthDestination}}へ進む</button></form>
+{{else}}<p>このアカウントはパスキーでの再認証が必要です。</p>{{end}}
+<p role="status" data-passkey-status aria-live="polite"></p>{{end}}
+{{if .Capacity}}<section class="admin-panel" aria-label="投稿の保存容量"><div class="admin-section-heading"><h2>{{template "archive-icon"}}投稿受付と保存容量</h2><a class="tonal-link" href="{{adminBase}}/maintenance">最新の状況を取得</a></div><dl class="admin-status-grid"><div><dt>投稿受付</dt><dd class="admin-status-copy"><span class="admin-badge {{if .Capacity.WriteReady}}admin-badge-on{{else}}admin-badge-alert{{end}}">{{if .Capacity.WriteReady}}受付中{{else if .Capacity.Recovering}}容量回復を確認中{{else}}容量不足または確認不能のため停止中{{end}}</span></dd></div><div><dt>空き容量</dt><dd>{{if .Capacity.Known}}{{.Capacity.AvailableMiB}}<small>MiB</small>{{else}}確認不能{{end}}</dd></div><div><dt>復旧用予約</dt><dd class="admin-status-copy"><span class="admin-badge {{if .Capacity.EmergencyReserve.Ready}}admin-badge-on{{else}}admin-badge-alert{{end}}">{{if .Capacity.EmergencyReserve.Enabled}}{{if .Capacity.EmergencyReserve.Ready}}確保済み{{else}}補充が必要（投稿・圧縮停止）{{end}}{{else}}未導入{{end}}</span>{{if .Capacity.EmergencyReserve.Enabled}}<p>残量 {{.Capacity.EmergencyReserve.RemainingMiB}} MiB</p>{{end}}</dd></div></dl>
+{{if not .Capacity.EmergencyReserve.Ready}}<p>容量不足時の復旧作業に使う256MiBの領域を確保します。</p><form method="post" action="{{adminBase}}/maintenance/emergency-reserve"><input type="hidden" name="csrf" value="{{.CSRF}}"><button type="submit">{{if .Capacity.EmergencyReserve.Enabled}}復旧用予約を256MiBまで補充{{else}}復旧用予約を導入（256MiB）{{end}}</button></form>{{end}}
+{{if .Capacity.Pressure.Enabled}}<h3>容量回収</h3><p><span class="admin-badge">{{.Capacity.Pressure.Description}}</span></p><dl class="admin-totals"><div><dt>起動後の公開回収</dt><dd>{{.Capacity.Pressure.DroppedThreads}}<small>スレッド</small></dd></div><div><dt>起動後の原本回収</dt><dd>{{.Capacity.Pressure.RemovedOriginals}}<small>件</small></dd></div></dl><details><summary>回収の対象と順序</summary><p>最終投稿から7日以上の未満杯スレッド、満杯スレッドの順に回収します。保全中・固定スレッドは対象外です。</p></details>{{end}}<p class="field-hint">確認日時：{{.Capacity.Checked}}</p></section>{{end}}
+{{if .Latency}}<section class="admin-panel" aria-label="投稿時間"><h2>投稿処理の時間</h2><dl class="admin-status-grid"><div><dt>直近60秒の投稿</dt><dd>{{.Latency.Samples}}<small>件</small></dd></div><div><dt>P99</dt><dd>{{if not .Latency.Known}}集計不能{{else if .Latency.Samples}}{{.Latency.P99Millis}}<small>ms</small>{{else}}標本なし{{end}}</dd></div><div><dt>圧縮</dt><dd class="admin-status-copy"><span class="admin-badge">{{if .Latency.Recovering}}回復を確認中{{else if .Latency.Paused}}投稿負荷のため延期{{else}}実行可能{{end}}</span></dd></div></dl><p class="field-hint">P99は、99%の投稿処理が収まった時間です。本文の受信と応答の送信時間は含みません。</p></section>{{end}}
+{{if .Resources}}<section class="admin-panel"><h2>CPU・メモリの自動調整</h2><dl class="admin-status-grid"><div><dt>Goの並列数</dt><dd>{{.Resources.CPUs}}</dd></div><div><dt>メモリ予算</dt><dd>{{formatBytes .Resources.Memory.Limit}}</dd></div><div><dt>観測したメモリの余裕</dt><dd>{{formatBytes .Resources.Memory.Headroom}}</dd></div></dl><details><summary>メモリの内訳と作業予約</summary><dl><dt>Goの並列数</dt><dd>{{.Resources.CPUs}}</dd><dt>メモリ予算</dt><dd>{{.Resources.Memory.Limit}} byte</dd><dt>Go管理領域</dt><dd>{{.Resources.Memory.Managed}} byte</dd><dt>Go内で再利用できる空き領域</dt><dd>{{.Resources.Memory.Reusable}} byte</dd><dt>観測したメモリの余裕</dt><dd>{{.Resources.Memory.Headroom}} byte</dd><dt>処理中の作業予約</dt><dd>{{.Resources.Reserved}} byte</dd><dt>作業メモリを予約できなかった回数</dt><dd>{{.Resources.Rejected}}回</dd></dl></details><p class="field-hint">メモリ逼迫時は保持量と新規処理を抑えます。観測値は監視周期で更新します。</p></section>{{end}}
+{{if .Compression}}<section class="admin-panel"><h2>公開配信の共有キャッシュ</h2><dl class="admin-status-grid"><div><dt>共有キャッシュ使用量</dt><dd>{{formatBytes .Compression.Used}}</dd></div><div><dt>共有キャッシュ上限</dt><dd>{{formatBytes .Compression.Limit}}</dd></div><div><dt>表現生成を待つ版数</dt><dd>{{.Compression.Pending}}</dd></div></dl><h3>起動後の累計</h3><dl class="admin-totals"><div><dt>表現生成</dt><dd>{{.Compression.Builds}}<small>回</small></dd></div><div><dt>公開表現の再利用</dt><dd>{{.Compression.Hits}}<small>回</small></dd></div></dl><details><summary>保持・生成の詳細</summary><dl><dt>保持している版数</dt><dd>{{.Compression.Entries}}</dd><dt>共有キャッシュ使用量</dt><dd>{{.Compression.Used}} byte</dd><dt>共有キャッシュ上限</dt><dd>{{.Compression.Limit}} byte</dd></dl><p>同じ公開版の閲覧HTMLと圧縮結果を共有し、HTML生成・gzip・Zstandardを合わせて同時処理は{{.Compression.Workers}}件までです。差分取得と更新なしの応答には圧縮処理を使いません。</p></details></section>{{end}}
+{{if .Delivery}}<section class="admin-panel"><h2>公開・管理の送信状況</h2><dl class="admin-status-grid"><div><dt>送信予算</dt><dd>{{formatMbps .Delivery.Budget}}</dd></div><div><dt>送信中の片数</dt><dd>{{.Delivery.Active}}</dd></div><div><dt>待機している片数</dt><dd>{{.Delivery.Queued}}</dd></div></dl><details><summary>接続元と起動後の送信量</summary><dl><dt>送信予算</dt><dd>{{.Delivery.Budget}} bit/s</dd><dt>送信中の片数</dt><dd>{{.Delivery.Active}}</dd><dt>待機している片数</dt><dd>{{.Delivery.Queued}}</dd><dt>現在の接続元数</dt><dd>{{.Delivery.Subjects}}</dd><dt>起動後の予約済み送信量</dt><dd>{{.Delivery.Reserved}} byte</dd></dl><p>予約量は送信失敗分と推定ヘッダを含みます。ネットワーク機器で測定した通信量とは別の集計です。</p></details></section>{{end}}
+{{if .OptionalLogs}}<section class="admin-panel"><h2>HTTPログの保存</h2><p><span class="admin-badge {{if .OptionalLogs.CleanupFailed}}admin-badge-alert{{end}}">{{if .OptionalLogs.Active}}記録中{{else}}公開サーバー未起動{{end}}{{if .OptionalLogs.CleanupFailed}} · 期限回収でエラー{{end}}</span></p><dl class="admin-status-grid"><div><dt>保存待ち・保存中</dt><dd>{{.OptionalLogs.Queue.Pending}}<small>件</small></dd></div><div><dt>起動後の保存成功</dt><dd>{{.OptionalLogs.Queue.Saved}}<small>件</small></dd></div><div><dt>起動後の保存失敗</dt><dd>{{.OptionalLogs.Queue.Failed}}<small>件</small></dd></div></dl><details><summary>起動後の欠測・保存の内訳</summary><dl><dt>保存待ち・保存中</dt><dd>{{.OptionalLogs.Queue.Pending}}件 / {{.OptionalLogs.Queue.PendingBytes}} byte</dd><dt>起動後の保存成功</dt><dd>{{.OptionalLogs.Queue.Saved}}件</dd><dt>容量上限による欠測</dt><dd>{{.OptionalLogs.Queue.DroppedCapacity}}件</dd><dt>保存失敗</dt><dd>{{.OptionalLogs.Queue.Failed}}件</dd><dt>不正観測による欠測</dt><dd>{{.OptionalLogs.Queue.DroppedInvalid}}件</dd><dt>受付停止後の欠測</dt><dd>{{.OptionalLogs.Queue.DroppedClosed}}件</dd><dt>終了時の未保存</dt><dd>{{.OptionalLogs.Queue.DroppedShutdown}}件</dd><dt>起動時に回収した未設置候補</dt><dd>{{.OptionalLogs.StartupDiscarded}}件</dd></dl></details><p>起動後の集計です。投稿に必須の記録とは別に保存し、HTTP handlerの終了時点を観測します。</p>{{if .OptionalLogs.Loss.PersistFailed}}<p role="alert">欠測集計の保存でエラー。最後の保存以後は未確認です。</p>{{end}}{{if .OptionalLogs.Loss.HasSnapshot}}<h3>再起動を越えた欠測集計</h3><dl><dt>保存済み集計の観測日時（UTC / JST）</dt><dd>{{.OptionalLogs.Loss.ObservedTime}}</dd>{{if .OptionalLogs.Loss.KnownRange}}<dt>既知欠測の観測範囲（UTC / JST）</dt><dd>{{.OptionalLogs.Loss.KnownRange}}</dd>{{end}}{{if .OptionalLogs.Loss.UnknownRange}}<dt>終了未確認の観測範囲（UTC / JST）</dt><dd>{{.OptionalLogs.Loss.UnknownRange}}</dd>{{end}}<dt>保存失敗</dt><dd>{{.OptionalLogs.Loss.Known.Failed}}件</dd><dt>容量上限</dt><dd>{{.OptionalLogs.Loss.Known.Capacity}}件</dd><dt>不正観測</dt><dd>{{.OptionalLogs.Loss.Known.Invalid}}件</dd><dt>受付停止後</dt><dd>{{.OptionalLogs.Loss.Known.Closed}}件</dd><dt>終了時の未保存</dt><dd>{{.OptionalLogs.Loss.Known.Shutdown}}件</dd><dt>終了を確認できなかった起動</dt><dd>{{.OptionalLogs.Loss.Summary.UncleanBoots}}回</dd></dl><p>最後に保存した集計までの既知件数です。未確認期間の欠測件数を推測で含めず、全要求を記録できた証明にはしません。</p>{{else}}<p>再起動後も確認できる集計はまだ保存できていません。</p>{{end}}</section>{{end}}
+{{if .Maintenance}}
+<section class="admin-panel" aria-label="自動整理の状態"><h2>保存の自動整理</h2>
+<dl class="admin-status-grid"><div><dt>自動実行</dt><dd class="admin-status-copy"><span class="admin-badge">{{if .Maintenance.Enabled}}有効{{else}}無効{{end}}</span></dd></div><div><dt>実行状態</dt><dd class="admin-status-copy"><span class="admin-badge {{if .Maintenance.Failed}}admin-badge-alert{{end}}">{{if .Maintenance.Running}}整理中{{else if .Maintenance.Failed}}前回の処理でエラー{{else if .Maintenance.Completed}}待機中{{else}}未実行{{end}}</span></dd></div></dl>
+{{if .Maintenance.Completed}}<details><summary>前回の整理結果</summary><dl><dt>前回の完了日時（UTC）</dt><dd>{{.Maintenance.Completed}}</dd><dt>確認したスレッド</dt><dd>{{.Maintenance.Scanned}}</dd><dt>圧縮したスレッド</dt><dd>{{.Maintenance.Compacted}}</dd><dt>回収した旧ファイル</dt><dd>{{.Maintenance.Reclaimed}}</dd><dt>容量不足で延期した圧縮</dt><dd>{{.Maintenance.Deferred}}</dd><dt>投稿遅延で延期した圧縮</dt><dd>{{.Maintenance.LatencyDeferred}}</dd><dt>混雑で延期した板</dt><dd>{{.Maintenance.BusyBoards}}</dd><dt>巡回結果</dt><dd>{{.Maintenance.StopLabel}}</dd><dt>処理時間</dt><dd>{{.Maintenance.DurationMillis}} ms</dd></dl></details>{{end}}
+{{if .Maintenance.CapacityKnown}}<dl><dt>前回確認した空き容量</dt><dd>{{.Maintenance.AvailableMiB}} MiB</dd><dt>現在の整理用予約</dt><dd>{{.Maintenance.ReservedMiB}} MiB</dd></dl>{{end}}
+<p>投稿内容を保持したまま、保存領域を整理します。設定は<a href="{{adminBase}}/operations">運用設定</a>で変更できます。</p>
+<p><a href="{{adminBase}}/maintenance">状態を更新する</a></p>
+</section>
+{{end}}
+{{if .Settings}}
+<div class="admin-shortcuts" aria-label="関連する管理画面">
+<section class="admin-panel"><h2>{{template "board-icon"}}掲示板・投稿</h2><nav aria-label="掲示板の設定"><a href="{{adminBase}}/boards">板設定</a><a href="{{adminBase}}/board-categories">板カテゴリー</a><a href="{{adminBase}}/caps">キャップ</a></nav></section>
+<section class="admin-panel"><h2>{{template "shield-icon"}}運用・記録</h2><nav aria-label="運用と記録"><a href="{{adminBase}}/operations">運用設定</a><a href="{{adminBase}}/audit">管理操作の記録</a><a href="{{adminBase}}/evidence">提出用ログ</a></nav></section>
+<section class="admin-panel"><h2>{{template "passkey-icon"}}管理者</h2><nav aria-label="管理者の設定"><a href="{{adminBase}}/administrators">管理者</a><a href="{{adminBase}}/reauth">再認証</a></nav></section>
+</div>
+<form method="post" action="{{adminBase}}/site">
+<input type="hidden" name="csrf" value="{{.CSRF}}">
+<input type="hidden" name="revision" value="{{.ETag}}">
+<input type="hidden" name="request_id" value="{{.RequestID}}">
+<p><label>サイト名 
+<input name="name" value="{{.Name}}" maxlength="128" required></label>
+</p>
+<button type="submit">保存</button> <a href="{{adminBase}}/">最新の設定を読み直す</a>
+</form>
+<form method="post" action="{{adminBase}}/logout">
+<input type="hidden" name="csrf" value="{{.LogoutCSRF}}">
+<button type="submit">ログアウト</button>
+</form>{{else if not .Login}}
+<p><a href="{{if .Reauth}}{{adminBase}}/{{else if .ActionLabel}}{{adminBase}}/{{else if .BackPath}}{{adminURL .BackPath}}{{else}}{{adminBase}}/{{end}}">{{if .Reauth}}再認証をやめてサイト設定へ戻る{{else}}戻る{{end}}</a>
+</p>{{end}}
+</main>{{template "footer" .}}
+</body>
+</html>
+
+{{define "page-assets"}}{{if or .Login .Reauth}}{{template "stylesheet" "admin-auth.css"}}{{template "javascript" "admin-auth.js"}}{{end}}{{end}}

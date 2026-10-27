@@ -1,0 +1,926 @@
+{
+  "date": "2026-10-27",
+  "decision": "No tested SATA setting prevented long real-fsync waits; all settings restored.",
+  "scope": "application-free buffered 3x16KiB append + real fsync, 30 groups/s for 30s, existing services active; not a posting-throughput benchmark",
+  "experiments": {
+    "lpm": {
+      "config": {
+        "baseline_commit": "7b6b71bdeee7dbe72e7c822a127c0cc9c254d542",
+        "kernel": "6.12.90+deb12.1-amd64",
+        "policy_path": "/sys/devices/pci0000:00/0000:00:08.2/0000:05:00.1/ata1/host0/scsi_host/host0/link_power_management_policy",
+        "device_path": "/sys/devices/pci0000:00/0000:00:08.2/0000:05:00.1/ata1/host0/target0:0:0/0:0:0:0",
+        "initial_policy": "med_power_with_dipm",
+        "write_cache": "write back",
+        "queue_depth": "32",
+        "scheduler": "none [mq-deadline]",
+        "runtime_image": "sha256:77ebef59ee4c5efd4b976307757d3945f84bcf3560806ad488c45ae2bbfd1adc",
+        "live": {
+          "id": "4eb5040aa05186ff06acc6e6393b9d6cbb1baaea7a0660059684ef213217741b",
+          "image": "sha256:77ebef59ee4c5efd4b976307757d3945f84bcf3560806ad488c45ae2bbfd1adc",
+          "started_at": "2026-10-26T22:20:15.04868303Z"
+        },
+        "sources": [
+          "https://docs.kernel.org/scsi/link_power_management_policy.html",
+          "https://raw.githubusercontent.com/torvalds/linux/v6.12/drivers/ata/libata-sata.c"
+        ]
+      },
+      "trials": [
+        {
+          "name": "raw-baseline-r1",
+          "policy": "med_power_with_dipm",
+          "policy_at_finish": "med_power_with_dipm",
+          "planned_groups": 900,
+          "completed_groups": 900,
+          "skipped_groups": 0,
+          "fsync_calls": 2700,
+          "bytes_per_write": 16384,
+          "elapsed_s": 29.97502486200392,
+          "process_cpu_s": 1.0747281,
+          "started_unix_ns": 1793089429331166659,
+          "sync_p50_ms": 1.843364,
+          "sync_p95_ms": 2.827403,
+          "sync_p99_ms": 3.28925,
+          "sync_max_ms": 31.344196,
+          "over100ms": 0,
+          "files": [
+            {
+              "name": "raw-baseline-r1-0.bin",
+              "size": 14745600,
+              "sha256": "1f167fbb318035904bbbe0f1516bbb5b00de255635dcb56adbb6844e5e2a847a",
+              "exact_payload": true
+            },
+            {
+              "name": "raw-baseline-r1-1.bin",
+              "size": 14745600,
+              "sha256": "1f167fbb318035904bbbe0f1516bbb5b00de255635dcb56adbb6844e5e2a847a",
+              "exact_payload": true
+            },
+            {
+              "name": "raw-baseline-r1-2.bin",
+              "size": 14745600,
+              "sha256": "1f167fbb318035904bbbe0f1516bbb5b00de255635dcb56adbb6844e5e2a847a",
+              "exact_payload": true
+            }
+          ],
+          "error": null,
+          "raw_path": "var/posting-io-lpm-20261027/raw-baseline-r1.json",
+          "raw_sha256": "6ecd3d819f428fc3626b681b60e4eb3b9444f2a936a69452e0b5347a87e900cf",
+          "deterministic_payload_files_removed_after_reverification": true
+        },
+        {
+          "name": "raw-performance-r1",
+          "policy": "max_performance",
+          "policy_at_finish": "max_performance",
+          "planned_groups": 900,
+          "completed_groups": 573,
+          "skipped_groups": 327,
+          "fsync_calls": 1719,
+          "bytes_per_write": 16384,
+          "elapsed_s": 29.974953899996763,
+          "process_cpu_s": 0.8918554489999999,
+          "started_unix_ns": 1793089464562039338,
+          "sync_p50_ms": 1.917878,
+          "sync_p95_ms": 40.470963,
+          "sync_p99_ms": 73.127192,
+          "sync_max_ms": 623.907949,
+          "over100ms": 2,
+          "files": [
+            {
+              "name": "raw-performance-r1-0.bin",
+              "size": 9388032,
+              "sha256": "03badbede4d16cab11e4c635c0ee1066a29270e49b06d70fd469d5cfaa14131a",
+              "exact_payload": true
+            },
+            {
+              "name": "raw-performance-r1-1.bin",
+              "size": 9388032,
+              "sha256": "03badbede4d16cab11e4c635c0ee1066a29270e49b06d70fd469d5cfaa14131a",
+              "exact_payload": true
+            },
+            {
+              "name": "raw-performance-r1-2.bin",
+              "size": 9388032,
+              "sha256": "03badbede4d16cab11e4c635c0ee1066a29270e49b06d70fd469d5cfaa14131a",
+              "exact_payload": true
+            }
+          ],
+          "error": null,
+          "raw_path": "var/posting-io-lpm-20261027/raw-performance-r1.json",
+          "raw_sha256": "eccc1cb7f15867d9a003863892dc2f0580fa8c133ec3a80010dd6118c928c390",
+          "deterministic_payload_files_removed_after_reverification": true
+        },
+        {
+          "name": "raw-performance-r2",
+          "policy": "max_performance",
+          "policy_at_finish": "max_performance",
+          "planned_groups": 900,
+          "completed_groups": 900,
+          "skipped_groups": 0,
+          "fsync_calls": 2700,
+          "bytes_per_write": 16384,
+          "elapsed_s": 29.972463502999744,
+          "process_cpu_s": 1.047538384,
+          "started_unix_ns": 1793089499584640064,
+          "sync_p50_ms": 1.820146,
+          "sync_p95_ms": 2.771581,
+          "sync_p99_ms": 3.030759,
+          "sync_max_ms": 30.507563,
+          "over100ms": 0,
+          "files": [
+            {
+              "name": "raw-performance-r2-0.bin",
+              "size": 14745600,
+              "sha256": "1f167fbb318035904bbbe0f1516bbb5b00de255635dcb56adbb6844e5e2a847a",
+              "exact_payload": true
+            },
+            {
+              "name": "raw-performance-r2-1.bin",
+              "size": 14745600,
+              "sha256": "1f167fbb318035904bbbe0f1516bbb5b00de255635dcb56adbb6844e5e2a847a",
+              "exact_payload": true
+            },
+            {
+              "name": "raw-performance-r2-2.bin",
+              "size": 14745600,
+              "sha256": "1f167fbb318035904bbbe0f1516bbb5b00de255635dcb56adbb6844e5e2a847a",
+              "exact_payload": true
+            }
+          ],
+          "error": null,
+          "raw_path": "var/posting-io-lpm-20261027/raw-performance-r2.json",
+          "raw_sha256": "795dabbe87c55b38e60a256c98dd2022649096f44330c1cce8d02f77c725135e",
+          "deterministic_payload_files_removed_after_reverification": true
+        },
+        {
+          "name": "raw-baseline-r2",
+          "policy": "med_power_with_dipm",
+          "policy_at_finish": "med_power_with_dipm",
+          "planned_groups": 900,
+          "completed_groups": 900,
+          "skipped_groups": 0,
+          "fsync_calls": 2700,
+          "bytes_per_write": 16384,
+          "elapsed_s": 29.972623958994518,
+          "process_cpu_s": 0.9851503729999997,
+          "started_unix_ns": 1793089534742324059,
+          "sync_p50_ms": 1.869552,
+          "sync_p95_ms": 2.819572,
+          "sync_p99_ms": 3.011167,
+          "sync_max_ms": 30.03163,
+          "over100ms": 0,
+          "files": [
+            {
+              "name": "raw-baseline-r2-0.bin",
+              "size": 14745600,
+              "sha256": "1f167fbb318035904bbbe0f1516bbb5b00de255635dcb56adbb6844e5e2a847a",
+              "exact_payload": true
+            },
+            {
+              "name": "raw-baseline-r2-1.bin",
+              "size": 14745600,
+              "sha256": "1f167fbb318035904bbbe0f1516bbb5b00de255635dcb56adbb6844e5e2a847a",
+              "exact_payload": true
+            },
+            {
+              "name": "raw-baseline-r2-2.bin",
+              "size": 14745600,
+              "sha256": "1f167fbb318035904bbbe0f1516bbb5b00de255635dcb56adbb6844e5e2a847a",
+              "exact_payload": true
+            }
+          ],
+          "error": null,
+          "raw_path": "var/posting-io-lpm-20261027/raw-baseline-r2.json",
+          "raw_sha256": "7a2e9caafd09931d66c1d17831f3f26543e1b167b44c6f3f41d81ed24cc7b785",
+          "deterministic_payload_files_removed_after_reverification": true
+        },
+        {
+          "name": "raw-baseline-r3",
+          "policy": "med_power_with_dipm",
+          "policy_at_finish": "med_power_with_dipm",
+          "planned_groups": 900,
+          "completed_groups": 615,
+          "skipped_groups": 285,
+          "fsync_calls": 1845,
+          "bytes_per_write": 16384,
+          "elapsed_s": 30.027585231997364,
+          "process_cpu_s": 0.8495093019999995,
+          "started_unix_ns": 1793089569791290805,
+          "sync_p50_ms": 1.912896,
+          "sync_p95_ms": 39.841213,
+          "sync_p99_ms": 55.259525,
+          "sync_max_ms": 365.09694,
+          "over100ms": 3,
+          "files": [
+            {
+              "name": "raw-baseline-r3-0.bin",
+              "size": 10076160,
+              "sha256": "9f0c3382db3e56255d0508f7d22312e24e5561d2b889a961ba7e2610295c43b2",
+              "exact_payload": true
+            },
+            {
+              "name": "raw-baseline-r3-1.bin",
+              "size": 10076160,
+              "sha256": "9f0c3382db3e56255d0508f7d22312e24e5561d2b889a961ba7e2610295c43b2",
+              "exact_payload": true
+            },
+            {
+              "name": "raw-baseline-r3-2.bin",
+              "size": 10076160,
+              "sha256": "9f0c3382db3e56255d0508f7d22312e24e5561d2b889a961ba7e2610295c43b2",
+              "exact_payload": true
+            }
+          ],
+          "error": null,
+          "raw_path": "var/posting-io-lpm-20261027/raw-baseline-r3.json",
+          "raw_sha256": "804871cb131f040ab8ea8c1f56fe47caa0a71aba731eec5aa6fd9d31e30bd727",
+          "deterministic_payload_files_removed_after_reverification": true
+        },
+        {
+          "name": "raw-performance-r3",
+          "policy": "max_performance",
+          "policy_at_finish": "max_performance",
+          "planned_groups": 900,
+          "completed_groups": 900,
+          "skipped_groups": 0,
+          "fsync_calls": 2700,
+          "bytes_per_write": 16384,
+          "elapsed_s": 29.975171288999263,
+          "process_cpu_s": 1.0119494529999997,
+          "started_unix_ns": 1793089606345481772,
+          "sync_p50_ms": 1.847627,
+          "sync_p95_ms": 2.799059,
+          "sync_p99_ms": 3.024781,
+          "sync_max_ms": 30.669898,
+          "over100ms": 0,
+          "files": [
+            {
+              "name": "raw-performance-r3-0.bin",
+              "size": 14745600,
+              "sha256": "1f167fbb318035904bbbe0f1516bbb5b00de255635dcb56adbb6844e5e2a847a",
+              "exact_payload": true
+            },
+            {
+              "name": "raw-performance-r3-1.bin",
+              "size": 14745600,
+              "sha256": "1f167fbb318035904bbbe0f1516bbb5b00de255635dcb56adbb6844e5e2a847a",
+              "exact_payload": true
+            },
+            {
+              "name": "raw-performance-r3-2.bin",
+              "size": 14745600,
+              "sha256": "1f167fbb318035904bbbe0f1516bbb5b00de255635dcb56adbb6844e5e2a847a",
+              "exact_payload": true
+            }
+          ],
+          "error": null,
+          "raw_path": "var/posting-io-lpm-20261027/raw-performance-r3.json",
+          "raw_sha256": "30a118add49ca814fc409fab06eb7f1c875d29d1705833be2727b6043f64758d",
+          "deterministic_payload_files_removed_after_reverification": true
+        }
+      ],
+      "public_reads": {
+        "requests": 104,
+        "status_counts": {
+          "200": 104
+        },
+        "max_ms": 2012.8917260008166,
+        "p95_ms": 79.04846799647203,
+        "raw_sha256": "f6da3ad7af564b34882df5f4db34e0d9100e313f3a416faabe2ec4cedd21cbb8",
+        "peak_context": {
+          "phase": "transition",
+          "policy_at_start": "med_power_with_dipm",
+          "policy_at_finish": "med_power_with_dipm",
+          "elapsed_ms": 2012.8917260008166,
+          "status": 200
+        }
+      },
+      "artifacts": {
+        "hold-policy.sh": "95be49826a48bc5edf4392cf3c4e5d859d32f0af67f609119320f74fdbac0e69",
+        "holder.log": "1c4c6201bdacc4cce3b8d2e90f0b45ef01a35ee3198064e9769c2b75c90ab8e2",
+        "policy.py": "fab78b902fa65968637cb50ac2fc85c1c8b237bfc3c88a08185e1f5693f1dad9",
+        "rawbench.log": "c330f0fa665e67540a9a97de63b8f8d52c6484cb0ba933c78656a4f5421c8450",
+        "rawbench.py": "41ca8a7755af1c9aad9a42908df8b62f7cc7f897b9cf525e5eee8a593422db15",
+        "transitions.jsonl": "4921e40acf7d4a5d497b6d5375bf43e9ee60fee53b2eb1d7b43b4da6c69ca207"
+      }
+    },
+    "ncq": {
+      "config": {
+        "baseline_commit": "7b6b71bdeee7dbe72e7c822a127c0cc9c254d542",
+        "kernel": "6.12.90+deb12.1-amd64",
+        "policy_path": "/sys/devices/pci0000:00/0000:00:08.2/0000:05:00.1/ata1/host0/target0:0:0/0:0:0:0/queue_depth",
+        "device_path": "/sys/devices/pci0000:00/0000:00:08.2/0000:05:00.1/ata1/host0/target0:0:0/0:0:0:0",
+        "initial_policy": "32",
+        "write_cache": "write back",
+        "queue_depth": "32",
+        "scheduler": "none [mq-deadline]",
+        "runtime_image": "sha256:77ebef59ee4c5efd4b976307757d3945f84bcf3560806ad488c45ae2bbfd1adc",
+        "live": {
+          "id": "4eb5040aa05186ff06acc6e6393b9d6cbb1baaea7a0660059684ef213217741b",
+          "image": "sha256:77ebef59ee4c5efd4b976307757d3945f84bcf3560806ad488c45ae2bbfd1adc",
+          "started_at": "2026-10-26T22:20:15.04868303Z"
+        },
+        "sources": [
+          "https://docs.kernel.org/scsi/link_power_management_policy.html",
+          "https://raw.githubusercontent.com/torvalds/linux/v6.12/drivers/ata/libata-sata.c"
+        ],
+        "invariant_lpm": "med_power_with_dipm",
+        "experiment": "queue_depth 32 versus 1 (NCQ disabled by Linux ATA driver)"
+      },
+      "trials": [
+        {
+          "name": "raw-baseline-r1",
+          "policy": "32",
+          "policy_at_finish": "32",
+          "planned_groups": 900,
+          "completed_groups": 900,
+          "skipped_groups": 0,
+          "fsync_calls": 2700,
+          "bytes_per_write": 16384,
+          "elapsed_s": 29.972151561996725,
+          "process_cpu_s": 1.088211217,
+          "started_unix_ns": 1793089821021062674,
+          "sync_p50_ms": 1.832231,
+          "sync_p95_ms": 2.835513,
+          "sync_p99_ms": 3.789777,
+          "sync_max_ms": 31.305206,
+          "over100ms": 0,
+          "files": [
+            {
+              "name": "raw-baseline-r1-0.bin",
+              "size": 14745600,
+              "sha256": "1f167fbb318035904bbbe0f1516bbb5b00de255635dcb56adbb6844e5e2a847a",
+              "exact_payload": true
+            },
+            {
+              "name": "raw-baseline-r1-1.bin",
+              "size": 14745600,
+              "sha256": "1f167fbb318035904bbbe0f1516bbb5b00de255635dcb56adbb6844e5e2a847a",
+              "exact_payload": true
+            },
+            {
+              "name": "raw-baseline-r1-2.bin",
+              "size": 14745600,
+              "sha256": "1f167fbb318035904bbbe0f1516bbb5b00de255635dcb56adbb6844e5e2a847a",
+              "exact_payload": true
+            }
+          ],
+          "error": null,
+          "raw_path": "var/posting-io-ncq-20261027/raw-baseline-r1.json",
+          "raw_sha256": "3dd4ae8a96794e73c7326b827e59c1a7da86c1d6df28369c15b44c1e9214f7af",
+          "deterministic_payload_files_removed_after_reverification": true
+        },
+        {
+          "name": "raw-depth1-r1",
+          "policy": "1",
+          "policy_at_finish": "1",
+          "planned_groups": 900,
+          "completed_groups": 591,
+          "skipped_groups": 309,
+          "fsync_calls": 1773,
+          "bytes_per_write": 16384,
+          "elapsed_s": 30.07825514399883,
+          "process_cpu_s": 0.9189872609999998,
+          "started_unix_ns": 1793089856236404845,
+          "sync_p50_ms": 1.88844,
+          "sync_p95_ms": 40.546843,
+          "sync_p99_ms": 50.526876,
+          "sync_max_ms": 481.350887,
+          "over100ms": 3,
+          "files": [
+            {
+              "name": "raw-depth1-r1-0.bin",
+              "size": 9682944,
+              "sha256": "d56f23d8badeeb109b7ceed7be5f84f93c49ed2081983606bfefea64ab8155d8",
+              "exact_payload": true
+            },
+            {
+              "name": "raw-depth1-r1-1.bin",
+              "size": 9682944,
+              "sha256": "d56f23d8badeeb109b7ceed7be5f84f93c49ed2081983606bfefea64ab8155d8",
+              "exact_payload": true
+            },
+            {
+              "name": "raw-depth1-r1-2.bin",
+              "size": 9682944,
+              "sha256": "d56f23d8badeeb109b7ceed7be5f84f93c49ed2081983606bfefea64ab8155d8",
+              "exact_payload": true
+            }
+          ],
+          "error": null,
+          "raw_path": "var/posting-io-ncq-20261027/raw-depth1-r1.json",
+          "raw_sha256": "05f9f31376adb538d5ff8e52b45d8b13a636b8a8c5939ef37a0dd571213426d0",
+          "deterministic_payload_files_removed_after_reverification": true
+        },
+        {
+          "name": "raw-depth1-r2",
+          "policy": "1",
+          "policy_at_finish": "1",
+          "planned_groups": 900,
+          "completed_groups": 896,
+          "skipped_groups": 4,
+          "fsync_calls": 2688,
+          "bytes_per_write": 16384,
+          "elapsed_s": 29.97283370799414,
+          "process_cpu_s": 1.0418840420000004,
+          "started_unix_ns": 1793089891425443850,
+          "sync_p50_ms": 1.814315,
+          "sync_p95_ms": 2.78402,
+          "sync_p99_ms": 3.197307,
+          "sync_max_ms": 108.42634,
+          "over100ms": 1,
+          "files": [
+            {
+              "name": "raw-depth1-r2-0.bin",
+              "size": 14680064,
+              "sha256": "0f8b5371a07b5110e619ed0b53437863fe9c2d79a4ab1345bf83b4fc1bc302a0",
+              "exact_payload": true
+            },
+            {
+              "name": "raw-depth1-r2-1.bin",
+              "size": 14680064,
+              "sha256": "0f8b5371a07b5110e619ed0b53437863fe9c2d79a4ab1345bf83b4fc1bc302a0",
+              "exact_payload": true
+            },
+            {
+              "name": "raw-depth1-r2-2.bin",
+              "size": 14680064,
+              "sha256": "0f8b5371a07b5110e619ed0b53437863fe9c2d79a4ab1345bf83b4fc1bc302a0",
+              "exact_payload": true
+            }
+          ],
+          "error": null,
+          "raw_path": "var/posting-io-ncq-20261027/raw-depth1-r2.json",
+          "raw_sha256": "578f504c5f153930f3df626de13afc8f7f1a7061d411e3b58627a9417d8c26e8",
+          "deterministic_payload_files_removed_after_reverification": true
+        },
+        {
+          "name": "raw-baseline-r2",
+          "policy": "32",
+          "policy_at_finish": "32",
+          "planned_groups": 900,
+          "completed_groups": 900,
+          "skipped_groups": 0,
+          "fsync_calls": 2700,
+          "bytes_per_write": 16384,
+          "elapsed_s": 29.973424675001297,
+          "process_cpu_s": 1.0156243310000002,
+          "started_unix_ns": 1793089926588073171,
+          "sync_p50_ms": 1.867569,
+          "sync_p95_ms": 2.809098,
+          "sync_p99_ms": 3.042123,
+          "sync_max_ms": 30.825044,
+          "over100ms": 0,
+          "files": [
+            {
+              "name": "raw-baseline-r2-0.bin",
+              "size": 14745600,
+              "sha256": "1f167fbb318035904bbbe0f1516bbb5b00de255635dcb56adbb6844e5e2a847a",
+              "exact_payload": true
+            },
+            {
+              "name": "raw-baseline-r2-1.bin",
+              "size": 14745600,
+              "sha256": "1f167fbb318035904bbbe0f1516bbb5b00de255635dcb56adbb6844e5e2a847a",
+              "exact_payload": true
+            },
+            {
+              "name": "raw-baseline-r2-2.bin",
+              "size": 14745600,
+              "sha256": "1f167fbb318035904bbbe0f1516bbb5b00de255635dcb56adbb6844e5e2a847a",
+              "exact_payload": true
+            }
+          ],
+          "error": null,
+          "raw_path": "var/posting-io-ncq-20261027/raw-baseline-r2.json",
+          "raw_sha256": "732e7dcd18f40fbc4854484d4a93a1bf46025ecc41bd23d9dd6e9440575edca0",
+          "deterministic_payload_files_removed_after_reverification": true
+        },
+        {
+          "name": "raw-baseline-r3",
+          "policy": "32",
+          "policy_at_finish": "32",
+          "planned_groups": 900,
+          "completed_groups": 771,
+          "skipped_groups": 129,
+          "fsync_calls": 2313,
+          "bytes_per_write": 16384,
+          "elapsed_s": 30.035310167993885,
+          "process_cpu_s": 0.9827925010000005,
+          "started_unix_ns": 1793089961635089727,
+          "sync_p50_ms": 1.884,
+          "sync_p95_ms": 3.321698,
+          "sync_p99_ms": 50.233721,
+          "sync_max_ms": 430.925005,
+          "over100ms": 2,
+          "files": [
+            {
+              "name": "raw-baseline-r3-0.bin",
+              "size": 12632064,
+              "sha256": "50dd10dfe414345f9f195bff6e79a25100632bc49c8aafac708511df866a5f40",
+              "exact_payload": true
+            },
+            {
+              "name": "raw-baseline-r3-1.bin",
+              "size": 12632064,
+              "sha256": "50dd10dfe414345f9f195bff6e79a25100632bc49c8aafac708511df866a5f40",
+              "exact_payload": true
+            },
+            {
+              "name": "raw-baseline-r3-2.bin",
+              "size": 12632064,
+              "sha256": "50dd10dfe414345f9f195bff6e79a25100632bc49c8aafac708511df866a5f40",
+              "exact_payload": true
+            }
+          ],
+          "error": null,
+          "raw_path": "var/posting-io-ncq-20261027/raw-baseline-r3.json",
+          "raw_sha256": "0e6b01eee79923723d9ce95e15b20b822792604d0df14fb15454dc992ba772c0",
+          "deterministic_payload_files_removed_after_reverification": true
+        },
+        {
+          "name": "raw-depth1-r3",
+          "policy": "1",
+          "policy_at_finish": "1",
+          "planned_groups": 900,
+          "completed_groups": 736,
+          "skipped_groups": 164,
+          "fsync_calls": 2208,
+          "bytes_per_write": 16384,
+          "elapsed_s": 29.972437887001433,
+          "process_cpu_s": 0.9442510039999998,
+          "started_unix_ns": 1793089997935907170,
+          "sync_p50_ms": 1.886664,
+          "sync_p95_ms": 38.632379,
+          "sync_p99_ms": 41.015242,
+          "sync_max_ms": 132.33205,
+          "over100ms": 1,
+          "files": [
+            {
+              "name": "raw-depth1-r3-0.bin",
+              "size": 12058624,
+              "sha256": "d37ca5418ec5e402af7482b4ef69da89f0bb94dc73b44d6034c200b437018358",
+              "exact_payload": true
+            },
+            {
+              "name": "raw-depth1-r3-1.bin",
+              "size": 12058624,
+              "sha256": "d37ca5418ec5e402af7482b4ef69da89f0bb94dc73b44d6034c200b437018358",
+              "exact_payload": true
+            },
+            {
+              "name": "raw-depth1-r3-2.bin",
+              "size": 12058624,
+              "sha256": "d37ca5418ec5e402af7482b4ef69da89f0bb94dc73b44d6034c200b437018358",
+              "exact_payload": true
+            }
+          ],
+          "error": null,
+          "raw_path": "var/posting-io-ncq-20261027/raw-depth1-r3.json",
+          "raw_sha256": "7210a7116a74afd3c3eab5a7d3fe1c1e8fd840b13b682ef3a38b282158fdec40",
+          "deterministic_payload_files_removed_after_reverification": true
+        }
+      ],
+      "public_reads": {
+        "requests": 106,
+        "status_counts": {
+          "200": 106
+        },
+        "max_ms": 246.71819099603454,
+        "p95_ms": 65.8390460012015,
+        "raw_sha256": "de7685514af2779f9821a2881ecbbc054f2db142cd074ab427a2f062e877ccf8",
+        "peak_context": {
+          "phase": "before",
+          "policy_at_start": "32",
+          "policy_at_finish": "32",
+          "elapsed_ms": 246.71819099603454,
+          "status": 200
+        }
+      },
+      "artifacts": {
+        "hold-policy.sh": "3b94d157dc7a69c4da78cae7131745a85f9a7236f33785c1701bbefa6a0661d1",
+        "holder.log": "2661c14fe7a7b85b90928414260f296535b543ee560daafaacf9d18c6f45401c",
+        "policy.py": "a3ee12137322756bd483ec82505f6ffbc66e97d7051e56ffb0e5a7cda8065411",
+        "rawbench.log": "124c2a83bb226fe664e9333d6cb1ddf1fd5250fa79d43d158ea3d637aaa72eaf",
+        "rawbench.py": "593e030af422e8539a0af4e074c4ba8986d733551d5d349b00fb93ce26d6d73b",
+        "transitions.jsonl": "63efd5cb95f7ff3a4a7b3aaf952da6827a4e0f7292654c1ee3ff1fbd5f47270a"
+      }
+    },
+    "combined": {
+      "config": {
+        "baseline_commit": "7b6b71bdeee7dbe72e7c822a127c0cc9c254d542",
+        "kernel": "6.12.90+deb12.1-amd64",
+        "policy_path": "/sys/devices/pci0000:00/0000:00:08.2/0000:05:00.1/ata1/host0/scsi_host/host0/link_power_management_policy",
+        "device_path": "/sys/devices/pci0000:00/0000:00:08.2/0000:05:00.1/ata1/host0/target0:0:0/0:0:0:0",
+        "initial_policy": "med_power_with_dipm/32",
+        "write_cache": "write back",
+        "queue_depth": "32",
+        "scheduler": "none [mq-deadline]",
+        "runtime_image": "sha256:77ebef59ee4c5efd4b976307757d3945f84bcf3560806ad488c45ae2bbfd1adc",
+        "live": {
+          "id": "4eb5040aa05186ff06acc6e6393b9d6cbb1baaea7a0660059684ef213217741b",
+          "image": "sha256:77ebef59ee4c5efd4b976307757d3945f84bcf3560806ad488c45ae2bbfd1adc",
+          "started_at": "2026-10-26T22:20:15.04868303Z"
+        },
+        "sources": [
+          "https://docs.kernel.org/scsi/link_power_management_policy.html",
+          "https://raw.githubusercontent.com/torvalds/linux/v6.12/drivers/ata/libata-sata.c"
+        ],
+        "candidate": "max_performance/1",
+        "experiment": "combined SATA LPM and queue-depth controls",
+        "components": {
+          "lpm": "/sys/devices/pci0000:00/0000:00:08.2/0000:05:00.1/ata1/host0/scsi_host/host0/link_power_management_policy",
+          "ncq": "/sys/devices/pci0000:00/0000:00:08.2/0000:05:00.1/ata1/host0/target0:0:0/0:0:0:0/queue_depth"
+        }
+      },
+      "trials": [
+        {
+          "name": "raw-baseline-r1",
+          "policy": "med_power_with_dipm/32",
+          "policy_at_finish": "med_power_with_dipm/32",
+          "planned_groups": 900,
+          "completed_groups": 900,
+          "skipped_groups": 0,
+          "fsync_calls": 2700,
+          "bytes_per_write": 16384,
+          "elapsed_s": 29.972136233998754,
+          "process_cpu_s": 1.051911366,
+          "started_unix_ns": 1793090236505313590,
+          "sync_p50_ms": 1.824911,
+          "sync_p95_ms": 2.809242,
+          "sync_p99_ms": 3.129998,
+          "sync_max_ms": 30.249429,
+          "over100ms": 0,
+          "files": [
+            {
+              "name": "raw-baseline-r1-0.bin",
+              "size": 14745600,
+              "sha256": "1f167fbb318035904bbbe0f1516bbb5b00de255635dcb56adbb6844e5e2a847a",
+              "exact_payload": true
+            },
+            {
+              "name": "raw-baseline-r1-1.bin",
+              "size": 14745600,
+              "sha256": "1f167fbb318035904bbbe0f1516bbb5b00de255635dcb56adbb6844e5e2a847a",
+              "exact_payload": true
+            },
+            {
+              "name": "raw-baseline-r1-2.bin",
+              "size": 14745600,
+              "sha256": "1f167fbb318035904bbbe0f1516bbb5b00de255635dcb56adbb6844e5e2a847a",
+              "exact_payload": true
+            }
+          ],
+          "error": null,
+          "raw_path": "var/posting-io-combined-20261027/raw-baseline-r1.json",
+          "raw_sha256": "93c475b3c4e75eaa1cd782948ccc147d3165b5d5daf2b4cf877e23b948fe1e4b",
+          "deterministic_payload_files_removed_after_reverification": true
+        },
+        {
+          "name": "raw-combined-r1",
+          "policy": "max_performance/1",
+          "policy_at_finish": "max_performance/1",
+          "planned_groups": 900,
+          "completed_groups": 754,
+          "skipped_groups": 146,
+          "fsync_calls": 2262,
+          "bytes_per_write": 16384,
+          "elapsed_s": 30.00534086499829,
+          "process_cpu_s": 0.9446373969999999,
+          "started_unix_ns": 1793090271929200962,
+          "sync_p50_ms": 1.837326,
+          "sync_p95_ms": 37.937014,
+          "sync_p99_ms": 49.50193,
+          "sync_max_ms": 488.913865,
+          "over100ms": 2,
+          "files": [
+            {
+              "name": "raw-combined-r1-0.bin",
+              "size": 12353536,
+              "sha256": "24143eb534991ae90d4912c58e997f9f60f1481ffe4cade95b0c190f040bec1d",
+              "exact_payload": true
+            },
+            {
+              "name": "raw-combined-r1-1.bin",
+              "size": 12353536,
+              "sha256": "24143eb534991ae90d4912c58e997f9f60f1481ffe4cade95b0c190f040bec1d",
+              "exact_payload": true
+            },
+            {
+              "name": "raw-combined-r1-2.bin",
+              "size": 12353536,
+              "sha256": "24143eb534991ae90d4912c58e997f9f60f1481ffe4cade95b0c190f040bec1d",
+              "exact_payload": true
+            }
+          ],
+          "error": null,
+          "raw_path": "var/posting-io-combined-20261027/raw-combined-r1.json",
+          "raw_sha256": "dd62dbbaa3a794aaef739e3a41aac905687374dc78776b6372cdb873a7aff5ce",
+          "deterministic_payload_files_removed_after_reverification": true
+        },
+        {
+          "name": "raw-combined-r2",
+          "policy": "max_performance/1",
+          "policy_at_finish": "max_performance/1",
+          "planned_groups": 900,
+          "completed_groups": 731,
+          "skipped_groups": 169,
+          "fsync_calls": 2193,
+          "bytes_per_write": 16384,
+          "elapsed_s": 29.97230006000609,
+          "process_cpu_s": 0.958359357,
+          "started_unix_ns": 1793090307057628479,
+          "sync_p50_ms": 1.858627,
+          "sync_p95_ms": 38.872807,
+          "sync_p99_ms": 40.691896,
+          "sync_max_ms": 80.260072,
+          "over100ms": 0,
+          "files": [
+            {
+              "name": "raw-combined-r2-0.bin",
+              "size": 11976704,
+              "sha256": "a0fa27f7bb795977ea03d62b293615c6b266f6dc33f196d16b3c4d96beec1774",
+              "exact_payload": true
+            },
+            {
+              "name": "raw-combined-r2-1.bin",
+              "size": 11976704,
+              "sha256": "a0fa27f7bb795977ea03d62b293615c6b266f6dc33f196d16b3c4d96beec1774",
+              "exact_payload": true
+            },
+            {
+              "name": "raw-combined-r2-2.bin",
+              "size": 11976704,
+              "sha256": "a0fa27f7bb795977ea03d62b293615c6b266f6dc33f196d16b3c4d96beec1774",
+              "exact_payload": true
+            }
+          ],
+          "error": null,
+          "raw_path": "var/posting-io-combined-20261027/raw-combined-r2.json",
+          "raw_sha256": "2b56a42e9c8df7f6623c949ee92c457313df075f1f31645766cfe87bf0cf2827",
+          "deterministic_payload_files_removed_after_reverification": true
+        },
+        {
+          "name": "raw-baseline-r2",
+          "policy": "med_power_with_dipm/32",
+          "policy_at_finish": "med_power_with_dipm/32",
+          "planned_groups": 900,
+          "completed_groups": 900,
+          "skipped_groups": 0,
+          "fsync_calls": 2700,
+          "bytes_per_write": 16384,
+          "elapsed_s": 29.972157796997635,
+          "process_cpu_s": 1.0024232179999997,
+          "started_unix_ns": 1793090342306310169,
+          "sync_p50_ms": 1.839368,
+          "sync_p95_ms": 2.78802,
+          "sync_p99_ms": 3.017678,
+          "sync_max_ms": 30.854549,
+          "over100ms": 0,
+          "files": [
+            {
+              "name": "raw-baseline-r2-0.bin",
+              "size": 14745600,
+              "sha256": "1f167fbb318035904bbbe0f1516bbb5b00de255635dcb56adbb6844e5e2a847a",
+              "exact_payload": true
+            },
+            {
+              "name": "raw-baseline-r2-1.bin",
+              "size": 14745600,
+              "sha256": "1f167fbb318035904bbbe0f1516bbb5b00de255635dcb56adbb6844e5e2a847a",
+              "exact_payload": true
+            },
+            {
+              "name": "raw-baseline-r2-2.bin",
+              "size": 14745600,
+              "sha256": "1f167fbb318035904bbbe0f1516bbb5b00de255635dcb56adbb6844e5e2a847a",
+              "exact_payload": true
+            }
+          ],
+          "error": null,
+          "raw_path": "var/posting-io-combined-20261027/raw-baseline-r2.json",
+          "raw_sha256": "307bd467f14f01354bdeb561312fa43f95615d95e1cb2c2a4e9cb14d759d4127",
+          "deterministic_payload_files_removed_after_reverification": true
+        }
+      ],
+      "public_reads": {
+        "requests": 71,
+        "status_counts": {
+          "200": 71
+        },
+        "max_ms": 95.65651600132696,
+        "p95_ms": 77.27708500169683,
+        "raw_sha256": "0eb557f6329c8fb52e1135d5ab1426ef71577d769a4ab437f1eb3a1e08aaf1cd",
+        "peak_context": {
+          "phase": "raw-baseline-r1",
+          "policy_at_start": "med_power_with_dipm/32",
+          "policy_at_finish": "med_power_with_dipm/32",
+          "elapsed_ms": 95.65651600132696,
+          "status": 200
+        }
+      },
+      "artifacts": {
+        "lpm/hold-policy.sh": "95be49826a48bc5edf4392cf3c4e5d859d32f0af67f609119320f74fdbac0e69",
+        "lpm/holder.log": "52abc29c864f4380d72efa143790a9cb9e2f7956e16b1f12451ff9427f613aaa",
+        "lpm/policy.py": "1ce7113788c198794954fd7d96134a131c839366ac582b4a15c215cbe49b8c1a",
+        "lpm/transitions.jsonl": "1e8261451f8407404da2adb8ffef8c85bbe2e790960eb207decab0a03b796422",
+        "ncq/hold-policy.sh": "3b94d157dc7a69c4da78cae7131745a85f9a7236f33785c1701bbefa6a0661d1",
+        "ncq/holder.log": "230e23c9913dce7a1b6ff2a271a39b345387184aeb0d0331c5cd23dec0b669b3",
+        "ncq/policy.py": "a6a91737aa4ff5f6b9ad5835f1c60ec64bde2fabeef522ae58414fd308e7408c",
+        "ncq/transitions.jsonl": "1de36a53e8b89380bc32970e70052fd1ce5cfea87bc4731966ed9c84cfc5a604",
+        "policy.py": "7ae5f9e8e12dddba334ef856245d1bcb5a9d5aca7d17a3a79b8c9fbb1554f912",
+        "rawbench.log": "6410bc3718a3ecfb2d1b1017ac8acd1fdc75a3c9a9b9c2b8fd6d9bf099a8a9dc",
+        "rawbench.py": "93acca4d95bbc667a6dc3a585d9b0cc4bc51db290aca101d4a1f02c20e813035"
+      }
+    }
+  },
+  "totals": {
+    "planned_groups": 14400,
+    "completed_groups": 12867,
+    "skipped_groups": 1533,
+    "fsync_calls": 38601,
+    "over100ms": 14,
+    "trials": 16,
+    "public_gets": 281
+  },
+  "verification": {
+    "go_files_match_baseline": 1452,
+    "settings_restored": {
+      "lpm": "med_power_with_dipm",
+      "queue_depth": "32",
+      "write_cache": "write back",
+      "scheduler": "none [mq-deadline]"
+    },
+    "no_policy_holders_running": true,
+    "live": {
+      "id": "4eb5040aa05186ff06acc6e6393b9d6cbb1baaea7a0660059684ef213217741b",
+      "image": "sha256:77ebef59ee4c5efd4b976307757d3945f84bcf3560806ad488c45ae2bbfd1adc",
+      "started_at": "2026-10-26T22:20:15.04868303Z",
+      "health": "healthy",
+      "restarts": 0,
+      "oom": false
+    },
+    "workspace_device": {
+      "major": 8,
+      "minor": 2
+    },
+    "live_data_device": {
+      "major": 8,
+      "minor": 2,
+      "same_as_test_directory": true
+    },
+    "scsi_ioerr_cnt": "0x1dc",
+    "scsi_iodone_cnt": "0x29e486",
+    "payload_files_rehashed_and_removed": 48,
+    "kernel_log": {
+      "window_begin_monotonic": 37103.786146830294,
+      "window_end_monotonic": 38742.46383376,
+      "kernel_last_timestamp": 38673.950484,
+      "window_records": 13,
+      "storage_related_window_records": 0,
+      "storage_error_window_records": 0,
+      "raw_sha256": "cf6d73f52adb733c890a2bfb28aa5acc6263aebb704d6a928c04a3a921a4cf1b",
+      "scsi_counter_scope": "ioerr_cnt was read only after the tests; no before/after increment can be inferred"
+    },
+    "scsi_counter_scope": "Read only after tests; no before/after increment or causal attribution is available.",
+    "kernel_log_sha256": "af7916793f9198b5c474f0eb690f1569c852794c4411a4ea4d39d1064f6c99f5",
+    "settings_at_final_check": {
+      "lpm": "med_power_with_dipm",
+      "queue_depth": "32"
+    }
+  },
+  "notes": [
+    "All fsyncs remained enabled. No write-cache/scheduler changes, firmware flash, filesystem remount or application-image swap.",
+    "Settings affect the shared root SATA device and were temporarily changed for diagnostics, then restored; no permanent tuning added.",
+    "sysfs LPM readback reports requested target policy; no link-state/kernel-command trace was collected in this run.",
+    "Public-read observer is one GET every two seconds with normal TLS validation; no live posting/admin operations tested.",
+    "The task-specific deterministic payload files are validated by size/SHA256; this is not power-loss/media-failure proof.",
+    "No build/test/profile analysis overlapped timed raw I/O. Existing unrelated services remained active.",
+    "ioerr_cnt was sampled only after tests; its cumulative 476 is not a new-error count.",
+    "No ATA/sda/EXT4 storage error message was found in the collected kernel-log time window; this does not identify firmware/controller causality.",
+    "The 2.013s maximum public GET occurred in the transition/settling phase with med_power_with_dipm reported at start and finish; no causal attribution was made."
+  ],
+  "environment": {
+    "python": "3.11.2",
+    "cpu": "AMD Ryzen 5 5500U with Radeon Graphics"
+  },
+  "document_checks": {
+    "link_tests": 6,
+    "designcheck": "passed",
+    "render": [
+      {
+        "width": 390,
+        "new_measurement_link": true,
+        "no_body_overflow": true,
+        "data_link": true
+      },
+      {
+        "width": 1280,
+        "new_measurement_link": true,
+        "no_body_overflow": true,
+        "data_link": true
+      }
+    ],
+    "screenshots_viewed": true,
+    "scope": "local Markdown render, not hosted GitHub UI"
+  }
+}

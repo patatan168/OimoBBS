@@ -1,0 +1,27 @@
+{
+  "description": "署名付き運用記録の検証用。cache_bytes・cache_workersは過去記録の項目で、現行管理APIの入力には含めない。期待範囲は独立列挙する。",
+  "valid": [
+    {"maintenance":{"enabled":true,"max_seconds":5,"interval_seconds":300,"max_threads":5},"egress_budget_bits_per_second":80000000,"cache_bytes":16777216,"cache_workers":2,"reports":{"window_seconds":86400,"quorum":3,"stop_seconds":600}},
+    {"maintenance":{"enabled":false,"max_seconds":1,"interval_seconds":60,"max_threads":1},"egress_budget_bits_per_second":1000000,"cache_bytes":0,"cache_workers":1,"reports":{"window_seconds":60,"quorum":1,"stop_seconds":60}},
+    {"maintenance":{"enabled":true,"max_seconds":300,"interval_seconds":86400,"max_threads":1000},"egress_budget_bits_per_second":100000000000,"cache_bytes":134217728,"cache_workers":8,"reports":{"window_seconds":604800,"quorum":20,"stop_seconds":86400}},
+    {"maintenance":{"enabled":true,"max_seconds":5,"interval_seconds":300,"max_threads":5},"egress_budget_bits_per_second":80000000,"cache_bytes":0,"cache_workers":0,"reports":{"window_seconds":86400,"quorum":3,"stop_seconds":600}},
+    {"maintenance":{"enabled":true,"max_seconds":5,"interval_seconds":300,"max_threads":5},"egress_budget_bits_per_second":80000000,"cache_bytes":1073741824,"cache_workers":64,"reports":{"window_seconds":86400,"quorum":3,"stop_seconds":600}}
+  ],
+  "invalid_overrides": [
+    {"field":"cache_workers","value":4098},
+    {"field":"cache_workers","value":4097},
+    {"field":"cache_bytes","value":134217729},
+    {"field":"cache_bytes","value":1},
+    {"field":"egress_budget_bits_per_second","value":999999},
+    {"field":"egress_budget_bits_per_second","value":100000000001},
+    {"field":"egress_budget_bits_per_second","value":100001000000},
+    {"field":"quorum","value":0},
+    {"field":"quorum","value":21},
+    {"field":"window_seconds","value":604860},
+    {"field":"stop_seconds","value":86460},
+    {"field":"max_seconds","value":0},
+    {"field":"max_seconds","value":301},
+    {"field":"interval_seconds","value":59},
+    {"field":"max_threads","value":1001}
+  ]
+}

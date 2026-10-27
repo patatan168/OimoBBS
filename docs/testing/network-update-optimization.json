@@ -1,0 +1,438 @@
+{
+  "date": "2026-10-24",
+  "scope": "network classification update, captured fixed feeds, excludes external download time",
+  "baseline_commit": "1de0c16",
+  "dataset": {
+    "sources": 240,
+    "normal_rows": 22937,
+    "country_rows": 248783,
+    "japan_rows": 8777,
+    "vpn4_rows": 10942,
+    "vpn6_rows": 498,
+    "semantic_sha256": "f303839dbe408c6e9d7f099b9d94fd51e5fb9026720f5c6dbed9203907800405",
+    "fixture_set_sha256": "ad0f0918612d3226fb5899798335b6c874ccc18874f12486a6c7aeec0c66b003"
+  },
+  "results": {
+    "baseline-final": {
+      "prepare/1": {
+        "ms": 861.405,
+        "alloc_MiB": 276.36,
+        "trials": [
+          861.405,
+          867.215,
+          856.116
+        ]
+      },
+      "prepare/2": {
+        "ms": 804.29,
+        "alloc_MiB": 278.54,
+        "trials": [
+          810.691,
+          804.29,
+          781.774
+        ]
+      },
+      "prepare/4": {
+        "ms": 780.242,
+        "alloc_MiB": 280.72,
+        "trials": [
+          784.249,
+          780.242,
+          768.45
+        ]
+      },
+      "durable/1": {
+        "ms": 1442.064,
+        "alloc_MiB": 502.11,
+        "trials": [
+          1452.052,
+          1424.53,
+          1442.064
+        ]
+      },
+      "durable/2": {
+        "ms": 1314.89,
+        "alloc_MiB": 503.7,
+        "trials": [
+          1303.158,
+          1333.881,
+          1314.89
+        ]
+      },
+      "durable/4": {
+        "ms": 1273.554,
+        "alloc_MiB": 504.68,
+        "trials": [
+          1313.811,
+          1263.865,
+          1273.554
+        ]
+      }
+    },
+    "zstd-final": {
+      "prepare/1": {
+        "ms": 333.867,
+        "alloc_MiB": 153.01,
+        "trials": [
+          339.382,
+          330.845,
+          333.867
+        ]
+      },
+      "prepare/2": {
+        "ms": 296.275,
+        "alloc_MiB": 153.03,
+        "trials": [
+          240.885,
+          296.275,
+          366.069
+        ]
+      },
+      "prepare/4": {
+        "ms": 220.087,
+        "alloc_MiB": 153.13,
+        "trials": [
+          240.332,
+          220.087,
+          212.161
+        ]
+      },
+      "durable/1": {
+        "ms": 663.565,
+        "alloc_MiB": 282.58,
+        "trials": [
+          668.423,
+          650.993,
+          663.565
+        ]
+      },
+      "durable/2": {
+        "ms": 548.985,
+        "alloc_MiB": 283.48,
+        "trials": [
+          525.387,
+          548.985,
+          549.799
+        ]
+      },
+      "durable/4": {
+        "ms": 508.085,
+        "alloc_MiB": 282.55,
+        "trials": [
+          512.465,
+          500.551,
+          508.085
+        ]
+      },
+      "durable_cold/1": {
+        "ms": 747.042,
+        "alloc_MiB": 308.47,
+        "trials": [
+          751.149,
+          724.28,
+          747.042
+        ]
+      },
+      "durable_cold/2": {
+        "ms": 579.093,
+        "alloc_MiB": 308.48,
+        "trials": [
+          579.093,
+          584.541,
+          567.319
+        ]
+      },
+      "durable_cold/4": {
+        "ms": 544.957,
+        "alloc_MiB": 309.98,
+        "trials": [
+          551.898,
+          544.957,
+          540.282
+        ]
+      }
+    },
+    "zstd-parallel": {
+      "durable/1": {
+        "ms": 718.963,
+        "alloc_MiB": 257.92,
+        "trials": [
+          722.966,
+          692.562,
+          718.963
+        ]
+      },
+      "durable/2": {
+        "ms": 503.526,
+        "alloc_MiB": 258.41,
+        "trials": [
+          563.667,
+          503.526,
+          494.592
+        ]
+      },
+      "durable/4": {
+        "ms": 476.261,
+        "alloc_MiB": 258.7,
+        "trials": [
+          476.261,
+          486.686,
+          456.032
+        ]
+      },
+      "durable_cold/1": {
+        "ms": 701.721,
+        "alloc_MiB": 283.88,
+        "trials": [
+          698.741,
+          701.721,
+          726.693
+        ]
+      },
+      "durable_cold/2": {
+        "ms": 567.389,
+        "alloc_MiB": 284.45,
+        "trials": [
+          567.389,
+          579.386,
+          549.843
+        ]
+      },
+      "durable_cold/4": {
+        "ms": 494.327,
+        "alloc_MiB": 284.58,
+        "trials": [
+          538.668,
+          494.327,
+          482.472
+        ]
+      }
+    },
+    "final": {
+      "durable/1": {
+        "ms": 679.706,
+        "alloc_MiB": 263.62,
+        "trials_ms": [
+          697.009,
+          653.827,
+          679.706
+        ]
+      },
+      "durable/2": {
+        "ms": 495.464,
+        "alloc_MiB": 258.97,
+        "trials_ms": [
+          477.184,
+          503.895,
+          495.464
+        ]
+      },
+      "durable/4": {
+        "ms": 453.731,
+        "alloc_MiB": 258.03,
+        "trials_ms": [
+          452.309,
+          463.023,
+          453.731
+        ]
+      },
+      "durable_cold/1": {
+        "ms": 712.183,
+        "alloc_MiB": 289.5,
+        "trials_ms": [
+          718.954,
+          712.183,
+          687.693
+        ]
+      },
+      "durable_cold/2": {
+        "ms": 534.726,
+        "alloc_MiB": 284.3,
+        "trials_ms": [
+          542.692,
+          534.726,
+          532.865
+        ]
+      },
+      "durable_cold/4": {
+        "ms": 503.394,
+        "alloc_MiB": 284.81,
+        "trials_ms": [
+          525.658,
+          503.394,
+          500.531
+        ]
+      }
+    }
+  },
+  "memory": {
+    "mem128-after": {
+      "medians_ms": {
+        "durable": 461.315,
+        "durable_cold": 518.713
+      },
+      "trials_ms": {
+        "durable": [
+          468.460326,
+          458.11757,
+          461.315315
+        ],
+        "durable_cold": [
+          518.712918,
+          515.771728,
+          520.060121
+        ]
+      },
+      "process": {
+        "max_rss_kib": 148436,
+        "cpu_user_seconds": 27.441981,
+        "cpu_system_seconds": 2.30985,
+        "wall_seconds": 16.930305481888354
+      }
+    },
+    "mem128-before": {
+      "medians_ms": {
+        "durable": 1404.287
+      },
+      "trials_ms": {
+        "durable": [
+          1311.000609,
+          1448.682165,
+          1404.286888
+        ]
+      },
+      "process": {
+        "max_rss_kib": 153960,
+        "cpu_user_seconds": 29.712054,
+        "cpu_system_seconds": 1.852751,
+        "wall_seconds": 25.83474012138322
+      }
+    },
+    "mem512-after": {
+      "medians_ms": {
+        "durable": 449.02,
+        "durable_cold": 497.307
+      },
+      "trials_ms": {
+        "durable": [
+          449.020168,
+          447.498064,
+          456.127366
+        ],
+        "durable_cold": [
+          497.306804,
+          510.496055,
+          494.916543
+        ]
+      },
+      "process": {
+        "max_rss_kib": 212628,
+        "cpu_user_seconds": 24.874295,
+        "cpu_system_seconds": 1.789,
+        "wall_seconds": 16.47037980891764
+      }
+    },
+    "mem512-before": {
+      "medians_ms": {
+        "durable": 1277.812
+      },
+      "trials_ms": {
+        "durable": [
+          1277.811539,
+          1315.963879,
+          1267.704261
+        ]
+      },
+      "process": {
+        "max_rss_kib": 217400,
+        "cpu_user_seconds": 25.84135,
+        "cpu_system_seconds": 1.32788,
+        "wall_seconds": 22.491168807726353
+      }
+    }
+  },
+  "raw_runs": {
+    "before.txt": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/bootstrap\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkNetworkUpdate/prepare           \t       3\t 874243390 ns/op\t289900544 B/op\t  671935 allocs/op\nBenchmarkNetworkUpdate/prepare           \t       3\t 865387000 ns/op\t289865829 B/op\t  671905 allocs/op\nBenchmarkNetworkUpdate/prepare           \t       3\t 853314745 ns/op\t285534562 B/op\t  671898 allocs/op\nBenchmarkNetworkUpdate/prepare-2         \t       3\t 803401093 ns/op\t294447304 B/op\t  672000 allocs/op\nBenchmarkNetworkUpdate/prepare-2         \t       3\t 800117345 ns/op\t292149661 B/op\t  671976 allocs/op\nBenchmarkNetworkUpdate/prepare-2         \t       3\t 799436260 ns/op\t290059709 B/op\t  671972 allocs/op\nBenchmarkNetworkUpdate/prepare-4         \t       3\t 803161855 ns/op\t294493832 B/op\t  672056 allocs/op\nBenchmarkNetworkUpdate/prepare-4         \t       3\t 777723617 ns/op\t292443757 B/op\t  672045 allocs/op\nBenchmarkNetworkUpdate/prepare-4         \t       3\t 795063590 ns/op\t296652810 B/op\t  672068 allocs/op\nBenchmarkNetworkUpdate/durable           \t       3\t1463760847 ns/op\t526528786 B/op\t 1585649 allocs/op\nBenchmarkNetworkUpdate/durable           \t       3\t1450094196 ns/op\t526532448 B/op\t 1585680 allocs/op\nBenchmarkNetworkUpdate/durable           \t       3\t1434955748 ns/op\t526496125 B/op\t 1585674 allocs/op\nBenchmarkNetworkUpdate/durable-2         \t       3\t1288325393 ns/op\t527654141 B/op\t 1585746 allocs/op\nBenchmarkNetworkUpdate/durable-2         \t       3\t1286583207 ns/op\t528567549 B/op\t 1585755 allocs/op\nBenchmarkNetworkUpdate/durable-2         \t       3\t1810882953 ns/op\t523884973 B/op\t 1585736 allocs/op\nBenchmarkNetworkUpdate/durable-4         \t       3\t1298276961 ns/op\t530435178 B/op\t 1585821 allocs/op\nBenchmarkNetworkUpdate/durable-4         \t       3\t1291449202 ns/op\t527600488 B/op\t 1585783 allocs/op\nBenchmarkNetworkUpdate/durable-4         \t       3\t1302048208 ns/op\t527367645 B/op\t 1585782 allocs/op\nPASS\nok  \toimobbs/internal/bootstrap\t125.100s\n",
+    "after-first.txt": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/bootstrap\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkNetworkUpdate/prepare           \t       3\t 675317651 ns/op\t178738490 B/op\t  670184 allocs/op\nBenchmarkNetworkUpdate/prepare           \t       3\t 667042060 ns/op\t179243653 B/op\t  670182 allocs/op\nBenchmarkNetworkUpdate/prepare           \t       3\t 672210902 ns/op\t179194645 B/op\t  670183 allocs/op\nBenchmarkNetworkUpdate/prepare-2         \t       3\t 577487503 ns/op\t182085602 B/op\t  670254 allocs/op\nBenchmarkNetworkUpdate/prepare-2         \t       3\t 574835360 ns/op\t179985096 B/op\t  670212 allocs/op\nBenchmarkNetworkUpdate/prepare-2         \t       3\t 568952400 ns/op\t182133077 B/op\t  670227 allocs/op\nBenchmarkNetworkUpdate/prepare-4         \t       3\t 552810862 ns/op\t184398237 B/op\t  670301 allocs/op\nBenchmarkNetworkUpdate/prepare-4         \t       3\t 545725222 ns/op\t184338861 B/op\t  670306 allocs/op\nBenchmarkNetworkUpdate/prepare-4         \t       3\t 538213427 ns/op\t184448312 B/op\t  670285 allocs/op\nBenchmarkNetworkUpdate/durable           \t       3\t1168829453 ns/op\t408415109 B/op\t 1583777 allocs/op\nBenchmarkNetworkUpdate/durable           \t       3\t1153675588 ns/op\t408087440 B/op\t 1583797 allocs/op\nBenchmarkNetworkUpdate/durable           \t       3\t1164154281 ns/op\t408497133 B/op\t 1583799 allocs/op\nBenchmarkNetworkUpdate/durable-2         \t       3\t1038499896 ns/op\t410433832 B/op\t 1583886 allocs/op\nBenchmarkNetworkUpdate/durable-2         \t       3\t1105711706 ns/op\t409621045 B/op\t 1583897 allocs/op\nBenchmarkNetworkUpdate/durable-2         \t       3\t 970357650 ns/op\t410403053 B/op\t 1583888 allocs/op\nBenchmarkNetworkUpdate/durable-4         \t       3\t 940907490 ns/op\t410417549 B/op\t 1583954 allocs/op\nBenchmarkNetworkUpdate/durable-4         \t       3\t 940573161 ns/op\t409033469 B/op\t 1583948 allocs/op\nBenchmarkNetworkUpdate/durable-4         \t       3\t 959045910 ns/op\t410798485 B/op\t 1583950 allocs/op\nPASS\nok  \toimobbs/internal/bootstrap\t93.745s\n",
+    "after.txt": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/bootstrap\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkNetworkUpdate/prepare           \t       3\t 324592076 ns/op\t160251520 B/op\t  637045 allocs/op\nBenchmarkNetworkUpdate/prepare           \t       3\t 329383245 ns/op\t151191074 B/op\t  637047 allocs/op\nBenchmarkNetworkUpdate/prepare           \t       3\t 326375420 ns/op\t160169520 B/op\t  637043 allocs/op\nBenchmarkNetworkUpdate/prepare-2         \t       3\t 231895432 ns/op\t155658688 B/op\t  637111 allocs/op\nBenchmarkNetworkUpdate/prepare-2         \t       3\t 231885936 ns/op\t160257485 B/op\t  637065 allocs/op\nBenchmarkNetworkUpdate/prepare-2         \t       3\t 233893525 ns/op\t146761080 B/op\t  637068 allocs/op\nBenchmarkNetworkUpdate/prepare-4         \t       3\t 207220463 ns/op\t160125533 B/op\t  637158 allocs/op\nBenchmarkNetworkUpdate/prepare-4         \t       3\t 213523520 ns/op\t160199413 B/op\t  637161 allocs/op\nBenchmarkNetworkUpdate/prepare-4         \t       3\t 220185888 ns/op\t160119485 B/op\t  637168 allocs/op\nBenchmarkNetworkUpdate/durable           \t       3\t 702947148 ns/op\t302469522 B/op\t 1421528 allocs/op\nBenchmarkNetworkUpdate/durable           \t       3\t 696795124 ns/op\t302637005 B/op\t 1421539 allocs/op\nBenchmarkNetworkUpdate/durable           \t       3\t 680547055 ns/op\t302551133 B/op\t 1421503 allocs/op\nBenchmarkNetworkUpdate/durable-2         \t       3\t 536813391 ns/op\t303114624 B/op\t 1421606 allocs/op\nBenchmarkNetworkUpdate/durable-2         \t       3\t 541730194 ns/op\t299789626 B/op\t 1421587 allocs/op\nBenchmarkNetworkUpdate/durable-2         \t       3\t 571093117 ns/op\t303039400 B/op\t 1421612 allocs/op\nBenchmarkNetworkUpdate/durable-4         \t       3\t 511599152 ns/op\t302989608 B/op\t 1421670 allocs/op\nBenchmarkNetworkUpdate/durable-4         \t       3\t 505183188 ns/op\t303075800 B/op\t 1421670 allocs/op\nBenchmarkNetworkUpdate/durable-4         \t       3\t 496602343 ns/op\t303148944 B/op\t 1421657 allocs/op\nBenchmarkNetworkUpdate/durable_cold      \t       3\t1095236745 ns/op\t325160512 B/op\t 1453424 allocs/op\nBenchmarkNetworkUpdate/durable_cold      \t       3\t1187918424 ns/op\t325128322 B/op\t 1453416 allocs/op\nBenchmarkNetworkUpdate/durable_cold      \t       3\t1149102683 ns/op\t325686957 B/op\t 1453432 allocs/op\nBenchmarkNetworkUpdate/durable_cold-2    \t       3\t1054136791 ns/op\t325427754 B/op\t 1453497 allocs/op\nBenchmarkNetworkUpdate/durable_cold-2    \t       3\t1053326975 ns/op\t325934650 B/op\t 1453486 allocs/op\nBenchmarkNetworkUpdate/durable_cold-2    \t       3\t1013181747 ns/op\t326022184 B/op\t 1453508 allocs/op\nBenchmarkNetworkUpdate/durable_cold-4    \t       3\t1067998114 ns/op\t326293957 B/op\t 1453548 allocs/op\nBenchmarkNetworkUpdate/durable_cold-4    \t       3\t 990405667 ns/op\t326214218 B/op\t 1453556 allocs/op\nBenchmarkNetworkUpdate/durable_cold-4    \t       3\t1000577104 ns/op\t325628440 B/op\t 1453568 allocs/op\nPASS\nok  \toimobbs/internal/bootstrap\t105.307s\n",
+    "baseline-final.txt": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/bootstrap\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkNetworkUpdate/prepare           \t       3\t 861405180 ns/op\t289779818 B/op\t  671904 allocs/op\nBenchmarkNetworkUpdate/prepare           \t       3\t 867215418 ns/op\t289779770 B/op\t  671902 allocs/op\nBenchmarkNetworkUpdate/prepare           \t       3\t 856115598 ns/op\t289812650 B/op\t  671905 allocs/op\nBenchmarkNetworkUpdate/prepare-2         \t       3\t 810691021 ns/op\t294258578 B/op\t  672004 allocs/op\nBenchmarkNetworkUpdate/prepare-2         \t       3\t 804289664 ns/op\t289803186 B/op\t  671979 allocs/op\nBenchmarkNetworkUpdate/prepare-2         \t       3\t 781773611 ns/op\t292065693 B/op\t  671987 allocs/op\nBenchmarkNetworkUpdate/prepare-4         \t       3\t 784248782 ns/op\t294447434 B/op\t  672040 allocs/op\nBenchmarkNetworkUpdate/prepare-4         \t       3\t 780241545 ns/op\t292267240 B/op\t  672037 allocs/op\nBenchmarkNetworkUpdate/prepare-4         \t       3\t 768450175 ns/op\t294352325 B/op\t  672030 allocs/op\nBenchmarkNetworkUpdate/durable           \t       3\t1452052475 ns/op\t526086709 B/op\t 1585675 allocs/op\nBenchmarkNetworkUpdate/durable           \t       3\t1424530247 ns/op\t526612632 B/op\t 1585678 allocs/op\nBenchmarkNetworkUpdate/durable           \t       3\t1442064398 ns/op\t526496178 B/op\t 1585649 allocs/op\nBenchmarkNetworkUpdate/durable-2         \t       3\t1303158446 ns/op\t528167405 B/op\t 1585766 allocs/op\nBenchmarkNetworkUpdate/durable-2         \t       3\t1333881177 ns/op\t530296368 B/op\t 1585785 allocs/op\nBenchmarkNetworkUpdate/durable-2         \t       3\t1314890036 ns/op\t527336837 B/op\t 1585756 allocs/op\nBenchmarkNetworkUpdate/durable-4         \t       3\t1313811086 ns/op\t529647597 B/op\t 1585818 allocs/op\nBenchmarkNetworkUpdate/durable-4         \t       3\t1263865267 ns/op\t529199538 B/op\t 1585814 allocs/op\nBenchmarkNetworkUpdate/durable-4         \t       3\t1273553514 ns/op\t529177368 B/op\t 1585810 allocs/op\nPASS\n",
+    "zstd-final.txt": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/bootstrap\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkNetworkUpdate/prepare           \t       3\t 339381875 ns/op\t151639944 B/op\t  637081 allocs/op\nBenchmarkNetworkUpdate/prepare           \t       3\t 330844753 ns/op\t160527165 B/op\t  637018 allocs/op\nBenchmarkNetworkUpdate/prepare           \t       3\t 333866816 ns/op\t160445322 B/op\t  637041 allocs/op\nBenchmarkNetworkUpdate/prepare-2         \t       3\t 240884647 ns/op\t160548192 B/op\t  637109 allocs/op\nBenchmarkNetworkUpdate/prepare-2         \t       3\t 296274579 ns/op\t160463853 B/op\t  637095 allocs/op\nBenchmarkNetworkUpdate/prepare-2         \t       3\t 366068651 ns/op\t160462069 B/op\t  637111 allocs/op\nBenchmarkNetworkUpdate/prepare-4         \t       3\t 240332050 ns/op\t160491384 B/op\t  637180 allocs/op\nBenchmarkNetworkUpdate/prepare-4         \t       3\t 220087273 ns/op\t160570672 B/op\t  637171 allocs/op\nBenchmarkNetworkUpdate/prepare-4         \t       3\t 212160560 ns/op\t160642848 B/op\t  637151 allocs/op\nBenchmarkNetworkUpdate/durable           \t       3\t 668422637 ns/op\t296308400 B/op\t 1421067 allocs/op\nBenchmarkNetworkUpdate/durable           \t       3\t 650993248 ns/op\t296306197 B/op\t 1421038 allocs/op\nBenchmarkNetworkUpdate/durable           \t       3\t 663564811 ns/op\t296226400 B/op\t 1421092 allocs/op\nBenchmarkNetworkUpdate/durable-2         \t       3\t 525387353 ns/op\t297327738 B/op\t 1421178 allocs/op\nBenchmarkNetworkUpdate/durable-2         \t       3\t 548984825 ns/op\t296328056 B/op\t 1421151 allocs/op\nBenchmarkNetworkUpdate/durable-2         \t       3\t 549798559 ns/op\t297245424 B/op\t 1421178 allocs/op\nBenchmarkNetworkUpdate/durable-4         \t       3\t 512464704 ns/op\t296774970 B/op\t 1421224 allocs/op\nBenchmarkNetworkUpdate/durable-4         \t       3\t 500551143 ns/op\t296271893 B/op\t 1421214 allocs/op\nBenchmarkNetworkUpdate/durable-4         \t       3\t 508085183 ns/op\t295138224 B/op\t 1421243 allocs/op\nBenchmarkNetworkUpdate/durable_cold      \t       3\t 751149235 ns/op\t323452906 B/op\t 1453420 allocs/op\nBenchmarkNetworkUpdate/durable_cold      \t       3\t 724280355 ns/op\t323448989 B/op\t 1453411 allocs/op\nBenchmarkNetworkUpdate/durable_cold      \t       3\t 747042303 ns/op\t323531080 B/op\t 1453413 allocs/op\nBenchmarkNetworkUpdate/durable_cold-2    \t       3\t 579093147 ns/op\t323468906 B/op\t 1453475 allocs/op\nBenchmarkNetworkUpdate/durable_cold-2    \t       3\t 584540739 ns/op\t321722189 B/op\t 1453484 allocs/op\nBenchmarkNetworkUpdate/durable_cold-2    \t       3\t 567318699 ns/op\t324215680 B/op\t 1453490 allocs/op\nBenchmarkNetworkUpdate/durable_cold-4    \t       3\t 551898273 ns/op\t325466568 B/op\t 1453562 allocs/op\nBenchmarkNetworkUpdate/durable_cold-4    \t       3\t 544957441 ns/op\t325033522 B/op\t 1453552 allocs/op\nBenchmarkNetworkUpdate/durable_cold-4    \t       3\t 540282282 ns/op\t324019317 B/op\t 1453548 allocs/op\nPASS\n",
+    "zstd-parallel.txt": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/bootstrap\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkNetworkUpdate/durable           \t       3\t 722965863 ns/op\t270451621 B/op\t 1352240 allocs/op\nBenchmarkNetworkUpdate/durable           \t       3\t 692562188 ns/op\t270445605 B/op\t 1352174 allocs/op\nBenchmarkNetworkUpdate/durable           \t       3\t 718963230 ns/op\t270527589 B/op\t 1352176 allocs/op\nBenchmarkNetworkUpdate/durable-2         \t       3\t 563666914 ns/op\t270965957 B/op\t 1352310 allocs/op\nBenchmarkNetworkUpdate/durable-2         \t       3\t 503525721 ns/op\t270458021 B/op\t 1352278 allocs/op\nBenchmarkNetworkUpdate/durable-2         \t       3\t 494591620 ns/op\t271045845 B/op\t 1352302 allocs/op\nBenchmarkNetworkUpdate/durable-4         \t       3\t 476261037 ns/op\t271927754 B/op\t 1352371 allocs/op\nBenchmarkNetworkUpdate/durable-4         \t       3\t 486686331 ns/op\t271264573 B/op\t 1352385 allocs/op\nBenchmarkNetworkUpdate/durable-4         \t       3\t 456031772 ns/op\t270977301 B/op\t 1352363 allocs/op\nBenchmarkNetworkUpdate/durable_cold      \t       3\t 698741065 ns/op\t297670674 B/op\t 1384550 allocs/op\nBenchmarkNetworkUpdate/durable_cold      \t       3\t 701721266 ns/op\t297668410 B/op\t 1384518 allocs/op\nBenchmarkNetworkUpdate/durable_cold      \t       3\t 726692836 ns/op\t297671952 B/op\t 1384527 allocs/op\nBenchmarkNetworkUpdate/durable_cold-2    \t       3\t 567389349 ns/op\t297679349 B/op\t 1384615 allocs/op\nBenchmarkNetworkUpdate/durable_cold-2    \t       3\t 579386394 ns/op\t298271338 B/op\t 1384634 allocs/op\nBenchmarkNetworkUpdate/durable_cold-2    \t       3\t 549843299 ns/op\t298622893 B/op\t 1384610 allocs/op\nBenchmarkNetworkUpdate/durable_cold-4    \t       3\t 538667640 ns/op\t298398552 B/op\t 1384711 allocs/op\nBenchmarkNetworkUpdate/durable_cold-4    \t       3\t 494327426 ns/op\t299157112 B/op\t 1384691 allocs/op\nBenchmarkNetworkUpdate/durable_cold-4    \t       3\t 482471745 ns/op\t297862792 B/op\t 1384687 allocs/op\nPASS\n",
+    "final-bench.txt": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/bootstrap\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkNetworkUpdate/durable           \t       3\t 697009026 ns/op\t276511992 B/op\t 1352231 allocs/op\nBenchmarkNetworkUpdate/durable           \t       3\t 653827363 ns/op\t276429704 B/op\t 1352228 allocs/op\nBenchmarkNetworkUpdate/durable           \t       3\t 679706387 ns/op\t276429392 B/op\t 1352202 allocs/op\nBenchmarkNetworkUpdate/durable-2         \t       3\t 477184406 ns/op\t271457141 B/op\t 1352266 allocs/op\nBenchmarkNetworkUpdate/durable-2         \t       3\t 503894554 ns/op\t271545074 B/op\t 1352324 allocs/op\nBenchmarkNetworkUpdate/durable-2         \t       3\t 495464403 ns/op\t272552880 B/op\t 1352299 allocs/op\nBenchmarkNetworkUpdate/durable-4         \t       3\t 452309213 ns/op\t271979045 B/op\t 1352388 allocs/op\nBenchmarkNetworkUpdate/durable-4         \t       3\t 463022733 ns/op\t269798032 B/op\t 1352397 allocs/op\nBenchmarkNetworkUpdate/durable-4         \t       3\t 453730539 ns/op\t270568280 B/op\t 1352369 allocs/op\nBenchmarkNetworkUpdate/durable_cold      \t       3\t 718953555 ns/op\t303732677 B/op\t 1384547 allocs/op\nBenchmarkNetworkUpdate/durable_cold      \t       3\t 712182720 ns/op\t303565048 B/op\t 1384511 allocs/op\nBenchmarkNetworkUpdate/durable_cold      \t       3\t 687693382 ns/op\t303564688 B/op\t 1384484 allocs/op\nBenchmarkNetworkUpdate/durable_cold-2    \t       3\t 542692355 ns/op\t298468336 B/op\t 1384633 allocs/op\nBenchmarkNetworkUpdate/durable_cold-2    \t       3\t 534725681 ns/op\t298113850 B/op\t 1384604 allocs/op\nBenchmarkNetworkUpdate/durable_cold-2    \t       3\t 532865440 ns/op\t297685720 B/op\t 1384592 allocs/op\nBenchmarkNetworkUpdate/durable_cold-4    \t       3\t 525657530 ns/op\t298169213 B/op\t 1384712 allocs/op\nBenchmarkNetworkUpdate/durable_cold-4    \t       3\t 503394218 ns/op\t298754013 B/op\t 1384734 allocs/op\nBenchmarkNetworkUpdate/durable_cold-4    \t       3\t 500531240 ns/op\t298647426 B/op\t 1384700 allocs/op\nPASS\n",
+    "mem128-before.txt": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/bootstrap\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkNetworkUpdate/durable-4         \t       3\t1311000609 ns/op\t529912136 B/op\t 1585859 allocs/op\nBenchmarkNetworkUpdate/durable-4         \t       3\t1448682165 ns/op\t533161976 B/op\t 1585889 allocs/op\nBenchmarkNetworkUpdate/durable-4         \t       3\t1404286888 ns/op\t530619674 B/op\t 1585861 allocs/op\nPASS\n\nPROCESS {\"max_rss_kib\": 153960, \"cpu_user_seconds\": 29.712054, \"cpu_system_seconds\": 1.852751, \"wall_seconds\": 25.83474012138322}\n",
+    "mem128-after.txt": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/bootstrap\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkNetworkUpdate/durable-4         \t       3\t 468460326 ns/op\t272033512 B/op\t 1352418 allocs/op\nBenchmarkNetworkUpdate/durable-4         \t       3\t 458117570 ns/op\t268342533 B/op\t 1352413 allocs/op\nBenchmarkNetworkUpdate/durable-4         \t       3\t 461315315 ns/op\t270992424 B/op\t 1352406 allocs/op\nBenchmarkNetworkUpdate/durable_cold-4    \t       3\t 518712918 ns/op\t298649082 B/op\t 1384742 allocs/op\nBenchmarkNetworkUpdate/durable_cold-4    \t       3\t 515771728 ns/op\t298226898 B/op\t 1384742 allocs/op\nBenchmarkNetworkUpdate/durable_cold-4    \t       3\t 520060121 ns/op\t298820578 B/op\t 1384739 allocs/op\nPASS\n\nPROCESS {\"max_rss_kib\": 148436, \"cpu_user_seconds\": 27.441981, \"cpu_system_seconds\": 2.30985, \"wall_seconds\": 16.930305481888354}\n",
+    "mem512-before.txt": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/bootstrap\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkNetworkUpdate/durable-4         \t       3\t1277811539 ns/op\t525574837 B/op\t 1585814 allocs/op\nBenchmarkNetworkUpdate/durable-4         \t       3\t1315963879 ns/op\t530016226 B/op\t 1585809 allocs/op\nBenchmarkNetworkUpdate/durable-4         \t       3\t1267704261 ns/op\t527532221 B/op\t 1585794 allocs/op\nPASS\n\nPROCESS {\"max_rss_kib\": 217400, \"cpu_user_seconds\": 25.84135, \"cpu_system_seconds\": 1.32788, \"wall_seconds\": 22.491168807726353}\n",
+    "mem512-after.txt": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/bootstrap\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkNetworkUpdate/durable-4         \t       3\t 449020168 ns/op\t269261920 B/op\t 1352401 allocs/op\nBenchmarkNetworkUpdate/durable-4         \t       3\t 447498064 ns/op\t270646746 B/op\t 1352363 allocs/op\nBenchmarkNetworkUpdate/durable-4         \t       3\t 456127366 ns/op\t270487400 B/op\t 1352368 allocs/op\nBenchmarkNetworkUpdate/durable_cold-4    \t       3\t 497306804 ns/op\t299128581 B/op\t 1384701 allocs/op\nBenchmarkNetworkUpdate/durable_cold-4    \t       3\t 510496055 ns/op\t297701946 B/op\t 1384681 allocs/op\nBenchmarkNetworkUpdate/durable_cold-4    \t       3\t 494916543 ns/op\t298397034 B/op\t 1384710 allocs/op\nPASS\n\nPROCESS {\"max_rss_kib\": 212628, \"cpu_user_seconds\": 24.874295, \"cpu_system_seconds\": 1.789, \"wall_seconds\": 16.47037980891764}\n",
+    "zstd-diagnostic.txt": "=== RUN   TestNetworkCompressionDiagnostic\n=== RUN   TestNetworkCompressionDiagnostic/1\n    network_compression_diagnostic_test.go:29: level=1 size=575994\n=== RUN   TestNetworkCompressionDiagnostic/4\n    network_compression_diagnostic_test.go:29: level=4 size=506072\n=== RUN   TestNetworkCompressionDiagnostic/6\n    network_compression_diagnostic_test.go:29: level=6 size=468938\n=== RUN   TestNetworkCompressionDiagnostic/9\n    network_compression_diagnostic_test.go:29: level=9 size=424214\n=== NAME  TestNetworkCompressionDiagnostic\n    network_compression_diagnostic_test.go:41: zstd hash=0 size=540412 elapsed=18.965331ms\n    network_compression_diagnostic_test.go:41: zstd hash=4 size=557453 elapsed=18.916858ms\n    network_compression_diagnostic_test.go:41: zstd hash=5 size=544348 elapsed=19.373442ms\n    network_compression_diagnostic_test.go:41: zstd hash=6 size=535440 elapsed=17.835709ms\n    network_compression_diagnostic_test.go:41: zstd hash=7 size=531517 elapsed=16.051838ms\n--- PASS: TestNetworkCompressionDiagnostic (0.97s)\n    --- PASS: TestNetworkCompressionDiagnostic/1 (0.01s)\n    --- PASS: TestNetworkCompressionDiagnostic/4 (0.02s)\n    --- PASS: TestNetworkCompressionDiagnostic/6 (0.02s)\n    --- PASS: TestNetworkCompressionDiagnostic/9 (0.31s)\nPASS\nok  \toimobbs/internal/bootstrap\t0.991s\n"
+  },
+  "validation": {
+    "bootstrap_final": "PASS 640.085s",
+    "race_network_with_recorded_fixtures": "PASS 165.672s",
+    "race_store": "PASS 30.515s",
+    "race_strictjson": "PASS 8.067s",
+    "race_identity": "PASS 1.188s",
+    "extended_management_saved_bytes": 1418342,
+    "vet": "PASS",
+    "designcheck": "PASS",
+    "initial_full_run_failures": [
+      "DNS settings reader expectation 92 to 102",
+      "special-network reader expectation 92 to 102"
+    ],
+    "all_other_product_packages": "PASS; bootstrap rerun after reader assertion updates"
+  },
+  "deployment": {
+    "image": "oimobbs:network-zstd-only-20261024",
+    "image_id": "sha256:908fb28818376db22b8f2b53aadb8ace42734407d7fa7b98a6929fea48661772",
+    "container": "5e21773ec0d435ebeb23194d171f0910f1cf4004374f93b4ffc97cd4dc8e4243",
+    "health": "healthy",
+    "restarts": 0,
+    "oom": false,
+    "data_volume": "oimobbs-network-zstd-only-20261024",
+    "old_data_volume_retained": "oimobbs-network-update-zstd-20261024",
+    "cutover_to_healthy_seconds": 139.74,
+    "control_rows_unchanged": 57,
+    "protected_files_unchanged": 73,
+    "public_routes_verified": 11,
+    "edge_and_certificates_unchanged": true,
+    "cpu_memory_limits_preserved": true,
+    "authenticated_admin_verified": false,
+    "admin_origin_login_and_unauthenticated_api_verified": true,
+    "temporary_migration_source_executables_and_images_removed": true,
+    "source_commit": "1674e255ae73976e8de5419064cffd347dedc139",
+    "saved_gzip_compatibility": "removed from current source and deployed image",
+    "migration": {
+      "network_values_reencoded": 72,
+      "canonical_control_frames_reencoded": 241,
+      "source_hash_references_rebound": 174,
+      "authenticated_anchors_rebound": 3,
+      "files_changed": 35,
+      "current_site_and_board_rows_unchanged": true,
+      "all_other_files_unchanged": true,
+      "full_posting_and_audit_reopen": true,
+      "total_seconds": 105.96
+    }
+  },
+  "strict_codec_validation": {
+    "legacy_saved_gzip": "rejected, including valid old rows/config/country/prefix and zstd-tag spoof",
+    "bootstrap_full_seconds": 628.865,
+    "network_race_seconds": 120.354,
+    "migration_rehearsal": {
+      "network_values_reencoded": 72,
+      "source_hash_references_rebound": 174,
+      "authenticated_anchors_rebound": 3,
+      "files_changed": 35,
+      "current_site_board_rows_unchanged": true,
+      "all_other_file_content_and_modes_unchanged": true,
+      "full_posting_and_audit_reopen": true,
+      "strict_rejects_unconverted_without_file_changes": true,
+      "strict_service_startup": true,
+      "compatible_rollback_startup": true
+    },
+    "idempotence": {
+      "files_changed": 0,
+      "network_values_reencoded": 0,
+      "source_hash_references_rebound": 0,
+      "authenticated_anchors_rebound": 0
+    }
+  }
+}

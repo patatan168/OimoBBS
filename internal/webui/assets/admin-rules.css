@@ -1,0 +1,45 @@
+/* 投稿規制で使う条件説明。 */
+.policy-guide { padding:20px; border:1px solid var(--line); border-radius:12px; background:var(--paper); }
+.policy-guide h2 { margin-top:0; }
+/* 登録済み規制は表で比較し、狭い画面では同じ行をカードに整える。 */
+.rule-list { margin-block:28px; }
+.rule-status-tabs { display:flex;gap:8px;flex-wrap:wrap;margin-block:16px; }
+.rule-status-tabs a { display:flex;gap:8px;align-items:center;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--paper);text-decoration:none; }
+.rule-status-tabs a[aria-current] { color:var(--ink);border-color:currentColor;font-weight:700; }
+.rule-status-tabs strong { font-variant-numeric:tabular-nums; }
+.admin .rule-list-search { display:flex;align-items:end;gap:12px;flex-wrap:wrap;padding:16px;margin-block:16px; }
+.rule-list-search label { flex:1;min-width:180px; }
+.rule-list-search input { width:100%; }
+.rule-table { display:table;overflow:visible;width:100%;table-layout:fixed;border-collapse:collapse;background:var(--paper); }
+.rule-table th,.rule-table td { padding:12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line);overflow-wrap:anywhere; }
+.rule-table th:first-child { width:43%; }
+.rule-table th:nth-child(2) { width:19%; }
+.rule-table th:nth-child(3) { width:21%; }
+.rule-table th:nth-child(4) { width:17%; }
+.rule-condition-heading { font-weight:700; }
+.rule-condition-heading span { font-size:.82em;font-weight:400;color:var(--muted);margin-inline-start:8px; }
+.rule-value-preview { display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;white-space:pre-wrap;margin-block:6px; }
+.rule-details { margin-top:8px; }
+.rule-details summary { cursor:pointer;font-size:.85em; }
+.rule-details dl { display:block;margin:8px 0;font-size:.85em; }
+.rule-details dt { font-weight:700;margin-top:8px; }
+.rule-details dd { margin:0;overflow-wrap:anywhere; }
+.rule-full-value { white-space:pre-wrap; }
+.rule-cell-label { display:none; }
+.rule-state { display:inline-block;border-radius:6px;padding:2px 8px;font-size:.85em;font-weight:700;background:var(--line); }
+.rule-state-active { color:#155c34;background:#daf0e2; }
+.rule-state-expired { color:#795409;background:#fff0c9; }
+.admin .rule-revoke { border:0;background:none;padding:0;margin:10px 0 0;box-shadow:none; }
+.admin .rule-revoke button { padding:6px 10px;font-size:.85em; }
+.rule-empty { padding:20px;border:1px dashed var(--line);border-radius:8px; }
+.visually-hidden { position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap; }
+@media(max-width:680px) {
+ .rule-table,.rule-table tbody { display:block; }
+ .rule-table thead { display:none; }
+ .rule-table tr { display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);border:1px solid var(--line);border-radius:10px;margin-block:12px;overflow:hidden; }
+ .rule-table td { display:block;min-width:0;border:0; }
+ .rule-table td:first-child { grid-column:1/-1;border-bottom:1px solid var(--line); }
+ .rule-table td:last-child { grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;gap:12px;border-top:1px solid var(--line); }
+ .rule-cell-label { display:block;font-size:.8em;color:var(--muted);margin-bottom:4px; }
+ .admin .rule-revoke { margin:0; }
+}

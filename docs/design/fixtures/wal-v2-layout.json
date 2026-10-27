@@ -1,0 +1,47 @@
+{
+  "description": "OimoBBSの設計用バイト配置fixture。架空値のみ。サーバ実装の試験結果ではない。",
+  "schema": "oimobbs-wal-v2-layout-fixture",
+  "crc32c_check": {
+    "ascii": "123456789",
+    "value_hex": "e3069283"
+  },
+  "wal_header": {
+    "hex": "4f494d4f57414c32020040000000000000112233445566778899aabbccddeeff00f15365000000000700000000000000020000000000000000000000327b550f",
+    "length": 64,
+    "crc32c_hex": "0f557b32",
+    "board_id_hex": "00112233445566778899aabbccddeeff",
+    "thread_key": "1700000000",
+    "base_seq": "7",
+    "storage_generation": "2"
+  },
+  "frame": {
+    "hex": "3600000003fc63b2080000000000000001000000102132435465768798a9bacbdcedfe0f120000007b2274797065223a2261726368697665227d00000000974cc8dd4f494d4f454e4431",
+    "length": 74,
+    "body_length": 54,
+    "first_seq": "8",
+    "operation_count": 1,
+    "operation_id_hex": "102132435465768798a9bacbdcedfe0f",
+    "json_utf8": "{\"type\":\"archive\"}",
+    "dat_hex": "",
+    "length_crc32c_hex": "b263fc03",
+    "body_crc32c_hex": "ddc84c97",
+    "valid_envelope": true,
+    "valid_operation_schema": false,
+    "schema_rejection": "archive共通フィールドとpayloadが欠落。外枠のみのfixture。"
+  },
+  "dedup_section": {
+    "header_hex": "4f494d4f4445443101002000010000000700000000000000a00000009296fd7a",
+    "entry_hex": "0101000001000000111111111111111111111111111111111111111111111111111111111111111122222222222222222222222222222222222222222222222222222222222222223333333333333333333333333333333333333333333333333333333333333333102132435465768798a9bacbdcedfe0f0700000000000000010000000000000000002a36fe9c9717000079c792eb97170000000048691902",
+    "length": 192,
+    "header_crc32c_hex": "7afd9692",
+    "entry_crc32c_hex": "02196948",
+    "mode": 1,
+    "result": 1,
+    "key_id": 1,
+    "seq": "7",
+    "post_number": 1,
+    "committed_at_ns": "1700000000000000000",
+    "expires_at_ns": "1700086400000000000"
+  },
+  "wal_envelope_sha256": "ec56a21d837ceaaa08c523af8ceb305ff5fddbf5ea70c95266a163958da4178c"
+}

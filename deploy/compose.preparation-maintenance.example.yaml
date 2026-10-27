@@ -1,0 +1,79 @@
+# 独立した停止中バックアップ定期作成。正本/配置は設定と一致する固定絶対pathを使う。
+name: oimobbs-preparation-maintenance
+services:
+  preparation-maintenance:
+    build:
+      context: ..
+    image: oimobbs-preparation-maintenance:local
+    command: ["backup", "watch-prepare", "--config", "/private/config/config.json", "--copy-parent", "/private/copies", "--keys-parent", "/private/key-bundles", "--partial-plan-parent", "/private/partial-plans", "--partial-keys-plan-parent", "/private/partial-key-plans", "--keys-plan-parent", "/private/key-plans", "--pair-plan-parent", "/private/pair-plans", "--work-parent", "/private/replay-work", "--control-parent", "/private/preparation-control", "--trust-instance", "/private/trust/site-instance.json", "--interval", "1h", "--budget", "5m"]
+    volumes:
+      - type: bind
+        source: /private/source
+        target: /private/source
+        bind:
+          create_host_path: false
+      - type: bind
+        source: /private/copies
+        target: /private/copies
+        bind:
+          create_host_path: false
+      - type: bind
+        source: /private/key-bundles
+        target: /private/key-bundles
+        bind:
+          create_host_path: false
+      - type: bind
+        source: /private/partial-plans
+        target: /private/partial-plans
+        bind:
+          create_host_path: false
+      - type: bind
+        source: /private/partial-key-plans
+        target: /private/partial-key-plans
+        bind:
+          create_host_path: false
+      - type: bind
+        source: /private/key-plans
+        target: /private/key-plans
+        bind:
+          create_host_path: false
+      - type: bind
+        source: /private/pair-plans
+        target: /private/pair-plans
+        bind:
+          create_host_path: false
+      - type: bind
+        source: /private/replay-work
+        target: /private/replay-work
+        bind:
+          create_host_path: false
+      - type: bind
+        source: /private/preparation-control
+        target: /private/preparation-control
+        bind:
+          create_host_path: false
+      - type: bind
+        source: /private/trust
+        target: /private/trust
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: /private/config
+        target: /private/config
+        read_only: true
+        bind:
+          create_host_path: false
+    network_mode: none
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    init: true
+    restart: "no"
+    stop_grace_period: 65s
+    mem_limit: 512m
+    cpus: 1
+    pids_limit: 64
+    logging:
+      driver: json-file
+      options: {max-size: "2m", max-file: "2"}

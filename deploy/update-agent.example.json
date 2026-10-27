@@ -1,0 +1,7 @@
+{
+  "socket": "/run/oimobbs-update/control.sock",
+  "state_dir": "/var/lib/oimobbs-update",
+  "current_revision": "0000000000000000000000000000000000000000",
+  "prepare_command": ["/usr/bin/python3", "/usr/local/libexec/oimobbs-deploy-update.py", "prepare", "--config", "/etc/oimobbs-update/deployment.json", "--source", "{source}", "--revision", "{revision}", "--job", "{job}"],
+  "apply_command": ["/usr/bin/python3", "/usr/local/libexec/oimobbs-deploy-update.py", "apply", "--config", "/etc/oimobbs-update/deployment.json", "--source", "{source}", "--revision", "{revision}", "--job", "{job}"]
+}

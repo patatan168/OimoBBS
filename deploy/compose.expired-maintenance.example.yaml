@@ -1,0 +1,33 @@
+# 独立した本文期限巡回の例。両親は実在する0700、実行UID所有の専用領域を指定する。
+name: oimobbs-expired-maintenance
+services:
+  expired-maintenance:
+    build:
+      context: ..
+    image: oimobbs-expired-maintenance:local
+    command: ["backup", "watch-expired", "--copy-parent", "/private/copies", "--keys-parent", "/private/key-bundles", "--limit", "16", "--interval", "1m", "--budget", "30s"]
+    volumes:
+      - type: bind
+        source: /private/copies
+        target: /private/copies
+        bind:
+          create_host_path: false
+      - type: bind
+        source: /private/key-bundles
+        target: /private/key-bundles
+        read_only: true
+        bind:
+          create_host_path: false
+    network_mode: none
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    init: true
+    restart: "no"
+    stop_grace_period: 35s
+    mem_limit: 256m
+    cpus: 1
+    pids_limit: 64
+    logging:
+      driver: json-file
+      options: {max-size: "2m", max-file: "2"}

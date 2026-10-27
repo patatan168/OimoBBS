@@ -1,0 +1,4 @@
+/* 終了レスのプレビュー。 */
+.ending-preview { padding:16px; background:var(--surface); border-radius:8px; }
+.ending-preview h2 { margin-top:0; }
+.ending-preview { grid-column:1 / -1; }

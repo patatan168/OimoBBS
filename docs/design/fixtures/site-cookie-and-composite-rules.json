@@ -1,0 +1,182 @@
+{
+  "modes": [
+    {
+      "input": {
+        "mode": "off"
+      },
+      "valid": false
+    },
+    {
+      "input": {
+        "mode": "optional"
+      },
+      "valid": false
+    },
+    {
+      "input": {
+        "mode": "required"
+      },
+      "valid": true
+    },
+    {
+      "input": {
+        "mode": "disabled"
+      },
+      "valid": false
+    },
+    {
+      "input": {
+        "mode": null
+      },
+      "valid": false
+    },
+    {
+      "input": {
+        "mode": "off",
+        "subject_hmac": null
+      },
+      "valid": false
+    }
+  ],
+  "rules": [
+    {
+      "input": {
+        "target": "SpamClient",
+        "operations": [
+          "create",
+          "reply"
+        ],
+        "duration_minutes": 60,
+        "reason_code": "spam",
+        "match": {
+          "field": "ua",
+          "operator": "contains",
+          "effect": "deny"
+        },
+        "extra_conditions": [],
+        "allow_rule_ids": [],
+        "rate_override": null
+      },
+      "valid": true
+    },
+    {
+      "input": {
+        "target": "192.0.2.0/24",
+        "operations": [
+          "reply"
+        ],
+        "duration_minutes": 60,
+        "reason_code": "spam",
+        "extra_conditions": [
+          {
+            "field": "body",
+            "operator": "contains",
+            "value": "広告"
+          }
+        ],
+        "match": null,
+        "allow_rule_ids": [],
+        "rate_override": null
+      },
+      "valid": true
+    },
+    {
+      "input": {
+        "target": "宣伝",
+        "operations": [
+          "create",
+          "reply"
+        ],
+        "duration_minutes": 60,
+        "reason_code": "abuse",
+        "match": {
+          "field": "body",
+          "operator": "contains",
+          "effect": "require_token"
+        },
+        "extra_conditions": [
+          {
+            "field": "domain",
+            "operator": "suffix",
+            "value": "example.test"
+          }
+        ],
+        "allow_rule_ids": [],
+        "rate_override": null
+      },
+      "valid": true
+    },
+    {
+      "input": {
+        "target": "192.0.2.1",
+        "operations": [
+          "reply"
+        ],
+        "duration_minutes": 60,
+        "reason_code": "spam",
+        "extra_conditions": [],
+        "match": null,
+        "allow_rule_ids": [],
+        "rate_override": null
+      },
+      "valid": true
+    },
+    {
+      "input": {
+        "target": "192.0.2.1",
+        "operations": [
+          "reply"
+        ],
+        "duration_minutes": 60,
+        "reason_code": "spam",
+        "extra_conditions": null,
+        "match": null,
+        "allow_rule_ids": [],
+        "rate_override": null
+      },
+      "valid": false
+    },
+    {
+      "input": {
+        "target": "192.0.2.1",
+        "operations": [
+          "reply"
+        ],
+        "duration_minutes": 60,
+        "reason_code": "spam",
+        "extra_conditions": [
+          {
+            "field": "body",
+            "operator": "regexp",
+            "value": "["
+          }
+        ],
+        "match": null,
+        "allow_rule_ids": [],
+        "rate_override": null
+      },
+      "valid": false
+    },
+    {
+      "input": {
+        "target": "192.0.2.1",
+        "operations": [
+          "reply"
+        ],
+        "duration_minutes": 60,
+        "reason_code": "spam",
+        "extra_conditions": [
+          {
+            "field": "ip",
+            "operator": "exact",
+            "value": "192.0.2.1"
+          }
+        ],
+        "match": null,
+        "allow_rule_ids": [],
+        "rate_override": null
+      },
+      "valid": false
+    }
+  ]
+}

@@ -1,0 +1,444 @@
+{
+  "date": "2026-10-26",
+  "production_deployment": false,
+  "default_enabled_changed": false,
+  "limits": {
+    "user_agent_bytes": 1024,
+    "parsed_header_values": 128,
+    "header_name_and_value_bytes": 16384,
+    "public_declared_body_bytes": 65536,
+    "admin_declared_body_bytes": 262144
+  },
+  "host": "configured origin with existing normalization; no forwarded host trust",
+  "allowed_header_bytes": "HTAB and bytes >=128; reject other ASCII CTL and DEL",
+  "privacy": "no body reading or secret/pattern logging added; Cookie/Authorization syntax and size only",
+  "unit_and_real_http": {
+    "header_boundaries": "pass",
+    "host_and_preflight_before_tokens": "pass",
+    "raw_http1_public_and_admin": "pass",
+    "http1_expect_early_close": "pass",
+    "chunked_normal_post_confirmation": "pass",
+    "http2_reused_connection_after_rejection": "pass"
+  },
+  "race": {
+    "repeat": 3,
+    "packages": [
+      "internal/waf",
+      "internal/bootstrap"
+    ],
+    "result": "pass",
+    "log": "var/waf-ingress-20261025/ingress-final-race.log"
+  },
+  "fuzz": [
+    {
+      "target": "FuzzInspectHeaderControls",
+      "seconds_requested": 20,
+      "executions": 440195,
+      "result": "pass"
+    },
+    {
+      "target": "FuzzInspect",
+      "seconds_requested": 10,
+      "executions": 85712,
+      "result": "pass"
+    }
+  ],
+  "benchmark": {
+    "GOMAXPROCS": 2,
+    "iterations": 100000,
+    "repeats": 5,
+    "scope": "existing filter/traffic middleware benchmark excludes outer Host preflight and networking; median",
+    "results": {
+      "before": {
+        "off": {
+          "ns": 24.97,
+          "bytes": 0,
+          "allocs": 0
+        },
+        "inspection": {
+          "ns": 247.7,
+          "bytes": 4,
+          "allocs": 0
+        },
+        "inspection_and_traffic": {
+          "ns": 1445.0,
+          "bytes": 59,
+          "allocs": 2
+        }
+      },
+      "after": {
+        "off": {
+          "ns": 30.3,
+          "bytes": 0,
+          "allocs": 0
+        },
+        "inspection": {
+          "ns": 290.4,
+          "bytes": 4,
+          "allocs": 0
+        },
+        "inspection_and_traffic": {
+          "ns": 1314.0,
+          "bytes": 59,
+          "allocs": 2
+        }
+      }
+    }
+  },
+  "sources_sha256": {
+    "internal/waf/headers.go": "693208df72f1e85352f446a14a042ca1edad40eea26315103481c52d70d1a7d3",
+    "internal/waf/headers_test.go": "98ea224d8fbd7f727ef3365269843d749ce236df1419fb92e723f508d15be5bc",
+    "internal/waf/filter.go": "99878f9b4d5ab010472fca7c36028f6329041f9b3a2f55e981ce6edecfa34043",
+    "internal/bootstrap/waf_ingress.go": "ab52570b7d5cc1e123cd8c44d61f20ba0238d40918e451071fa15d208c9b61a8",
+    "internal/bootstrap/waf_ingress_test.go": "563ac6094a603ca0523e21c47d6d14b5bc671b118b40cfd8ceb465f78757e7f7",
+    "internal/bootstrap/waf_ingress_http_test.go": "e6e6fc156e6fb359ba84330f0d64a611b6276007a554fa1a39eb288890b1110d",
+    "internal/bootstrap/waf.go": "a89ab7e3b22d77e248a85642ccfa7988d45582c402dbcac34a6666f5986e4fb6",
+    "internal/bootstrap/validation_server.go": "69b938cbe25ce8f60a43fa3c3cdc8eb996526dc553a280dd1b903844ba742131",
+    "internal/bootstrap/admin_http.go": "c809fb10f82c53af30c4c6eedd0db6c48fc74cd74fc8dd29fa52ce5221cf428f"
+  },
+  "checks": {
+    "initial_designcheck_failure": "report JSON not generated yet; see report_followup after generation",
+    "normal_skips": [
+      {
+        "package": "oimobbs/internal/adminauth",
+        "test": "TestEnrollmentQRIndependentDecoder",
+        "output": "=== RUN   TestEnrollmentQRIndependentDecoder\n    qr_test.go:64: independent QR decoder not configured\n--- SKIP: TestEnrollmentQRIndependentDecoder (0.00s)\n"
+      },
+      {
+        "package": "oimobbs/internal/compat",
+        "test": "TestHTTPFixture/hidden_before_conditional",
+        "output": "=== RUN   TestHTTPFixture/hidden_before_conditional\n    compat_test.go:52: public state gate belongs to application\n--- SKIP: TestHTTPFixture/hidden_before_conditional (0.00s)\n"
+      },
+      {
+        "package": "oimobbs/internal/bootstrap",
+        "test": "TestAdminAuditBrowser",
+        "output": "=== RUN   TestAdminAuditBrowser\n    admin_audit_view_test.go:162: OIMO_BROWSER_NODE/OIMO_PLAYWRIGHT/OIMO_CHROMIUMでブラウザ検証を有効化\n--- SKIP: TestAdminAuditBrowser (0.00s)\n"
+      },
+      {
+        "package": "oimobbs/internal/bootstrap",
+        "test": "TestAdminLoginFormsUnderAnonymousFlood",
+        "output": "=== RUN   TestAdminLoginFormsUnderAnonymousFlood\n    admin_auth_availability_test.go:72: 50秒の隔離HTTP並走試験は未指定\n--- SKIP: TestAdminLoginFormsUnderAnonymousFlood (0.00s)\n"
+      },
+      {
+        "package": "oimobbs/internal/bootstrap",
+        "test": "TestBotGuardStatusBrowser",
+        "output": "=== RUN   TestBotGuardStatusBrowser\n    admin_bot_status_test.go:17: OIMO_BROWSER_NODE/OIMO_PLAYWRIGHT/OIMO_CHROMIUMでブラウザ検証を有効化\n--- SKIP: TestBotGuardStatusBrowser (0.00s)\n"
+      },
+      {
+        "package": "oimobbs/internal/bootstrap",
+        "test": "TestAdminEvidenceSearchBrowser",
+        "output": "=== RUN   TestAdminEvidenceSearchBrowser\n    admin_evidence_list_test.go:337: OIMO_BROWSER_NODE/OIMO_PLAYWRIGHT/OIMO_CHROMIUMでブラウザー検証を有効化\n--- SKIP: TestAdminEvidenceSearchBrowser (0.00s)\n"
+      },
+      {
+        "package": "oimobbs/internal/bootstrap",
+        "test": "TestAdminLayoutBrowser",
+        "output": "=== RUN   TestAdminLayoutBrowser\n    admin_layout_browser_test.go:60: OIMO_BROWSER_NODE/OIMO_PLAYWRIGHT/OIMO_CHROMIUMでブラウザ検証を有効化\n--- SKIP: TestAdminLayoutBrowser (0.00s)\n"
+      },
+      {
+        "package": "oimobbs/internal/bootstrap",
+        "test": "TestAdminSettingsBrowser",
+        "output": "=== RUN   TestAdminSettingsBrowser\n    admin_layout_browser_test.go:60: OIMO_BROWSER_NODE/OIMO_PLAYWRIGHT/OIMO_CHROMIUMでブラウザ検証を有効化\n--- SKIP: TestAdminSettingsBrowser (0.00s)\n"
+      },
+      {
+        "package": "oimobbs/internal/bootstrap",
+        "test": "TestAdminAssetsBrowser",
+        "output": "=== RUN   TestAdminAssetsBrowser\n    admin_layout_browser_test.go:60: OIMO_BROWSER_NODE/OIMO_PLAYWRIGHT/OIMO_CHROMIUMでブラウザ検証を有効化\n--- SKIP: TestAdminAssetsBrowser (0.00s)\n"
+      },
+      {
+        "package": "oimobbs/internal/bootstrap",
+        "test": "TestAdminExpiredSessionBrowser",
+        "output": "=== RUN   TestAdminExpiredSessionBrowser\n    admin_layout_browser_test.go:60: OIMO_BROWSER_NODE/OIMO_PLAYWRIGHT/OIMO_CHROMIUMでブラウザ検証を有効化\n--- SKIP: TestAdminExpiredSessionBrowser (0.00s)\n"
+      },
+      {
+        "package": "oimobbs/internal/bootstrap",
+        "test": "TestAdminReauthenticationExpiryBrowser",
+        "output": "=== RUN   TestAdminReauthenticationExpiryBrowser\n    admin_layout_browser_test.go:60: OIMO_BROWSER_NODE/OIMO_PLAYWRIGHT/OIMO_CHROMIUMでブラウザ検証を有効化\n--- SKIP: TestAdminReauthenticationExpiryBrowser (0.00s)\n"
+      },
+      {
+        "package": "oimobbs/internal/bootstrap",
+        "test": "TestAdminListBrowser",
+        "output": "=== RUN   TestAdminListBrowser\n    admin_layout_browser_test.go:60: OIMO_BROWSER_NODE/OIMO_PLAYWRIGHT/OIMO_CHROMIUMでブラウザ検証を有効化\n--- SKIP: TestAdminListBrowser (0.00s)\n"
+      },
+      {
+        "package": "oimobbs/internal/bootstrap",
+        "test": "TestButtonColorsBrowser",
+        "output": "=== RUN   TestButtonColorsBrowser\n    admin_layout_browser_test.go:60: OIMO_BROWSER_NODE/OIMO_PLAYWRIGHT/OIMO_CHROMIUMでブラウザ検証を有効化\n--- SKIP: TestButtonColorsBrowser (0.00s)\n"
+      },
+      {
+        "package": "oimobbs/internal/bootstrap",
+        "test": "TestReportRequestBrowser",
+        "output": "=== RUN   TestReportRequestBrowser\n    admin_layout_browser_test.go:60: OIMO_BROWSER_NODE/OIMO_PLAYWRIGHT/OIMO_CHROMIUMでブラウザ検証を有効化\n--- SKIP: TestReportRequestBrowser (0.00s)\n"
+      },
+      {
+        "package": "oimobbs/internal/bootstrap",
+        "test": "TestDateInputsBrowser",
+        "output": "=== RUN   TestDateInputsBrowser\n    admin_layout_browser_test.go:60: OIMO_BROWSER_NODE/OIMO_PLAYWRIGHT/OIMO_CHROMIUMでブラウザ検証を有効化\n--- SKIP: TestDateInputsBrowser (0.00s)\n"
+      },
+      {
+        "package": "oimobbs/internal/bootstrap",
+        "test": "TestAdminOTPBrowser",
+        "output": "=== RUN   TestAdminOTPBrowser\n    admin_otp_test.go:327: ブラウザ環境未指定\n--- SKIP: TestAdminOTPBrowser (0.00s)\n"
+      },
+      {
+        "package": "oimobbs/internal/bootstrap",
+        "test": "TestAdminPasskeyBrowser",
+        "output": "=== RUN   TestAdminPasskeyBrowser\n    admin_passkey_test.go:162: OIMO_BROWSER_NODE/OIMO_PLAYWRIGHT/OIMO_CHROMIUMでブラウザ検証を有効化\n--- SKIP: TestAdminPasskeyBrowser (0.00s)\n"
+      },
+      {
+        "package": "oimobbs/internal/bootstrap",
+        "test": "TestAdminPostActionsBrowser",
+        "output": "=== RUN   TestAdminPostActionsBrowser\n    admin_post_actions_browser_test.go:25: OIMO_BROWSER_NODE/OIMO_PLAYWRIGHT/OIMO_CHROMIUMでブラウザー検証を有効化\n--- SKIP: TestAdminPostActionsBrowser (0.00s)\n"
+      },
+      {
+        "package": "oimobbs/internal/bootstrap",
+        "test": "TestNetworkCompressionDiagnostic",
+        "output": "=== RUN   TestNetworkCompressionDiagnostic\n    network_compression_diagnostic_test.go:14: requires recorded network fixture\n--- SKIP: TestNetworkCompressionDiagnostic (0.00s)\n"
+      },
+      {
+        "package": "oimobbs/internal/bootstrap",
+        "test": "TestNetworkFullLiveSavedCapacity",
+        "output": "=== RUN   TestNetworkFullLiveSavedCapacity\n    network_full_live_test.go:15: explicit live fetch\n--- SKIP: TestNetworkFullLiveSavedCapacity (0.00s)\n"
+      },
+      {
+        "package": "oimobbs/internal/bootstrap",
+        "test": "TestNetworkLivePublicFeed",
+        "output": "=== RUN   TestNetworkLivePublicFeed\n    network_live_test.go:16: explicit public-network verification only\n--- SKIP: TestNetworkLivePublicFeed (0.00s)\n"
+      },
+      {
+        "package": "oimobbs/internal/bootstrap",
+        "test": "TestNetworkAccessLivePublicFeeds",
+        "output": "=== RUN   TestNetworkAccessLivePublicFeeds\n    network_live_test.go:36: explicit public-network verification only\n--- SKIP: TestNetworkAccessLivePublicFeeds (0.00s)\n"
+      },
+      {
+        "package": "oimobbs/internal/bootstrap",
+        "test": "TestNetworkDomesticLiveStartup",
+        "output": "=== RUN   TestNetworkDomesticLiveStartup\n    network_live_test.go:69: explicit public-network verification only\n--- SKIP: TestNetworkDomesticLiveStartup (0.00s)\n"
+      },
+      {
+        "package": "oimobbs/internal/bootstrap",
+        "test": "TestNetworkRecordFixture",
+        "output": "=== RUN   TestNetworkRecordFixture\n    network_update_bench_test.go:58: requires recorded network fixture\n--- SKIP: TestNetworkRecordFixture (0.00s)\n"
+      },
+      {
+        "package": "oimobbs/internal/bootstrap",
+        "test": "TestNetworkRecordedRefreshRecovery",
+        "output": "=== RUN   TestNetworkRecordedRefreshRecovery\n    network_update_bench_test.go:148: requires recorded network fixture\n--- SKIP: TestNetworkRecordedRefreshRecovery (0.00s)\n"
+      },
+      {
+        "package": "oimobbs/internal/bootstrap",
+        "test": "TestNetworkDeploymentRefresh",
+        "output": "=== RUN   TestNetworkDeploymentRefresh\n    network_update_bench_test.go:204: requires isolated restored volume\n--- SKIP: TestNetworkDeploymentRefresh (0.00s)\n"
+      },
+      {
+        "package": "oimobbs/internal/bootstrap",
+        "test": "TestNetworkRecordedExtendedManagement",
+        "output": "=== RUN   TestNetworkRecordedExtendedManagement\n    network_update_bench_test.go:253: requires recorded network fixture\n--- SKIP: TestNetworkRecordedExtendedManagement (0.00s)\n"
+      },
+      {
+        "package": "oimobbs/internal/bootstrap",
+        "test": "TestResourcePressureProcess",
+        "output": "=== RUN   TestResourcePressureProcess\n    resource_pressure_test.go:22: isolated cgroup probe only\n--- SKIP: TestResourcePressureProcess (0.00s)\n"
+      },
+      {
+        "package": "oimobbs/internal/bootstrap",
+        "test": "TestResourceCollectionWithReservedWorkProcess",
+        "output": "=== RUN   TestResourceCollectionWithReservedWorkProcess\n    resource_pressure_test.go:118: isolated cgroup probe only\n--- SKIP: TestResourceCollectionWithReservedWorkProcess (0.00s)\n"
+      },
+      {
+        "package": "oimobbs/internal/bootstrap",
+        "test": "TestWAFPublicReadPerformance",
+        "output": "=== RUN   TestWAFPublicReadPerformance\n    waf_performance_test.go:26: set OIMO_WAF_PERFORMANCE=1 for isolated HTTP measurement\n--- SKIP: TestWAFPublicReadPerformance (0.00s)\n"
+      },
+      {
+        "package": "oimobbs/internal/bootstrap",
+        "test": "TestWSTGBrowser",
+        "output": "=== RUN   TestWSTGBrowser\n    admin_layout_browser_test.go:60: OIMO_BROWSER_NODE/OIMO_PLAYWRIGHT/OIMO_CHROMIUMでブラウザ検証を有効化\n--- SKIP: TestWSTGBrowser (0.00s)\n"
+      }
+    ],
+    "final": [
+      {
+        "name": "normal",
+        "command": [
+          "go",
+          "test",
+          "-json",
+          "-p",
+          "2",
+          "./cmd/...",
+          "./internal/...",
+          "./tools/...",
+          "-count=1",
+          "-timeout=60m"
+        ],
+        "exit_code": 0,
+        "seconds": 714.8309684731066,
+        "output": "var/posting-multicore-20261025/final-normal.jsonl"
+      },
+      {
+        "name": "vet",
+        "command": [
+          "go",
+          "vet",
+          "./cmd/...",
+          "./internal/...",
+          "./tools/..."
+        ],
+        "exit_code": 0,
+        "seconds": 1.81337761413306,
+        "output": "var/posting-multicore-20261025/final-vet.log"
+      },
+      {
+        "name": "generated",
+        "command": [
+          "go",
+          "run",
+          "./tools/jsonencodegen",
+          "-check"
+        ],
+        "exit_code": 0,
+        "seconds": 0.0833998559974134,
+        "output": "var/posting-multicore-20261025/final-generated.log"
+      },
+      {
+        "name": "build",
+        "command": [
+          "go",
+          "build",
+          "./cmd/...",
+          "./internal/...",
+          "./tools/..."
+        ],
+        "exit_code": 0,
+        "seconds": 6.612672680057585,
+        "output": "var/posting-multicore-20261025/final-build.log"
+      },
+      {
+        "name": "doclinks",
+        "command": [
+          "python3",
+          "-B",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tools/designcheck",
+          "-p",
+          "test_doclinks.py"
+        ],
+        "exit_code": 0,
+        "seconds": 0.050111143849790096,
+        "output": "var/posting-multicore-20261025/final-doclinks.log"
+      },
+      {
+        "name": "designcheck",
+        "command": [
+          "python3",
+          "-B",
+          "tools/designcheck/check.py"
+        ],
+        "exit_code": 1,
+        "seconds": 0.29357514809817076,
+        "output": "var/posting-multicore-20261025/final-designcheck.log"
+      }
+    ],
+    "report_followup": [
+      {
+        "name": "doclinks",
+        "command": [
+          "mise",
+          "exec",
+          "--",
+          "python3",
+          "-B",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tools/designcheck",
+          "-p",
+          "test_doclinks.py"
+        ],
+        "exit_code": 0,
+        "seconds": 0.08208101987838745,
+        "output": "var/posting-multicore-20261025/report-doclinks.log"
+      },
+      {
+        "name": "designcheck",
+        "command": [
+          "mise",
+          "exec",
+          "--",
+          "python3",
+          "-B",
+          "tools/designcheck/check.py"
+        ],
+        "exit_code": 0,
+        "seconds": 0.44582126708701253,
+        "output": "var/posting-multicore-20261025/report-designcheck.log"
+      },
+      {
+        "name": "diff-check",
+        "command": [
+          "git",
+          "diff",
+          "--check"
+        ],
+        "exit_code": 0,
+        "seconds": 0.006435157265514135,
+        "output": "var/posting-multicore-20261025/report-diff-check.log"
+      },
+      {
+        "name": "markdown-browser",
+        "widths": [
+          390,
+          1280
+        ],
+        "layouts": 8,
+        "local_anchors_checked": 12,
+        "successful_clicks": 6,
+        "result": "pass",
+        "script": "var/posting-multicore-20261025/render.mjs",
+        "note": "screenshots visually inspected; local Markdown renderer, not GitHub UI"
+      },
+      {
+        "name": "last-header-boundaries-race",
+        "command": [
+          "mise",
+          "exec",
+          "--",
+          "go",
+          "test",
+          "-race",
+          "./internal/waf",
+          "-count=3"
+        ],
+        "exit_code": 0,
+        "package_elapsed_seconds": 1.475
+      }
+    ]
+  },
+  "artifacts": {
+    "var/waf-ingress-20261025/after-benchmark.log": "f75633cdd36f459a4f0b178d66013b5efff4d4dde9843ceb6e486357aaac0975",
+    "var/waf-ingress-20261025/baseline-filter.go": "f0ccb664e395003896151f9988877199ac0c967ea18812b984e30f9b871be9f9",
+    "var/waf-ingress-20261025/before-benchmark.log": "55dd052daad103f567c7006c6ecaf860f573a227ff3691ed764d0e8b24bfca98",
+    "var/waf-ingress-20261025/before-overlay.json": "ea37baf47ae6836c55a30cce3687a5d0370e93c0b7418d9e32f15ce2799ea385",
+    "var/waf-ingress-20261025/benchmark-summary.json": "a236ec19a7b89e5c80523f979d231b2f3e90ad9d8e0f798796e39efc4cde05d4",
+    "var/waf-ingress-20261025/bootstrap-red.log": "b533091d1dcfd4d576baf693c58d043a4365898c98921786d43d7ed8a20c2ba2",
+    "var/waf-ingress-20261025/filter.log": "9d514b80bc3cfa3e0dbe8e70ff8bc8dd02970fc224deafdf8aa0e86d435fca61",
+    "var/waf-ingress-20261025/focused.log": "40bdd09048e0310f1a8fc18bc16a9ca19bf2ee1bec1be0496461a0962ff1535a",
+    "var/waf-ingress-20261025/fuzz-request.log": "8e8296904df0182dd00967458cf67dda493f19d3033c06caf8c644fa89edee60",
+    "var/waf-ingress-20261025/fuzz.log": "ff7e3b3060da2405194a6fd57a2c1621ebfb1c13de1966f85388769526ac2fd2",
+    "var/waf-ingress-20261025/host-final.log": "5ad550f79389659c006a22d02924e5852a5064ba5081717544bfb38796b44141",
+    "var/waf-ingress-20261025/ingress-final-race.log": "68fc1a701d7bd23ab8253f3319b0ab7a87f0570a35c507c83b3080f037f5f448",
+    "var/waf-ingress-20261025/race.log": "ce4d8be884ae740b62aea87abed87c8a8342b5ac3b14e443766d482e986f6bea",
+    "var/waf-ingress-20261025/raw-final.log": "ec6a31a5ed8e81709deb555be7d1688678003352818d55688209f9188b930945",
+    "var/waf-ingress-20261025/raw-http.log": "e933062406823f5aee38dc0f38c0cf358f53c9d453a13ce1214f4cc273743638",
+    "var/waf-ingress-20261025/red.log": "283cef45b7ec32df2ff257efc44218862ea18f3c87f29c81c9dd4ed8ade00011"
+  },
+  "scope_not_verified": [
+    "production rollout",
+    "proxy parser disagreement",
+    "WAN / NIC / DDoS protection",
+    "complete legitimate UA and Cookie population"
+  ]
+}

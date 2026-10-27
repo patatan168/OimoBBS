@@ -1,0 +1,125 @@
+{
+  "schema": "board-posting-rates-v1",
+  "cases": [
+    {
+      "name": "default",
+      "settings": {
+        "enabled": true,
+        "reply_seconds": 1,
+        "reply_burst": 3,
+        "create_seconds": 600,
+        "create_burst": 1,
+        "create_window_limit": 6
+      },
+      "valid": true
+    },
+    {
+      "name": "disabled",
+      "settings": {
+        "enabled": false,
+        "reply_seconds": 1,
+        "reply_burst": 3,
+        "create_seconds": 600,
+        "create_burst": 1,
+        "create_window_limit": 6
+      },
+      "valid": true
+    },
+    {
+      "name": "maximum_interval",
+      "settings": {
+        "enabled": true,
+        "reply_seconds": 3600,
+        "reply_burst": 1,
+        "create_seconds": 3600,
+        "create_burst": 1,
+        "create_window_limit": 6
+      },
+      "valid": true
+    },
+    {
+      "name": "maximum_burst",
+      "settings": {
+        "enabled": true,
+        "reply_seconds": 36,
+        "reply_burst": 100,
+        "create_seconds": 36,
+        "create_burst": 100,
+        "create_window_limit": 1000
+      },
+      "valid": true
+    },
+    {
+      "name": "zero_seconds",
+      "settings": {
+        "enabled": true,
+        "reply_seconds": 0,
+        "reply_burst": 3,
+        "create_seconds": 600,
+        "create_burst": 1,
+        "create_window_limit": 6
+      },
+      "valid": false
+    },
+    {
+      "name": "zero_burst",
+      "settings": {
+        "enabled": true,
+        "reply_seconds": 1,
+        "reply_burst": 3,
+        "create_seconds": 600,
+        "create_burst": 0,
+        "create_window_limit": 6
+      },
+      "valid": false
+    },
+    {
+      "name": "too_long",
+      "settings": {
+        "enabled": true,
+        "reply_seconds": 1,
+        "reply_burst": 3,
+        "create_seconds": 3601,
+        "create_burst": 1,
+        "create_window_limit": 6
+      },
+      "valid": false
+    },
+    {
+      "name": "refill_horizon",
+      "settings": {
+        "enabled": true,
+        "reply_seconds": 37,
+        "reply_burst": 100,
+        "create_seconds": 600,
+        "create_burst": 1,
+        "create_window_limit": 6
+      },
+      "valid": false
+    },
+    {
+      "name": "window_too_small",
+      "settings": {
+        "enabled": true,
+        "reply_seconds": 1,
+        "reply_burst": 3,
+        "create_seconds": 600,
+        "create_burst": 2,
+        "create_window_limit": 1
+      },
+      "valid": false
+    },
+    {
+      "name": "window_too_large",
+      "settings": {
+        "enabled": true,
+        "reply_seconds": 1,
+        "reply_burst": 3,
+        "create_seconds": 600,
+        "create_burst": 1,
+        "create_window_limit": 1001
+      },
+      "valid": false
+    }
+  ]
+}

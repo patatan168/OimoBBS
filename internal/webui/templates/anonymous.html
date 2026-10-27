@@ -1,0 +1,28 @@
+<!-- 匿名Cookieの状態と全体失効。個別対応はレス閲覧・規制へ案内する。 -->
+<!doctype html>
+<html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>匿名Cookie — OimoBBS管理</title>{{template "admin-assets" .}}</head>
+<body class="admin">{{template "admin-header" .}}
+<main id="main" tabindex="-1"><h1>匿名Cookie</h1>
+{{if .Message}}<p role="alert">{{.Message}}</p>{{end}}
+<section class="admin-panel"><h2>現在の状態</h2>
+{{if .State.Enabled}}
+<dl class="admin-status-grid"><div><dt>利用状態</dt><dd class="admin-status-copy"><span class="admin-badge admin-badge-on">全投稿で必須</span></dd></div><div><dt>現在の世代</dt><dd>{{.State.Generation}}</dd></div><div><dt>個別失効の登録数</dt><dd>{{.State.Revocations}}件</dd></div></dl>
+<p>Web・専ブラ・CAPの投稿で利用します。Cookieは投稿確認時に発行し、有効期間は30日です。</p>
+{{else}}<p>匿名Cookie機能は無効です。停止中の管理CLIで投稿間隔制限と匿名Cookieを有効化してください。</p>{{end}}
+</section>
+<section class="admin-panel"><h2>特定の投稿者に対応する</h2>
+<p>対象の板で「管理人用スレッド一覧」→「レス閲覧・規制」を開き、対象レスの「このレスの記録を確認・規制」から進んでください。記録を確認するには追加権限と再認証が必要です。</p>
+<p>「この内部ID」を選ぶと、対象を自動入力した投稿規制の確認画面へ進めます。</p>
+{{if adminCan "/boards"}}<p><a href="{{adminBase}}/boards">板を選んで個別対応する</a></p>{{end}}
+</section>
+{{if .State.Enabled}}<section class="admin-panel admin-danger" aria-labelledby="revoke-all-heading"><h2 id="revoke-all-heading">全Cookieを失効する</h2>
+<p>全利用者の現在の匿名Cookieを無効にします。世代を更新するため、取り消せません。</p>
+<ul><li>全員が次の投稿時にCookieの再発行と投稿確認を行う必要があります。CAPも対象です。</li><li>再発行には既存の発行回数制限・待機時間が適用されます。</li><li>投稿や管理画面のログイン状態、IP・ネットワークの投稿制限、発行履歴は保持します。</li><li>新しいCookieの取得を禁止する操作ではありません。荒らしの個別対応は投稿規制を使ってください。</li></ul>
+<form method="post" action="{{adminBase}}/anonymous">
+<input type="hidden" name="csrf" value="{{.Fields.Get "csrf"}}"><input type="hidden" name="revision" value="{{.Fields.Get "revision"}}"><input type="hidden" name="request_id" value="{{.Fields.Get "request_id"}}"><input type="hidden" name="operation" value="all">
+<p><label class="check-option"><input type="checkbox" name="confirm" value="all" required {{if eq (.Fields.Get "confirm") "all"}}checked{{end}}><span>全員にCookieの再発行が必要になることを確認しました</span></label></p>
+<p><button type="submit">全Cookieを失効する</button></p>
+</form>
+<p class="field-hint">操作には10分以内の再認証が必要です。<a href="{{adminBase}}/reauth?return_to=%2Fanonymous">パスワードを再確認する</a></p>
+</section>{{end}}
+</main>{{template "footer" .}}</body></html>

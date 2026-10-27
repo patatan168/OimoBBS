@@ -1,0 +1,26 @@
+<!-- 更新確認と再起動の同意を、通常の状態表示とは別画面にする。 -->
+<!doctype html><html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>ソフトウェア更新 — OimoBBS管理</title>{{template "admin-assets" .}}</head>
+<body class="admin">{{template "admin-header" .}}<main id="main" tabindex="-1">
+<h1>{{if .Confirm}}更新・再起動の確認{{else}}ソフトウェア更新{{end}}</h1>
+<p>サイト管理者だけが、GitHubの公式リポジトリからmainブランチの最新版へ更新できます。</p>
+{{if .Message}}<p role="alert">{{.Message}}</p>{{end}}
+{{if not .Enabled}}<section class="admin-panel"><h2>更新機能は未設定です</h2><p>サーバー側で更新サービスの設定が必要です。</p></section>
+{{else if .State.Phase}}
+<section class="admin-panel" aria-label="更新状況"><h2>{{.PhaseLabel}}</h2><p role="status">{{.State.Message}}</p>
+<dl class="meta-grid"><div><dt>現在のコミット</dt><dd><code>{{.State.CurrentRevision}}</code></dd></div>{{if .State.LatestRevision}}<div><dt>更新対象のコミット</dt><dd><code>{{.State.LatestRevision}}</code></dd></div>{{end}}{{if .State.Job}}<div><dt>更新番号</dt><dd><code>{{.State.Job}}</code></dd></div>{{end}}</dl>
+<p><a href="https://github.com/patatan168/OimoBBS" target="_blank" rel="noopener noreferrer">GitHubでソースを見る</a></p></section>
+{{if .Confirm}}
+<section class="admin-panel admin-danger"><h2>掲示板を一時停止して再起動します</h2>
+<p>最初にビルドと検証を行います。成功した場合、掲示板を停止し、データのバックアップを保存してから更新・再起動します。停止中は閲覧・投稿・管理操作ができません。</p>
+<p>更新するのは上に表示したコミットです。確認後にGitHubが更新されても、別のコミットには変わりません。</p>
+{{if .Fresh}}<form method="post" action="{{adminBase}}/updates/apply">
+<input type="hidden" name="csrf" value="{{.CSRF}}"><input type="hidden" name="token" value="{{.State.Token}}"><input type="hidden" name="revision" value="{{.State.LatestRevision}}">
+<label class="check-option"><input type="checkbox" name="restart_confirmed" value="yes" required><span>掲示板の一時停止と再起動を確認しました</span></label>
+<div class="admin-form-actions"><button type="submit">更新して再起動する</button><a href="{{adminBase}}/updates">キャンセル</a></div></form>
+{{else}}<p>実行前に本人確認が必要です。</p><a class="tonal-link" href="{{adminBase}}/reauth?return_to=%2Fupdates">再認証する</a>{{end}}</section>
+{{else if eq .State.Phase "ready"}}<p><a class="tonal-link" href="{{adminBase}}/updates/confirm">更新内容と再起動を確認する</a></p>
+{{end}}
+{{if not .Confirm}}{{if not .State.Busy}}<form method="post" action="{{adminBase}}/updates/check"><input type="hidden" name="csrf" value="{{.CheckCSRF}}"><button type="submit">最新版を確認する</button></form>{{end}}{{end}}
+<p><a href="{{adminBase}}/updates">状態を更新する</a></p>
+{{end}}
+</main>{{template "footer" .}}</body></html>

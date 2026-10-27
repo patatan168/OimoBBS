@@ -1,0 +1,3164 @@
+{
+  "date": "2026-10-27",
+  "baseline_commit": "6e27cb194c5e6e2dddbf5c20196750f6579e7671",
+  "go": "1.27.3",
+  "images": {
+    "baseline": {
+      "tag": "oimobbs:posting-json-typed-baseline-20261027",
+      "id": "sha256:3f117af8b4fdbb1d0071620b997411a01ea712dc466a0b62e5e158e485f5d8de"
+    },
+    "candidate": {
+      "tag": "oimobbs:posting-json-typed-candidate-20261027",
+      "id": "sha256:c6a6e9c8c5011b97a6bed8f03bdadeeaa14076696284d77a995bf8a35b25350a"
+    },
+    "baseline-diag": {
+      "tag": "oimobbs:posting-json-typed-baseline-diag-20261027",
+      "id": "sha256:7b6bff4a5ceddc54f7c94fb7a2f78c9e28ce0f07f711276b75729605e94b8c91"
+    },
+    "candidate-diag": {
+      "tag": "oimobbs:posting-json-typed-candidate-diag-20261027",
+      "id": "sha256:57aff2e717fbd803f83d12648e5686778f0ad2128cca4753d1fc8d61040e1134"
+    }
+  },
+  "runtime_id": "sha256:785d57bc85aab211471b1a6e4c6ea4b0d003be38df89c19a98fb208da3d8cac4",
+  "changed_go_files": [
+    "internal/domain/json_decode_generated.go",
+    "internal/evidence/json_decode_generated.go",
+    "internal/postcapture/json_decode_generated.go",
+    "internal/store/json_decode_generated.go",
+    "internal/strictjson/generated_integration_test.go",
+    "internal/strictjson/json.go",
+    "internal/strictjson/typed.go",
+    "internal/strictjson/typed_test.go",
+    "tools/jsondecodegen/main.go",
+    "tools/jsondecodegen/main_test.go"
+  ],
+  "source_manifests": {
+    "baseline": "b3faa5119dd65f295666098db777762dfa0c42adb8b85ad27a8ae43b3e1557b7",
+    "candidate": "bb8c68cb3ce530fc84c9ae199b26552d6fb24121a33fc6b6a8d831e8880d8778"
+  },
+  "json_cpu_diagnosis": [
+    {
+      "trial": "fixed-tmpfs-w80-baseline-diag-1cpu-r1",
+      "category": "json",
+      "matched_cpu_seconds": 7.15,
+      "percent": 37.24,
+      "total_cpu_seconds": 19.2
+    },
+    {
+      "trial": "fixed-tmpfs-w80-baseline-diag-1cpu-r1",
+      "category": "signature",
+      "matched_cpu_seconds": 2.81,
+      "percent": 14.64,
+      "total_cpu_seconds": 19.2
+    },
+    {
+      "trial": "fixed-tmpfs-w80-baseline-diag-1cpu-r1",
+      "category": "compression",
+      "matched_cpu_seconds": 1.21,
+      "percent": 6.3,
+      "total_cpu_seconds": 19.2
+    },
+    {
+      "trial": "fixed-tmpfs-w80-baseline-diag-1cpu-r1",
+      "category": "journal_encode",
+      "matched_cpu_seconds": 1.1,
+      "percent": 5.73,
+      "total_cpu_seconds": 19.2
+    },
+    {
+      "trial": "fixed-tmpfs-w80-candidate-diag-1cpu-r2",
+      "category": "json",
+      "matched_cpu_seconds": 5.26,
+      "percent": 29.65,
+      "total_cpu_seconds": 17.74
+    },
+    {
+      "trial": "fixed-tmpfs-w80-candidate-diag-1cpu-r2",
+      "category": "signature",
+      "matched_cpu_seconds": 2.87,
+      "percent": 16.18,
+      "total_cpu_seconds": 17.74
+    },
+    {
+      "trial": "fixed-tmpfs-w80-candidate-diag-1cpu-r2",
+      "category": "compression",
+      "matched_cpu_seconds": 1.42,
+      "percent": 8.0,
+      "total_cpu_seconds": 17.74
+    },
+    {
+      "trial": "fixed-tmpfs-w80-candidate-diag-1cpu-r2",
+      "category": "journal_encode",
+      "matched_cpu_seconds": 1.14,
+      "percent": 6.43,
+      "total_cpu_seconds": 17.74
+    }
+  ],
+  "microbenchmarks": {
+    "baseline": {
+      "BenchmarkCaptureMetadata/shared": {
+        "runs": [
+          {
+            "ns": 34102,
+            "bytes": 11816,
+            "allocations": 126
+          },
+          {
+            "ns": 34305,
+            "bytes": 11816,
+            "allocations": 126
+          },
+          {
+            "ns": 34798,
+            "bytes": 11816,
+            "allocations": 126
+          },
+          {
+            "ns": 37661,
+            "bytes": 11816,
+            "allocations": 126
+          },
+          {
+            "ns": 34928,
+            "bytes": 11816,
+            "allocations": 126
+          }
+        ],
+        "median": {
+          "ns": 34798,
+          "bytes": 11816,
+          "allocations": 126
+        }
+      }
+    },
+    "candidate": {
+      "BenchmarkCaptureMetadata/shared": {
+        "runs": [
+          {
+            "ns": 25848,
+            "bytes": 10480,
+            "allocations": 117
+          },
+          {
+            "ns": 25811,
+            "bytes": 10480,
+            "allocations": 117
+          },
+          {
+            "ns": 25614,
+            "bytes": 10480,
+            "allocations": 117
+          },
+          {
+            "ns": 26311,
+            "bytes": 10480,
+            "allocations": 117
+          },
+          {
+            "ns": 25817,
+            "bytes": 10480,
+            "allocations": 117
+          }
+        ],
+        "median": {
+          "ns": 25817,
+          "bytes": 10480,
+          "allocations": 117
+        }
+      }
+    }
+  },
+  "decoder_benchmarks": {
+    "BenchmarkGeneratedDecode/operation/prior": {
+      "runs": [
+        {
+          "ns": 11993,
+          "bytes": 1584,
+          "allocations": 39
+        },
+        {
+          "ns": 12154,
+          "bytes": 1584,
+          "allocations": 39
+        },
+        {
+          "ns": 12244,
+          "bytes": 1584,
+          "allocations": 39
+        }
+      ],
+      "median": {
+        "ns": 12154,
+        "bytes": 1584,
+        "allocations": 39
+      }
+    },
+    "BenchmarkGeneratedDecode/operation/typed": {
+      "runs": [
+        {
+          "ns": 9895,
+          "bytes": 1328,
+          "allocations": 38
+        },
+        {
+          "ns": 9726,
+          "bytes": 1328,
+          "allocations": 38
+        },
+        {
+          "ns": 9714,
+          "bytes": 1328,
+          "allocations": 38
+        }
+      ],
+      "median": {
+        "ns": 9726,
+        "bytes": 1328,
+        "allocations": 38
+      }
+    },
+    "BenchmarkGeneratedDecode/append/prior": {
+      "runs": [
+        {
+          "ns": 41043,
+          "bytes": 4344,
+          "allocations": 132
+        },
+        {
+          "ns": 41123,
+          "bytes": 4344,
+          "allocations": 132
+        },
+        {
+          "ns": 41061,
+          "bytes": 4344,
+          "allocations": 132
+        }
+      ],
+      "median": {
+        "ns": 41061,
+        "bytes": 4344,
+        "allocations": 132
+      }
+    },
+    "BenchmarkGeneratedDecode/append/typed": {
+      "runs": [
+        {
+          "ns": 30875,
+          "bytes": 4632,
+          "allocations": 131
+        },
+        {
+          "ns": 30819,
+          "bytes": 4632,
+          "allocations": 131
+        },
+        {
+          "ns": 30774,
+          "bytes": 4632,
+          "allocations": 131
+        }
+      ],
+      "median": {
+        "ns": 30819,
+        "bytes": 4632,
+        "allocations": 131
+      }
+    },
+    "BenchmarkGeneratedDecode/create/prior": {
+      "runs": [
+        {
+          "ns": 49803,
+          "bytes": 5473,
+          "allocations": 159
+        },
+        {
+          "ns": 49745,
+          "bytes": 5472,
+          "allocations": 159
+        },
+        {
+          "ns": 49770,
+          "bytes": 5472,
+          "allocations": 159
+        }
+      ],
+      "median": {
+        "ns": 49770,
+        "bytes": 5472,
+        "allocations": 159
+      }
+    },
+    "BenchmarkGeneratedDecode/create/typed": {
+      "runs": [
+        {
+          "ns": 36786,
+          "bytes": 5376,
+          "allocations": 153
+        },
+        {
+          "ns": 36486,
+          "bytes": 5376,
+          "allocations": 153
+        },
+        {
+          "ns": 36603,
+          "bytes": 5376,
+          "allocations": 153
+        }
+      ],
+      "median": {
+        "ns": 36603,
+        "bytes": 5376,
+        "allocations": 153
+      }
+    },
+    "BenchmarkGeneratedDecode/observation/prior": {
+      "runs": [
+        {
+          "ns": 63738,
+          "bytes": 7745,
+          "allocations": 232
+        },
+        {
+          "ns": 63744,
+          "bytes": 7744,
+          "allocations": 232
+        },
+        {
+          "ns": 63201,
+          "bytes": 7744,
+          "allocations": 232
+        }
+      ],
+      "median": {
+        "ns": 63738,
+        "bytes": 7744,
+        "allocations": 232
+      }
+    },
+    "BenchmarkGeneratedDecode/observation/typed": {
+      "runs": [
+        {
+          "ns": 50595,
+          "bytes": 7344,
+          "allocations": 231
+        },
+        {
+          "ns": 50656,
+          "bytes": 7344,
+          "allocations": 231
+        },
+        {
+          "ns": 50587,
+          "bytes": 7344,
+          "allocations": 231
+        }
+      ],
+      "median": {
+        "ns": 50595,
+        "bytes": 7344,
+        "allocations": 231
+      }
+    },
+    "BenchmarkGeneratedDecode/event/prior": {
+      "runs": [
+        {
+          "ns": 5206,
+          "bytes": 832,
+          "allocations": 18
+        },
+        {
+          "ns": 5186,
+          "bytes": 832,
+          "allocations": 18
+        },
+        {
+          "ns": 5187,
+          "bytes": 832,
+          "allocations": 18
+        }
+      ],
+      "median": {
+        "ns": 5187,
+        "bytes": 832,
+        "allocations": 18
+      }
+    },
+    "BenchmarkGeneratedDecode/event/typed": {
+      "runs": [
+        {
+          "ns": 4511,
+          "bytes": 640,
+          "allocations": 17
+        },
+        {
+          "ns": 4521,
+          "bytes": 640,
+          "allocations": 17
+        },
+        {
+          "ns": 4535,
+          "bytes": 640,
+          "allocations": 17
+        }
+      ],
+      "median": {
+        "ns": 4521,
+        "bytes": 640,
+        "allocations": 17
+      }
+    },
+    "BenchmarkGeneratedDecode/optional_record/prior": {
+      "runs": [
+        {
+          "ns": 15275,
+          "bytes": 2116,
+          "allocations": 55
+        },
+        {
+          "ns": 15266,
+          "bytes": 2116,
+          "allocations": 55
+        },
+        {
+          "ns": 15252,
+          "bytes": 2116,
+          "allocations": 55
+        }
+      ],
+      "median": {
+        "ns": 15266,
+        "bytes": 2116,
+        "allocations": 55
+      }
+    },
+    "BenchmarkGeneratedDecode/optional_record/typed": {
+      "runs": [
+        {
+          "ns": 13152,
+          "bytes": 1764,
+          "allocations": 54
+        },
+        {
+          "ns": 13239,
+          "bytes": 1764,
+          "allocations": 54
+        },
+        {
+          "ns": 13250,
+          "bytes": 1764,
+          "allocations": 54
+        }
+      ],
+      "median": {
+        "ns": 13239,
+        "bytes": 1764,
+        "allocations": 54
+      }
+    },
+    "BenchmarkGeneratedDecode/optional_payload/prior": {
+      "runs": [
+        {
+          "ns": 15949,
+          "bytes": 2180,
+          "allocations": 55
+        },
+        {
+          "ns": 15939,
+          "bytes": 2180,
+          "allocations": 55
+        },
+        {
+          "ns": 16045,
+          "bytes": 2180,
+          "allocations": 55
+        }
+      ],
+      "median": {
+        "ns": 15949,
+        "bytes": 2180,
+        "allocations": 55
+      }
+    },
+    "BenchmarkGeneratedDecode/optional_payload/typed": {
+      "runs": [
+        {
+          "ns": 14039,
+          "bytes": 1796,
+          "allocations": 54
+        },
+        {
+          "ns": 14235,
+          "bytes": 1796,
+          "allocations": 54
+        },
+        {
+          "ns": 13617,
+          "bytes": 1796,
+          "allocations": 54
+        }
+      ],
+      "median": {
+        "ns": 14039,
+        "bytes": 1796,
+        "allocations": 54
+      }
+    },
+    "BenchmarkGeneratedDecode/capture/prior": {
+      "runs": [
+        {
+          "ns": 88162,
+          "bytes": 11475,
+          "allocations": 309
+        },
+        {
+          "ns": 88901,
+          "bytes": 11473,
+          "allocations": 309
+        },
+        {
+          "ns": 88535,
+          "bytes": 11473,
+          "allocations": 309
+        }
+      ],
+      "median": {
+        "ns": 88535,
+        "bytes": 11473,
+        "allocations": 309
+      }
+    },
+    "BenchmarkGeneratedDecode/capture/typed": {
+      "runs": [
+        {
+          "ns": 70642,
+          "bytes": 10088,
+          "allocations": 303
+        },
+        {
+          "ns": 70527,
+          "bytes": 10088,
+          "allocations": 303
+        },
+        {
+          "ns": 70303,
+          "bytes": 10088,
+          "allocations": 303
+        }
+      ],
+      "median": {
+        "ns": 70527,
+        "bytes": 10088,
+        "allocations": 303
+      }
+    },
+    "BenchmarkGeneratedDecode/control/prior": {
+      "runs": [
+        {
+          "ns": 15676,
+          "bytes": 1864,
+          "allocations": 54
+        },
+        {
+          "ns": 15516,
+          "bytes": 1864,
+          "allocations": 54
+        },
+        {
+          "ns": 15502,
+          "bytes": 1864,
+          "allocations": 54
+        }
+      ],
+      "median": {
+        "ns": 15516,
+        "bytes": 1864,
+        "allocations": 54
+      }
+    },
+    "BenchmarkGeneratedDecode/control/typed": {
+      "runs": [
+        {
+          "ns": 11868,
+          "bytes": 1720,
+          "allocations": 53
+        },
+        {
+          "ns": 11922,
+          "bytes": 1720,
+          "allocations": 53
+        },
+        {
+          "ns": 11942,
+          "bytes": 1720,
+          "allocations": 53
+        }
+      ],
+      "median": {
+        "ns": 11922,
+        "bytes": 1720,
+        "allocations": 53
+      }
+    }
+  },
+  "diagnostic_runtime": {
+    "fixed-tmpfs-w80-candidate-diag-1cpu-r2.json.profiles": {
+      "/cpu/classes/gc/mark/assist:cpu-seconds": 0.137548116,
+      "/cpu/classes/gc/mark/dedicated:cpu-seconds": 0.5729159699999999,
+      "/cpu/classes/gc/pause:cpu-seconds": 0.00154172,
+      "allocated_bytes": 6817722528,
+      "gc_cycles": 31,
+      "gc_pause_ns": 1764456,
+      "gomaxprocs": 1,
+      "heap_alloc_bytes": 883025288,
+      "mallocs": 26937252
+    },
+    "fixed-tmpfs-w80-baseline-diag-1cpu-r1.json.profiles": {
+      "/cpu/classes/gc/mark/assist:cpu-seconds": 0.138553755,
+      "/cpu/classes/gc/mark/dedicated:cpu-seconds": 0.600860507,
+      "/cpu/classes/gc/pause:cpu-seconds": 0.001533632,
+      "allocated_bytes": 6912062120,
+      "gc_cycles": 31,
+      "gc_pause_ns": 1738404,
+      "gomaxprocs": 1,
+      "heap_alloc_bytes": 667038872,
+      "mallocs": 27516251
+    }
+  },
+  "groups": [
+    {
+      "kind": "diagnostic",
+      "storage": "tmpfs",
+      "cpu": 1,
+      "workers": 80,
+      "observed_gomaxprocs": [
+        1
+      ],
+      "baseline": {
+        "count": 1,
+        "names": [
+          "fixed-tmpfs-w80-baseline-diag-1cpu-r1"
+        ],
+        "throughput": 412.8448884052874,
+        "cpu_ms_per_success": 2.419412,
+        "duration_with_drain_seconds": 19.377737800998148
+      },
+      "candidate": {
+        "count": 1,
+        "names": [
+          "fixed-tmpfs-w80-candidate-diag-1cpu-r2"
+        ],
+        "throughput": 448.3337156912265,
+        "cpu_ms_per_success": 2.2284785,
+        "duration_with_drain_seconds": 17.843850953002402
+      },
+      "cpu_reduction_percent": 7.891731544689362,
+      "throughput_increase_percent": 8.59616487514796
+    },
+    {
+      "kind": "fixed",
+      "storage": "disk",
+      "cpu": 2,
+      "workers": 120,
+      "observed_gomaxprocs": [
+        2
+      ],
+      "baseline": {
+        "count": 1,
+        "names": [
+          "fixed-disk-w120-baseline-2cpu-r1"
+        ],
+        "throughput": 358.72925831935527,
+        "cpu_ms_per_success": 2.636334375,
+        "duration_with_drain_seconds": 22.30094093099615
+      },
+      "candidate": {
+        "count": 1,
+        "names": [
+          "fixed-disk-w120-candidate-2cpu-r1"
+        ],
+        "throughput": 660.7813900687507,
+        "cpu_ms_per_success": 2.4875225,
+        "duration_with_drain_seconds": 12.106878493003023
+      },
+      "cpu_reduction_percent": 5.644651012829138,
+      "throughput_increase_percent": 84.20058435280917
+    },
+    {
+      "kind": "fixed",
+      "storage": "tmpfs",
+      "cpu": 1,
+      "workers": 80,
+      "observed_gomaxprocs": [
+        1
+      ],
+      "baseline": {
+        "count": 4,
+        "names": [
+          "fixed-tmpfs-w80-baseline-1cpu-r1",
+          "fixed-tmpfs-w80-baseline-1cpu-r2",
+          "fixed-tmpfs-w80-baseline-1cpu-r3",
+          "fixed-tmpfs-w80-baseline-1cpu-r4"
+        ],
+        "throughput": 423.69437132753933,
+        "cpu_ms_per_success": 2.3590751875000002,
+        "duration_with_drain_seconds": 18.88156037599765
+      },
+      "candidate": {
+        "count": 3,
+        "names": [
+          "fixed-tmpfs-w80-candidate-1cpu-r1",
+          "fixed-tmpfs-w80-candidate-1cpu-r3",
+          "fixed-tmpfs-w80-candidate-1cpu-r4"
+        ],
+        "throughput": 447.23060882211047,
+        "cpu_ms_per_success": 2.23382675,
+        "duration_with_drain_seconds": 17.887863313000707
+      },
+      "cpu_reduction_percent": 5.309217703770209,
+      "throughput_increase_percent": 5.555003579779982
+    },
+    {
+      "kind": "mixed",
+      "storage": "disk",
+      "cpu": 2,
+      "workers": 120,
+      "observed_gomaxprocs": [
+        2
+      ],
+      "baseline": {
+        "count": 0,
+        "names": [],
+        "throughput": null,
+        "cpu_ms_per_success": null,
+        "duration_with_drain_seconds": null
+      },
+      "candidate": {
+        "count": 1,
+        "names": [
+          "mixed-disk-w120-candidate-2cpu-r1"
+        ],
+        "throughput": 157.89500692567805,
+        "cpu_ms_per_success": 5.572786041666666,
+        "duration_with_drain_seconds": 30.399947999998403
+      }
+    }
+  ],
+  "trials": [
+    {
+      "name": "fixed-tmpfs-w80-baseline-1cpu-r1",
+      "variant": "baseline",
+      "kind": "fixed",
+      "cpu": 1,
+      "memory": "4g",
+      "storage": "tmpfs",
+      "command": [
+        "python3",
+        "/home/patatan/OimoBBS/var/posting-json-typed-20261027/balanced120-probe.py",
+        "--image",
+        "sha256:3f117af8b4fdbb1d0071620b997411a01ea712dc466a0b62e5e158e485f5d8de",
+        "--cpus",
+        "1",
+        "--memory",
+        "4g",
+        "--egress-bps",
+        "80000000",
+        "--waf",
+        "--waf-posting-rate",
+        "100000",
+        "--waf-posting-concurrent",
+        "256",
+        "--waf-posting-client-rate",
+        "1000",
+        "--optional-log-stats",
+        "--collect-server-log",
+        "--posting-capacity-rate",
+        "1600",
+        "--posting-capacity-seconds",
+        "5",
+        "--posting-capacity-workers",
+        "80",
+        "--posting-capacity-threads",
+        "16",
+        "--output",
+        "/home/patatan/OimoBBS/var/posting-json-typed-20261027/fixed-tmpfs-w80-baseline-1cpu-r1.json",
+        "--posting-capacity-fixed-count"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 45.056113149999874,
+      "throughput": 423.20087248830083,
+      "cpu_ms_per_success": 2.36145525,
+      "summary": {
+        "planned": 8000,
+        "sent": 8000,
+        "success": 8000,
+        "acknowledged": 8000,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 328.9360519993352,
+        "scheduled_p95_ms": 13275.656598998467,
+        "issuance_wait_p95_ms": 13155.21829899808
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "resources": {
+        "cpu_cores_average": 0.9993699221420786,
+        "generator_cpu_seconds": 6.7366965400000005,
+        "wbytes_delta": 0,
+        "wios_delta": 0,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 151897,
+        "io_some_usec_delta": 0
+      },
+      "duration_with_drain_seconds": 18.90355270999862,
+      "restart": null,
+      "memory_peak_bytes": 1086644224,
+      "observed_gomaxprocs": [
+        1
+      ],
+      "version": "baseline",
+      "workers": 80,
+      "trial_status": "success",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 26.427421005791984,
+        "scheduled_p95_ms": 26.843075000215322,
+        "issuance_wait_p95_ms": null
+      },
+      "integrity_ok": true,
+      "integrity_counts": {
+        "missing_acknowledged": 0,
+        "stored_without_acknowledgement": 0,
+        "duplicates": 0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 19912,
+          "saved": 19912,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 8061123,
+        "day_file_bytes": {
+          "20261027": 8061123
+        }
+      },
+      "environment": {
+        "OIMO_PROBE_STORAGE": "tmpfs",
+        "OIMO_PROBE_TMPFS": "1",
+        "OIMO_PROBE_CPUS": "1"
+      },
+      "raw": "var/posting-json-typed-20261027/fixed-tmpfs-w80-baseline-1cpu-r1.json"
+    },
+    {
+      "name": "fixed-tmpfs-w80-candidate-1cpu-r1",
+      "variant": "candidate",
+      "kind": "fixed",
+      "cpu": 1,
+      "memory": "4g",
+      "storage": "tmpfs",
+      "command": [
+        "python3",
+        "/home/patatan/OimoBBS/var/posting-json-typed-20261027/balanced120-probe.py",
+        "--image",
+        "sha256:c6a6e9c8c5011b97a6bed8f03bdadeeaa14076696284d77a995bf8a35b25350a",
+        "--cpus",
+        "1",
+        "--memory",
+        "4g",
+        "--egress-bps",
+        "80000000",
+        "--waf",
+        "--waf-posting-rate",
+        "100000",
+        "--waf-posting-concurrent",
+        "256",
+        "--waf-posting-client-rate",
+        "1000",
+        "--optional-log-stats",
+        "--collect-server-log",
+        "--posting-capacity-rate",
+        "1600",
+        "--posting-capacity-seconds",
+        "5",
+        "--posting-capacity-workers",
+        "80",
+        "--posting-capacity-threads",
+        "16",
+        "--output",
+        "/home/patatan/OimoBBS/var/posting-json-typed-20261027/fixed-tmpfs-w80-candidate-1cpu-r1.json",
+        "--posting-capacity-fixed-count"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 39.885571685001196,
+      "throughput": 445.46057873007067,
+      "cpu_ms_per_success": 2.2428461250000002,
+      "summary": {
+        "planned": 8000,
+        "sent": 8000,
+        "success": 8000,
+        "acknowledged": 8000,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 331.62752999487566,
+        "scheduled_p95_ms": 12347.290300000168,
+        "issuance_wait_p95_ms": 12226.55709800165
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "resources": {
+        "cpu_cores_average": 0.9990995328449963,
+        "generator_cpu_seconds": 6.905658936,
+        "wbytes_delta": 0,
+        "wios_delta": 0,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 129661,
+        "io_some_usec_delta": 0
+      },
+      "duration_with_drain_seconds": 17.958940436001285,
+      "restart": null,
+      "memory_peak_bytes": 1065951232,
+      "observed_gomaxprocs": [
+        1
+      ],
+      "version": "candidate",
+      "workers": 80,
+      "trial_status": "success",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 27.24389200011501,
+        "scheduled_p95_ms": 27.37552599865012,
+        "issuance_wait_p95_ms": null
+      },
+      "integrity_ok": true,
+      "integrity_counts": {
+        "missing_acknowledged": 0,
+        "stored_without_acknowledgement": 0,
+        "duplicates": 0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 19912,
+          "saved": 19912,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 8077369,
+        "day_file_bytes": {
+          "20261027": 8077369
+        }
+      },
+      "environment": {
+        "OIMO_PROBE_STORAGE": "tmpfs",
+        "OIMO_PROBE_TMPFS": "1",
+        "OIMO_PROBE_CPUS": "1"
+      },
+      "raw": "var/posting-json-typed-20261027/fixed-tmpfs-w80-candidate-1cpu-r1.json"
+    },
+    {
+      "name": "fixed-tmpfs-w80-candidate-1cpu-r2",
+      "variant": "candidate",
+      "kind": "fixed",
+      "cpu": 1,
+      "memory": "4g",
+      "storage": "tmpfs",
+      "command": [
+        "python3",
+        "/home/patatan/OimoBBS/var/posting-json-typed-20261027/balanced120-probe.py",
+        "--image",
+        "sha256:c6a6e9c8c5011b97a6bed8f03bdadeeaa14076696284d77a995bf8a35b25350a",
+        "--cpus",
+        "1",
+        "--memory",
+        "4g",
+        "--egress-bps",
+        "80000000",
+        "--waf",
+        "--waf-posting-rate",
+        "100000",
+        "--waf-posting-concurrent",
+        "256",
+        "--waf-posting-client-rate",
+        "1000",
+        "--optional-log-stats",
+        "--collect-server-log",
+        "--posting-capacity-rate",
+        "1600",
+        "--posting-capacity-seconds",
+        "5",
+        "--posting-capacity-workers",
+        "80",
+        "--posting-capacity-threads",
+        "16",
+        "--output",
+        "/home/patatan/OimoBBS/var/posting-json-typed-20261027/fixed-tmpfs-w80-candidate-1cpu-r2.json",
+        "--posting-capacity-fixed-count"
+      ],
+      "exit_code": 1,
+      "wall_seconds": 47.57774004300154,
+      "throughput": 449.36076825251183,
+      "cpu_ms_per_success": 2.223583645911478,
+      "summary": {
+        "planned": 8000,
+        "sent": 8000,
+        "success": 7998,
+        "acknowledged": 7998,
+        "completion_errors_after_ack": 0,
+        "errors": 2,
+        "skipped": 0,
+        "http_p95_ms": 324.1761850003968,
+        "scheduled_p95_ms": 12216.813211001863,
+        "issuance_wait_p95_ms": 12062.777737999568
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "resources": {
+        "cpu_cores_average": 0.9991912554005029,
+        "generator_cpu_seconds": 6.797132441,
+        "wbytes_delta": 0,
+        "wios_delta": 0,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 126964,
+        "io_some_usec_delta": 0
+      },
+      "duration_with_drain_seconds": 17.7986165350012,
+      "restart": null,
+      "memory_peak_bytes": 1127260160,
+      "observed_gomaxprocs": [
+        1
+      ],
+      "version": "candidate",
+      "workers": 80,
+      "trial_status": "http_failure",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 26.639771000191104,
+        "scheduled_p95_ms": 26.768258001538925,
+        "issuance_wait_p95_ms": null
+      },
+      "integrity_ok": false,
+      "integrity_counts": {
+        "missing_acknowledged": 0,
+        "stored_without_acknowledgement": 2,
+        "duplicates": 0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 19911,
+          "saved": 19911,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 8071777,
+        "day_file_bytes": {
+          "20261027": 8071777
+        }
+      },
+      "environment": {
+        "OIMO_PROBE_STORAGE": "tmpfs",
+        "OIMO_PROBE_TMPFS": "1",
+        "OIMO_PROBE_CPUS": "1"
+      },
+      "raw": "var/posting-json-typed-20261027/fixed-tmpfs-w80-candidate-1cpu-r2.json"
+    },
+    {
+      "name": "fixed-tmpfs-w80-baseline-1cpu-r2",
+      "variant": "baseline",
+      "kind": "fixed",
+      "cpu": 1,
+      "memory": "4g",
+      "storage": "tmpfs",
+      "command": [
+        "python3",
+        "/home/patatan/OimoBBS/var/posting-json-typed-20261027/balanced120-probe.py",
+        "--image",
+        "sha256:3f117af8b4fdbb1d0071620b997411a01ea712dc466a0b62e5e158e485f5d8de",
+        "--cpus",
+        "1",
+        "--memory",
+        "4g",
+        "--egress-bps",
+        "80000000",
+        "--waf",
+        "--waf-posting-rate",
+        "100000",
+        "--waf-posting-concurrent",
+        "256",
+        "--waf-posting-client-rate",
+        "1000",
+        "--optional-log-stats",
+        "--collect-server-log",
+        "--posting-capacity-rate",
+        "1600",
+        "--posting-capacity-seconds",
+        "5",
+        "--posting-capacity-workers",
+        "80",
+        "--posting-capacity-threads",
+        "16",
+        "--output",
+        "/home/patatan/OimoBBS/var/posting-json-typed-20261027/fixed-tmpfs-w80-baseline-1cpu-r2.json",
+        "--posting-capacity-fixed-count"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 39.51683352299733,
+      "throughput": 429.5006549256047,
+      "cpu_ms_per_success": 2.32679375,
+      "summary": {
+        "planned": 8000,
+        "sent": 8000,
+        "success": 8000,
+        "acknowledged": 8000,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 331.064902995422,
+        "scheduled_p95_ms": 13036.326663997897,
+        "issuance_wait_p95_ms": 12915.83959399577
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "resources": {
+        "cpu_cores_average": 0.9993594395018038,
+        "generator_cpu_seconds": 6.697223735000001,
+        "wbytes_delta": 0,
+        "wios_delta": 0,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 143121,
+        "io_some_usec_delta": 0
+      },
+      "duration_with_drain_seconds": 18.626281260003452,
+      "restart": null,
+      "memory_peak_bytes": 1071153152,
+      "observed_gomaxprocs": [
+        1
+      ],
+      "version": "baseline",
+      "workers": 80,
+      "trial_status": "success",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 25.423958999454044,
+        "scheduled_p95_ms": 25.55215699976543,
+        "issuance_wait_p95_ms": null
+      },
+      "integrity_ok": true,
+      "integrity_counts": {
+        "missing_acknowledged": 0,
+        "stored_without_acknowledgement": 0,
+        "duplicates": 0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 19912,
+          "saved": 19912,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 8066402,
+        "day_file_bytes": {
+          "20261027": 8066402
+        }
+      },
+      "environment": {
+        "OIMO_PROBE_STORAGE": "tmpfs",
+        "OIMO_PROBE_TMPFS": "1",
+        "OIMO_PROBE_CPUS": "1"
+      },
+      "raw": "var/posting-json-typed-20261027/fixed-tmpfs-w80-baseline-1cpu-r2.json"
+    },
+    {
+      "name": "fixed-tmpfs-w80-baseline-1cpu-r3",
+      "variant": "baseline",
+      "kind": "fixed",
+      "cpu": 1,
+      "memory": "4g",
+      "storage": "tmpfs",
+      "command": [
+        "python3",
+        "/home/patatan/OimoBBS/var/posting-json-typed-20261027/balanced120-probe.py",
+        "--image",
+        "sha256:3f117af8b4fdbb1d0071620b997411a01ea712dc466a0b62e5e158e485f5d8de",
+        "--cpus",
+        "1",
+        "--memory",
+        "4g",
+        "--egress-bps",
+        "80000000",
+        "--waf",
+        "--waf-posting-rate",
+        "100000",
+        "--waf-posting-concurrent",
+        "256",
+        "--waf-posting-client-rate",
+        "1000",
+        "--optional-log-stats",
+        "--collect-server-log",
+        "--posting-capacity-rate",
+        "1600",
+        "--posting-capacity-seconds",
+        "5",
+        "--posting-capacity-workers",
+        "80",
+        "--posting-capacity-threads",
+        "16",
+        "--output",
+        "/home/patatan/OimoBBS/var/posting-json-typed-20261027/fixed-tmpfs-w80-baseline-1cpu-r3.json",
+        "--posting-capacity-fixed-count"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 40.22744710400002,
+      "throughput": 416.8870725386592,
+      "cpu_ms_per_success": 2.392292,
+      "summary": {
+        "planned": 8000,
+        "sent": 8000,
+        "success": 8000,
+        "acknowledged": 8000,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 338.8168550009141,
+        "scheduled_p95_ms": 13601.208027997927,
+        "issuance_wait_p95_ms": 13476.820021001913
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "resources": {
+        "cpu_cores_average": 0.997315608537654,
+        "generator_cpu_seconds": 6.862202591,
+        "wbytes_delta": 0,
+        "wios_delta": 0,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 193617,
+        "io_some_usec_delta": 0
+      },
+      "duration_with_drain_seconds": 19.18984906699916,
+      "restart": null,
+      "memory_peak_bytes": 1136939008,
+      "observed_gomaxprocs": [
+        1
+      ],
+      "version": "baseline",
+      "workers": 80,
+      "trial_status": "success",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 26.351145999797154,
+        "scheduled_p95_ms": 26.46729300613515,
+        "issuance_wait_p95_ms": null
+      },
+      "integrity_ok": true,
+      "integrity_counts": {
+        "missing_acknowledged": 0,
+        "stored_without_acknowledgement": 0,
+        "duplicates": 0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 19912,
+          "saved": 19912,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 8056586,
+        "day_file_bytes": {
+          "20261027": 8056586
+        }
+      },
+      "environment": {
+        "OIMO_PROBE_STORAGE": "tmpfs",
+        "OIMO_PROBE_TMPFS": "1",
+        "OIMO_PROBE_CPUS": "1"
+      },
+      "raw": "var/posting-json-typed-20261027/fixed-tmpfs-w80-baseline-1cpu-r3.json"
+    },
+    {
+      "name": "fixed-tmpfs-w80-candidate-1cpu-r3",
+      "variant": "candidate",
+      "kind": "fixed",
+      "cpu": 1,
+      "memory": "4g",
+      "storage": "tmpfs",
+      "command": [
+        "python3",
+        "/home/patatan/OimoBBS/var/posting-json-typed-20261027/balanced120-probe.py",
+        "--image",
+        "sha256:c6a6e9c8c5011b97a6bed8f03bdadeeaa14076696284d77a995bf8a35b25350a",
+        "--cpus",
+        "1",
+        "--memory",
+        "4g",
+        "--egress-bps",
+        "80000000",
+        "--waf",
+        "--waf-posting-rate",
+        "100000",
+        "--waf-posting-concurrent",
+        "256",
+        "--waf-posting-client-rate",
+        "1000",
+        "--optional-log-stats",
+        "--collect-server-log",
+        "--posting-capacity-rate",
+        "1600",
+        "--posting-capacity-seconds",
+        "5",
+        "--posting-capacity-workers",
+        "80",
+        "--posting-capacity-threads",
+        "16",
+        "--output",
+        "/home/patatan/OimoBBS/var/posting-json-typed-20261027/fixed-tmpfs-w80-candidate-1cpu-r3.json",
+        "--posting-capacity-fixed-count"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 38.343133547001344,
+      "throughput": 455.8872412751064,
+      "cpu_ms_per_success": 2.188118,
+      "summary": {
+        "planned": 8000,
+        "sent": 8000,
+        "success": 8000,
+        "acknowledged": 8000,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 327.9632949997904,
+        "scheduled_p95_ms": 11931.765654997434,
+        "issuance_wait_p95_ms": 11791.550450005161
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "resources": {
+        "cpu_cores_average": 0.9975350786044033,
+        "generator_cpu_seconds": 6.6848984279999994,
+        "wbytes_delta": 0,
+        "wios_delta": 0,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 156809,
+        "io_some_usec_delta": 0
+      },
+      "duration_with_drain_seconds": 17.548198930999206,
+      "restart": null,
+      "memory_peak_bytes": 1118392320,
+      "observed_gomaxprocs": [
+        1
+      ],
+      "version": "candidate",
+      "workers": 80,
+      "trial_status": "success",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 26.139677000173833,
+        "scheduled_p95_ms": 26.237040998239536,
+        "issuance_wait_p95_ms": null
+      },
+      "integrity_ok": true,
+      "integrity_counts": {
+        "missing_acknowledged": 0,
+        "stored_without_acknowledgement": 0,
+        "duplicates": 0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 19912,
+          "saved": 19912,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 8076905,
+        "day_file_bytes": {
+          "20261027": 8076905
+        }
+      },
+      "environment": {
+        "OIMO_PROBE_STORAGE": "tmpfs",
+        "OIMO_PROBE_TMPFS": "1",
+        "OIMO_PROBE_CPUS": "1"
+      },
+      "raw": "var/posting-json-typed-20261027/fixed-tmpfs-w80-candidate-1cpu-r3.json"
+    },
+    {
+      "name": "fixed-tmpfs-w80-candidate-diag-1cpu-r1",
+      "variant": "candidate-diag",
+      "kind": "diagnostic",
+      "cpu": 1,
+      "memory": "4g",
+      "storage": "tmpfs",
+      "command": [
+        "python3",
+        "/home/patatan/OimoBBS/var/posting-json-typed-20261027/balanced120-probe.py",
+        "--image",
+        "sha256:57aff2e717fbd803f83d12648e5686778f0ad2128cca4753d1fc8d61040e1134",
+        "--cpus",
+        "1",
+        "--memory",
+        "4g",
+        "--egress-bps",
+        "80000000",
+        "--waf",
+        "--waf-posting-rate",
+        "100000",
+        "--waf-posting-concurrent",
+        "256",
+        "--waf-posting-client-rate",
+        "1000",
+        "--optional-log-stats",
+        "--collect-server-log",
+        "--posting-capacity-rate",
+        "1600",
+        "--posting-capacity-seconds",
+        "5",
+        "--posting-capacity-workers",
+        "80",
+        "--posting-capacity-threads",
+        "16",
+        "--output",
+        "/home/patatan/OimoBBS/var/posting-json-typed-20261027/fixed-tmpfs-w80-candidate-diag-1cpu-r1.json",
+        "--posting-capacity-fixed-count",
+        "--collect-profiles"
+      ],
+      "exit_code": -15,
+      "wall_seconds": 240.57636384199577,
+      "throughput": null,
+      "cpu_ms_per_success": null,
+      "summary": null,
+      "read_summary": null,
+      "resources": null,
+      "duration_with_drain_seconds": null,
+      "restart": null,
+      "memory_peak_bytes": null,
+      "observed_gomaxprocs": [
+        1
+      ],
+      "version": "candidate",
+      "workers": 80,
+      "trial_status": "setup_failure",
+      "recovery": null,
+      "integrity_ok": null,
+      "integrity_counts": {
+        "missing_acknowledged": 0,
+        "stored_without_acknowledgement": 0,
+        "duplicates": 0
+      },
+      "environment": {
+        "OIMO_PROBE_STORAGE": "tmpfs",
+        "OIMO_PROBE_TMPFS": "1",
+        "OIMO_PROBE_CPUS": "1"
+      },
+      "raw": "var/posting-json-typed-20261027/fixed-tmpfs-w80-candidate-diag-1cpu-r1.json"
+    },
+    {
+      "name": "fixed-tmpfs-w80-baseline-diag-1cpu-r1",
+      "variant": "baseline-diag",
+      "kind": "diagnostic",
+      "cpu": 1,
+      "memory": "4g",
+      "storage": "tmpfs",
+      "command": [
+        "python3",
+        "/home/patatan/OimoBBS/var/posting-json-typed-20261027/balanced120-probe.py",
+        "--image",
+        "sha256:7b6bff4a5ceddc54f7c94fb7a2f78c9e28ce0f07f711276b75729605e94b8c91",
+        "--cpus",
+        "1",
+        "--memory",
+        "4g",
+        "--egress-bps",
+        "80000000",
+        "--waf",
+        "--waf-posting-rate",
+        "100000",
+        "--waf-posting-concurrent",
+        "256",
+        "--waf-posting-client-rate",
+        "1000",
+        "--optional-log-stats",
+        "--collect-server-log",
+        "--posting-capacity-rate",
+        "1600",
+        "--posting-capacity-seconds",
+        "5",
+        "--posting-capacity-workers",
+        "80",
+        "--posting-capacity-threads",
+        "16",
+        "--output",
+        "/home/patatan/OimoBBS/var/posting-json-typed-20261027/fixed-tmpfs-w80-baseline-diag-1cpu-r1.json",
+        "--posting-capacity-fixed-count",
+        "--collect-profiles"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 46.695052306000434,
+      "throughput": 412.8448884052874,
+      "cpu_ms_per_success": 2.419412,
+      "summary": {
+        "planned": 8000,
+        "sent": 8000,
+        "success": 8000,
+        "acknowledged": 8000,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 339.6015239995904,
+        "scheduled_p95_ms": 13762.63933500013,
+        "issuance_wait_p95_ms": 13647.262886996032
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "resources": {
+        "cpu_cores_average": 0.9988418771464133,
+        "generator_cpu_seconds": 6.901176348,
+        "diagnostic_cpu_pressure_before": "some avg10=0.00 avg60=0.00 avg300=0.00 total=6614\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=6614\n",
+        "diagnostic_cpu_pressure_after": "some avg10=0.00 avg60=0.00 avg300=0.00 total=115547\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=115546\n",
+        "wbytes_delta": 0,
+        "wios_delta": 0,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 182993,
+        "io_some_usec_delta": 0
+      },
+      "duration_with_drain_seconds": 19.377737800998148,
+      "restart": null,
+      "memory_peak_bytes": 1106284544,
+      "observed_gomaxprocs": [
+        1
+      ],
+      "version": "baseline",
+      "workers": 80,
+      "trial_status": "success",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 26.185949995124247,
+        "scheduled_p95_ms": 26.306120002118405,
+        "issuance_wait_p95_ms": null
+      },
+      "integrity_ok": true,
+      "integrity_counts": {
+        "missing_acknowledged": 0,
+        "stored_without_acknowledgement": 0,
+        "duplicates": 0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 19912,
+          "saved": 19912,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 8067897,
+        "day_file_bytes": {
+          "20261027": 8067897
+        }
+      },
+      "environment": {
+        "OIMO_PROBE_STORAGE": "tmpfs",
+        "OIMO_PROBE_TMPFS": "1",
+        "OIMO_PROBE_CPUS": "1"
+      },
+      "raw": "var/posting-json-typed-20261027/fixed-tmpfs-w80-baseline-diag-1cpu-r1.json"
+    },
+    {
+      "name": "fixed-disk-w120-candidate-2cpu-r1",
+      "variant": "candidate",
+      "kind": "fixed",
+      "cpu": 2,
+      "memory": "4g",
+      "storage": "disk",
+      "command": [
+        "python3",
+        "/home/patatan/OimoBBS/var/posting-json-typed-20261027/balanced120-probe.py",
+        "--image",
+        "sha256:c6a6e9c8c5011b97a6bed8f03bdadeeaa14076696284d77a995bf8a35b25350a",
+        "--cpus",
+        "2",
+        "--memory",
+        "4g",
+        "--egress-bps",
+        "80000000",
+        "--waf",
+        "--waf-posting-rate",
+        "100000",
+        "--waf-posting-concurrent",
+        "256",
+        "--waf-posting-client-rate",
+        "1000",
+        "--optional-log-stats",
+        "--collect-server-log",
+        "--posting-capacity-rate",
+        "1600",
+        "--posting-capacity-seconds",
+        "5",
+        "--posting-capacity-workers",
+        "120",
+        "--posting-capacity-threads",
+        "16",
+        "--output",
+        "/home/patatan/OimoBBS/var/posting-json-typed-20261027/fixed-disk-w120-candidate-2cpu-r1.json",
+        "--posting-capacity-fixed-count"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 39.3602733420048,
+      "throughput": 660.7813900687507,
+      "cpu_ms_per_success": 2.4875225,
+      "summary": {
+        "planned": 8000,
+        "sent": 8000,
+        "success": 8000,
+        "acknowledged": 8000,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 303.56905299413484,
+        "scheduled_p95_ms": 6759.535432000121,
+        "issuance_wait_p95_ms": 6643.656853004359
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "resources": {
+        "cpu_cores_average": 1.643708575377294,
+        "generator_cpu_seconds": 7.272674058,
+        "wbytes_delta": 135528448,
+        "wios_delta": 1415,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 0,
+        "io_some_usec_delta": 106682
+      },
+      "duration_with_drain_seconds": 12.106878493003023,
+      "restart": null,
+      "memory_peak_bytes": 1058992128,
+      "observed_gomaxprocs": [
+        2
+      ],
+      "version": "candidate",
+      "workers": 120,
+      "trial_status": "success",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 34.549437994428445,
+        "scheduled_p95_ms": 34.6116790024098,
+        "issuance_wait_p95_ms": null
+      },
+      "integrity_ok": true,
+      "integrity_counts": {
+        "missing_acknowledged": 0,
+        "stored_without_acknowledgement": 0,
+        "duplicates": 0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 20098,
+          "saved": 20098,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 8219749,
+        "day_file_bytes": {
+          "20261027": 8219749
+        }
+      },
+      "environment": {
+        "OIMO_PROBE_STORAGE": "disk",
+        "OIMO_PROBE_TMPFS": "0",
+        "OIMO_PROBE_CPUS": "2"
+      },
+      "raw": "var/posting-json-typed-20261027/fixed-disk-w120-candidate-2cpu-r1.json"
+    },
+    {
+      "name": "fixed-disk-w120-baseline-2cpu-r1",
+      "variant": "baseline",
+      "kind": "fixed",
+      "cpu": 2,
+      "memory": "4g",
+      "storage": "disk",
+      "command": [
+        "python3",
+        "/home/patatan/OimoBBS/var/posting-json-typed-20261027/balanced120-probe.py",
+        "--image",
+        "sha256:3f117af8b4fdbb1d0071620b997411a01ea712dc466a0b62e5e158e485f5d8de",
+        "--cpus",
+        "2",
+        "--memory",
+        "4g",
+        "--egress-bps",
+        "80000000",
+        "--waf",
+        "--waf-posting-rate",
+        "100000",
+        "--waf-posting-concurrent",
+        "256",
+        "--waf-posting-client-rate",
+        "1000",
+        "--optional-log-stats",
+        "--collect-server-log",
+        "--posting-capacity-rate",
+        "1600",
+        "--posting-capacity-seconds",
+        "5",
+        "--posting-capacity-workers",
+        "120",
+        "--posting-capacity-threads",
+        "16",
+        "--output",
+        "/home/patatan/OimoBBS/var/posting-json-typed-20261027/fixed-disk-w120-baseline-2cpu-r1.json",
+        "--posting-capacity-fixed-count"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 49.75657735099958,
+      "throughput": 358.72925831935527,
+      "cpu_ms_per_success": 2.636334375,
+      "summary": {
+        "planned": 8000,
+        "sent": 8000,
+        "success": 8000,
+        "acknowledged": 8000,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 868.2285460017738,
+        "scheduled_p95_ms": 16957.768279993616,
+        "issuance_wait_p95_ms": 16828.695929994865
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "resources": {
+        "cpu_cores_average": 0.945730275025571,
+        "generator_cpu_seconds": 7.153692154,
+        "wbytes_delta": 110723072,
+        "wios_delta": 1288,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 0,
+        "io_some_usec_delta": 2033101
+      },
+      "duration_with_drain_seconds": 22.30094093099615,
+      "restart": null,
+      "memory_peak_bytes": 1071345664,
+      "observed_gomaxprocs": [
+        2
+      ],
+      "version": "baseline",
+      "workers": 120,
+      "trial_status": "success",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 33.475529999122955,
+        "scheduled_p95_ms": 33.59117000218248,
+        "issuance_wait_p95_ms": null
+      },
+      "integrity_ok": true,
+      "integrity_counts": {
+        "missing_acknowledged": 0,
+        "stored_without_acknowledgement": 0,
+        "duplicates": 0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 20098,
+          "saved": 20098,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 8201139,
+        "day_file_bytes": {
+          "20261027": 8201139
+        }
+      },
+      "environment": {
+        "OIMO_PROBE_STORAGE": "disk",
+        "OIMO_PROBE_TMPFS": "0",
+        "OIMO_PROBE_CPUS": "2"
+      },
+      "raw": "var/posting-json-typed-20261027/fixed-disk-w120-baseline-2cpu-r1.json"
+    },
+    {
+      "name": "mixed-disk-w120-baseline-2cpu-r1",
+      "variant": "baseline",
+      "kind": "mixed",
+      "cpu": 2,
+      "memory": "4g",
+      "storage": "disk",
+      "command": [
+        "python3",
+        "/home/patatan/OimoBBS/var/posting-json-typed-20261027/balanced120-probe.py",
+        "--image",
+        "sha256:3f117af8b4fdbb1d0071620b997411a01ea712dc466a0b62e5e158e485f5d8de",
+        "--cpus",
+        "2",
+        "--memory",
+        "4g",
+        "--egress-bps",
+        "8000000000",
+        "--waf",
+        "--waf-posting-rate",
+        "100000",
+        "--waf-posting-concurrent",
+        "256",
+        "--waf-posting-client-rate",
+        "1000",
+        "--optional-log-stats",
+        "--collect-server-log",
+        "--posting-capacity-rate",
+        "160",
+        "--posting-capacity-seconds",
+        "30",
+        "--posting-capacity-workers",
+        "120",
+        "--posting-capacity-threads",
+        "16",
+        "--output",
+        "/home/patatan/OimoBBS/var/posting-json-typed-20261027/mixed-disk-w120-baseline-2cpu-r1.json",
+        "--posting-capacity-reads",
+        "400",
+        "--posting-capacity-subject-every",
+        "4",
+        "--posting-capacity-restart"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 103.87020743999892,
+      "throughput": 158.46784745590065,
+      "cpu_ms_per_success": 5.887599033816425,
+      "summary": {
+        "planned": 4800,
+        "sent": 4800,
+        "success": 4761,
+        "acknowledged": 4761,
+        "completion_errors_after_ack": 0,
+        "errors": 39,
+        "skipped": 0,
+        "http_p95_ms": 331.9663010042859,
+        "scheduled_p95_ms": 359.2073489999166,
+        "issuance_wait_p95_ms": 0.793594001152087
+      },
+      "read_summary": {
+        "planned": 12000,
+        "sent": 11741,
+        "success": 11721,
+        "acknowledged": 11721,
+        "completion_errors_after_ack": 0,
+        "errors": 20,
+        "skipped": 259,
+        "http_p95_ms": 13.375230999372434,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 859.7847653333333
+      },
+      "resources": {
+        "cpu_cores_average": 0.9329951455723293,
+        "generator_cpu_seconds": 14.512541268000001,
+        "wbytes_delta": 293072896,
+        "wios_delta": 5060,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 0,
+        "io_some_usec_delta": 1004180
+      },
+      "duration_with_drain_seconds": 30.043949459999567,
+      "restart": {
+        "ok": true,
+        "mode": "graceful container restart on the same data volume",
+        "ready": true,
+        "readiness_timeout_seconds": 60,
+        "ready_seconds": 15.858630597002048,
+        "verification_seconds": 15.867628189000243,
+        "threads": [
+          {
+            "key": "1793096851",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1793096852",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1793096853",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1793096854",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1793096855",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1793096856",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1793096857",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1793096858",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1793096859",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1793096860",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1793096861",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1793096862",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1793096863",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1793096864",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1793096865",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1793096866",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          }
+        ]
+      },
+      "memory_peak_bytes": 938151936,
+      "observed_gomaxprocs": [
+        2
+      ],
+      "version": "baseline",
+      "workers": 120,
+      "trial_status": "http_failure",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 32.63985600642627,
+        "scheduled_p95_ms": 33.33755199855659,
+        "issuance_wait_p95_ms": null
+      },
+      "integrity_ok": true,
+      "integrity_counts": {
+        "missing_acknowledged": 0,
+        "stored_without_acknowledgement": 0,
+        "duplicates": 0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 17,
+          "saved": 17,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 11233354,
+        "day_file_bytes": {
+          "20261027": 11233354
+        }
+      },
+      "timed_process_optional_shutdown": {
+        "summary": {
+          "schema": "optional-http-loss-summary-v1",
+          "completeness": "snapshot_only",
+          "site_id": "63d33acbb3c9c7990ba00117dc341a52",
+          "sequence": "3",
+          "previous_sha256": "76d066655b1693fd7860445fdff3f2a4040b27106274195de5da7293c86eacf4",
+          "monitor_boot_id": "ba94dbc86e25998e9859e1e228b8071d",
+          "opened_at_ns": "1793096822826328769",
+          "observed_at_ns": "1793096908648623154",
+          "clean_shutdown": true,
+          "prior_known_losses": {
+            "failed": 0,
+            "dropped_capacity": 0,
+            "dropped_invalid": 0,
+            "dropped_closed": 0,
+            "dropped_shutdown": 0,
+            "startup_discarded": 0
+          },
+          "queue": {
+            "accepted": 26124,
+            "saved": 26124,
+            "failed": 0,
+            "dropped_capacity": 0,
+            "dropped_invalid": 0,
+            "dropped_closed": 0,
+            "dropped_shutdown": 0,
+            "loss_started_at_ns": "0",
+            "loss_finished_at_ns": "0",
+            "pending": 0,
+            "pending_bytes": 0,
+            "closed": true
+          },
+          "startup_discarded": 0,
+          "unclean_boots": 0,
+          "unknown_from_ns": "0",
+          "unknown_until_ns": "0",
+          "known_loss_from_ns": "0",
+          "known_loss_until_ns": "0"
+        },
+        "signature": "5DODe2lXIetTEbcTcaJbmTN3qsaLDGXEhl8vWGqDjZoV0i077QFcwUubMjGw1U7lKc+yqexi53F6LJP+T61vAQ=="
+      },
+      "environment": {
+        "OIMO_PROBE_STORAGE": "disk",
+        "OIMO_PROBE_TMPFS": "0",
+        "OIMO_PROBE_CPUS": "2"
+      },
+      "raw": "var/posting-json-typed-20261027/mixed-disk-w120-baseline-2cpu-r1.json"
+    },
+    {
+      "name": "mixed-disk-w120-candidate-2cpu-r1",
+      "variant": "candidate",
+      "kind": "mixed",
+      "cpu": 2,
+      "memory": "4g",
+      "storage": "disk",
+      "command": [
+        "python3",
+        "/home/patatan/OimoBBS/var/posting-json-typed-20261027/balanced120-probe.py",
+        "--image",
+        "sha256:c6a6e9c8c5011b97a6bed8f03bdadeeaa14076696284d77a995bf8a35b25350a",
+        "--cpus",
+        "2",
+        "--memory",
+        "4g",
+        "--egress-bps",
+        "8000000000",
+        "--waf",
+        "--waf-posting-rate",
+        "100000",
+        "--waf-posting-concurrent",
+        "256",
+        "--waf-posting-client-rate",
+        "1000",
+        "--optional-log-stats",
+        "--collect-server-log",
+        "--posting-capacity-rate",
+        "160",
+        "--posting-capacity-seconds",
+        "30",
+        "--posting-capacity-workers",
+        "120",
+        "--posting-capacity-threads",
+        "16",
+        "--output",
+        "/home/patatan/OimoBBS/var/posting-json-typed-20261027/mixed-disk-w120-candidate-2cpu-r1.json",
+        "--posting-capacity-reads",
+        "400",
+        "--posting-capacity-subject-every",
+        "4",
+        "--posting-capacity-restart"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 116.54921865499637,
+      "throughput": 157.89500692567805,
+      "cpu_ms_per_success": 5.572786041666666,
+      "summary": {
+        "planned": 4800,
+        "sent": 4800,
+        "success": 4800,
+        "acknowledged": 4800,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 622.00055699941,
+        "scheduled_p95_ms": 668.1457440063241,
+        "issuance_wait_p95_ms": 1.3556550038629211
+      },
+      "read_summary": {
+        "planned": 12000,
+        "sent": 12000,
+        "success": 12000,
+        "acknowledged": 12000,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 11.424686999816913,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 880.1827877333334
+      },
+      "resources": {
+        "cpu_cores_average": 0.8799150906442802,
+        "generator_cpu_seconds": 14.192831165,
+        "wbytes_delta": 231141376,
+        "wios_delta": 5356,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 0,
+        "io_some_usec_delta": 1285246
+      },
+      "duration_with_drain_seconds": 30.399947999998403,
+      "restart": {
+        "ok": true,
+        "mode": "graceful container restart on the same data volume",
+        "ready": true,
+        "readiness_timeout_seconds": 60,
+        "ready_seconds": 14.775958707999962,
+        "verification_seconds": 14.78290276399639,
+        "threads": [
+          {
+            "key": "1793096968",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1793096969",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1793096970",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1793096971",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1793096972",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1793096973",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1793096974",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1793096975",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1793096976",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1793096977",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1793096978",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1793096979",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1793096980",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1793096981",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1793096982",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          },
+          {
+            "key": "1793096983",
+            "status": 200,
+            "body_equal": true,
+            "etag_equal": true,
+            "identity": true
+          }
+        ]
+      },
+      "memory_peak_bytes": 934313984,
+      "observed_gomaxprocs": [
+        2
+      ],
+      "version": "candidate",
+      "workers": 120,
+      "trial_status": "success",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 215.15132599597564,
+        "scheduled_p95_ms": 5027.781033000792,
+        "issuance_wait_p95_ms": null
+      },
+      "integrity_ok": true,
+      "integrity_counts": {
+        "missing_acknowledged": 0,
+        "stored_without_acknowledgement": 0,
+        "duplicates": 0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 17,
+          "saved": 17,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 11441681,
+        "day_file_bytes": {
+          "20261027": 11441681
+        }
+      },
+      "timed_process_optional_shutdown": {
+        "summary": {
+          "schema": "optional-http-loss-summary-v1",
+          "completeness": "snapshot_only",
+          "site_id": "682543b447cc12c59bc0e182d1bfd803",
+          "sequence": "3",
+          "previous_sha256": "c0f9ac26ba62ce9a1b59b3e8532f91c732af93bdeff0046ee39e80b7605d803c",
+          "monitor_boot_id": "2d27438cef2c063ffb2e2ccaf7b5512f",
+          "opened_at_ns": "1793096926774004502",
+          "observed_at_ns": "1793097026367397299",
+          "clean_shutdown": true,
+          "prior_known_losses": {
+            "failed": 0,
+            "dropped_capacity": 0,
+            "dropped_invalid": 0,
+            "dropped_closed": 0,
+            "dropped_shutdown": 0,
+            "startup_discarded": 0
+          },
+          "queue": {
+            "accepted": 26437,
+            "saved": 26437,
+            "failed": 0,
+            "dropped_capacity": 0,
+            "dropped_invalid": 0,
+            "dropped_closed": 0,
+            "dropped_shutdown": 0,
+            "loss_started_at_ns": "0",
+            "loss_finished_at_ns": "0",
+            "pending": 0,
+            "pending_bytes": 0,
+            "closed": true
+          },
+          "startup_discarded": 0,
+          "unclean_boots": 0,
+          "unknown_from_ns": "0",
+          "unknown_until_ns": "0",
+          "known_loss_from_ns": "0",
+          "known_loss_until_ns": "0"
+        },
+        "signature": "spBuLPxfy1sw7E8m5d2xBO1XRgSpR7+Dnkip9pin6IuRH24X7HlvQ6ycOrDwo+QJrPcF4z0inMojAajK32vJDg=="
+      },
+      "environment": {
+        "OIMO_PROBE_STORAGE": "disk",
+        "OIMO_PROBE_TMPFS": "0",
+        "OIMO_PROBE_CPUS": "2"
+      },
+      "raw": "var/posting-json-typed-20261027/mixed-disk-w120-candidate-2cpu-r1.json"
+    },
+    {
+      "name": "fixed-tmpfs-w80-baseline-1cpu-r4",
+      "variant": "baseline",
+      "kind": "fixed",
+      "cpu": 1,
+      "memory": "4g",
+      "storage": "tmpfs",
+      "command": [
+        "python3",
+        "/home/patatan/OimoBBS/var/posting-json-typed-20261027/balanced120-probe.py",
+        "--image",
+        "sha256:3f117af8b4fdbb1d0071620b997411a01ea712dc466a0b62e5e158e485f5d8de",
+        "--cpus",
+        "1",
+        "--memory",
+        "4g",
+        "--egress-bps",
+        "80000000",
+        "--waf",
+        "--waf-posting-rate",
+        "100000",
+        "--waf-posting-concurrent",
+        "256",
+        "--waf-posting-client-rate",
+        "1000",
+        "--optional-log-stats",
+        "--collect-server-log",
+        "--posting-capacity-rate",
+        "1600",
+        "--posting-capacity-seconds",
+        "5",
+        "--posting-capacity-workers",
+        "80",
+        "--posting-capacity-threads",
+        "16",
+        "--output",
+        "/home/patatan/OimoBBS/var/posting-json-typed-20261027/fixed-tmpfs-w80-baseline-1cpu-r4.json",
+        "--posting-capacity-fixed-count"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 45.370951883996895,
+      "throughput": 424.1878701667778,
+      "cpu_ms_per_success": 2.356695125,
+      "summary": {
+        "planned": 8000,
+        "sent": 8000,
+        "success": 8000,
+        "acknowledged": 8000,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 341.3255429986748,
+        "scheduled_p95_ms": 13281.94546699524,
+        "issuance_wait_p95_ms": 13169.80678300024
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "resources": {
+        "cpu_cores_average": 0.9996814857061781,
+        "generator_cpu_seconds": 6.780300013,
+        "wbytes_delta": 0,
+        "wios_delta": 0,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 158469,
+        "io_some_usec_delta": 0
+      },
+      "duration_with_drain_seconds": 18.85956804199668,
+      "restart": null,
+      "memory_peak_bytes": 1138790400,
+      "observed_gomaxprocs": [
+        1
+      ],
+      "version": "baseline",
+      "workers": 80,
+      "trial_status": "success",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 26.1121160001494,
+        "scheduled_p95_ms": 26.224702000035904,
+        "issuance_wait_p95_ms": null
+      },
+      "integrity_ok": true,
+      "integrity_counts": {
+        "missing_acknowledged": 0,
+        "stored_without_acknowledgement": 0,
+        "duplicates": 0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 19912,
+          "saved": 19912,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 8065708,
+        "day_file_bytes": {
+          "20261027": 8065708
+        }
+      },
+      "environment": {
+        "OIMO_PROBE_STORAGE": "tmpfs",
+        "OIMO_PROBE_TMPFS": "1",
+        "OIMO_PROBE_CPUS": "1"
+      },
+      "raw": "var/posting-json-typed-20261027/fixed-tmpfs-w80-baseline-1cpu-r4.json"
+    },
+    {
+      "name": "fixed-tmpfs-w80-candidate-1cpu-r4",
+      "variant": "candidate",
+      "kind": "fixed",
+      "cpu": 1,
+      "memory": "4g",
+      "storage": "tmpfs",
+      "command": [
+        "python3",
+        "/home/patatan/OimoBBS/var/posting-json-typed-20261027/balanced120-probe.py",
+        "--image",
+        "sha256:c6a6e9c8c5011b97a6bed8f03bdadeeaa14076696284d77a995bf8a35b25350a",
+        "--cpus",
+        "1",
+        "--memory",
+        "4g",
+        "--egress-bps",
+        "80000000",
+        "--waf",
+        "--waf-posting-rate",
+        "100000",
+        "--waf-posting-concurrent",
+        "256",
+        "--waf-posting-client-rate",
+        "1000",
+        "--optional-log-stats",
+        "--collect-server-log",
+        "--posting-capacity-rate",
+        "1600",
+        "--posting-capacity-seconds",
+        "5",
+        "--posting-capacity-workers",
+        "80",
+        "--posting-capacity-threads",
+        "16",
+        "--output",
+        "/home/patatan/OimoBBS/var/posting-json-typed-20261027/fixed-tmpfs-w80-candidate-1cpu-r4.json",
+        "--posting-capacity-fixed-count"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 38.66942161199404,
+      "throughput": 447.23060882211047,
+      "cpu_ms_per_success": 2.23382675,
+      "summary": {
+        "planned": 8000,
+        "sent": 8000,
+        "success": 8000,
+        "acknowledged": 8000,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 314.908631000435,
+        "scheduled_p95_ms": 12354.78701399552,
+        "issuance_wait_p95_ms": 12255.04500399984
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "resources": {
+        "cpu_cores_average": 0.9990356974056163,
+        "generator_cpu_seconds": 6.874138855,
+        "wbytes_delta": 0,
+        "wios_delta": 0,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 142403,
+        "io_some_usec_delta": 0
+      },
+      "duration_with_drain_seconds": 17.887863313000707,
+      "restart": null,
+      "memory_peak_bytes": 1121411072,
+      "observed_gomaxprocs": [
+        1
+      ],
+      "version": "candidate",
+      "workers": 80,
+      "trial_status": "success",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 25.58539100573398,
+        "scheduled_p95_ms": 25.69833600864513,
+        "issuance_wait_p95_ms": null
+      },
+      "integrity_ok": true,
+      "integrity_counts": {
+        "missing_acknowledged": 0,
+        "stored_without_acknowledgement": 0,
+        "duplicates": 0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 19912,
+          "saved": 19912,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 8066746,
+        "day_file_bytes": {
+          "20261027": 8066746
+        }
+      },
+      "environment": {
+        "OIMO_PROBE_STORAGE": "tmpfs",
+        "OIMO_PROBE_TMPFS": "1",
+        "OIMO_PROBE_CPUS": "1"
+      },
+      "raw": "var/posting-json-typed-20261027/fixed-tmpfs-w80-candidate-1cpu-r4.json"
+    },
+    {
+      "name": "fixed-tmpfs-w80-candidate-diag-1cpu-r2",
+      "variant": "candidate-diag",
+      "kind": "diagnostic",
+      "cpu": 1,
+      "memory": "4g",
+      "storage": "tmpfs",
+      "command": [
+        "python3",
+        "/home/patatan/OimoBBS/var/posting-json-typed-20261027/balanced120-probe.py",
+        "--image",
+        "sha256:57aff2e717fbd803f83d12648e5686778f0ad2128cca4753d1fc8d61040e1134",
+        "--cpus",
+        "1",
+        "--memory",
+        "4g",
+        "--egress-bps",
+        "80000000",
+        "--waf",
+        "--waf-posting-rate",
+        "100000",
+        "--waf-posting-concurrent",
+        "256",
+        "--waf-posting-client-rate",
+        "1000",
+        "--optional-log-stats",
+        "--collect-server-log",
+        "--posting-capacity-rate",
+        "1600",
+        "--posting-capacity-seconds",
+        "5",
+        "--posting-capacity-workers",
+        "80",
+        "--posting-capacity-threads",
+        "16",
+        "--output",
+        "/home/patatan/OimoBBS/var/posting-json-typed-20261027/fixed-tmpfs-w80-candidate-diag-1cpu-r2.json",
+        "--posting-capacity-fixed-count",
+        "--collect-profiles"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 39.65387543600082,
+      "throughput": 448.3337156912265,
+      "cpu_ms_per_success": 2.2284785,
+      "summary": {
+        "planned": 8000,
+        "sent": 8000,
+        "success": 8000,
+        "acknowledged": 8000,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 315.6283299977076,
+        "scheduled_p95_ms": 12274.13938400423,
+        "issuance_wait_p95_ms": 12151.013556001999
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "resources": {
+        "cpu_cores_average": 0.9991020462430109,
+        "generator_cpu_seconds": 6.778733492,
+        "diagnostic_cpu_pressure_before": "some avg10=0.00 avg60=0.00 avg300=0.00 total=5425\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=5425\n",
+        "diagnostic_cpu_pressure_after": "some avg10=0.00 avg60=0.00 avg300=0.00 total=91789\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=91789\n",
+        "wbytes_delta": 0,
+        "wios_delta": 0,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 126975,
+        "io_some_usec_delta": 0
+      },
+      "duration_with_drain_seconds": 17.843850953002402,
+      "restart": null,
+      "memory_peak_bytes": 1069432832,
+      "observed_gomaxprocs": [
+        1
+      ],
+      "version": "candidate",
+      "workers": 80,
+      "trial_status": "success",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 26.08894200238865,
+        "scheduled_p95_ms": 26.473508005437907,
+        "issuance_wait_p95_ms": null
+      },
+      "integrity_ok": true,
+      "integrity_counts": {
+        "missing_acknowledged": 0,
+        "stored_without_acknowledgement": 0,
+        "duplicates": 0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 19912,
+          "saved": 19912,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 8082368,
+        "day_file_bytes": {
+          "20261027": 8082368
+        }
+      },
+      "environment": {
+        "OIMO_PROBE_STORAGE": "tmpfs",
+        "OIMO_PROBE_TMPFS": "1",
+        "OIMO_PROBE_CPUS": "1"
+      },
+      "raw": "var/posting-json-typed-20261027/fixed-tmpfs-w80-candidate-diag-1cpu-r2.json"
+    }
+  ],
+  "checks": {
+    "fuzz-mutation.log": "fuzz: elapsed: 0s, gathering baseline coverage: 0/9 completed\nfuzz: elapsed: 0s, gathering baseline coverage: 9/9 completed, now fuzzing with 2 workers\nfuzz: elapsed: 3s, execs: 14474 (4817/sec), new interesting: 308 (total: 317)\nfuzz: elapsed: 6s, execs: 38004 (7852/sec), new interesting: 325 (total: 334)\nfuzz: elapsed: 9s, execs: 61417 (7805/sec), new interesting: 336 (total: 345)\nfuzz: elapsed: 12s, execs: 84428 (7671/sec), new interesting: 358 (total: 367)\nfuzz: elapsed: 15s, execs: 101928 (5833/sec), new interesting: 376 (total: 385)\nfuzz: elapsed: 18s, execs: 123576 (7217/sec), new interesting: 405 (total: 414)\nfuzz: elapsed: 21s, execs: 144766 (7058/sec), new interesting: 452 (total: 461)\nfuzz: elapsed: 24s, execs: 168125 (7793/sec), new interesting: 458 (total: 467)\nfuzz: elapsed: 27s, execs: 191713 (7862/sec), new interesting: 459 (total: 468)\nfuzz: elapsed: 30s, execs: 216282 (8188/sec), new interesting: 463 (total: 472)\nfuzz: elapsed: 33s, execs: 235235 (6318/sec), new interesting: 465 (total: 474)\nfuzz: elapsed: 36s, execs: 257600 (7456/sec), new interesting: 472 (total: 481)\nfuzz: elapsed: 39s, execs: 281794 (8063/sec), new interesting: 479 (total: 488)\nfuzz: elapsed: 42s, execs: 307431 (8546/sec), new interesting: 481 (total: 490)\nfuzz: elapsed: 45s, execs: 329564 (7379/sec), new interesting: 491 (total: 500)\nfuzz: elapsed: 45s, execs: 329564 (0/sec), new interesting: 491 (total: 500)\nPASS\nok  \toimobbs/internal/strictjson\t45.071s\n",
+    "fuzz-decode.log": "fuzz: elapsed: 0s, gathering baseline coverage: 0/10 completed\nfuzz: elapsed: 0s, gathering baseline coverage: 10/10 completed, now fuzzing with 2 workers\nfuzz: elapsed: 3s, execs: 13 (4/sec), new interesting: 0 (total: 10)\nfuzz: elapsed: 6s, execs: 13 (0/sec), new interesting: 0 (total: 10)\nfuzz: elapsed: 9s, execs: 13 (0/sec), new interesting: 0 (total: 10)\nfuzz: elapsed: 12s, execs: 13 (0/sec), new interesting: 0 (total: 10)\nfuzz: elapsed: 15s, execs: 13 (0/sec), new interesting: 0 (total: 10)\nfuzz: elapsed: 18s, execs: 13 (0/sec), new interesting: 0 (total: 10)\nfuzz: elapsed: 21s, execs: 13 (0/sec), new interesting: 0 (total: 10)\nfuzz: elapsed: 24s, execs: 13 (0/sec), new interesting: 0 (total: 10)\nfuzz: elapsed: 27s, execs: 13 (0/sec), new interesting: 0 (total: 10)\nfuzz: elapsed: 30s, execs: 13 (0/sec), new interesting: 0 (total: 10)\nfuzz: elapsed: 33s, execs: 13 (0/sec), new interesting: 0 (total: 10)\nfuzz: elapsed: 36s, execs: 13 (0/sec), new interesting: 0 (total: 10)\nfuzz: elapsed: 39s, execs: 13 (0/sec), new interesting: 0 (total: 10)\nfuzz: elapsed: 42s, execs: 13 (0/sec), new interesting: 0 (total: 10)\nfuzz: elapsed: 45s, execs: 13 (0/sec), new interesting: 0 (total: 10)\nfuzz: elapsed: 46s, execs: 13 (0/sec), new interesting: 0 (total: 10)\nPASS\nok  \toimobbs/internal/strictjson\t46.015s\n",
+    "fuzz-decode-bounded.log": "fuzz: elapsed: 0s, gathering baseline coverage: 0/10 completed\nfuzz: elapsed: 0s, gathering baseline coverage: 10/10 completed, now fuzzing with 2 workers\nfuzz: elapsed: 3s, execs: 2030 (677/sec), new interesting: 45 (total: 55)\nfuzz: elapsed: 6s, execs: 10936 (2968/sec), new interesting: 83 (total: 93)\nfuzz: elapsed: 9s, execs: 27459 (5508/sec), new interesting: 115 (total: 125)\nfuzz: elapsed: 12s, execs: 40347 (4297/sec), new interesting: 150 (total: 160)\nfuzz: elapsed: 15s, execs: 62721 (7458/sec), new interesting: 184 (total: 194)\nfuzz: elapsed: 18s, execs: 81637 (6304/sec), new interesting: 218 (total: 228)\nfuzz: elapsed: 21s, execs: 104167 (7510/sec), new interesting: 251 (total: 261)\nfuzz: elapsed: 24s, execs: 129971 (8603/sec), new interesting: 283 (total: 293)\nfuzz: elapsed: 27s, execs: 154354 (8126/sec), new interesting: 303 (total: 313)\nfuzz: elapsed: 30s, execs: 185217 (10290/sec), new interesting: 318 (total: 328)\nfuzz: elapsed: 30s, execs: 185217 (0/sec), new interesting: 318 (total: 328)\nPASS\nok  \toimobbs/internal/strictjson\t30.087s\n",
+    "fuzz-values.log": "fuzz: elapsed: 0s, gathering baseline coverage: 0/2 completed\nfuzz: elapsed: 0s, gathering baseline coverage: 2/2 completed, now fuzzing with 2 workers\nfuzz: elapsed: 3s, execs: 10240 (3413/sec), new interesting: 93 (total: 95)\nfuzz: elapsed: 6s, execs: 25585 (5115/sec), new interesting: 140 (total: 142)\nfuzz: elapsed: 9s, execs: 41819 (5410/sec), new interesting: 163 (total: 165)\nfuzz: elapsed: 12s, execs: 55491 (4557/sec), new interesting: 186 (total: 188)\nfuzz: elapsed: 15s, execs: 71732 (5415/sec), new interesting: 197 (total: 199)\nfuzz: elapsed: 18s, execs: 92914 (7060/sec), new interesting: 207 (total: 209)\nfuzz: elapsed: 21s, execs: 108264 (5116/sec), new interesting: 217 (total: 219)\nfuzz: elapsed: 24s, execs: 117919 (3219/sec), new interesting: 234 (total: 236)\nfuzz: elapsed: 27s, execs: 138465 (6847/sec), new interesting: 234 (total: 236)\nfuzz: elapsed: 30s, execs: 160915 (7485/sec), new interesting: 235 (total: 237)\nfuzz: elapsed: 30s, execs: 160915 (0/sec), new interesting: 235 (total: 237)\nPASS\nok  \toimobbs/internal/strictjson\t30.072s\n",
+    "race.log": "ok  \toimobbs/internal/strictjson\t22.656s\nok  \toimobbs/internal/domain\t1.451s\nok  \toimobbs/internal/postcapture\t5.675s\nok  \toimobbs/internal/evidence\t250.739s\nok  \toimobbs/internal/store\t49.203s\n",
+    "race-final.log": "ok  \toimobbs/internal/strictjson\t14.463s\nok  \toimobbs/tools/jsondecodegen\t1.098s\n",
+    "regression.log": "ok  \toimobbs/internal/app\t35.227s\nok  \toimobbs/internal/evidence\t73.793s\nok  \toimobbs/internal/store\t9.444s\nok  \toimobbs/internal/domain\t0.218s\nok  \toimobbs/internal/postcapture\t0.536s\nok  \toimobbs/internal/postinput\t0.195s\n",
+    "bootstrap.log": "ok  \toimobbs/internal/bootstrap\t155.159s\n",
+    "vet.log": "internal/strictjson/typed_test.go:67:4: result of (*oimobbs/internal/strictjson.TypedReader).String call not used\n",
+    "vet-final.log": "",
+    "designcheck.log": "PASS: 77 Markdown files, 84 JSON files, current documents, 687 local links including headings, fences and strict JSON\nPASS: standard Go CRC32C, header/frame offsets, dedup section, create DAT lengths and sample expiry\nPASS: pack offsets/CRC/SHA, raw+gzip blocks, compressed audit, 5 DAT ranges, current/prefix stability through seq=4, 4 invalid gzip samples\nPASS: control frame/snapshot/current bytes, CRC/SHA, JSON equality, 4 invalid control examples\nPASS: 26 HTTP decision examples (not a live HTTP server)\nPASS: independent HMAC ID/token vector, token tamper, 3 six-calendar-month boundaries\nPASS: design checks only; application, crash, device and load tests NOT RUN\n"
+  },
+  "raw_sha256": {
+    "var/posting-json-typed-20261027/analyze.py": "658df96d0efb7d8267e8848b8c4444bd39a271fb61df20813faa6a8b5dc4ec3b",
+    "var/posting-json-typed-20261027/balanced120-probe.py": "8e80ef84156fc0b397e5fffa640d1f88f86977d3940d3fcba3814ae5d06c1412",
+    "var/posting-json-typed-20261027/balanced120_capacity.py": "addb3f04156f0ba48af9b692ca90e93d8a88a8d2fac1c2a1419a7c63a40e2e98",
+    "var/posting-json-typed-20261027/baseline-bench.log": "0adf2f63aae2757d667fb7765f90131199949331908983aa034b1326170059ca",
+    "var/posting-json-typed-20261027/baseline-build.log": "6612823f9fbdf5c3c5b5985cc920e8dd3dc843a0b36fd455a257fb6af77e78c4",
+    "var/posting-json-typed-20261027/baseline-diag-build.log": "813834c331f32b1d48e9d4b7da0bc528918589b24e4c70f41c37cb270139e46f",
+    "var/posting-json-typed-20261027/bootstrap.log": "d6ec4753543ed86c5c47a91bc30c7e39bbdc412ddc45b7bdcc52ee5518501822",
+    "var/posting-json-typed-20261027/candidate-bench.log": "22fe06f5b41a6e75244cc1f3dedce7cc625b77c51cb30483a33428eb04c4e436",
+    "var/posting-json-typed-20261027/candidate-build.log": "d06781c7382b7fca577fe23dd295dfb0b0eb0ac3f56c85d2cccd83354f6ce925",
+    "var/posting-json-typed-20261027/candidate-diag-build.log": "34509113a5e805dc2fea0f6f62b7e40fc9b5b7bbfbf5b3b6fd0bb0fbd17b82a5",
+    "var/posting-json-typed-20261027/cpu-shares.json": "a05147830851206c4c4705be2fe8a3bb655f6dd565f70e1853df87223d0d27d0",
+    "var/posting-json-typed-20261027/decoder-bench.log": "bc6795a2239b4fc7a3395aa1b3c5a105e32720d60f512a01bd8b9c135aaecc29",
+    "var/posting-json-typed-20261027/designcheck.log": "b1da0e0c29f9227747398a604a57d886554de213333d3c563eef81eeb02ef23d",
+    "var/posting-json-typed-20261027/extra-pair.py": "ee9508ef64901441557fb08c431b35e71d9bb3ad4570b7fa9c534156b73ec7d9",
+    "var/posting-json-typed-20261027/fixed-disk-w120-baseline-2cpu-r1.json": "2c4b629d0dbac2708a0e820bec384dda0f9c51c8b29094cf78bf6a1163736db0",
+    "var/posting-json-typed-20261027/fixed-disk-w120-baseline-2cpu-r1.json.server.log": "9d450aaeeb4f55bf3dcebfbfe0b32c52cb6e1abfd07ac05126ebedaa58358a43",
+    "var/posting-json-typed-20261027/fixed-disk-w120-baseline-2cpu-r1.log": "b9de86435cc45ce263a41b645c227ae0bef8eb2c2371172dbb56948c369e1a33",
+    "var/posting-json-typed-20261027/fixed-disk-w120-candidate-2cpu-r1.json": "b0c052c9fe3e6170ec1dd0c366dc1ba8b18789ea11f23e75538f04c9d4ecf0e8",
+    "var/posting-json-typed-20261027/fixed-disk-w120-candidate-2cpu-r1.json.server.log": "48cc1d1e378c3b7d004d0d596663cb7e70f54e7b279909731a841b63606df230",
+    "var/posting-json-typed-20261027/fixed-disk-w120-candidate-2cpu-r1.log": "b01cf16bca49158b7907abaad6c771a67b9c738d40a49f329a6190e9ea1cde65",
+    "var/posting-json-typed-20261027/fixed-tmpfs-w80-baseline-1cpu-r1.json": "dc445d9559001babdefddd843e88e8295e0d51d6cea5e34f778d3456fed7faf1",
+    "var/posting-json-typed-20261027/fixed-tmpfs-w80-baseline-1cpu-r1.json.server.log": "02acf4cc172c0f4b944322135be3610f077076850cd54c7d40db950819795682",
+    "var/posting-json-typed-20261027/fixed-tmpfs-w80-baseline-1cpu-r1.log": "2ee12757e068b45978abf90519058e0dc8c9451ae981a75307d25bef9891ee7c",
+    "var/posting-json-typed-20261027/fixed-tmpfs-w80-baseline-1cpu-r2.json": "73ae36b39ee53359f880a510f41900d23b51313063f61cb9873faadd3f6eede5",
+    "var/posting-json-typed-20261027/fixed-tmpfs-w80-baseline-1cpu-r2.json.server.log": "e76ca8a8dc8a3984a54a3143293508a5fb916b00bfb81957af1c27c0e9f2caa4",
+    "var/posting-json-typed-20261027/fixed-tmpfs-w80-baseline-1cpu-r2.log": "739973ff3517e09e1a1616a65da4fa9d246c5e52527c30a6f7f58afc18cec444",
+    "var/posting-json-typed-20261027/fixed-tmpfs-w80-baseline-1cpu-r3.json": "0f1861df8c3e4e372e24e676e36d2bde8a5a987cb099f4e7c950bdb79dabfeb0",
+    "var/posting-json-typed-20261027/fixed-tmpfs-w80-baseline-1cpu-r3.json.server.log": "b5fb93f60d95717181f4fd15e5cb60f204546878b4328a841a6efe7eb8e58b8e",
+    "var/posting-json-typed-20261027/fixed-tmpfs-w80-baseline-1cpu-r3.log": "fd9537c96c7a33092afd7b5669f1091fc2a1b65f1f44d82929092bf1358346ca",
+    "var/posting-json-typed-20261027/fixed-tmpfs-w80-baseline-1cpu-r4.json": "a9f76bf2c2978adb66cb03dc4ac5105947562f47052535ca66e5838220dc0eba",
+    "var/posting-json-typed-20261027/fixed-tmpfs-w80-baseline-1cpu-r4.json.server.log": "2fef448c1aa6a13db6e08d1e3d356e6f20a88f235b1e11b6a20a5020cbd3619c",
+    "var/posting-json-typed-20261027/fixed-tmpfs-w80-baseline-1cpu-r4.log": "d49a70e0b4442903de50f1a1f3beef3f89ec71c274a4a30c27fdfc72d63c6514",
+    "var/posting-json-typed-20261027/fixed-tmpfs-w80-baseline-diag-1cpu-r1.json": "eef21cdcfa83e7c426ae5dc8011d023906f420ebe4de7000a247958fb3f97985",
+    "var/posting-json-typed-20261027/fixed-tmpfs-w80-baseline-diag-1cpu-r1.json.profiles/allocs.pprof": "365827afe0f393433e97f4901c176076f93160c32cb8cf20195bf9983da2662e",
+    "var/posting-json-typed-20261027/fixed-tmpfs-w80-baseline-diag-1cpu-r1.json.profiles/block-top.txt": "3636256a7b09601f62c032a002c143d5da2a44e84d930fb30ef3b619ebede737",
+    "var/posting-json-typed-20261027/fixed-tmpfs-w80-baseline-diag-1cpu-r1.json.profiles/block.pprof": "b8f69b43fb03955be636bcfcd2f9f899685a1509d123d119d6d3dda1654ba388",
+    "var/posting-json-typed-20261027/fixed-tmpfs-w80-baseline-diag-1cpu-r1.json.profiles/cpu-share-compression.txt": "fa618d97ed531584f27aa87cf2b9b280c4b929e465776af19f17bf1eb4701074",
+    "var/posting-json-typed-20261027/fixed-tmpfs-w80-baseline-diag-1cpu-r1.json.profiles/cpu-share-journal_encode.txt": "c691512fbc59cecb76c15d0fd683c0194ad106a2572b2e6e46974f362c28e2f5",
+    "var/posting-json-typed-20261027/fixed-tmpfs-w80-baseline-diag-1cpu-r1.json.profiles/cpu-share-json.txt": "1d7bcd32ef9b07014b7e225c67a55e6895c0799faed57e98283022990514d1a1",
+    "var/posting-json-typed-20261027/fixed-tmpfs-w80-baseline-diag-1cpu-r1.json.profiles/cpu-share-signature.txt": "96f6a80d0cf34ec17fb5fb093f304e4de47a81ae4914a07f7e25982f89ea53ef",
+    "var/posting-json-typed-20261027/fixed-tmpfs-w80-baseline-diag-1cpu-r1.json.profiles/cpu-top.txt": "3847b757f2cb1a2f33b07c0d67dbc9b82cd0ff533d12f8bd499f7b9337aad49f",
+    "var/posting-json-typed-20261027/fixed-tmpfs-w80-baseline-diag-1cpu-r1.json.profiles/cpu.pprof": "bfba6c44e0cfb5aad7c6718195f5eb376964ecec90a6dd9adbf181519b1750f5",
+    "var/posting-json-typed-20261027/fixed-tmpfs-w80-baseline-diag-1cpu-r1.json.profiles/mutex-top.txt": "54aaa0193fcd0ccde33a305c0e1f2b0463b3e26a5880d8afb4d9f625465bc879",
+    "var/posting-json-typed-20261027/fixed-tmpfs-w80-baseline-diag-1cpu-r1.json.profiles/mutex.pprof": "2457e97fe34fe284f69317a8d0a33786d57eb2719bcaff20e3eda6e490c8bd38",
+    "var/posting-json-typed-20261027/fixed-tmpfs-w80-baseline-diag-1cpu-r1.json.profiles/runtime.json": "bfe8e332ade25148ef4bd4489796e5dc7462323d097384b02dd0c45b7d231cd1",
+    "var/posting-json-typed-20261027/fixed-tmpfs-w80-baseline-diag-1cpu-r1.json.server.log": "62660ca69d3545f78a38819e0b6b1e4ceb61e737b71c7c1142f5bd9fc59ae2a3",
+    "var/posting-json-typed-20261027/fixed-tmpfs-w80-baseline-diag-1cpu-r1.log": "5ad93cd921d06e95b2ef4d49958d0ab9c129acad4210923ec9647598a97ba8b9",
+    "var/posting-json-typed-20261027/fixed-tmpfs-w80-candidate-1cpu-r1.json": "e9214d285aa4059d98f368d25c141e67a72c6aa19a0f2dc93e97e341a3285ff1",
+    "var/posting-json-typed-20261027/fixed-tmpfs-w80-candidate-1cpu-r1.json.server.log": "bbbb1df3807b05f3ba12b0861348345d2513cae9b330d39ab073e6eb80f697eb",
+    "var/posting-json-typed-20261027/fixed-tmpfs-w80-candidate-1cpu-r1.log": "4b0865d028beaedd055b5c8b7023d37ec9e9711bbfa746f4772d2b35d472b3a0",
+    "var/posting-json-typed-20261027/fixed-tmpfs-w80-candidate-1cpu-r2.json": "eb59acde94380a63b4f6e628fb23bbb309c3685abd663ea0ca8a3ec2527bdb6c",
+    "var/posting-json-typed-20261027/fixed-tmpfs-w80-candidate-1cpu-r2.json.server.log": "b04c4b18b84cefbf355ecbd2ba0738c8bdc7b0c0e4902ce0bb579fd70a6d720f",
+    "var/posting-json-typed-20261027/fixed-tmpfs-w80-candidate-1cpu-r2.log": "2ab8d8740ec957fb09c59009677799c50a2c1321271b5912074651b4cf5159b9",
+    "var/posting-json-typed-20261027/fixed-tmpfs-w80-candidate-1cpu-r3.json": "6d938fd0d1a994bfe7857a81b70d34bcc1c2024d638fbd52bd78670e54e0b35d",
+    "var/posting-json-typed-20261027/fixed-tmpfs-w80-candidate-1cpu-r3.json.server.log": "d5361a86f62c7466281faaac0902dd689c816a1535807f4a1d97af6ed2222253",
+    "var/posting-json-typed-20261027/fixed-tmpfs-w80-candidate-1cpu-r3.log": "fd7735f2c54997b8f16468fefaa21aeecad7ea1e7e5f29597897a4c94718ecab",
+    "var/posting-json-typed-20261027/fixed-tmpfs-w80-candidate-1cpu-r4.json": "2211e88657f05070ee00702b84d23178adb23ce912044e499859dcf64f6ead77",
+    "var/posting-json-typed-20261027/fixed-tmpfs-w80-candidate-1cpu-r4.json.server.log": "6b7670803871a0bb2e457a34baace81c53c0b47caeb0756f17cb452512401a8c",
+    "var/posting-json-typed-20261027/fixed-tmpfs-w80-candidate-1cpu-r4.log": "eb17af81e29d6b29ff7db233db8b14e90666b832a572a1271b6f87576f176cb8",
+    "var/posting-json-typed-20261027/fixed-tmpfs-w80-candidate-diag-1cpu-r1.json.server.log": "216eb2af9d8969031749a6ed10e46d21ce2401c0664cdb79b45d185ed4f2dee4",
+    "var/posting-json-typed-20261027/fixed-tmpfs-w80-candidate-diag-1cpu-r1.log": "a511403c8f3c4eaf890ebee12f37462a1e43be0407f20c83c0693cc311ee41a0",
+    "var/posting-json-typed-20261027/fixed-tmpfs-w80-candidate-diag-1cpu-r2.json": "6971ae9fed814dcc2963f00aa8ca669fcee55ba18986921619855e93062bb3f0",
+    "var/posting-json-typed-20261027/fixed-tmpfs-w80-candidate-diag-1cpu-r2.json.profiles/allocs.pprof": "60a49f7af4dccbb578759ea3b4a14fa60e76c316eaaa6dbf513672d702d67960",
+    "var/posting-json-typed-20261027/fixed-tmpfs-w80-candidate-diag-1cpu-r2.json.profiles/block-top.txt": "d703f5279008d0a9ca31c4f841aa409e3a923fe6543d423579834aba5366b218",
+    "var/posting-json-typed-20261027/fixed-tmpfs-w80-candidate-diag-1cpu-r2.json.profiles/block.pprof": "5477901f42f0849dd47be172c9bb02b173024b26e5f745ca246fb0b4ec34aa2d",
+    "var/posting-json-typed-20261027/fixed-tmpfs-w80-candidate-diag-1cpu-r2.json.profiles/cpu-share-compression.txt": "d9a32949fa0f8aaef8dd6da9f742bebc6a5bc5be15ed0bf5954284842a1929bd",
+    "var/posting-json-typed-20261027/fixed-tmpfs-w80-candidate-diag-1cpu-r2.json.profiles/cpu-share-journal_encode.txt": "4108e42eb184a438654b56b65a449f7e3456732d8419e70ff2421e6ee207642d",
+    "var/posting-json-typed-20261027/fixed-tmpfs-w80-candidate-diag-1cpu-r2.json.profiles/cpu-share-json.txt": "789515c66ea53be4054f50eb0075e69627194a577bd51a647fb31e0c2fe1de7e",
+    "var/posting-json-typed-20261027/fixed-tmpfs-w80-candidate-diag-1cpu-r2.json.profiles/cpu-share-signature.txt": "f815d73b8b3124147f8dc39632fe50ee5f98bc6e2f097526c2eab1d58c3f88cd",
+    "var/posting-json-typed-20261027/fixed-tmpfs-w80-candidate-diag-1cpu-r2.json.profiles/cpu-top.txt": "49dbde5711bab323702066ab79f97055a31be9a5fe740f909f26810a709fabb9",
+    "var/posting-json-typed-20261027/fixed-tmpfs-w80-candidate-diag-1cpu-r2.json.profiles/cpu.pprof": "f30a9ced00363cf0153f919b55af572165ecb9fee0d20d1c9b2f04f317e6bb90",
+    "var/posting-json-typed-20261027/fixed-tmpfs-w80-candidate-diag-1cpu-r2.json.profiles/mutex-top.txt": "6a0dd453231145037f3c944dd9036f22a42adcd7c59070f1d977296fb09f2af0",
+    "var/posting-json-typed-20261027/fixed-tmpfs-w80-candidate-diag-1cpu-r2.json.profiles/mutex.pprof": "e2e439b53f6b50eab205543d898c2f4480518f8835f02f820255477073ade213",
+    "var/posting-json-typed-20261027/fixed-tmpfs-w80-candidate-diag-1cpu-r2.json.profiles/runtime.json": "78885f7730e70dda3044817c7cff1d48ff2cd5bc0467c0086b2b0d8f98fe764f",
+    "var/posting-json-typed-20261027/fixed-tmpfs-w80-candidate-diag-1cpu-r2.json.server.log": "7708d8ed16dfc70324455237e738423f7cef1e23809319106f2dea7cbbb8fc34",
+    "var/posting-json-typed-20261027/fixed-tmpfs-w80-candidate-diag-1cpu-r2.log": "c77b9c6eead9a140bd0b7686fd74b2ad9790e2a6d2da7fa088dd648172b66e68",
+    "var/posting-json-typed-20261027/fuzz-decode-bounded.log": "ebd5cbc6643036033915f479e7eb33856b31e6cc425d26d85df39b34f35c3ec7",
+    "var/posting-json-typed-20261027/fuzz-decode.log": "f38c1d13d5be79a6e98cd655188faa66eb304b6fc5d866235c5ecb4601f3d9d9",
+    "var/posting-json-typed-20261027/fuzz-mutation.log": "01e8fa131e62d787c525993b4cafadb552b745cff713b741371b3560e9486dd4",
+    "var/posting-json-typed-20261027/fuzz-values.log": "5b72dac408919df9cba9f1bb2c2a448f556ce390b7da35928c6716e6c6777677",
+    "var/posting-json-typed-20261027/initial-bench.log": "5603e9f40e58f2b0648cccfc426b6f7020c1c3f5a83c58062ff81e82b690b1d1",
+    "var/posting-json-typed-20261027/mixed-disk-w120-baseline-2cpu-r1.json": "5e51b74dd9818b9d78c5fd7c851dbfd89a41fcb79eac17b6425b4e50d980154e",
+    "var/posting-json-typed-20261027/mixed-disk-w120-baseline-2cpu-r1.json.pre-restart-optional.json": "2cc0635287e355accca40f8d17a9970a135a6332f0974138ba3cac529be3a991",
+    "var/posting-json-typed-20261027/mixed-disk-w120-baseline-2cpu-r1.json.server.log": "b291962011b0afb4cad46e6596e07736fa959d5c1b6fc3df74dd5cd59a068678",
+    "var/posting-json-typed-20261027/mixed-disk-w120-baseline-2cpu-r1.log": "aa34272acd8c4440a93329fe415344977345a6b99fd34c5e0a6816923b672c7e",
+    "var/posting-json-typed-20261027/mixed-disk-w120-candidate-2cpu-r1.json": "f9d129cdc11dd4e7f2cb98c6f0101b86fb67989b715be1085df4cf9a3793d125",
+    "var/posting-json-typed-20261027/mixed-disk-w120-candidate-2cpu-r1.json.pre-restart-optional.json": "17bac9eddd3cfb2542a49479e364689263e58acc1a5054a0f381cad27d488459",
+    "var/posting-json-typed-20261027/mixed-disk-w120-candidate-2cpu-r1.json.server.log": "51a1c4cb628c433bbae474c6c891ce45bfb6ca5541bfc4f69c5302eee49af8b6",
+    "var/posting-json-typed-20261027/mixed-disk-w120-candidate-2cpu-r1.log": "c8269e87feb14c979451694bd6c21ec27ff38296bb303cd1489c28d89f4ef900",
+    "var/posting-json-typed-20261027/prepare.py": "02d5af6488d42901de504a04240b0a863d8870bdf3880c971742a1e66d9e618a",
+    "var/posting-json-typed-20261027/probe_waf.py": "a88bcc17281a4d4c5c6fd7e380ad69ec97cfb3ecb0abace7adf90e535ca39525",
+    "var/posting-json-typed-20261027/race-final.log": "d771893b052e156a28aa2345cdb53f80e88579476cb74af9a4793202ff6831d5",
+    "var/posting-json-typed-20261027/race.log": "7015b668318db86ee42dea8197fe2dccb14596205e0298d5b93461322ddb26c1",
+    "var/posting-json-typed-20261027/regression.log": "d484bd3de8d25886629e52db0877aed7278c966af050f071e147d08e7b8b86dc",
+    "var/posting-json-typed-20261027/report.py": "12df749f89d0d8b6c2bd559f09ba487efac38a1c0822ef3386a5942a9fa6942e",
+    "var/posting-json-typed-20261027/run.py": "afed83f34d24b3b949d6a0cb948686c1f646b7a4e6235c6a9943bd23375549a8",
+    "var/posting-json-typed-20261027/sequence.py": "2d742e829ec9206f4b1ed64a46bd891a13c253126c07606fd9482f4f31987887",
+    "var/posting-json-typed-20261027/setup.json": "b825f4cd156bddc7a68f69a51168b4bbca5f334c3865dcb55c3d3a943fbccab8",
+    "var/posting-json-typed-20261027/trials.jsonl": "dace20c98e91acb4dae8378ecbbc0b5e9d19f703fc954b83fda2ebabf9985466",
+    "var/posting-json-typed-20261027/vet-final.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "var/posting-json-typed-20261027/vet.log": "ffec3b3df60ddaf4f2fd9a39b179f98aa34e37ef1e5eda24af0fa6f692f2b596"
+  },
+  "limits": [
+    "tmpfs is an isolated CPU-ceiling diagnostic, not durable storage or production throughput",
+    "CPU slots are quota, not exclusive physical cores",
+    "fixed-count throughput includes completion drain; not sustainable arrival rate or p95 SLO",
+    "main-load CPU excludes setup, recovery posts and final optional queue drain",
+    "automatic runtime concurrency and explicit GOMAXPROCS=1 trials are separate groups",
+    "tmpfs volume max is 8GiB and existing disk floor and all budgets remain unchanged",
+    "no live service replacement or host tuning",
+    "diagnostic images collect CPU/allocation but do not instrument Sync call counts",
+    "one diagnostic setup matched its tmpfs holder; stopped before load and retried with server label"
+  ]
+}

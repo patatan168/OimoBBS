@@ -1,0 +1,5583 @@
+{
+  "date": "2026-10-24",
+  "baseline_commit": "3343d89",
+  "goal": {
+    "metric": "same candidate, 2 to 4 CPU posting throughput scaling",
+    "minimum_ratio": 1.6,
+    "achieved": false
+  },
+  "adopted_runtime_changes": false,
+  "production_image_unchanged": "sha256:74adc6cf6a3ecef1899cd60bc0f49572bb17108cd5169abb31b042f12ce279a0",
+  "scope": "isolated real TLS HTTP/1.1, synthetic data, WAF enabled with equal performance-test limits, ordinary 4GiB and 80Mbps; tmpfs/PGO profiles are diagnostics; no production posting/load trial",
+  "experiment_count": 38,
+  "environment": {
+    "cpu": "AMD Ryzen 5 5500U, Docker CPU quotas and GOMAXPROCS; no dedicated physical core reservation",
+    "storage": "shared SATA SSD; no host scheduler/clock/affinity or unrelated service changes",
+    "clocksource": "hpet",
+    "available_clocksources": [
+      "hpet",
+      "acpi_pm"
+    ],
+    "cpu_governor": "performance",
+    "cpu_driver": "amd-pstate-epp"
+  },
+  "matched_repeated_trials": {
+    "baseline": {
+      "2": {
+        "trials": [
+          "baseline-fixed-2cpu",
+          "baseline-r2-fixed-2cpu",
+          "baseline-r3-fixed-2cpu"
+        ],
+        "seconds": [
+          25.143248077947646,
+          17.72635632008314,
+          26.037730022799224
+        ],
+        "median_seconds": 25.143248077947646
+      },
+      "4": {
+        "trials": [
+          "baseline-fixed-4cpu",
+          "baseline-r2-fixed-4cpu",
+          "baseline-r3-fixed-4cpu"
+        ],
+        "seconds": [
+          21.569343127775937,
+          12.26273251697421,
+          12.385957377962768
+        ],
+        "median_seconds": 12.385957377962768
+      },
+      "all_planned_accepted": true,
+      "observed_ratio": 2.029980187295234
+    },
+    "overlap": {
+      "2": {
+        "trials": [
+          "overlap-fixed-2cpu",
+          "overlap-r2-fixed-2cpu",
+          "overlap-r3-fixed-2cpu"
+        ],
+        "seconds": [
+          17.38306353893131,
+          17.414532201830298,
+          17.248747672885656
+        ],
+        "median_seconds": 17.38306353893131
+      },
+      "4": {
+        "trials": [
+          "overlap-fixed-4cpu",
+          "overlap-r2-fixed-4cpu",
+          "overlap-r3-fixed-4cpu"
+        ],
+        "seconds": [
+          22.167826242744923,
+          18.048608580604196,
+          21.70504118828103
+        ],
+        "median_seconds": 21.70504118828103
+      },
+      "all_planned_accepted": false,
+      "observed_ratio": 0.8008767819485532
+    }
+  },
+  "experiments": [
+    {
+      "name": "baseline-fixed-2cpu",
+      "artifact": "var/posting-pipeline-160/baseline-fixed-2cpu.json",
+      "sha256": "488b57509d50278d097060317cb1dbfbf5b1b9cb289bb022ea16cd50ac69b6c7",
+      "image": "sha256:74adc6cf6a3ecef1899cd60bc0f49572bb17108cd5169abb31b042f12ce279a0",
+      "waf": {
+        "enabled": true,
+        "traffic": {
+          "posting": {
+            "client_rate": 10,
+            "client_burst": 30,
+            "global_rate": 100000,
+            "global_burst": 200000,
+            "client_concurrent": 8,
+            "global_concurrent": 256
+          },
+          "client_enabled": true,
+          "enabled": true,
+          "client_rate": 10000,
+          "client_burst": 100000,
+          "global_rate": 100000,
+          "global_burst": 200000,
+          "client_concurrent": 32,
+          "global_concurrent": 128,
+          "search_rate": 2,
+          "search_burst": 10,
+          "search_global_rate": 12,
+          "search_global_burst": 24,
+          "search_concurrent": 4
+        }
+      },
+      "posting_trip": false,
+      "cpu_max": "200000 100000",
+      "memory_max": "4294967296",
+      "go_memory_limit": "auto",
+      "egress_budget_bits_per_second": 80000000,
+      "post_mix": "80% legacy / 20% Web including form, CSRF and redirect",
+      "measurement_mode": "fixed_count_complete",
+      "rate": 800,
+      "seconds": 10,
+      "workers": 80,
+      "thread_count": 16,
+      "duration_with_drain_seconds": 25.143248077947646,
+      "summary": {
+        "planned": 8000,
+        "sent": 8000,
+        "success": 8000,
+        "acknowledged": 8000,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 493.9661016687751,
+        "scheduled_p95_ms": 15571.458719670773,
+        "issuance_wait_p95_ms": 15471.542675979435
+      },
+      "completed_in_window": 3418,
+      "completed_per_second": 341.8,
+      "success_per_second_with_drain": 318.1768709913239,
+      "stable_at_tested_rate": false,
+      "resources": {
+        "cpu_cores_average": 1.2368459676964076,
+        "generator_cpu_seconds": 7.810980942,
+        "wbytes_delta": 62009344,
+        "wios_delta": 2259,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 2246,
+        "io_some_usec_delta": 1292554
+      },
+      "memory_peak_bytes": 1007865856,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 32.26078627631068,
+        "scheduled_p95_ms": 32.62742655351758,
+        "issuance_wait_p95_ms": null
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 19890,
+          "saved": 19890,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 8001433,
+        "day_file_bytes": {
+          "20261024": 8001433
+        }
+      },
+      "integrity_ok": true,
+      "server_log": {
+        "artifact": "var/posting-pipeline-160/baseline-fixed-2cpu.json.server.log",
+        "sha256": "9ec93651da75420bef507d172b41bcdab1f6b72fd556bde2684d77b64acd5c25"
+      }
+    },
+    {
+      "name": "baseline-fixed-4cpu",
+      "artifact": "var/posting-pipeline-160/baseline-fixed-4cpu.json",
+      "sha256": "6c1360a64b688a13b86c4457b5cf87515feb7bdceb4b3a4b5394b419527df7f7",
+      "image": "sha256:74adc6cf6a3ecef1899cd60bc0f49572bb17108cd5169abb31b042f12ce279a0",
+      "waf": {
+        "enabled": true,
+        "traffic": {
+          "posting": {
+            "client_rate": 10,
+            "client_burst": 30,
+            "global_rate": 100000,
+            "global_burst": 200000,
+            "client_concurrent": 8,
+            "global_concurrent": 256
+          },
+          "client_enabled": true,
+          "enabled": true,
+          "client_rate": 10000,
+          "client_burst": 100000,
+          "global_rate": 100000,
+          "global_burst": 200000,
+          "client_concurrent": 32,
+          "global_concurrent": 128,
+          "search_rate": 2,
+          "search_burst": 10,
+          "search_global_rate": 12,
+          "search_global_burst": 24,
+          "search_concurrent": 4
+        }
+      },
+      "posting_trip": false,
+      "cpu_max": "400000 100000",
+      "memory_max": "4294967296",
+      "go_memory_limit": "auto",
+      "egress_budget_bits_per_second": 80000000,
+      "post_mix": "80% legacy / 20% Web including form, CSRF and redirect",
+      "measurement_mode": "fixed_count_complete",
+      "rate": 800,
+      "seconds": 10,
+      "workers": 80,
+      "thread_count": 16,
+      "duration_with_drain_seconds": 21.569343127775937,
+      "summary": {
+        "planned": 8000,
+        "sent": 8000,
+        "success": 8000,
+        "acknowledged": 8000,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 454.66822292655706,
+        "scheduled_p95_ms": 12468.893497716635,
+        "issuance_wait_p95_ms": 12369.469590950757
+      },
+      "completed_in_window": 4400,
+      "completed_per_second": 440.0,
+      "success_per_second_with_drain": 370.89678404244006,
+      "stable_at_tested_rate": false,
+      "resources": {
+        "cpu_cores_average": 1.7388764589544257,
+        "generator_cpu_seconds": 8.831826681999999,
+        "wbytes_delta": 61444096,
+        "wios_delta": 2076,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 0,
+        "io_some_usec_delta": 943356
+      },
+      "memory_peak_bytes": 1035980800,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 33.09209691360593,
+        "scheduled_p95_ms": 33.20699371397495,
+        "issuance_wait_p95_ms": null
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 19890,
+          "saved": 19890,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 8008813,
+        "day_file_bytes": {
+          "20261024": 8008813
+        }
+      },
+      "integrity_ok": true,
+      "server_log": {
+        "artifact": "var/posting-pipeline-160/baseline-fixed-4cpu.json.server.log",
+        "sha256": "ec076986ff6dc910d467bf1668e380c6b4354c042afa1f399ba4ea2fc32c49de"
+      }
+    },
+    {
+      "name": "baseline-r2-fixed-2cpu",
+      "artifact": "var/posting-pipeline-160/baseline-r2-fixed-2cpu.json",
+      "sha256": "54dafd0b4c9821b269741a9698c4da736b38a63008584ce463afc9e8745e7731",
+      "image": "sha256:74adc6cf6a3ecef1899cd60bc0f49572bb17108cd5169abb31b042f12ce279a0",
+      "waf": {
+        "enabled": true,
+        "traffic": {
+          "posting": {
+            "client_rate": 10,
+            "client_burst": 30,
+            "global_rate": 100000,
+            "global_burst": 200000,
+            "client_concurrent": 8,
+            "global_concurrent": 256
+          },
+          "client_enabled": true,
+          "enabled": true,
+          "client_rate": 10000,
+          "client_burst": 100000,
+          "global_rate": 100000,
+          "global_burst": 200000,
+          "client_concurrent": 32,
+          "global_concurrent": 128,
+          "search_rate": 2,
+          "search_burst": 10,
+          "search_global_rate": 12,
+          "search_global_burst": 24,
+          "search_concurrent": 4
+        }
+      },
+      "posting_trip": false,
+      "cpu_max": "200000 100000",
+      "memory_max": "4294967296",
+      "go_memory_limit": "auto",
+      "egress_budget_bits_per_second": 80000000,
+      "post_mix": "80% legacy / 20% Web including form, CSRF and redirect",
+      "measurement_mode": "fixed_count_complete",
+      "rate": 800,
+      "seconds": 10,
+      "workers": 80,
+      "thread_count": 16,
+      "duration_with_drain_seconds": 17.72635632008314,
+      "summary": {
+        "planned": 8000,
+        "sent": 8000,
+        "success": 8000,
+        "acknowledged": 8000,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 254.08543227240443,
+        "scheduled_p95_ms": 8194.495206233114,
+        "issuance_wait_p95_ms": 8094.555274117738
+      },
+      "completed_in_window": 4984,
+      "completed_per_second": 498.4,
+      "success_per_second_with_drain": 451.3053814074791,
+      "stable_at_tested_rate": false,
+      "resources": {
+        "cpu_cores_average": 1.7309545428259836,
+        "generator_cpu_seconds": 7.734847795,
+        "wbytes_delta": 62320640,
+        "wios_delta": 2275,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 0,
+        "io_some_usec_delta": 179829
+      },
+      "memory_peak_bytes": 1038802944,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 33.568321261554956,
+        "scheduled_p95_ms": 33.69943983852863,
+        "issuance_wait_p95_ms": null
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 19890,
+          "saved": 19890,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 8021821,
+        "day_file_bytes": {
+          "20261024": 8021821
+        }
+      },
+      "integrity_ok": true,
+      "server_log": {
+        "artifact": "var/posting-pipeline-160/baseline-r2-fixed-2cpu.json.server.log",
+        "sha256": "09c9741b8cd3cb1313b85d9fa5f9ed89010ab7c0fcbcf9cd3133604ac9af9aa5"
+      }
+    },
+    {
+      "name": "baseline-r2-fixed-4cpu",
+      "artifact": "var/posting-pipeline-160/baseline-r2-fixed-4cpu.json",
+      "sha256": "683f50db67ac30e156ce1ac9b4d473b44f92b3d913a77c2aebde269fc792aa6d",
+      "image": "sha256:74adc6cf6a3ecef1899cd60bc0f49572bb17108cd5169abb31b042f12ce279a0",
+      "waf": {
+        "enabled": true,
+        "traffic": {
+          "posting": {
+            "client_rate": 10,
+            "client_burst": 30,
+            "global_rate": 100000,
+            "global_burst": 200000,
+            "client_concurrent": 8,
+            "global_concurrent": 256
+          },
+          "client_enabled": true,
+          "enabled": true,
+          "client_rate": 10000,
+          "client_burst": 100000,
+          "global_rate": 100000,
+          "global_burst": 200000,
+          "client_concurrent": 32,
+          "global_concurrent": 128,
+          "search_rate": 2,
+          "search_burst": 10,
+          "search_global_rate": 12,
+          "search_global_burst": 24,
+          "search_concurrent": 4
+        }
+      },
+      "posting_trip": false,
+      "cpu_max": "400000 100000",
+      "memory_max": "4294967296",
+      "go_memory_limit": "auto",
+      "egress_budget_bits_per_second": 80000000,
+      "post_mix": "80% legacy / 20% Web including form, CSRF and redirect",
+      "measurement_mode": "fixed_count_complete",
+      "rate": 800,
+      "seconds": 10,
+      "workers": 80,
+      "thread_count": 16,
+      "duration_with_drain_seconds": 12.26273251697421,
+      "summary": {
+        "planned": 8000,
+        "sent": 8000,
+        "success": 8000,
+        "acknowledged": 8000,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 171.28531308844686,
+        "scheduled_p95_ms": 3079.8027641139925,
+        "issuance_wait_p95_ms": 2980.1561417989433
+      },
+      "completed_in_window": 7245,
+      "completed_per_second": 724.5,
+      "success_per_second_with_drain": 652.3831445337579,
+      "stable_at_tested_rate": false,
+      "resources": {
+        "cpu_cores_average": 3.0140743874856986,
+        "generator_cpu_seconds": 8.799121753,
+        "wbytes_delta": 61759488,
+        "wios_delta": 2078,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 0,
+        "io_some_usec_delta": 49017
+      },
+      "memory_peak_bytes": 1006206976,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 32.902334816753864,
+        "scheduled_p95_ms": 33.028243109583855,
+        "issuance_wait_p95_ms": null
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 19890,
+          "saved": 19890,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 8047179,
+        "day_file_bytes": {
+          "20261024": 8047179
+        }
+      },
+      "integrity_ok": true,
+      "server_log": {
+        "artifact": "var/posting-pipeline-160/baseline-r2-fixed-4cpu.json.server.log",
+        "sha256": "2b344f180a6f456577e3b551583361c75dfa1899beb37421d797ff23c0cbe7fd"
+      }
+    },
+    {
+      "name": "baseline-r3-fixed-2cpu",
+      "artifact": "var/posting-pipeline-160/baseline-r3-fixed-2cpu.json",
+      "sha256": "3a2110ccb1ceb9303cc1cd812d0474ce00e2733a342b0dbb2e3bf48704f16ff8",
+      "image": "sha256:74adc6cf6a3ecef1899cd60bc0f49572bb17108cd5169abb31b042f12ce279a0",
+      "waf": {
+        "enabled": true,
+        "traffic": {
+          "posting": {
+            "client_rate": 10,
+            "client_burst": 30,
+            "global_rate": 100000,
+            "global_burst": 200000,
+            "client_concurrent": 8,
+            "global_concurrent": 256
+          },
+          "client_enabled": true,
+          "enabled": true,
+          "client_rate": 10000,
+          "client_burst": 100000,
+          "global_rate": 100000,
+          "global_burst": 200000,
+          "client_concurrent": 32,
+          "global_concurrent": 128,
+          "search_rate": 2,
+          "search_burst": 10,
+          "search_global_rate": 12,
+          "search_global_burst": 24,
+          "search_concurrent": 4
+        }
+      },
+      "posting_trip": false,
+      "cpu_max": "200000 100000",
+      "memory_max": "4294967296",
+      "go_memory_limit": "auto",
+      "egress_budget_bits_per_second": 80000000,
+      "post_mix": "80% legacy / 20% Web including form, CSRF and redirect",
+      "measurement_mode": "fixed_count_complete",
+      "rate": 800,
+      "seconds": 10,
+      "workers": 80,
+      "thread_count": 16,
+      "duration_with_drain_seconds": 26.037730022799224,
+      "summary": {
+        "planned": 8000,
+        "sent": 8000,
+        "success": 8000,
+        "acknowledged": 8000,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 464.93515791371465,
+        "scheduled_p95_ms": 16191.345680039376,
+        "issuance_wait_p95_ms": 16091.418738942593
+      },
+      "completed_in_window": 4842,
+      "completed_per_second": 484.2,
+      "success_per_second_with_drain": 307.2464455616914,
+      "stable_at_tested_rate": false,
+      "resources": {
+        "cpu_cores_average": 1.187836304198494,
+        "generator_cpu_seconds": 7.768380830999999,
+        "wbytes_delta": 61235200,
+        "wios_delta": 2054,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 0,
+        "io_some_usec_delta": 1503408
+      },
+      "memory_peak_bytes": 990105600,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 33.548903185874224,
+        "scheduled_p95_ms": 33.78712059929967,
+        "issuance_wait_p95_ms": null
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 19890,
+          "saved": 19890,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 8003420,
+        "day_file_bytes": {
+          "20261024": 8003420
+        }
+      },
+      "integrity_ok": true,
+      "server_log": {
+        "artifact": "var/posting-pipeline-160/baseline-r3-fixed-2cpu.json.server.log",
+        "sha256": "5000888e781db8c475a4eec3c6c957e8205deef10d90ea6a1cbfc88d913b9319"
+      }
+    },
+    {
+      "name": "baseline-r3-fixed-4cpu",
+      "artifact": "var/posting-pipeline-160/baseline-r3-fixed-4cpu.json",
+      "sha256": "cd445e1cf91cf54707621151a6c08e756b9fa7b04ad25ebf6419fd9561a7d2bf",
+      "image": "sha256:74adc6cf6a3ecef1899cd60bc0f49572bb17108cd5169abb31b042f12ce279a0",
+      "waf": {
+        "enabled": true,
+        "traffic": {
+          "posting": {
+            "client_rate": 10,
+            "client_burst": 30,
+            "global_rate": 100000,
+            "global_burst": 200000,
+            "client_concurrent": 8,
+            "global_concurrent": 256
+          },
+          "client_enabled": true,
+          "enabled": true,
+          "client_rate": 10000,
+          "client_burst": 100000,
+          "global_rate": 100000,
+          "global_burst": 200000,
+          "client_concurrent": 32,
+          "global_concurrent": 128,
+          "search_rate": 2,
+          "search_burst": 10,
+          "search_global_rate": 12,
+          "search_global_burst": 24,
+          "search_concurrent": 4
+        }
+      },
+      "posting_trip": false,
+      "cpu_max": "400000 100000",
+      "memory_max": "4294967296",
+      "go_memory_limit": "auto",
+      "egress_budget_bits_per_second": 80000000,
+      "post_mix": "80% legacy / 20% Web including form, CSRF and redirect",
+      "measurement_mode": "fixed_count_complete",
+      "rate": 800,
+      "seconds": 10,
+      "workers": 80,
+      "thread_count": 16,
+      "duration_with_drain_seconds": 12.385957377962768,
+      "summary": {
+        "planned": 8000,
+        "sent": 8000,
+        "success": 8000,
+        "acknowledged": 8000,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 179.77507086470723,
+        "scheduled_p95_ms": 3194.6319858543575,
+        "issuance_wait_p95_ms": 3094.704764895141
+      },
+      "completed_in_window": 7202,
+      "completed_per_second": 720.2,
+      "success_per_second_with_drain": 645.8927441679791,
+      "stable_at_tested_rate": false,
+      "resources": {
+        "cpu_cores_average": 3.0104549743035687,
+        "generator_cpu_seconds": 8.805812493,
+        "wbytes_delta": 62001152,
+        "wios_delta": 2105,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 0,
+        "io_some_usec_delta": 39183
+      },
+      "memory_peak_bytes": 1012469760,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 34.046140033751726,
+        "scheduled_p95_ms": 34.17800087481737,
+        "issuance_wait_p95_ms": null
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 19890,
+          "saved": 19890,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 8049379,
+        "day_file_bytes": {
+          "20261024": 8049379
+        }
+      },
+      "integrity_ok": true,
+      "server_log": {
+        "artifact": "var/posting-pipeline-160/baseline-r3-fixed-4cpu.json.server.log",
+        "sha256": "2d12cc92292f12b939d7e9d15d33448e3ef80d339816909b218343bfcfb3caff"
+      }
+    },
+    {
+      "name": "baseline-sustained-4cpu",
+      "artifact": "var/posting-pipeline-160/baseline-sustained-4cpu.json",
+      "sha256": "1568415896e9d75e06f877c7b1f4200501128dba73ce55356b3763a2a428422d",
+      "image": "sha256:74adc6cf6a3ecef1899cd60bc0f49572bb17108cd5169abb31b042f12ce279a0",
+      "waf": {
+        "enabled": true,
+        "traffic": {
+          "posting": {
+            "client_rate": 10,
+            "client_burst": 30,
+            "global_rate": 100000,
+            "global_burst": 200000,
+            "client_concurrent": 8,
+            "global_concurrent": 256
+          },
+          "client_enabled": true,
+          "enabled": true,
+          "client_rate": 10000,
+          "client_burst": 100000,
+          "global_rate": 100000,
+          "global_burst": 200000,
+          "client_concurrent": 32,
+          "global_concurrent": 128,
+          "search_rate": 2,
+          "search_burst": 10,
+          "search_global_rate": 12,
+          "search_global_burst": 24,
+          "search_concurrent": 4
+        }
+      },
+      "posting_trip": false,
+      "cpu_max": "400000 100000",
+      "memory_max": "4294967296",
+      "go_memory_limit": "auto",
+      "egress_budget_bits_per_second": 8000000000,
+      "post_mix": "80% legacy / 20% Web including form, CSRF and redirect",
+      "measurement_mode": "fixed_arrival_window",
+      "rate": 160,
+      "seconds": 60,
+      "workers": 80,
+      "thread_count": 16,
+      "duration_with_drain_seconds": 60.03747480735183,
+      "summary": {
+        "planned": 9600,
+        "sent": 9600,
+        "success": 9600,
+        "acknowledged": 9600,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 305.4204951040447,
+        "scheduled_p95_ms": 307.18869622796774,
+        "issuance_wait_p95_ms": 0.6726235151290894
+      },
+      "completed_in_window": 9594,
+      "completed_per_second": 159.9,
+      "success_per_second_with_drain": 159.90012955748836,
+      "stable_at_tested_rate": false,
+      "resources": {
+        "cpu_cores_average": 1.3777363932346987,
+        "generator_cpu_seconds": 34.007300002,
+        "wbytes_delta": 122937344,
+        "wios_delta": 10459,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 0,
+        "io_some_usec_delta": 828037
+      },
+      "memory_peak_bytes": 1422499840,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 33.234529197216034,
+        "scheduled_p95_ms": 33.36640074849129,
+        "issuance_wait_p95_ms": null
+      },
+      "read_summary": {
+        "planned": 24000,
+        "sent": 24000,
+        "success": 24000,
+        "acknowledged": 24000,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 4.3250201269984245,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 880.4930777333334
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 17,
+          "saved": 0,
+          "failed": 17,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "1792823123886682386",
+          "loss_finished_at_ns": "1792823123886726809",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 13912106,
+        "day_file_bytes": {
+          "20261024": 13912106
+        }
+      },
+      "integrity_ok": true,
+      "restart": {
+        "ok": true,
+        "mode": "graceful container restart on the same data volume",
+        "ready": true,
+        "readiness_timeout_seconds": 60,
+        "ready_seconds": 29.013353649061173,
+        "verification_seconds": 29.02811097772792
+      },
+      "server_log": {
+        "artifact": "var/posting-pipeline-160/baseline-sustained-4cpu.json.server.log",
+        "sha256": "f8f92dbfa09930c9659a28d5830259465399f8193d367f96cf7c0f7c965a432d"
+      }
+    },
+    {
+      "name": "baseline-tmpfs-2cpu",
+      "artifact": "var/posting-pipeline-160/baseline-tmpfs-2cpu.json",
+      "sha256": "c33a460af87086b97e2db6a7a6d3f73952d8a792994c11e9a7794ea211253d15",
+      "image": "sha256:74adc6cf6a3ecef1899cd60bc0f49572bb17108cd5169abb31b042f12ce279a0",
+      "waf": {
+        "enabled": true,
+        "traffic": {
+          "posting": {
+            "client_rate": 10,
+            "client_burst": 30,
+            "global_rate": 100000,
+            "global_burst": 200000,
+            "client_concurrent": 8,
+            "global_concurrent": 256
+          },
+          "client_enabled": true,
+          "enabled": true,
+          "client_rate": 10000,
+          "client_burst": 100000,
+          "global_rate": 100000,
+          "global_burst": 200000,
+          "client_concurrent": 32,
+          "global_concurrent": 128,
+          "search_rate": 2,
+          "search_burst": 10,
+          "search_global_rate": 12,
+          "search_global_burst": 24,
+          "search_concurrent": 4
+        }
+      },
+      "posting_trip": false,
+      "cpu_max": "200000 100000",
+      "memory_max": "4294967296",
+      "go_memory_limit": "auto",
+      "egress_budget_bits_per_second": 80000000,
+      "post_mix": "80% legacy / 20% Web including form, CSRF and redirect",
+      "measurement_mode": "fixed_count_complete",
+      "storage_backend": "tmpfs_diagnostic_not_durable",
+      "rate": 800,
+      "seconds": 10,
+      "workers": 80,
+      "thread_count": 16,
+      "duration_with_drain_seconds": 15.213090896140784,
+      "summary": {
+        "planned": 8000,
+        "sent": 8000,
+        "success": 8000,
+        "acknowledged": 8000,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 218.44537602737546,
+        "scheduled_p95_ms": 6078.732422087342,
+        "issuance_wait_p95_ms": 5978.818821255118
+      },
+      "completed_in_window": 5710,
+      "completed_per_second": 571.0,
+      "success_per_second_with_drain": 525.8628936496671,
+      "stable_at_tested_rate": false,
+      "resources": {
+        "cpu_cores_average": 1.955000348255644,
+        "generator_cpu_seconds": 7.646098294999999,
+        "wbytes_delta": 0,
+        "wios_delta": 0,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 45387,
+        "io_some_usec_delta": 151
+      },
+      "memory_peak_bytes": 1023057920,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 25.293884798884392,
+        "scheduled_p95_ms": 25.41954955086112,
+        "issuance_wait_p95_ms": null
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 19890,
+          "saved": 19890,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 8027186,
+        "day_file_bytes": {
+          "20261024": 8027186
+        }
+      },
+      "integrity_ok": true,
+      "server_log": {
+        "artifact": "var/posting-pipeline-160/baseline-tmpfs-2cpu.json.server.log",
+        "sha256": "c188345e2a34a7d4a76121f26a6b2ef6e30d758822a555ef91694bc4f60ea425"
+      }
+    },
+    {
+      "name": "baseline-tmpfs-4cpu",
+      "artifact": "var/posting-pipeline-160/baseline-tmpfs-4cpu.json",
+      "sha256": "f134d9d01bb43acf2613758e0fd38a71698e8c21af27071c0859e0b2422f8122",
+      "image": "sha256:74adc6cf6a3ecef1899cd60bc0f49572bb17108cd5169abb31b042f12ce279a0",
+      "waf": {
+        "enabled": true,
+        "traffic": {
+          "posting": {
+            "client_rate": 10,
+            "client_burst": 30,
+            "global_rate": 100000,
+            "global_burst": 200000,
+            "client_concurrent": 8,
+            "global_concurrent": 256
+          },
+          "client_enabled": true,
+          "enabled": true,
+          "client_rate": 10000,
+          "client_burst": 100000,
+          "global_rate": 100000,
+          "global_burst": 200000,
+          "client_concurrent": 32,
+          "global_concurrent": 128,
+          "search_rate": 2,
+          "search_burst": 10,
+          "search_global_rate": 12,
+          "search_global_burst": 24,
+          "search_concurrent": 4
+        }
+      },
+      "posting_trip": false,
+      "cpu_max": "400000 100000",
+      "memory_max": "4294967296",
+      "go_memory_limit": "auto",
+      "egress_budget_bits_per_second": 80000000,
+      "post_mix": "80% legacy / 20% Web including form, CSRF and redirect",
+      "measurement_mode": "fixed_count_complete",
+      "storage_backend": "tmpfs_diagnostic_not_durable",
+      "rate": 800,
+      "seconds": 10,
+      "workers": 80,
+      "thread_count": 16,
+      "duration_with_drain_seconds": 10.578227755147964,
+      "summary": {
+        "planned": 8000,
+        "sent": 8000,
+        "success": 8000,
+        "acknowledged": 8000,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 125.58599282056093,
+        "scheduled_p95_ms": 852.239859290421,
+        "issuance_wait_p95_ms": 753.1835958361626
+      },
+      "completed_in_window": 7766,
+      "completed_per_second": 776.6,
+      "success_per_second_with_drain": 756.2703493604349,
+      "stable_at_tested_rate": false,
+      "resources": {
+        "cpu_cores_average": 3.5863447902733636,
+        "generator_cpu_seconds": 9.211931336,
+        "wbytes_delta": 0,
+        "wios_delta": 0,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 0,
+        "io_some_usec_delta": 153
+      },
+      "memory_peak_bytes": 1059704832,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 25.90037090703845,
+        "scheduled_p95_ms": 26.061929762363434,
+        "issuance_wait_p95_ms": null
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 19890,
+          "saved": 19890,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 8052745,
+        "day_file_bytes": {
+          "20261024": 8052745
+        }
+      },
+      "integrity_ok": true,
+      "server_log": {
+        "artifact": "var/posting-pipeline-160/baseline-tmpfs-4cpu.json.server.log",
+        "sha256": "a1da611f68fd63c923ee546e8814b79cccab33e05abf600b71cb51f756607030"
+      }
+    },
+    {
+      "name": "baseline-window-2cpu",
+      "artifact": "var/posting-pipeline-160/baseline-window-2cpu.json",
+      "sha256": "ea56364ed0c7ae16b50ec767241b730aa32b535615e48c6e77bc7084c02234b3",
+      "image": "sha256:74adc6cf6a3ecef1899cd60bc0f49572bb17108cd5169abb31b042f12ce279a0",
+      "waf": {
+        "enabled": true,
+        "traffic": {
+          "posting": {
+            "client_rate": 10,
+            "client_burst": 30,
+            "global_rate": 100000,
+            "global_burst": 200000,
+            "client_concurrent": 8,
+            "global_concurrent": 256
+          },
+          "client_enabled": true,
+          "enabled": true,
+          "client_rate": 10000,
+          "client_burst": 100000,
+          "global_rate": 100000,
+          "global_burst": 200000,
+          "client_concurrent": 32,
+          "global_concurrent": 128,
+          "search_rate": 2,
+          "search_burst": 10,
+          "search_global_rate": 12,
+          "search_global_burst": 24,
+          "search_concurrent": 4
+        }
+      },
+      "posting_trip": false,
+      "cpu_max": "200000 100000",
+      "memory_max": "4294967296",
+      "go_memory_limit": "auto",
+      "egress_budget_bits_per_second": 80000000,
+      "post_mix": "80% legacy / 20% Web including form, CSRF and redirect",
+      "measurement_mode": "fixed_arrival_window",
+      "rate": 800,
+      "seconds": 10,
+      "workers": 80,
+      "thread_count": 16,
+      "duration_with_drain_seconds": 10.179217705968767,
+      "summary": {
+        "planned": 8000,
+        "sent": 5204,
+        "success": 5204,
+        "acknowledged": 5204,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 2796,
+        "http_p95_ms": 251.41487177461386,
+        "scheduled_p95_ms": 300.518955104053,
+        "issuance_wait_p95_ms": 94.06385011970997
+      },
+      "completed_in_window": 5120,
+      "completed_per_second": 512.0,
+      "success_per_second_with_drain": 511.237714952156,
+      "stable_at_tested_rate": false,
+      "resources": {
+        "cpu_cores_average": 1.7627029422387575,
+        "generator_cpu_seconds": 4.417619842000001,
+        "wbytes_delta": 37433344,
+        "wios_delta": 957,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 0,
+        "io_some_usec_delta": 105859
+      },
+      "memory_peak_bytes": 676827136,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 33.323359210044146,
+        "scheduled_p95_ms": 33.44978718087077,
+        "issuance_wait_p95_ms": null
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 12482,
+          "saved": 12482,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 5113376,
+        "day_file_bytes": {
+          "20261024": 5113376
+        }
+      },
+      "integrity_ok": true,
+      "server_log": {
+        "artifact": "var/posting-pipeline-160/baseline-window-2cpu.json.server.log",
+        "sha256": "a777a2f41f87bbe011e709071751584744127891255442e93fbe1a1b865b15e2"
+      }
+    },
+    {
+      "name": "baseline-window-4cpu",
+      "artifact": "var/posting-pipeline-160/baseline-window-4cpu.json",
+      "sha256": "73114e9ba1b51749ce343b47085814ee0bad06ad71ec9ac69b7e80e4f14a80b7",
+      "image": "sha256:74adc6cf6a3ecef1899cd60bc0f49572bb17108cd5169abb31b042f12ce279a0",
+      "waf": {
+        "enabled": true,
+        "traffic": {
+          "posting": {
+            "client_rate": 10,
+            "client_burst": 30,
+            "global_rate": 100000,
+            "global_burst": 200000,
+            "client_concurrent": 8,
+            "global_concurrent": 256
+          },
+          "client_enabled": true,
+          "enabled": true,
+          "client_rate": 10000,
+          "client_burst": 100000,
+          "global_rate": 100000,
+          "global_burst": 200000,
+          "client_concurrent": 32,
+          "global_concurrent": 128,
+          "search_rate": 2,
+          "search_burst": 10,
+          "search_global_rate": 12,
+          "search_global_burst": 24,
+          "search_concurrent": 4
+        }
+      },
+      "posting_trip": false,
+      "cpu_max": "400000 100000",
+      "memory_max": "4294967296",
+      "go_memory_limit": "auto",
+      "egress_budget_bits_per_second": 80000000,
+      "post_mix": "80% legacy / 20% Web including form, CSRF and redirect",
+      "measurement_mode": "fixed_arrival_window",
+      "rate": 800,
+      "seconds": 10,
+      "workers": 80,
+      "thread_count": 16,
+      "duration_with_drain_seconds": 10.129896608181298,
+      "summary": {
+        "planned": 8000,
+        "sent": 7356,
+        "success": 7356,
+        "acknowledged": 7356,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 644,
+        "http_p95_ms": 173.35853865370154,
+        "scheduled_p95_ms": 219.22711469233036,
+        "issuance_wait_p95_ms": 83.49635358899832
+      },
+      "completed_in_window": 7267,
+      "completed_per_second": 726.7,
+      "success_per_second_with_drain": 726.1673326516491,
+      "stable_at_tested_rate": false,
+      "resources": {
+        "cpu_cores_average": 3.1568492983603478,
+        "generator_cpu_seconds": 7.247039429,
+        "wbytes_delta": 54603776,
+        "wios_delta": 1384,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 0,
+        "io_some_usec_delta": 34999
+      },
+      "memory_peak_bytes": 909291520,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 31.89444076269865,
+        "scheduled_p95_ms": 32.027036882936954,
+        "issuance_wait_p95_ms": null
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 17544,
+          "saved": 17544,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 7127428,
+        "day_file_bytes": {
+          "20261024": 7127428
+        }
+      },
+      "integrity_ok": true,
+      "server_log": {
+        "artifact": "var/posting-pipeline-160/baseline-window-4cpu.json.server.log",
+        "sha256": "48356451494121911e35d2c8e9c2192c5d99c1451b5493e1d3aa0df7b48b757a"
+      }
+    },
+    {
+      "name": "fused-diag-4cpu",
+      "artifact": "var/posting-pipeline-160/fused-diag-4cpu.json",
+      "sha256": "02cd0e281eb75dc0ca2da42c9b8bc780224be1eb71d424a77955946c71894a57",
+      "image": "sha256:5d49795ae225de095a8d5703faf7ad1df786088edafd0a045a9b61ba839c8e34",
+      "waf": {
+        "enabled": true,
+        "traffic": {
+          "posting": {
+            "client_rate": 10,
+            "client_burst": 30,
+            "global_rate": 100000,
+            "global_burst": 200000,
+            "client_concurrent": 8,
+            "global_concurrent": 256
+          },
+          "client_enabled": true,
+          "enabled": true,
+          "client_rate": 10000,
+          "client_burst": 100000,
+          "global_rate": 100000,
+          "global_burst": 200000,
+          "client_concurrent": 32,
+          "global_concurrent": 128,
+          "search_rate": 2,
+          "search_burst": 10,
+          "search_global_rate": 12,
+          "search_global_burst": 24,
+          "search_concurrent": 4
+        }
+      },
+      "posting_trip": false,
+      "cpu_max": "400000 100000",
+      "memory_max": "4294967296",
+      "go_memory_limit": "auto",
+      "egress_budget_bits_per_second": 80000000,
+      "post_mix": "80% legacy / 20% Web including form, CSRF and redirect",
+      "measurement_mode": "fixed_count_complete",
+      "rate": 800,
+      "seconds": 10,
+      "workers": 80,
+      "thread_count": 16,
+      "duration_with_drain_seconds": 12.469617722090334,
+      "summary": {
+        "planned": 8000,
+        "sent": 8000,
+        "success": 8000,
+        "acknowledged": 8000,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 186.29754101857543,
+        "scheduled_p95_ms": 3370.340302120894,
+        "issuance_wait_p95_ms": 3270.4238379374146
+      },
+      "completed_in_window": 7150,
+      "completed_per_second": 715.0,
+      "success_per_second_with_drain": 641.559362788463,
+      "stable_at_tested_rate": false,
+      "resources": {
+        "cpu_cores_average": 3.0528516469724236,
+        "generator_cpu_seconds": 8.868595942,
+        "wbytes_delta": 62742528,
+        "wios_delta": 2179,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 0,
+        "io_some_usec_delta": 52085
+      },
+      "memory_peak_bytes": 1041842176,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 31.692305114120245,
+        "scheduled_p95_ms": 31.808690633624792,
+        "issuance_wait_p95_ms": null
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 19890,
+          "saved": 19890,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 8051106,
+        "day_file_bytes": {
+          "20261024": 8051106
+        }
+      },
+      "integrity_ok": true,
+      "server_log": {
+        "artifact": "var/posting-pipeline-160/fused-diag-4cpu.json.server.log",
+        "sha256": "94262c489375ebcf54295e4148b26ab597367c7d2abffefedb2677807a05f7b3"
+      }
+    },
+    {
+      "name": "fused-fixed-2cpu",
+      "artifact": "var/posting-pipeline-160/fused-fixed-2cpu.json",
+      "sha256": "909d43b83132559398975db01090f0091949b3f41358977cd4ab1022ca06b13d",
+      "image": "sha256:96d9532c0736e55b84e7e0554c097914c47f673d48a3f9cef0e542e70ca9ae36",
+      "waf": {
+        "enabled": true,
+        "traffic": {
+          "posting": {
+            "client_rate": 10,
+            "client_burst": 30,
+            "global_rate": 100000,
+            "global_burst": 200000,
+            "client_concurrent": 8,
+            "global_concurrent": 256
+          },
+          "client_enabled": true,
+          "enabled": true,
+          "client_rate": 10000,
+          "client_burst": 100000,
+          "global_rate": 100000,
+          "global_burst": 200000,
+          "client_concurrent": 32,
+          "global_concurrent": 128,
+          "search_rate": 2,
+          "search_burst": 10,
+          "search_global_rate": 12,
+          "search_global_burst": 24,
+          "search_concurrent": 4
+        }
+      },
+      "posting_trip": false,
+      "cpu_max": "200000 100000",
+      "memory_max": "4294967296",
+      "go_memory_limit": "auto",
+      "egress_budget_bits_per_second": 80000000,
+      "post_mix": "80% legacy / 20% Web including form, CSRF and redirect",
+      "measurement_mode": "fixed_count_complete",
+      "rate": 800,
+      "seconds": 10,
+      "workers": 80,
+      "thread_count": 16,
+      "duration_with_drain_seconds": 17.718338465318084,
+      "summary": {
+        "planned": 8000,
+        "sent": 8000,
+        "success": 8000,
+        "acknowledged": 8000,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 252.2164569236338,
+        "scheduled_p95_ms": 8178.046296350658,
+        "issuance_wait_p95_ms": 8078.126410022378
+      },
+      "completed_in_window": 5043,
+      "completed_per_second": 504.3,
+      "success_per_second_with_drain": 451.509604902244,
+      "stable_at_tested_rate": false,
+      "resources": {
+        "cpu_cores_average": 1.7380634228361407,
+        "generator_cpu_seconds": 7.659539614999999,
+        "wbytes_delta": 62341120,
+        "wios_delta": 2293,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 0,
+        "io_some_usec_delta": 193721
+      },
+      "memory_peak_bytes": 1030742016,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 31.977767124772072,
+        "scheduled_p95_ms": 32.109599094837904,
+        "issuance_wait_p95_ms": null
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 19890,
+          "saved": 19890,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 8024430,
+        "day_file_bytes": {
+          "20261024": 8024430
+        }
+      },
+      "integrity_ok": true,
+      "server_log": {
+        "artifact": "var/posting-pipeline-160/fused-fixed-2cpu.json.server.log",
+        "sha256": "9037480c9ab8c95e957b5aeb0e51d66bd8742e3e13c91495e3a67acbeafba068"
+      }
+    },
+    {
+      "name": "fused-fixed-4cpu",
+      "artifact": "var/posting-pipeline-160/fused-fixed-4cpu.json",
+      "sha256": "17b47520e9ace9e45c85d7f3bee5eb6a73fe45c43d3d1446bd08617a264e639e",
+      "image": "sha256:96d9532c0736e55b84e7e0554c097914c47f673d48a3f9cef0e542e70ca9ae36",
+      "waf": {
+        "enabled": true,
+        "traffic": {
+          "posting": {
+            "client_rate": 10,
+            "client_burst": 30,
+            "global_rate": 100000,
+            "global_burst": 200000,
+            "client_concurrent": 8,
+            "global_concurrent": 256
+          },
+          "client_enabled": true,
+          "enabled": true,
+          "client_rate": 10000,
+          "client_burst": 100000,
+          "global_rate": 100000,
+          "global_burst": 200000,
+          "client_concurrent": 32,
+          "global_concurrent": 128,
+          "search_rate": 2,
+          "search_burst": 10,
+          "search_global_rate": 12,
+          "search_global_burst": 24,
+          "search_concurrent": 4
+        }
+      },
+      "posting_trip": false,
+      "cpu_max": "400000 100000",
+      "memory_max": "4294967296",
+      "go_memory_limit": "auto",
+      "egress_budget_bits_per_second": 80000000,
+      "post_mix": "80% legacy / 20% Web including form, CSRF and redirect",
+      "measurement_mode": "fixed_count_complete",
+      "rate": 800,
+      "seconds": 10,
+      "workers": 80,
+      "thread_count": 16,
+      "duration_with_drain_seconds": 12.132827015127987,
+      "summary": {
+        "planned": 8000,
+        "sent": 8000,
+        "success": 8000,
+        "acknowledged": 8000,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 169.66104181483388,
+        "scheduled_p95_ms": 2915.055972058326,
+        "issuance_wait_p95_ms": 2815.1652114465833
+      },
+      "completed_in_window": 7275,
+      "completed_per_second": 727.5,
+      "success_per_second_with_drain": 659.3681744596777,
+      "stable_at_tested_rate": false,
+      "resources": {
+        "cpu_cores_average": 3.0426454571528057,
+        "generator_cpu_seconds": 8.768988595,
+        "wbytes_delta": 61816832,
+        "wios_delta": 2079,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 0,
+        "io_some_usec_delta": 42993
+      },
+      "memory_peak_bytes": 998985728,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 31.987546011805534,
+        "scheduled_p95_ms": 32.11566573008895,
+        "issuance_wait_p95_ms": null
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 19890,
+          "saved": 19890,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 8043146,
+        "day_file_bytes": {
+          "20261024": 8043146
+        }
+      },
+      "integrity_ok": true,
+      "server_log": {
+        "artifact": "var/posting-pipeline-160/fused-fixed-4cpu.json.server.log",
+        "sha256": "43d382fd9f2be95253f29d6812a1af0c7751a86d371ed9383ed73c1aa99f3010"
+      }
+    },
+    {
+      "name": "fusedb-diag-4cpu",
+      "artifact": "var/posting-pipeline-160/fusedb-diag-4cpu.json",
+      "sha256": "0e35346d34505525848f24387484a969e09540e5ea7b62211fac011216393a42",
+      "image": "sha256:d302fb9152c61c6c41302ed7da1ddbe688edc870de410fa1bdad5de6f8801099",
+      "waf": {
+        "enabled": true,
+        "traffic": {
+          "posting": {
+            "client_rate": 10,
+            "client_burst": 30,
+            "global_rate": 100000,
+            "global_burst": 200000,
+            "client_concurrent": 8,
+            "global_concurrent": 256
+          },
+          "client_enabled": true,
+          "enabled": true,
+          "client_rate": 10000,
+          "client_burst": 100000,
+          "global_rate": 100000,
+          "global_burst": 200000,
+          "client_concurrent": 32,
+          "global_concurrent": 128,
+          "search_rate": 2,
+          "search_burst": 10,
+          "search_global_rate": 12,
+          "search_global_burst": 24,
+          "search_concurrent": 4
+        }
+      },
+      "posting_trip": false,
+      "cpu_max": "400000 100000",
+      "memory_max": "4294967296",
+      "go_memory_limit": "auto",
+      "egress_budget_bits_per_second": 80000000,
+      "post_mix": "80% legacy / 20% Web including form, CSRF and redirect",
+      "measurement_mode": "fixed_count_complete",
+      "rate": 800,
+      "seconds": 10,
+      "workers": 80,
+      "thread_count": 16,
+      "duration_with_drain_seconds": 12.268104176037014,
+      "summary": {
+        "planned": 8000,
+        "sent": 8000,
+        "success": 8000,
+        "acknowledged": 8000,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 177.345409989357,
+        "scheduled_p95_ms": 3179.031787905842,
+        "issuance_wait_p95_ms": 3079.104777891189
+      },
+      "completed_in_window": 7197,
+      "completed_per_second": 719.7,
+      "success_per_second_with_drain": 652.0974948701694,
+      "stable_at_tested_rate": false,
+      "resources": {
+        "cpu_cores_average": 3.0652672540434533,
+        "generator_cpu_seconds": 8.91376576,
+        "wbytes_delta": 61886464,
+        "wios_delta": 2091,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 0,
+        "io_some_usec_delta": 41375
+      },
+      "memory_peak_bytes": 1041731584,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 33.33897329866886,
+        "scheduled_p95_ms": 33.457139041274786,
+        "issuance_wait_p95_ms": null
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 19890,
+          "saved": 19890,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 8054012,
+        "day_file_bytes": {
+          "20261024": 8054012
+        }
+      },
+      "integrity_ok": true,
+      "server_log": {
+        "artifact": "var/posting-pipeline-160/fusedb-diag-4cpu.json.server.log",
+        "sha256": "2a6c501e3551a974b31e6bec7ada3a3a6faf45b8edf4fde0ed1b220ba321bebe"
+      }
+    },
+    {
+      "name": "fusedb-fixed-2cpu",
+      "artifact": "var/posting-pipeline-160/fusedb-fixed-2cpu.json",
+      "sha256": "3ba53eec2f7505f5a395f65d39558f0e8fe4c19d87f498c82f3aa3be53e1615d",
+      "image": "sha256:a85329efa81e9a0db2620d0cdcf6a1482f1a326cff72d9e83f627b0383146f1d",
+      "waf": {
+        "enabled": true,
+        "traffic": {
+          "posting": {
+            "client_rate": 10,
+            "client_burst": 30,
+            "global_rate": 100000,
+            "global_burst": 200000,
+            "client_concurrent": 8,
+            "global_concurrent": 256
+          },
+          "client_enabled": true,
+          "enabled": true,
+          "client_rate": 10000,
+          "client_burst": 100000,
+          "global_rate": 100000,
+          "global_burst": 200000,
+          "client_concurrent": 32,
+          "global_concurrent": 128,
+          "search_rate": 2,
+          "search_burst": 10,
+          "search_global_rate": 12,
+          "search_global_burst": 24,
+          "search_concurrent": 4
+        }
+      },
+      "posting_trip": false,
+      "cpu_max": "200000 100000",
+      "memory_max": "4294967296",
+      "go_memory_limit": "auto",
+      "egress_budget_bits_per_second": 80000000,
+      "post_mix": "80% legacy / 20% Web including form, CSRF and redirect",
+      "measurement_mode": "fixed_count_complete",
+      "rate": 800,
+      "seconds": 10,
+      "workers": 80,
+      "thread_count": 16,
+      "duration_with_drain_seconds": 17.428926798980683,
+      "summary": {
+        "planned": 8000,
+        "sent": 8000,
+        "success": 8000,
+        "acknowledged": 8000,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 248.15939972177148,
+        "scheduled_p95_ms": 7909.202570095658,
+        "issuance_wait_p95_ms": 7809.278563130647
+      },
+      "completed_in_window": 5115,
+      "completed_per_second": 511.5,
+      "success_per_second_with_drain": 459.00703424079296,
+      "stable_at_tested_rate": false,
+      "resources": {
+        "cpu_cores_average": 1.7355986027647512,
+        "generator_cpu_seconds": 7.693795466,
+        "wbytes_delta": 62152704,
+        "wios_delta": 2297,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 0,
+        "io_some_usec_delta": 177433
+      },
+      "memory_peak_bytes": 1033199616,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 33.233577851206064,
+        "scheduled_p95_ms": 34.31774443015456,
+        "issuance_wait_p95_ms": null
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 19890,
+          "saved": 19890,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 8019885,
+        "day_file_bytes": {
+          "20261024": 8019885
+        }
+      },
+      "integrity_ok": true,
+      "server_log": {
+        "artifact": "var/posting-pipeline-160/fusedb-fixed-2cpu.json.server.log",
+        "sha256": "5f49cf4d6aeb10c3a11723bbfd6bc11e759bd23bcecbf434dec09d4aecd51421"
+      }
+    },
+    {
+      "name": "fusedb-fixed-4cpu",
+      "artifact": "var/posting-pipeline-160/fusedb-fixed-4cpu.json",
+      "sha256": "62b1a4eae0a4864b0566e187951451e6571cb3b7610b7e96e3e33c4b366c57e8",
+      "image": "sha256:a85329efa81e9a0db2620d0cdcf6a1482f1a326cff72d9e83f627b0383146f1d",
+      "waf": {
+        "enabled": true,
+        "traffic": {
+          "posting": {
+            "client_rate": 10,
+            "client_burst": 30,
+            "global_rate": 100000,
+            "global_burst": 200000,
+            "client_concurrent": 8,
+            "global_concurrent": 256
+          },
+          "client_enabled": true,
+          "enabled": true,
+          "client_rate": 10000,
+          "client_burst": 100000,
+          "global_rate": 100000,
+          "global_burst": 200000,
+          "client_concurrent": 32,
+          "global_concurrent": 128,
+          "search_rate": 2,
+          "search_burst": 10,
+          "search_global_rate": 12,
+          "search_global_burst": 24,
+          "search_concurrent": 4
+        }
+      },
+      "posting_trip": false,
+      "cpu_max": "400000 100000",
+      "memory_max": "4294967296",
+      "go_memory_limit": "auto",
+      "egress_budget_bits_per_second": 80000000,
+      "post_mix": "80% legacy / 20% Web including form, CSRF and redirect",
+      "measurement_mode": "fixed_count_complete",
+      "rate": 800,
+      "seconds": 10,
+      "workers": 80,
+      "thread_count": 16,
+      "duration_with_drain_seconds": 12.017029823269695,
+      "summary": {
+        "planned": 8000,
+        "sent": 8000,
+        "success": 8000,
+        "acknowledged": 8000,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 164.57470785826445,
+        "scheduled_p95_ms": 2776.0899891145527,
+        "issuance_wait_p95_ms": 2676.2364571914077
+      },
+      "completed_in_window": 7352,
+      "completed_per_second": 735.2,
+      "success_per_second_with_drain": 665.7219061326497,
+      "stable_at_tested_rate": false,
+      "resources": {
+        "cpu_cores_average": 3.0634804557706716,
+        "generator_cpu_seconds": 8.803365171,
+        "wbytes_delta": 61853696,
+        "wios_delta": 2036,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 0,
+        "io_some_usec_delta": 45604
+      },
+      "memory_peak_bytes": 999321600,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 33.29462697729468,
+        "scheduled_p95_ms": 33.40151207521558,
+        "issuance_wait_p95_ms": null
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 19890,
+          "saved": 19890,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 8047662,
+        "day_file_bytes": {
+          "20261024": 8047662
+        }
+      },
+      "integrity_ok": true,
+      "server_log": {
+        "artifact": "var/posting-pipeline-160/fusedb-fixed-4cpu.json.server.log",
+        "sha256": "fa7336ed1e10f96b02f1d8baf6c1c4a0d6747408329d71963ab1328635f83910"
+      }
+    },
+    {
+      "name": "overlap-diag-4cpu",
+      "artifact": "var/posting-pipeline-160/overlap-diag-4cpu.json",
+      "sha256": "e7bc93f4c9bc153666548f736263100c3e2715cc00fadce8bcf925311a0f8b64",
+      "image": "sha256:fb0582ee220f17430baa298aaec1fede28350884edf5e8261aa96dc2373a0ac7",
+      "waf": {
+        "enabled": true,
+        "traffic": {
+          "posting": {
+            "client_rate": 10,
+            "client_burst": 30,
+            "global_rate": 100000,
+            "global_burst": 200000,
+            "client_concurrent": 8,
+            "global_concurrent": 256
+          },
+          "client_enabled": true,
+          "enabled": true,
+          "client_rate": 10000,
+          "client_burst": 100000,
+          "global_rate": 100000,
+          "global_burst": 200000,
+          "client_concurrent": 32,
+          "global_concurrent": 128,
+          "search_rate": 2,
+          "search_burst": 10,
+          "search_global_rate": 12,
+          "search_global_burst": 24,
+          "search_concurrent": 4
+        }
+      },
+      "posting_trip": false,
+      "cpu_max": "400000 100000",
+      "memory_max": "4294967296",
+      "go_memory_limit": "auto",
+      "egress_budget_bits_per_second": 80000000,
+      "post_mix": "80% legacy / 20% Web including form, CSRF and redirect",
+      "measurement_mode": "fixed_count_complete",
+      "rate": 800,
+      "seconds": 10,
+      "workers": 80,
+      "thread_count": 16,
+      "duration_with_drain_seconds": 21.33796837227419,
+      "summary": {
+        "planned": 8000,
+        "sent": 8000,
+        "success": 7993,
+        "acknowledged": 7993,
+        "completion_errors_after_ack": 0,
+        "errors": 7,
+        "skipped": 0,
+        "http_p95_ms": 459.4902480021119,
+        "scheduled_p95_ms": 12626.561226788908,
+        "issuance_wait_p95_ms": 12526.634634938091
+      },
+      "completed_in_window": 2589,
+      "completed_per_second": 258.9,
+      "success_per_second_with_drain": 374.59048867959825,
+      "stable_at_tested_rate": false,
+      "resources": {
+        "cpu_cores_average": 1.758484704136848,
+        "generator_cpu_seconds": 8.839607145999999,
+        "wbytes_delta": 62369792,
+        "wios_delta": 2193,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 0,
+        "io_some_usec_delta": 942640
+      },
+      "memory_peak_bytes": 1014263808,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 31.732341274619102,
+        "scheduled_p95_ms": 31.864354852586985,
+        "issuance_wait_p95_ms": null
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 19883,
+          "saved": 19883,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 8007331,
+        "day_file_bytes": {
+          "20261024": 8007331
+        }
+      },
+      "integrity_ok": true,
+      "server_log": {
+        "artifact": "var/posting-pipeline-160/overlap-diag-4cpu.json.server.log",
+        "sha256": "e8f3b1f4bc3278cf5c34699303747315fb9fdfde6baa17849d699a14f2f2b089"
+      }
+    },
+    {
+      "name": "overlap-fixed-2cpu",
+      "artifact": "var/posting-pipeline-160/overlap-fixed-2cpu.json",
+      "sha256": "ad70b7e0b52c54fb57c6dbf1e6b95e33b2fea240c6476e7e0f89cb66ea36e3c0",
+      "image": "sha256:19187cbc97e578b45936c64e65e7edcf50195e4dfa2e4113ddf7c048273ce79b",
+      "waf": {
+        "enabled": true,
+        "traffic": {
+          "posting": {
+            "client_rate": 10,
+            "client_burst": 30,
+            "global_rate": 100000,
+            "global_burst": 200000,
+            "client_concurrent": 8,
+            "global_concurrent": 256
+          },
+          "client_enabled": true,
+          "enabled": true,
+          "client_rate": 10000,
+          "client_burst": 100000,
+          "global_rate": 100000,
+          "global_burst": 200000,
+          "client_concurrent": 32,
+          "global_concurrent": 128,
+          "search_rate": 2,
+          "search_burst": 10,
+          "search_global_rate": 12,
+          "search_global_burst": 24,
+          "search_concurrent": 4
+        }
+      },
+      "posting_trip": false,
+      "cpu_max": "200000 100000",
+      "memory_max": "4294967296",
+      "go_memory_limit": "auto",
+      "egress_budget_bits_per_second": 80000000,
+      "post_mix": "80% legacy / 20% Web including form, CSRF and redirect",
+      "measurement_mode": "fixed_count_complete",
+      "rate": 800,
+      "seconds": 10,
+      "workers": 80,
+      "thread_count": 16,
+      "duration_with_drain_seconds": 17.38306353893131,
+      "summary": {
+        "planned": 8000,
+        "sent": 8000,
+        "success": 8000,
+        "acknowledged": 8000,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 246.45409872755408,
+        "scheduled_p95_ms": 7860.684291925281,
+        "issuance_wait_p95_ms": 7760.767688043416
+      },
+      "completed_in_window": 5037,
+      "completed_per_second": 503.7,
+      "success_per_second_with_drain": 460.2180727282684,
+      "stable_at_tested_rate": false,
+      "resources": {
+        "cpu_cores_average": 1.7569461753159783,
+        "generator_cpu_seconds": 7.747592162000001,
+        "wbytes_delta": 62283776,
+        "wios_delta": 2300,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 0,
+        "io_some_usec_delta": 172938
+      },
+      "memory_peak_bytes": 1029660672,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 32.653404865413904,
+        "scheduled_p95_ms": 32.90069103240967,
+        "issuance_wait_p95_ms": null
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 19890,
+          "saved": 19890,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 8020170,
+        "day_file_bytes": {
+          "20261024": 8020170
+        }
+      },
+      "integrity_ok": true,
+      "server_log": {
+        "artifact": "var/posting-pipeline-160/overlap-fixed-2cpu.json.server.log",
+        "sha256": "5bb80906288c56f10ebcd20681e8176e58f12409eb4e484295560571343e4d5b"
+      }
+    },
+    {
+      "name": "overlap-fixed-4cpu",
+      "artifact": "var/posting-pipeline-160/overlap-fixed-4cpu.json",
+      "sha256": "fc8258585a866a17634f63e31cff31fa851bcd7da52ce9d8f9c30ad03690820c",
+      "image": "sha256:19187cbc97e578b45936c64e65e7edcf50195e4dfa2e4113ddf7c048273ce79b",
+      "waf": {
+        "enabled": true,
+        "traffic": {
+          "posting": {
+            "client_rate": 10,
+            "client_burst": 30,
+            "global_rate": 100000,
+            "global_burst": 200000,
+            "client_concurrent": 8,
+            "global_concurrent": 256
+          },
+          "client_enabled": true,
+          "enabled": true,
+          "client_rate": 10000,
+          "client_burst": 100000,
+          "global_rate": 100000,
+          "global_burst": 200000,
+          "client_concurrent": 32,
+          "global_concurrent": 128,
+          "search_rate": 2,
+          "search_burst": 10,
+          "search_global_rate": 12,
+          "search_global_burst": 24,
+          "search_concurrent": 4
+        }
+      },
+      "posting_trip": false,
+      "cpu_max": "400000 100000",
+      "memory_max": "4294967296",
+      "go_memory_limit": "auto",
+      "egress_budget_bits_per_second": 80000000,
+      "post_mix": "80% legacy / 20% Web including form, CSRF and redirect",
+      "measurement_mode": "fixed_count_complete",
+      "rate": 800,
+      "seconds": 10,
+      "workers": 80,
+      "thread_count": 16,
+      "duration_with_drain_seconds": 22.167826242744923,
+      "summary": {
+        "planned": 8000,
+        "sent": 8000,
+        "success": 8000,
+        "acknowledged": 8000,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 351.23803187161684,
+        "scheduled_p95_ms": 9926.010081544518,
+        "issuance_wait_p95_ms": 9666.726185008883
+      },
+      "completed_in_window": 6292,
+      "completed_per_second": 629.2,
+      "success_per_second_with_drain": 360.8833772151312,
+      "stable_at_tested_rate": false,
+      "resources": {
+        "cpu_cores_average": 1.731308951077726,
+        "generator_cpu_seconds": 8.987829896,
+        "wbytes_delta": 61599744,
+        "wios_delta": 1861,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 0,
+        "io_some_usec_delta": 1374776
+      },
+      "memory_peak_bytes": 1022476288,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 32.731634099036455,
+        "scheduled_p95_ms": 32.84335881471634,
+        "issuance_wait_p95_ms": null
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 19890,
+          "saved": 19890,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 8025587,
+        "day_file_bytes": {
+          "20261024": 8025587
+        }
+      },
+      "integrity_ok": true,
+      "server_log": {
+        "artifact": "var/posting-pipeline-160/overlap-fixed-4cpu.json.server.log",
+        "sha256": "032d0e82af9c1632aaad2774ca3ed47941d5c5e13bf5650bba6d61cbbf0b8ea6"
+      }
+    },
+    {
+      "name": "overlap-r2-fixed-2cpu",
+      "artifact": "var/posting-pipeline-160/overlap-r2-fixed-2cpu.json",
+      "sha256": "2d1451ce1fe405fe0982a736a5109f3bc7afcd3d1eaf5aed489fb4f40619b3a9",
+      "image": "sha256:19187cbc97e578b45936c64e65e7edcf50195e4dfa2e4113ddf7c048273ce79b",
+      "waf": {
+        "enabled": true,
+        "traffic": {
+          "posting": {
+            "client_rate": 10,
+            "client_burst": 30,
+            "global_rate": 100000,
+            "global_burst": 200000,
+            "client_concurrent": 8,
+            "global_concurrent": 256
+          },
+          "client_enabled": true,
+          "enabled": true,
+          "client_rate": 10000,
+          "client_burst": 100000,
+          "global_rate": 100000,
+          "global_burst": 200000,
+          "client_concurrent": 32,
+          "global_concurrent": 128,
+          "search_rate": 2,
+          "search_burst": 10,
+          "search_global_rate": 12,
+          "search_global_burst": 24,
+          "search_concurrent": 4
+        }
+      },
+      "posting_trip": false,
+      "cpu_max": "200000 100000",
+      "memory_max": "4294967296",
+      "go_memory_limit": "auto",
+      "egress_budget_bits_per_second": 80000000,
+      "post_mix": "80% legacy / 20% Web including form, CSRF and redirect",
+      "measurement_mode": "fixed_count_complete",
+      "rate": 800,
+      "seconds": 10,
+      "workers": 80,
+      "thread_count": 16,
+      "duration_with_drain_seconds": 17.414532201830298,
+      "summary": {
+        "planned": 8000,
+        "sent": 8000,
+        "success": 8000,
+        "acknowledged": 8000,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 243.8562181778252,
+        "scheduled_p95_ms": 7812.281522899866,
+        "issuance_wait_p95_ms": 7713.8761873357
+      },
+      "completed_in_window": 5175,
+      "completed_per_second": 517.5,
+      "success_per_second_with_drain": 459.38644272966377,
+      "stable_at_tested_rate": false,
+      "resources": {
+        "cpu_cores_average": 1.7482073389717734,
+        "generator_cpu_seconds": 7.670322472,
+        "wbytes_delta": 62287872,
+        "wios_delta": 2264,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 0,
+        "io_some_usec_delta": 177257
+      },
+      "memory_peak_bytes": 985231360,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 31.501776073127985,
+        "scheduled_p95_ms": 31.641111709177494,
+        "issuance_wait_p95_ms": null
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 19890,
+          "saved": 19890,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 8017246,
+        "day_file_bytes": {
+          "20261024": 8017246
+        }
+      },
+      "integrity_ok": true,
+      "server_log": {
+        "artifact": "var/posting-pipeline-160/overlap-r2-fixed-2cpu.json.server.log",
+        "sha256": "9ab5c44d437f4ccfbf8b9c7e7913787a14747879e29892c7770974ab55f87922"
+      }
+    },
+    {
+      "name": "overlap-r2-fixed-4cpu",
+      "artifact": "var/posting-pipeline-160/overlap-r2-fixed-4cpu.json",
+      "sha256": "c18036e2ac3e38487e17c3470ade5b6f39aca31d97f05bca34f7a2c76882e0d6",
+      "image": "sha256:19187cbc97e578b45936c64e65e7edcf50195e4dfa2e4113ddf7c048273ce79b",
+      "waf": {
+        "enabled": true,
+        "traffic": {
+          "posting": {
+            "client_rate": 10,
+            "client_burst": 30,
+            "global_rate": 100000,
+            "global_burst": 200000,
+            "client_concurrent": 8,
+            "global_concurrent": 256
+          },
+          "client_enabled": true,
+          "enabled": true,
+          "client_rate": 10000,
+          "client_burst": 100000,
+          "global_rate": 100000,
+          "global_burst": 200000,
+          "client_concurrent": 32,
+          "global_concurrent": 128,
+          "search_rate": 2,
+          "search_burst": 10,
+          "search_global_rate": 12,
+          "search_global_burst": 24,
+          "search_concurrent": 4
+        }
+      },
+      "posting_trip": false,
+      "cpu_max": "400000 100000",
+      "memory_max": "4294967296",
+      "go_memory_limit": "auto",
+      "egress_budget_bits_per_second": 80000000,
+      "post_mix": "80% legacy / 20% Web including form, CSRF and redirect",
+      "measurement_mode": "fixed_count_complete",
+      "rate": 800,
+      "seconds": 10,
+      "workers": 80,
+      "thread_count": 16,
+      "duration_with_drain_seconds": 18.048608580604196,
+      "summary": {
+        "planned": 8000,
+        "sent": 8000,
+        "success": 7998,
+        "acknowledged": 7998,
+        "completion_errors_after_ack": 0,
+        "errors": 2,
+        "skipped": 0,
+        "http_p95_ms": 392.652730923146,
+        "scheduled_p95_ms": 9308.553106151521,
+        "issuance_wait_p95_ms": 9208.855680655688
+      },
+      "completed_in_window": 3127,
+      "completed_per_second": 312.7,
+      "success_per_second_with_drain": 443.1366531265458,
+      "stable_at_tested_rate": false,
+      "resources": {
+        "cpu_cores_average": 2.094485003161087,
+        "generator_cpu_seconds": 8.924860607000001,
+        "wbytes_delta": 62488576,
+        "wios_delta": 2204,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 0,
+        "io_some_usec_delta": 694379
+      },
+      "memory_peak_bytes": 1005076480,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 32.20631694421172,
+        "scheduled_p95_ms": 32.332359813153744,
+        "issuance_wait_p95_ms": null
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 19888,
+          "saved": 19888,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 8021685,
+        "day_file_bytes": {
+          "20261024": 8021685
+        }
+      },
+      "integrity_ok": true,
+      "server_log": {
+        "artifact": "var/posting-pipeline-160/overlap-r2-fixed-4cpu.json.server.log",
+        "sha256": "a781025638c9524ab1f93be3a1e29651a78de820a3a6188ca94a8fe774066586"
+      }
+    },
+    {
+      "name": "overlap-r3-fixed-2cpu",
+      "artifact": "var/posting-pipeline-160/overlap-r3-fixed-2cpu.json",
+      "sha256": "8c799862bc8b80af76ca1f9885fbf304fcd3b09c282af5e7c70cbf0786db6881",
+      "image": "sha256:19187cbc97e578b45936c64e65e7edcf50195e4dfa2e4113ddf7c048273ce79b",
+      "waf": {
+        "enabled": true,
+        "traffic": {
+          "posting": {
+            "client_rate": 10,
+            "client_burst": 30,
+            "global_rate": 100000,
+            "global_burst": 200000,
+            "client_concurrent": 8,
+            "global_concurrent": 256
+          },
+          "client_enabled": true,
+          "enabled": true,
+          "client_rate": 10000,
+          "client_burst": 100000,
+          "global_rate": 100000,
+          "global_burst": 200000,
+          "client_concurrent": 32,
+          "global_concurrent": 128,
+          "search_rate": 2,
+          "search_burst": 10,
+          "search_global_rate": 12,
+          "search_global_burst": 24,
+          "search_concurrent": 4
+        }
+      },
+      "posting_trip": false,
+      "cpu_max": "200000 100000",
+      "memory_max": "4294967296",
+      "go_memory_limit": "auto",
+      "egress_budget_bits_per_second": 80000000,
+      "post_mix": "80% legacy / 20% Web including form, CSRF and redirect",
+      "measurement_mode": "fixed_count_complete",
+      "rate": 800,
+      "seconds": 10,
+      "workers": 80,
+      "thread_count": 16,
+      "duration_with_drain_seconds": 17.248747672885656,
+      "summary": {
+        "planned": 8000,
+        "sent": 8000,
+        "success": 8000,
+        "acknowledged": 8000,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 243.6264860443771,
+        "scheduled_p95_ms": 7667.719312012196,
+        "issuance_wait_p95_ms": 7567.791881971061
+      },
+      "completed_in_window": 5197,
+      "completed_per_second": 519.7,
+      "success_per_second_with_drain": 463.8017873364616,
+      "stable_at_tested_rate": false,
+      "resources": {
+        "cpu_cores_average": 1.7566521682980192,
+        "generator_cpu_seconds": 7.7081422879999995,
+        "wbytes_delta": 62160896,
+        "wios_delta": 2286,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 0,
+        "io_some_usec_delta": 168555
+      },
+      "memory_peak_bytes": 1007595520,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 32.82180242240429,
+        "scheduled_p95_ms": 32.93163189664483,
+        "issuance_wait_p95_ms": null
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 19890,
+          "saved": 19890,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 8020385,
+        "day_file_bytes": {
+          "20261024": 8020385
+        }
+      },
+      "integrity_ok": true,
+      "server_log": {
+        "artifact": "var/posting-pipeline-160/overlap-r3-fixed-2cpu.json.server.log",
+        "sha256": "e538c9e351302c606f9fdfd197b13c3471915f40d3ddc2499fef84e176490061"
+      }
+    },
+    {
+      "name": "overlap-r3-fixed-4cpu",
+      "artifact": "var/posting-pipeline-160/overlap-r3-fixed-4cpu.json",
+      "sha256": "da4387145d8b344e9e623fca11402b83a7556e37f2954e75732fcf4f9aa4863d",
+      "image": "sha256:19187cbc97e578b45936c64e65e7edcf50195e4dfa2e4113ddf7c048273ce79b",
+      "waf": {
+        "enabled": true,
+        "traffic": {
+          "posting": {
+            "client_rate": 10,
+            "client_burst": 30,
+            "global_rate": 100000,
+            "global_burst": 200000,
+            "client_concurrent": 8,
+            "global_concurrent": 256
+          },
+          "client_enabled": true,
+          "enabled": true,
+          "client_rate": 10000,
+          "client_burst": 100000,
+          "global_rate": 100000,
+          "global_burst": 200000,
+          "client_concurrent": 32,
+          "global_concurrent": 128,
+          "search_rate": 2,
+          "search_burst": 10,
+          "search_global_rate": 12,
+          "search_global_burst": 24,
+          "search_concurrent": 4
+        }
+      },
+      "posting_trip": false,
+      "cpu_max": "400000 100000",
+      "memory_max": "4294967296",
+      "go_memory_limit": "auto",
+      "egress_budget_bits_per_second": 80000000,
+      "post_mix": "80% legacy / 20% Web including form, CSRF and redirect",
+      "measurement_mode": "fixed_count_complete",
+      "rate": 800,
+      "seconds": 10,
+      "workers": 80,
+      "thread_count": 16,
+      "duration_with_drain_seconds": 21.70504118828103,
+      "summary": {
+        "planned": 8000,
+        "sent": 8000,
+        "success": 8000,
+        "acknowledged": 8000,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 471.13046795129776,
+        "scheduled_p95_ms": 12727.832075208426,
+        "issuance_wait_p95_ms": 12627.902131527662
+      },
+      "completed_in_window": 4113,
+      "completed_per_second": 411.3,
+      "success_per_second_with_drain": 368.57796908118075,
+      "stable_at_tested_rate": false,
+      "resources": {
+        "cpu_cores_average": 1.7328307591651562,
+        "generator_cpu_seconds": 8.962028209,
+        "wbytes_delta": 61743104,
+        "wios_delta": 2087,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 0,
+        "io_some_usec_delta": 1081448
+      },
+      "memory_peak_bytes": 1034092544,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 32.20128593966365,
+        "scheduled_p95_ms": 32.326419837772846,
+        "issuance_wait_p95_ms": null
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 19890,
+          "saved": 19890,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 8005831,
+        "day_file_bytes": {
+          "20261024": 8005831
+        }
+      },
+      "integrity_ok": true,
+      "server_log": {
+        "artifact": "var/posting-pipeline-160/overlap-r3-fixed-4cpu.json.server.log",
+        "sha256": "51b830b9d0054019af781096df1e1f44fb3ed4c5566671c86cb9a45238bead80"
+      }
+    },
+    {
+      "name": "overlap-sustained-4cpu",
+      "artifact": "var/posting-pipeline-160/overlap-sustained-4cpu.json",
+      "sha256": "265e9e5bcc1a13676abe4dfcfd758b0c0b29816326483b33cd85e31b24640177",
+      "image": "sha256:19187cbc97e578b45936c64e65e7edcf50195e4dfa2e4113ddf7c048273ce79b",
+      "waf": {
+        "enabled": true,
+        "traffic": {
+          "posting": {
+            "client_rate": 10,
+            "client_burst": 30,
+            "global_rate": 100000,
+            "global_burst": 200000,
+            "client_concurrent": 8,
+            "global_concurrent": 256
+          },
+          "client_enabled": true,
+          "enabled": true,
+          "client_rate": 10000,
+          "client_burst": 100000,
+          "global_rate": 100000,
+          "global_burst": 200000,
+          "client_concurrent": 32,
+          "global_concurrent": 128,
+          "search_rate": 2,
+          "search_burst": 10,
+          "search_global_rate": 12,
+          "search_global_burst": 24,
+          "search_concurrent": 4
+        }
+      },
+      "posting_trip": false,
+      "cpu_max": "400000 100000",
+      "memory_max": "4294967296",
+      "go_memory_limit": "auto",
+      "egress_budget_bits_per_second": 8000000000,
+      "post_mix": "80% legacy / 20% Web including form, CSRF and redirect",
+      "measurement_mode": "fixed_arrival_window",
+      "rate": 160,
+      "seconds": 60,
+      "workers": 80,
+      "thread_count": 16,
+      "duration_with_drain_seconds": 60.02092914003879,
+      "summary": {
+        "planned": 9600,
+        "sent": 9563,
+        "success": 9563,
+        "acknowledged": 9563,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 37,
+        "http_p95_ms": 395.0261869467795,
+        "scheduled_p95_ms": 502.62185698375106,
+        "issuance_wait_p95_ms": 9.533606003969908
+      },
+      "completed_in_window": 9559,
+      "completed_per_second": 159.31666666666666,
+      "success_per_second_with_drain": 159.32775678443653,
+      "stable_at_tested_rate": false,
+      "resources": {
+        "cpu_cores_average": 1.353881573715796,
+        "generator_cpu_seconds": 33.809153857,
+        "wbytes_delta": 122966016,
+        "wios_delta": 10684,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 0,
+        "io_some_usec_delta": 1299880
+      },
+      "memory_peak_bytes": 1419042816,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 32.351823057979345,
+        "scheduled_p95_ms": 32.47012011706829,
+        "issuance_wait_p95_ms": null
+      },
+      "read_summary": {
+        "planned": 24000,
+        "sent": 23630,
+        "success": 23630,
+        "acknowledged": 23630,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 370,
+        "http_p95_ms": 5.1505351439118385,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 866.3937724
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 17,
+          "saved": 0,
+          "failed": 17,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "1792823274512618494",
+          "loss_finished_at_ns": "1792823274512661380",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 13903832,
+        "day_file_bytes": {
+          "20261024": 13903832
+        }
+      },
+      "integrity_ok": true,
+      "restart": {
+        "ok": true,
+        "mode": "graceful container restart on the same data volume",
+        "ready": true,
+        "readiness_timeout_seconds": 60,
+        "ready_seconds": 28.94144148239866,
+        "verification_seconds": 28.956199864391237
+      },
+      "server_log": {
+        "artifact": "var/posting-pipeline-160/overlap-sustained-4cpu.json.server.log",
+        "sha256": "756bd913e0ac24dd3e0325dad3c73e82324cfb7decb2ac9d242567eb963fcab3"
+      }
+    },
+    {
+      "name": "overlap-tmpfs-2cpu",
+      "artifact": "var/posting-pipeline-160/overlap-tmpfs-2cpu.json",
+      "sha256": "35e04bbc636b60823fa3c2013e83a853d892d23ba6275b4e2d80e2bf2a417b56",
+      "image": "sha256:19187cbc97e578b45936c64e65e7edcf50195e4dfa2e4113ddf7c048273ce79b",
+      "waf": {
+        "enabled": true,
+        "traffic": {
+          "posting": {
+            "client_rate": 10,
+            "client_burst": 30,
+            "global_rate": 100000,
+            "global_burst": 200000,
+            "client_concurrent": 8,
+            "global_concurrent": 256
+          },
+          "client_enabled": true,
+          "enabled": true,
+          "client_rate": 10000,
+          "client_burst": 100000,
+          "global_rate": 100000,
+          "global_burst": 200000,
+          "client_concurrent": 32,
+          "global_concurrent": 128,
+          "search_rate": 2,
+          "search_burst": 10,
+          "search_global_rate": 12,
+          "search_global_burst": 24,
+          "search_concurrent": 4
+        }
+      },
+      "posting_trip": false,
+      "cpu_max": "200000 100000",
+      "memory_max": "4294967296",
+      "go_memory_limit": "auto",
+      "egress_budget_bits_per_second": 80000000,
+      "post_mix": "80% legacy / 20% Web including form, CSRF and redirect",
+      "measurement_mode": "fixed_count_complete",
+      "storage_backend": "tmpfs_diagnostic_not_durable",
+      "rate": 800,
+      "seconds": 10,
+      "workers": 80,
+      "thread_count": 16,
+      "duration_with_drain_seconds": 15.505924146156758,
+      "summary": {
+        "planned": 8000,
+        "sent": 8000,
+        "success": 8000,
+        "acknowledged": 8000,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 222.69862797111273,
+        "scheduled_p95_ms": 6340.417169034481,
+        "issuance_wait_p95_ms": 6240.711803082377
+      },
+      "completed_in_window": 5625,
+      "completed_per_second": 562.5,
+      "success_per_second_with_drain": 515.9318415718453,
+      "stable_at_tested_rate": false,
+      "resources": {
+        "cpu_cores_average": 1.967507625629757,
+        "generator_cpu_seconds": 7.943086116,
+        "wbytes_delta": 0,
+        "wios_delta": 0,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 16744,
+        "io_some_usec_delta": 68
+      },
+      "memory_peak_bytes": 1025138688,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 25.766119826585054,
+        "scheduled_p95_ms": 25.911500677466393,
+        "issuance_wait_p95_ms": null
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 19890,
+          "saved": 19890,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 8030243,
+        "day_file_bytes": {
+          "20261024": 8030243
+        }
+      },
+      "integrity_ok": true,
+      "server_log": {
+        "artifact": "var/posting-pipeline-160/overlap-tmpfs-2cpu.json.server.log",
+        "sha256": "9a7cf02532fa9c0bd1e0f930f0988c61ad4b1c8aa3355401e019bdb52e460a2a"
+      }
+    },
+    {
+      "name": "overlap-tmpfs-4cpu",
+      "artifact": "var/posting-pipeline-160/overlap-tmpfs-4cpu.json",
+      "sha256": "4d9c05d665f751fc2d1d7df16ea1e26d0f37510bbdabb77fec804980c14d07ab",
+      "image": "sha256:19187cbc97e578b45936c64e65e7edcf50195e4dfa2e4113ddf7c048273ce79b",
+      "waf": {
+        "enabled": true,
+        "traffic": {
+          "posting": {
+            "client_rate": 10,
+            "client_burst": 30,
+            "global_rate": 100000,
+            "global_burst": 200000,
+            "client_concurrent": 8,
+            "global_concurrent": 256
+          },
+          "client_enabled": true,
+          "enabled": true,
+          "client_rate": 10000,
+          "client_burst": 100000,
+          "global_rate": 100000,
+          "global_burst": 200000,
+          "client_concurrent": 32,
+          "global_concurrent": 128,
+          "search_rate": 2,
+          "search_burst": 10,
+          "search_global_rate": 12,
+          "search_global_burst": 24,
+          "search_concurrent": 4
+        }
+      },
+      "posting_trip": false,
+      "cpu_max": "400000 100000",
+      "memory_max": "4294967296",
+      "go_memory_limit": "auto",
+      "egress_budget_bits_per_second": 80000000,
+      "post_mix": "80% legacy / 20% Web including form, CSRF and redirect",
+      "measurement_mode": "fixed_count_complete",
+      "storage_backend": "tmpfs_diagnostic_not_durable",
+      "rate": 800,
+      "seconds": 10,
+      "workers": 80,
+      "thread_count": 16,
+      "duration_with_drain_seconds": 10.37556982319802,
+      "summary": {
+        "planned": 8000,
+        "sent": 8000,
+        "success": 8000,
+        "acknowledged": 8000,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 115.81512540578842,
+        "scheduled_p95_ms": 314.0831640921533,
+        "issuance_wait_p95_ms": 203.22216115891933
+      },
+      "completed_in_window": 7824,
+      "completed_per_second": 782.4,
+      "success_per_second_with_drain": 771.0419896277265,
+      "stable_at_tested_rate": false,
+      "resources": {
+        "cpu_cores_average": 3.6292211070479476,
+        "generator_cpu_seconds": 9.281791582,
+        "wbytes_delta": 0,
+        "wios_delta": 0,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 0,
+        "io_some_usec_delta": 31
+      },
+      "memory_peak_bytes": 1044262912,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 25.83855390548706,
+        "scheduled_p95_ms": 25.96148755401373,
+        "issuance_wait_p95_ms": null
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 19890,
+          "saved": 19890,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 8069909,
+        "day_file_bytes": {
+          "20261024": 8069909
+        }
+      },
+      "integrity_ok": true,
+      "server_log": {
+        "artifact": "var/posting-pipeline-160/overlap-tmpfs-4cpu.json.server.log",
+        "sha256": "6cc7a6ed2aa1f3228a4c43a388ad1a7fed6ff7ad4a9fe89112e6a9fa36d3c857"
+      }
+    },
+    {
+      "name": "overlap-window-2cpu",
+      "artifact": "var/posting-pipeline-160/overlap-window-2cpu.json",
+      "sha256": "2b0f0770307b94f223d7359766dac4b7a5a97a7ffe50b181b3c8ddb81e07316c",
+      "image": "sha256:19187cbc97e578b45936c64e65e7edcf50195e4dfa2e4113ddf7c048273ce79b",
+      "waf": {
+        "enabled": true,
+        "traffic": {
+          "posting": {
+            "client_rate": 10,
+            "client_burst": 30,
+            "global_rate": 100000,
+            "global_burst": 200000,
+            "client_concurrent": 8,
+            "global_concurrent": 256
+          },
+          "client_enabled": true,
+          "enabled": true,
+          "client_rate": 10000,
+          "client_burst": 100000,
+          "global_rate": 100000,
+          "global_burst": 200000,
+          "client_concurrent": 32,
+          "global_concurrent": 128,
+          "search_rate": 2,
+          "search_burst": 10,
+          "search_global_rate": 12,
+          "search_global_burst": 24,
+          "search_concurrent": 4
+        }
+      },
+      "posting_trip": false,
+      "cpu_max": "200000 100000",
+      "memory_max": "4294967296",
+      "go_memory_limit": "auto",
+      "egress_budget_bits_per_second": 80000000,
+      "post_mix": "80% legacy / 20% Web including form, CSRF and redirect",
+      "measurement_mode": "fixed_arrival_window",
+      "rate": 800,
+      "seconds": 10,
+      "workers": 80,
+      "thread_count": 16,
+      "duration_with_drain_seconds": 10.298911466263235,
+      "summary": {
+        "planned": 8000,
+        "sent": 3485,
+        "success": 3485,
+        "acknowledged": 3485,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 4515,
+        "http_p95_ms": 473.1653658673167,
+        "scheduled_p95_ms": 548.1715025380254,
+        "issuance_wait_p95_ms": 93.93803030252457
+      },
+      "completed_in_window": 3404,
+      "completed_per_second": 340.4,
+      "success_per_second_with_drain": 338.38527609602477,
+      "stable_at_tested_rate": false,
+      "resources": {
+        "cpu_cores_average": 1.2047091618024866,
+        "generator_cpu_seconds": 3.091075203,
+        "wbytes_delta": 23724032,
+        "wios_delta": 604,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 0,
+        "io_some_usec_delta": 939479
+      },
+      "memory_peak_bytes": 504651776,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 176.64946475997567,
+        "scheduled_p95_ms": 5712.58199820295,
+        "issuance_wait_p95_ms": null
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 8588,
+          "saved": 8588,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 3596414,
+        "day_file_bytes": {
+          "20261024": 3596414
+        }
+      },
+      "integrity_ok": true,
+      "server_log": {
+        "artifact": "var/posting-pipeline-160/overlap-window-2cpu.json.server.log",
+        "sha256": "901555529977b7b311e2ebed7b1c143da76fa23689f050dcb5caaea94d311223"
+      }
+    },
+    {
+      "name": "overlap-window-4cpu",
+      "artifact": "var/posting-pipeline-160/overlap-window-4cpu.json",
+      "sha256": "c25ededa1c2d5394adf1639e1cfe63d5075c2e750c9d08510dc4f309ba1fcdc9",
+      "image": "sha256:19187cbc97e578b45936c64e65e7edcf50195e4dfa2e4113ddf7c048273ce79b",
+      "waf": {
+        "enabled": true,
+        "traffic": {
+          "posting": {
+            "client_rate": 10,
+            "client_burst": 30,
+            "global_rate": 100000,
+            "global_burst": 200000,
+            "client_concurrent": 8,
+            "global_concurrent": 256
+          },
+          "client_enabled": true,
+          "enabled": true,
+          "client_rate": 10000,
+          "client_burst": 100000,
+          "global_rate": 100000,
+          "global_burst": 200000,
+          "client_concurrent": 32,
+          "global_concurrent": 128,
+          "search_rate": 2,
+          "search_burst": 10,
+          "search_global_rate": 12,
+          "search_global_burst": 24,
+          "search_concurrent": 4
+        }
+      },
+      "posting_trip": false,
+      "cpu_max": "400000 100000",
+      "memory_max": "4294967296",
+      "go_memory_limit": "auto",
+      "egress_budget_bits_per_second": 80000000,
+      "post_mix": "80% legacy / 20% Web including form, CSRF and redirect",
+      "measurement_mode": "fixed_arrival_window",
+      "rate": 800,
+      "seconds": 10,
+      "workers": 80,
+      "thread_count": 16,
+      "duration_with_drain_seconds": 10.11211869167164,
+      "summary": {
+        "planned": 8000,
+        "sent": 2828,
+        "success": 2828,
+        "acknowledged": 2828,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 5172,
+        "http_p95_ms": 488.07275015860796,
+        "scheduled_p95_ms": 542.952218092978,
+        "issuance_wait_p95_ms": 95.1289189979434
+      },
+      "completed_in_window": 2715,
+      "completed_per_second": 271.5,
+      "success_per_second_with_drain": 279.66443890034105,
+      "stable_at_tested_rate": false,
+      "resources": {
+        "cpu_cores_average": 1.1797615676550037,
+        "generator_cpu_seconds": 2.789058574,
+        "wbytes_delta": 19836928,
+        "wios_delta": 516,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 0,
+        "io_some_usec_delta": 633442
+      },
+      "memory_peak_bytes": 440938496,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 32.65241999179125,
+        "scheduled_p95_ms": 32.788359094411135,
+        "issuance_wait_p95_ms": null
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 7092,
+          "saved": 7092,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 2987199,
+        "day_file_bytes": {
+          "20261024": 2987199
+        }
+      },
+      "integrity_ok": true,
+      "server_log": {
+        "artifact": "var/posting-pipeline-160/overlap-window-4cpu.json.server.log",
+        "sha256": "01725577810393a86d3ab9e8492a73032aace208e0a55f78e67c50988caa29f2"
+      }
+    },
+    {
+      "name": "pgo-fixed-2cpu",
+      "artifact": "var/posting-pipeline-160/pgo-fixed-2cpu.json",
+      "sha256": "464cc88b4013c33883bd115c35647b5ac2ea641da071fca33bd1a3db06fb18d3",
+      "image": "sha256:87bcadd27ae3ea1f229629a76b7f2ff1ebc4cadf65d559c669865097bbd39106",
+      "waf": {
+        "enabled": true,
+        "traffic": {
+          "posting": {
+            "client_rate": 10,
+            "client_burst": 30,
+            "global_rate": 100000,
+            "global_burst": 200000,
+            "client_concurrent": 8,
+            "global_concurrent": 256
+          },
+          "client_enabled": true,
+          "enabled": true,
+          "client_rate": 10000,
+          "client_burst": 100000,
+          "global_rate": 100000,
+          "global_burst": 200000,
+          "client_concurrent": 32,
+          "global_concurrent": 128,
+          "search_rate": 2,
+          "search_burst": 10,
+          "search_global_rate": 12,
+          "search_global_burst": 24,
+          "search_concurrent": 4
+        }
+      },
+      "posting_trip": false,
+      "cpu_max": "200000 100000",
+      "memory_max": "4294967296",
+      "go_memory_limit": "auto",
+      "egress_budget_bits_per_second": 80000000,
+      "post_mix": "80% legacy / 20% Web including form, CSRF and redirect",
+      "measurement_mode": "fixed_count_complete",
+      "rate": 800,
+      "seconds": 10,
+      "workers": 80,
+      "thread_count": 16,
+      "duration_with_drain_seconds": 17.22312915697694,
+      "summary": {
+        "planned": 8000,
+        "sent": 8000,
+        "success": 8000,
+        "acknowledged": 8000,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 244.06002881005406,
+        "scheduled_p95_ms": 7684.229911770672,
+        "issuance_wait_p95_ms": 7584.267977625132
+      },
+      "completed_in_window": 5105,
+      "completed_per_second": 510.5,
+      "success_per_second_with_drain": 464.4916685629841,
+      "stable_at_tested_rate": false,
+      "resources": {
+        "cpu_cores_average": 1.7538202102934184,
+        "generator_cpu_seconds": 7.859795688,
+        "wbytes_delta": 62476288,
+        "wios_delta": 2280,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 0,
+        "io_some_usec_delta": 185254
+      },
+      "memory_peak_bytes": 993820672,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 32.67633588984609,
+        "scheduled_p95_ms": 32.849241979420185,
+        "issuance_wait_p95_ms": null
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 19890,
+          "saved": 19890,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 8050289,
+        "day_file_bytes": {
+          "20261024": 8050289
+        }
+      },
+      "integrity_ok": true,
+      "server_log": {
+        "artifact": "var/posting-pipeline-160/pgo-fixed-2cpu.json.server.log",
+        "sha256": "35e35791d247951543d963af13248cc326a7360fd2733a015fed8b60c57b340c"
+      }
+    },
+    {
+      "name": "pgo-fixed-4cpu",
+      "artifact": "var/posting-pipeline-160/pgo-fixed-4cpu.json",
+      "sha256": "47897d0f319845c5304855290facb8abad203ac3f44152bc7c26b7736bd88529",
+      "image": "sha256:87bcadd27ae3ea1f229629a76b7f2ff1ebc4cadf65d559c669865097bbd39106",
+      "waf": {
+        "enabled": true,
+        "traffic": {
+          "posting": {
+            "client_rate": 10,
+            "client_burst": 30,
+            "global_rate": 100000,
+            "global_burst": 200000,
+            "client_concurrent": 8,
+            "global_concurrent": 256
+          },
+          "client_enabled": true,
+          "enabled": true,
+          "client_rate": 10000,
+          "client_burst": 100000,
+          "global_rate": 100000,
+          "global_burst": 200000,
+          "client_concurrent": 32,
+          "global_concurrent": 128,
+          "search_rate": 2,
+          "search_burst": 10,
+          "search_global_rate": 12,
+          "search_global_burst": 24,
+          "search_concurrent": 4
+        }
+      },
+      "posting_trip": false,
+      "cpu_max": "400000 100000",
+      "memory_max": "4294967296",
+      "go_memory_limit": "auto",
+      "egress_budget_bits_per_second": 80000000,
+      "post_mix": "80% legacy / 20% Web including form, CSRF and redirect",
+      "measurement_mode": "fixed_count_complete",
+      "rate": 800,
+      "seconds": 10,
+      "workers": 80,
+      "thread_count": 16,
+      "duration_with_drain_seconds": 11.862441442906857,
+      "summary": {
+        "planned": 8000,
+        "sent": 8000,
+        "success": 8000,
+        "acknowledged": 8000,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 143.96279212087393,
+        "scheduled_p95_ms": 2270.0917501933873,
+        "issuance_wait_p95_ms": 2170.1682321727276
+      },
+      "completed_in_window": 7380,
+      "completed_per_second": 738.0,
+      "success_per_second_with_drain": 674.3974280929831,
+      "stable_at_tested_rate": false,
+      "resources": {
+        "cpu_cores_average": 3.108945757709278,
+        "generator_cpu_seconds": 9.123900203,
+        "wbytes_delta": 62619648,
+        "wios_delta": 2028,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 0,
+        "io_some_usec_delta": 40288
+      },
+      "memory_peak_bytes": 1042317312,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 164.90327520295978,
+        "scheduled_p95_ms": 2155.0931544043124,
+        "issuance_wait_p95_ms": null
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 19890,
+          "saved": 19890,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 8051327,
+        "day_file_bytes": {
+          "20261024": 8051327
+        }
+      },
+      "integrity_ok": true,
+      "server_log": {
+        "artifact": "var/posting-pipeline-160/pgo-fixed-4cpu.json.server.log",
+        "sha256": "040b127bcdda92f722dd50ae2fec4dd1ee56e9d17a6e9745c2b7500006c1202e"
+      }
+    },
+    {
+      "name": "pgob-fixed-2cpu",
+      "artifact": "var/posting-pipeline-160/pgob-fixed-2cpu.json",
+      "sha256": "2f4ef52f9900902186dbc327e9b6ab3cdeec1eb82368376f33da90d890910fc4",
+      "image": "sha256:895af2149b63ec6fd5f46a33a519d8dc335c8771c633000015032f2932a21015",
+      "waf": {
+        "enabled": true,
+        "traffic": {
+          "posting": {
+            "client_rate": 10,
+            "client_burst": 30,
+            "global_rate": 100000,
+            "global_burst": 200000,
+            "client_concurrent": 8,
+            "global_concurrent": 256
+          },
+          "client_enabled": true,
+          "enabled": true,
+          "client_rate": 10000,
+          "client_burst": 100000,
+          "global_rate": 100000,
+          "global_burst": 200000,
+          "client_concurrent": 32,
+          "global_concurrent": 128,
+          "search_rate": 2,
+          "search_burst": 10,
+          "search_global_rate": 12,
+          "search_global_burst": 24,
+          "search_concurrent": 4
+        }
+      },
+      "posting_trip": false,
+      "cpu_max": "200000 100000",
+      "memory_max": "4294967296",
+      "go_memory_limit": "auto",
+      "egress_budget_bits_per_second": 80000000,
+      "post_mix": "80% legacy / 20% Web including form, CSRF and redirect",
+      "measurement_mode": "fixed_count_complete",
+      "rate": 800,
+      "seconds": 10,
+      "workers": 80,
+      "thread_count": 16,
+      "duration_with_drain_seconds": 17.743634460959584,
+      "summary": {
+        "planned": 8000,
+        "sent": 8000,
+        "success": 8000,
+        "acknowledged": 8000,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 251.431574113667,
+        "scheduled_p95_ms": 8154.615888372064,
+        "issuance_wait_p95_ms": 8056.351639330387
+      },
+      "completed_in_window": 5070,
+      "completed_per_second": 507.0,
+      "success_per_second_with_drain": 450.86591575147656,
+      "stable_at_tested_rate": false,
+      "resources": {
+        "cpu_cores_average": 1.7319783648393545,
+        "generator_cpu_seconds": 7.790235553,
+        "wbytes_delta": 62222336,
+        "wios_delta": 2284,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 0,
+        "io_some_usec_delta": 209242
+      },
+      "memory_peak_bytes": 997535744,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 32.65839070081711,
+        "scheduled_p95_ms": 33.26314175501466,
+        "issuance_wait_p95_ms": null
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 19890,
+          "saved": 19890,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 8018544,
+        "day_file_bytes": {
+          "20261024": 8018544
+        }
+      },
+      "integrity_ok": true,
+      "server_log": {
+        "artifact": "var/posting-pipeline-160/pgob-fixed-2cpu.json.server.log",
+        "sha256": "023d4552366b0cfbbc1c561c5f418b61c5b02caf3dcb5114123f21da77c59763"
+      }
+    },
+    {
+      "name": "pgob-fixed-4cpu",
+      "artifact": "var/posting-pipeline-160/pgob-fixed-4cpu.json",
+      "sha256": "90d703a0e2a5ca5c4a94c27f363f95d28bc2312092d2e8fd31db630d4bfa7f99",
+      "image": "sha256:895af2149b63ec6fd5f46a33a519d8dc335c8771c633000015032f2932a21015",
+      "waf": {
+        "enabled": true,
+        "traffic": {
+          "posting": {
+            "client_rate": 10,
+            "client_burst": 30,
+            "global_rate": 100000,
+            "global_burst": 200000,
+            "client_concurrent": 8,
+            "global_concurrent": 256
+          },
+          "client_enabled": true,
+          "enabled": true,
+          "client_rate": 10000,
+          "client_burst": 100000,
+          "global_rate": 100000,
+          "global_burst": 200000,
+          "client_concurrent": 32,
+          "global_concurrent": 128,
+          "search_rate": 2,
+          "search_burst": 10,
+          "search_global_rate": 12,
+          "search_global_burst": 24,
+          "search_concurrent": 4
+        }
+      },
+      "posting_trip": false,
+      "cpu_max": "400000 100000",
+      "memory_max": "4294967296",
+      "go_memory_limit": "auto",
+      "egress_budget_bits_per_second": 80000000,
+      "post_mix": "80% legacy / 20% Web including form, CSRF and redirect",
+      "measurement_mode": "fixed_count_complete",
+      "rate": 800,
+      "seconds": 10,
+      "workers": 80,
+      "thread_count": 16,
+      "duration_with_drain_seconds": 18.28010128205642,
+      "summary": {
+        "planned": 8000,
+        "sent": 8000,
+        "success": 8000,
+        "acknowledged": 8000,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 209.52721685171127,
+        "scheduled_p95_ms": 4527.442597318441,
+        "issuance_wait_p95_ms": 4261.994194239378
+      },
+      "completed_in_window": 7266,
+      "completed_per_second": 726.6,
+      "success_per_second_with_drain": 437.63433673383014,
+      "stable_at_tested_rate": false,
+      "resources": {
+        "cpu_cores_average": 2.050805650447834,
+        "generator_cpu_seconds": 8.808677264,
+        "wbytes_delta": 61566976,
+        "wios_delta": 1881,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 0,
+        "io_some_usec_delta": 583520
+      },
+      "memory_peak_bytes": 1033297920,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 156.12740395590663,
+        "scheduled_p95_ms": 4137.946184724569,
+        "issuance_wait_p95_ms": null
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 19890,
+          "saved": 19890,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 8046901,
+        "day_file_bytes": {
+          "20261024": 8046901
+        }
+      },
+      "integrity_ok": true,
+      "server_log": {
+        "artifact": "var/posting-pipeline-160/pgob-fixed-4cpu.json.server.log",
+        "sha256": "b4dddf3db1ec535b58134ba34cb6dfc72e2c5efd4b4e108748fab1287f43a171"
+      }
+    },
+    {
+      "name": "prefix-diag-4cpu",
+      "artifact": "var/posting-pipeline-160/prefix-diag-4cpu.json",
+      "sha256": "7b607104c26ccf58958d3eef6865d1da77ef92e42a9aeff3d2412b44ae48d451",
+      "image": "sha256:fd2c0ba1310740c41f148b462a2fcf438b60176fdd859c9730dfd01dd89b2b65",
+      "waf": {
+        "enabled": true,
+        "traffic": {
+          "posting": {
+            "client_rate": 10,
+            "client_burst": 30,
+            "global_rate": 100000,
+            "global_burst": 200000,
+            "client_concurrent": 8,
+            "global_concurrent": 256
+          },
+          "client_enabled": true,
+          "enabled": true,
+          "client_rate": 10000,
+          "client_burst": 100000,
+          "global_rate": 100000,
+          "global_burst": 200000,
+          "client_concurrent": 32,
+          "global_concurrent": 128,
+          "search_rate": 2,
+          "search_burst": 10,
+          "search_global_rate": 12,
+          "search_global_burst": 24,
+          "search_concurrent": 4
+        }
+      },
+      "posting_trip": false,
+      "cpu_max": "400000 100000",
+      "memory_max": "4294967296",
+      "go_memory_limit": "auto",
+      "egress_budget_bits_per_second": 80000000,
+      "post_mix": "80% legacy / 20% Web including form, CSRF and redirect",
+      "measurement_mode": "fixed_count_complete",
+      "rate": 800,
+      "seconds": 10,
+      "workers": 80,
+      "thread_count": 16,
+      "duration_with_drain_seconds": 12.451509219128639,
+      "summary": {
+        "planned": 8000,
+        "sent": 8000,
+        "success": 8000,
+        "acknowledged": 8000,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 176.69394612312317,
+        "scheduled_p95_ms": 3292.534619104117,
+        "issuance_wait_p95_ms": 3193.06936301291
+      },
+      "completed_in_window": 7083,
+      "completed_per_second": 708.3,
+      "success_per_second_with_drain": 642.4923966413642,
+      "stable_at_tested_rate": false,
+      "resources": {
+        "cpu_cores_average": 3.0866687181146064,
+        "generator_cpu_seconds": 8.930642333,
+        "wbytes_delta": 61915136,
+        "wios_delta": 2098,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 0,
+        "io_some_usec_delta": 44120
+      },
+      "memory_peak_bytes": 1004109824,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 190.36288326606154,
+        "scheduled_p95_ms": 5332.549202721566,
+        "issuance_wait_p95_ms": null
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 19890,
+          "saved": 19890,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 8066358,
+        "day_file_bytes": {
+          "20261024": 8066358
+        }
+      },
+      "integrity_ok": true,
+      "server_log": {
+        "artifact": "var/posting-pipeline-160/prefix-diag-4cpu.json.server.log",
+        "sha256": "736b4c39cda364f0331339ec03fc0e40bf98ed903881c905dcba68f66d0abf38"
+      }
+    },
+    {
+      "name": "prefix-fixed-2cpu",
+      "artifact": "var/posting-pipeline-160/prefix-fixed-2cpu.json",
+      "sha256": "2870651f0325317052b733b686ab7b59f57f2a10100068c2f3aad6dcd984e71e",
+      "image": "sha256:9f8a476dc447c2226aa427b9271214ccfdd4dbb2909dd1ba305fa981b5544930",
+      "waf": {
+        "enabled": true,
+        "traffic": {
+          "posting": {
+            "client_rate": 10,
+            "client_burst": 30,
+            "global_rate": 100000,
+            "global_burst": 200000,
+            "client_concurrent": 8,
+            "global_concurrent": 256
+          },
+          "client_enabled": true,
+          "enabled": true,
+          "client_rate": 10000,
+          "client_burst": 100000,
+          "global_rate": 100000,
+          "global_burst": 200000,
+          "client_concurrent": 32,
+          "global_concurrent": 128,
+          "search_rate": 2,
+          "search_burst": 10,
+          "search_global_rate": 12,
+          "search_global_burst": 24,
+          "search_concurrent": 4
+        }
+      },
+      "posting_trip": false,
+      "cpu_max": "200000 100000",
+      "memory_max": "4294967296",
+      "go_memory_limit": "auto",
+      "egress_budget_bits_per_second": 80000000,
+      "post_mix": "80% legacy / 20% Web including form, CSRF and redirect",
+      "measurement_mode": "fixed_count_complete",
+      "rate": 800,
+      "seconds": 10,
+      "workers": 80,
+      "thread_count": 16,
+      "duration_with_drain_seconds": 17.664548392873257,
+      "summary": {
+        "planned": 8000,
+        "sent": 8000,
+        "success": 8000,
+        "acknowledged": 8000,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 252.0312280394137,
+        "scheduled_p95_ms": 8088.316750712693,
+        "issuance_wait_p95_ms": 7988.395537715405
+      },
+      "completed_in_window": 4965,
+      "completed_per_second": 496.5,
+      "success_per_second_with_drain": 452.88449056685715,
+      "stable_at_tested_rate": false,
+      "resources": {
+        "cpu_cores_average": 1.7397447314531242,
+        "generator_cpu_seconds": 7.639482440000001,
+        "wbytes_delta": 62107648,
+        "wios_delta": 2264,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 0,
+        "io_some_usec_delta": 172371
+      },
+      "memory_peak_bytes": 1026084864,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 182.60553386062384,
+        "scheduled_p95_ms": 9919.465513899922,
+        "issuance_wait_p95_ms": null
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 19890,
+          "saved": 19890,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 8050420,
+        "day_file_bytes": {
+          "20261024": 8050420
+        }
+      },
+      "integrity_ok": true,
+      "server_log": {
+        "artifact": "var/posting-pipeline-160/prefix-fixed-2cpu.json.server.log",
+        "sha256": "7047b6b2d946fba70ac5b84eb95af8723a598c00ee7d899fad28afee3cb169da"
+      }
+    },
+    {
+      "name": "prefix-fixed-4cpu",
+      "artifact": "var/posting-pipeline-160/prefix-fixed-4cpu.json",
+      "sha256": "d351a334864c5fd34751c41889b80fd8c032fe1248c850dfe9cc9c69b5e299ff",
+      "image": "sha256:9f8a476dc447c2226aa427b9271214ccfdd4dbb2909dd1ba305fa981b5544930",
+      "waf": {
+        "enabled": true,
+        "traffic": {
+          "posting": {
+            "client_rate": 10,
+            "client_burst": 30,
+            "global_rate": 100000,
+            "global_burst": 200000,
+            "client_concurrent": 8,
+            "global_concurrent": 256
+          },
+          "client_enabled": true,
+          "enabled": true,
+          "client_rate": 10000,
+          "client_burst": 100000,
+          "global_rate": 100000,
+          "global_burst": 200000,
+          "client_concurrent": 32,
+          "global_concurrent": 128,
+          "search_rate": 2,
+          "search_burst": 10,
+          "search_global_rate": 12,
+          "search_global_burst": 24,
+          "search_concurrent": 4
+        }
+      },
+      "posting_trip": false,
+      "cpu_max": "400000 100000",
+      "memory_max": "4294967296",
+      "go_memory_limit": "auto",
+      "egress_budget_bits_per_second": 80000000,
+      "post_mix": "80% legacy / 20% Web including form, CSRF and redirect",
+      "measurement_mode": "fixed_count_complete",
+      "rate": 800,
+      "seconds": 10,
+      "workers": 80,
+      "thread_count": 16,
+      "duration_with_drain_seconds": 12.27461805799976,
+      "summary": {
+        "planned": 8000,
+        "sent": 8000,
+        "success": 8000,
+        "acknowledged": 8000,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 164.02283497154713,
+        "scheduled_p95_ms": 2929.974818136543,
+        "issuance_wait_p95_ms": 2831.094119232148
+      },
+      "completed_in_window": 7220,
+      "completed_per_second": 722.0,
+      "success_per_second_with_drain": 651.7514404276021,
+      "stable_at_tested_rate": false,
+      "resources": {
+        "cpu_cores_average": 3.053465844957433,
+        "generator_cpu_seconds": 8.881355767,
+        "wbytes_delta": 62251008,
+        "wios_delta": 2075,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 0,
+        "io_some_usec_delta": 40563
+      },
+      "memory_peak_bytes": 1005404160,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 32.84435160458088,
+        "scheduled_p95_ms": 32.98192983493209,
+        "issuance_wait_p95_ms": null
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 19890,
+          "saved": 19890,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 8102257,
+        "day_file_bytes": {
+          "20261024": 8102257
+        }
+      },
+      "integrity_ok": true,
+      "server_log": {
+        "artifact": "var/posting-pipeline-160/prefix-fixed-4cpu.json.server.log",
+        "sha256": "b41533facf184ede90c52a63c6b7fbc2b16d08e28f07639c02259d5cc9ea5a4c"
+      }
+    },
+    {
+      "name": "zero-fixed-2cpu",
+      "artifact": "var/posting-pipeline-160/zero-fixed-2cpu.json",
+      "sha256": "5a4435c3756d18c3440daeda87142c1dc0c10e782e38d81feb0df3ddce921c20",
+      "image": "sha256:caa6a7f3d89b5355fca6d342f20d839cd3a8ceabaca003bd5e411d37c005f846",
+      "waf": {
+        "enabled": true,
+        "traffic": {
+          "posting": {
+            "client_rate": 10,
+            "client_burst": 30,
+            "global_rate": 100000,
+            "global_burst": 200000,
+            "client_concurrent": 8,
+            "global_concurrent": 256
+          },
+          "client_enabled": true,
+          "enabled": true,
+          "client_rate": 10000,
+          "client_burst": 100000,
+          "global_rate": 100000,
+          "global_burst": 200000,
+          "client_concurrent": 32,
+          "global_concurrent": 128,
+          "search_rate": 2,
+          "search_burst": 10,
+          "search_global_rate": 12,
+          "search_global_burst": 24,
+          "search_concurrent": 4
+        }
+      },
+      "posting_trip": false,
+      "cpu_max": "200000 100000",
+      "memory_max": "4294967296",
+      "go_memory_limit": "auto",
+      "egress_budget_bits_per_second": 80000000,
+      "post_mix": "80% legacy / 20% Web including form, CSRF and redirect",
+      "measurement_mode": "fixed_count_complete",
+      "rate": 800,
+      "seconds": 10,
+      "workers": 80,
+      "thread_count": 16,
+      "duration_with_drain_seconds": 17.69684468815103,
+      "summary": {
+        "planned": 8000,
+        "sent": 8000,
+        "success": 8000,
+        "acknowledged": 8000,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 253.50043457001448,
+        "scheduled_p95_ms": 8162.689123302698,
+        "issuance_wait_p95_ms": 8062.7725892700255
+      },
+      "completed_in_window": 5068,
+      "completed_per_second": 506.8,
+      "success_per_second_with_drain": 452.05798779238995,
+      "stable_at_tested_rate": false,
+      "resources": {
+        "cpu_cores_average": 1.7209406838718189,
+        "generator_cpu_seconds": 7.627916328000001,
+        "wbytes_delta": 62554112,
+        "wios_delta": 2398,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 0,
+        "io_some_usec_delta": 180844
+      },
+      "memory_peak_bytes": 1038974976,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 32.90258441120386,
+        "scheduled_p95_ms": 33.03667576983571,
+        "issuance_wait_p95_ms": null
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 19890,
+          "saved": 19890,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 8012261,
+        "day_file_bytes": {
+          "20261024": 8012261
+        }
+      },
+      "integrity_ok": true,
+      "server_log": {
+        "artifact": "var/posting-pipeline-160/zero-fixed-2cpu.json.server.log",
+        "sha256": "3c2cf88823cdcecb2c62b11512950e48c0a4f036af31de229191526f7d4a2262"
+      }
+    },
+    {
+      "name": "zero-fixed-4cpu",
+      "artifact": "var/posting-pipeline-160/zero-fixed-4cpu.json",
+      "sha256": "19f711a964ca96fced3ddf4c68cca3ce3954287586e970da489e79188992524b",
+      "image": "sha256:caa6a7f3d89b5355fca6d342f20d839cd3a8ceabaca003bd5e411d37c005f846",
+      "waf": {
+        "enabled": true,
+        "traffic": {
+          "posting": {
+            "client_rate": 10,
+            "client_burst": 30,
+            "global_rate": 100000,
+            "global_burst": 200000,
+            "client_concurrent": 8,
+            "global_concurrent": 256
+          },
+          "client_enabled": true,
+          "enabled": true,
+          "client_rate": 10000,
+          "client_burst": 100000,
+          "global_rate": 100000,
+          "global_burst": 200000,
+          "client_concurrent": 32,
+          "global_concurrent": 128,
+          "search_rate": 2,
+          "search_burst": 10,
+          "search_global_rate": 12,
+          "search_global_burst": 24,
+          "search_concurrent": 4
+        }
+      },
+      "posting_trip": false,
+      "cpu_max": "400000 100000",
+      "memory_max": "4294967296",
+      "go_memory_limit": "auto",
+      "egress_budget_bits_per_second": 80000000,
+      "post_mix": "80% legacy / 20% Web including form, CSRF and redirect",
+      "measurement_mode": "fixed_count_complete",
+      "rate": 800,
+      "seconds": 10,
+      "workers": 80,
+      "thread_count": 16,
+      "duration_with_drain_seconds": 21.735025509726256,
+      "summary": {
+        "planned": 8000,
+        "sent": 8000,
+        "success": 8000,
+        "acknowledged": 8000,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 466.4433249272406,
+        "scheduled_p95_ms": 12820.399976335466,
+        "issuance_wait_p95_ms": 12720.476318150759
+      },
+      "completed_in_window": 2878,
+      "completed_per_second": 287.8,
+      "success_per_second_with_drain": 368.0695012950439,
+      "stable_at_tested_rate": false,
+      "resources": {
+        "cpu_cores_average": 1.7396545949798712,
+        "generator_cpu_seconds": 8.948490682,
+        "wbytes_delta": 62705664,
+        "wios_delta": 2238,
+        "oom_kill_delta": 0,
+        "throttled_usec_delta": 0,
+        "io_some_usec_delta": 794435
+      },
+      "memory_peak_bytes": 1031266304,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "recovery": {
+        "planned": 100,
+        "sent": 100,
+        "success": 100,
+        "acknowledged": 100,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 33.5247740149498,
+        "scheduled_p95_ms": 33.66041462868452,
+        "issuance_wait_p95_ms": null
+      },
+      "read_summary": {
+        "planned": 0,
+        "sent": 0,
+        "success": 0,
+        "acknowledged": 0,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": null,
+        "scheduled_p95_ms": null,
+        "issuance_wait_p95_ms": null,
+        "completed_body_mbps": 0.0
+      },
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 19890,
+          "saved": 19890,
+          "failed": 0,
+          "dropped_capacity": 0,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "0",
+          "loss_finished_at_ns": "0",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 8000972,
+        "day_file_bytes": {
+          "20261024": 8000972
+        }
+      },
+      "integrity_ok": true,
+      "server_log": {
+        "artifact": "var/posting-pipeline-160/zero-fixed-4cpu.json.server.log",
+        "sha256": "7cdd13e29634c1d5768c699e473de95328b7477f189983850a025f1101b464db"
+      }
+    }
+  ],
+  "profiles": [
+    {
+      "artifact": "var/posting-pipeline-160/fused-diag-4cpu.json.profiles",
+      "runtime": {
+        "/cpu/classes/gc/mark/assist:cpu-seconds": 0.082140231,
+        "/cpu/classes/gc/mark/dedicated:cpu-seconds": 0.615924429,
+        "/cpu/classes/gc/pause:cpu-seconds": 0.016981681,
+        "allocated_bytes": 6781853904,
+        "gc_cycles": 32,
+        "gc_pause_ns": 6124063,
+        "gomaxprocs": 4,
+        "heap_alloc_bytes": 606062592,
+        "mallocs": 31628747
+      },
+      "files": {
+        "allocs.pprof": "d3e80029644d4b15fddf3578e5466cb9be038ce5f717779e649d4e0389f983bb",
+        "block.pprof": "c5c8f28cfff3c6447ff8eb26dea579df5a5a386c75a21010d047a35d60c270fc",
+        "cpu.pprof": "a8e5cb670589f7d17f66191f8448cc10067dedb768c3a947f77a5801e10b2c2d",
+        "mutex.pprof": "51d4237b727e772091d6b8057b27def6a5dbf3d1c906085a7763759dcbf171ef",
+        "runtime.json": "90a83f95b7881142b97dfe5e5c5edbd4aa717368285bd60bb510f978eee0eafd"
+      }
+    },
+    {
+      "artifact": "var/posting-pipeline-160/fusedb-diag-4cpu.json.profiles",
+      "runtime": {
+        "/cpu/classes/gc/mark/assist:cpu-seconds": 0.073015365,
+        "/cpu/classes/gc/mark/dedicated:cpu-seconds": 0.648716278,
+        "/cpu/classes/gc/pause:cpu-seconds": 0.019093784000000003,
+        "allocated_bytes": 6665832088,
+        "gc_cycles": 33,
+        "gc_pause_ns": 6849145,
+        "gomaxprocs": 4,
+        "heap_alloc_bytes": 510511592,
+        "mallocs": 31575211
+      },
+      "files": {
+        "allocs.pprof": "60977d7eb00cd962c557ae48f15e41172d39145b2f22c6c117685ff76d845b3a",
+        "block.pprof": "de95ca9994cc528abfa39937705ad806639bd7baae687a92e9f901d4706af3c3",
+        "cpu.pprof": "44a20ba1c9519fee7436fbfe6ba135b40cd11f1dd36ce2052557ea68aa41bc3a",
+        "mutex.pprof": "8d2b9837e78238f3f0ca0d6224c7f7ac92655032c27d4fb9ebcf2aeabd61fb2a",
+        "runtime.json": "3e1257b1f27a535d3e9ab0180cde352505ed34d9972568c8ca63420da864e843"
+      }
+    },
+    {
+      "artifact": "var/posting-pipeline-160/overlap-diag-4cpu.json.profiles",
+      "runtime": {
+        "/cpu/classes/gc/mark/assist:cpu-seconds": 0.08496174299999999,
+        "/cpu/classes/gc/mark/dedicated:cpu-seconds": 0.575864419,
+        "/cpu/classes/gc/pause:cpu-seconds": 0.020151655,
+        "allocated_bytes": 6658021032,
+        "gc_cycles": 33,
+        "gc_pause_ns": 7602432,
+        "gomaxprocs": 4,
+        "heap_alloc_bytes": 641561256,
+        "mallocs": 31640528
+      },
+      "files": {
+        "allocs.pprof": "62492242a887a1a673a5fc38b0e2a442160b35c76d9e7d8b5a5de1e53988cf19",
+        "block.pprof": "2047c58a532e99fcd810526b2612b69f6b018c1b08d2815d2b2dab9fbb0344e8",
+        "cpu.pprof": "70ee03215b44a8c271f9e601c42381cdda05ea34c3fa079a5e48d1d9fd991da6",
+        "mutex.pprof": "5ff1cd2635f700fa21bc7b7be53c59615937ae6dd820121cee8f784a3822073d",
+        "runtime.json": "fe5c415ee6c9b7c9ef2337265ffe21a39bb504597162f78cb4d130caf29920f9"
+      }
+    },
+    {
+      "artifact": "var/posting-pipeline-160/prefix-diag-4cpu.json.profiles",
+      "runtime": {
+        "/cpu/classes/gc/mark/assist:cpu-seconds": 0.08070616900000001,
+        "/cpu/classes/gc/mark/dedicated:cpu-seconds": 0.669378708,
+        "/cpu/classes/gc/pause:cpu-seconds": 0.019216556,
+        "allocated_bytes": 6664740560,
+        "gc_cycles": 31,
+        "gc_pause_ns": 6694145,
+        "gomaxprocs": 4,
+        "heap_alloc_bytes": 676769504,
+        "mallocs": 31562671
+      },
+      "files": {
+        "allocs.pprof": "a26d5cbc56e8895f2becafdcb06d2dfca82b3f2eeb9ea8742866ba3e62b6fd09",
+        "block.pprof": "45cd2ea888318f232825ef36c4f2834270d3c4fcc340aa4c6ecd6c4c96ec582c",
+        "cpu.pprof": "89d1e5b96e61b772aae40af7c33939dd66f678e73654a4c17de8421929216519",
+        "mutex.pprof": "7098b29efa912ae5496eddb8d3d5df4a567409d33cf8d3ac83058e54cefd3277",
+        "runtime.json": "fd0a050a9bee2d792ce684d4c654096b3f339861bc9daf55e3a257b60e1e2fb6"
+      }
+    }
+  ],
+  "validation_logs": [
+    {
+      "artifact": "var/posting-pipeline-160/baseline-fixed-2cpu.log",
+      "sha256": "a438433c08d289154990f4c4617c6ae82683df801539ec4b9048fe257c8852e8",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/baseline-fixed-4cpu.log",
+      "sha256": "59552e27dc55271ace81a57731a1a67873c51ed54df7d48d8741f612dd43ea10",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/baseline-r2-2-runner.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/baseline-r2-4-runner.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/baseline-r2-fixed-2cpu.log",
+      "sha256": "289e3e5c905a8e3f555cbfc5be39a7b3d10d96f237aa69d7e2db8b6bb3b48fe1",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/baseline-r2-fixed-4cpu.log",
+      "sha256": "b58d5298525db4bcf571775b8566f5e61ca8b7be6ae286ea05dc225d11db399c",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/baseline-r3-2-runner.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/baseline-r3-4-runner.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/baseline-r3-fixed-2cpu.log",
+      "sha256": "7e615aad3495cf0c6ff49ebb434cdbd43defe8e3fd92d8a22a840b23e85f44d0",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/baseline-r3-fixed-4cpu.log",
+      "sha256": "f2f856682b907a3de68d2f0965ceb3a8d2c82c6828760b034de57f6a121f5e1b",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/baseline-runner.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/baseline-sustained-4cpu.log",
+      "sha256": "57d6341bee51aefa33542f8aa229e483324f22ff0f7b4ea564c84265c3f39723",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/baseline-tmpfs-2cpu.log",
+      "sha256": "45596ec0b8bda91412b9e3faf453f312bde65510adfa79846231cbe1c702bf78",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/baseline-tmpfs-4cpu.log",
+      "sha256": "e74334fa6554091624c2d41b30f1b40b286905ece3ace2fe8d853b97df43cade",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/baseline-window-2cpu.log",
+      "sha256": "b9599e15c745671ff5e1d995e8448347a157575e028d8ca1cdd28b98974b96c4",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/baseline-window-4cpu.log",
+      "sha256": "035385cb30a52e47e3ca774e621d9d24001ac57c5d90d69a406007a1f6456a9c",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/candidate-runner.log",
+      "sha256": "9360e0374524a509d4d0e05a621c1e5fa16a9d7eee8c71969475ef1e79460595",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/diagnostics-runner.log",
+      "sha256": "a5baa75a23a390461739905adb4d22903cc9b0f70ffe455f6fd92e3c2e6d5544",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/fused-b-tests.log",
+      "sha256": "816dc2134b8a39039a345e750c41a07816da155a635fa6ac6724413574e54927",
+      "result_lines": [
+        "ok  \toimobbs/internal/store\t0.290s",
+        "ok  \toimobbs/internal/evidence\t0.039s",
+        "ok  \toimobbs/internal/app\t6.200s"
+      ]
+    },
+    {
+      "artifact": "var/posting-pipeline-160/fused-bootstrap.log",
+      "sha256": "d9d70d8617cd395c4856e620a52268bc0cd997c330be5f3b2661fc0f9439d8f9",
+      "result_lines": [
+        "ok  \toimobbs/internal/bootstrap\t3.903s"
+      ]
+    },
+    {
+      "artifact": "var/posting-pipeline-160/fused-build-preflight.log",
+      "sha256": "8cde0a921514a433641a5f86c1c4baa0033a18994acfffa49422770429e9e06a",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/fused-build.log",
+      "sha256": "bcbc781c6362aed49a6f850677db73f32d8118f4eb4615656fcad16dbde5c2a4",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/fused-diag-build.log",
+      "sha256": "21bd17f844f8520f91b91828ef7c2ba4b63d2a85affd30b80b0882c44e5f1465",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/fused-diag.log",
+      "sha256": "5a7009f995f5d35d1b9cc00c4b6bfc46df9e525e1660fdebdff570760f405681",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/fused-fixed-2cpu.log",
+      "sha256": "ae19bd1b100afda989018c10cfe366c9e35ed742f18dd90f706b0d03dac1b66f",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/fused-fixed-4cpu.log",
+      "sha256": "1e70e9a41741c509c61d7fc87f8e49804c0b6573ff40bc60bcbea273f74369ba",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/fused-fuzz-seeds.log",
+      "sha256": "6a21f0e17eb4195ef5c421ae462afffa08e2bb21eea237e44493786e27327646",
+      "result_lines": [
+        "ok  \toimobbs/internal/store\t0.004s"
+      ]
+    },
+    {
+      "artifact": "var/posting-pipeline-160/fused-fuzz.log",
+      "sha256": "8a3aae28b498e9f91683766cbb8f0551e349c3bf5cbe17121452cee2e11e50eb",
+      "result_lines": [
+        "fuzz: elapsed: 31s, execs: 365140 (0/sec), new interesting: 3 (total: 6)",
+        "PASS",
+        "ok  \toimobbs/internal/store\t31.011s"
+      ]
+    },
+    {
+      "artifact": "var/posting-pipeline-160/fused-normal.log",
+      "sha256": "4ac53013b4d4351e438354b0bb95f2239cdc095e3a9075b3a0456572bb9bc948",
+      "result_lines": [
+        "ok  \toimobbs/internal/store\t5.380s",
+        "ok  \toimobbs/internal/evidence\t100.956s",
+        "ok  \toimobbs/internal/app\t46.240s"
+      ]
+    },
+    {
+      "artifact": "var/posting-pipeline-160/fused-race-evidence.log",
+      "sha256": "33bb77c879a139dbcc978a10d3c362440dd96f0965661e244708e763706805ff",
+      "result_lines": [
+        "ok  \toimobbs/internal/evidence\t282.727s"
+      ]
+    },
+    {
+      "artifact": "var/posting-pipeline-160/fused-race.log",
+      "sha256": "6a6f41d93511aabead32ce960e25a2e9a88be7c629df19ededbb9a542f316c86",
+      "result_lines": [
+        "ok  \toimobbs/internal/store\t35.160s",
+        "panic: test timed out after 3m0s",
+        "FAIL\toimobbs/internal/evidence\t180.047s",
+        "ok  \toimobbs/internal/app\t91.042s",
+        "FAIL"
+      ]
+    },
+    {
+      "artifact": "var/posting-pipeline-160/fused-resume.log",
+      "sha256": "9360e0374524a509d4d0e05a621c1e5fa16a9d7eee8c71969475ef1e79460595",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/fused-runner.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/fused-store-tests.log",
+      "sha256": "0e972e0bfb924a3e61188ea54d162f6075429794909eaee1e626afd9b4abf41d",
+      "result_lines": [
+        "ok  \toimobbs/internal/store\t0.181s"
+      ]
+    },
+    {
+      "artifact": "var/posting-pipeline-160/fused-test-before.log",
+      "sha256": "44c3dd1845880740afe9af246f823a77b8a75ec6b65ea50c7c56f15c548d2cff",
+      "result_lines": [
+        "FAIL\toimobbs/internal/store [build failed]",
+        "FAIL"
+      ]
+    },
+    {
+      "artifact": "var/posting-pipeline-160/fused-vet.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/fusedb-build.log",
+      "sha256": "196c973bf170ed59a985d3aaf3f49265d69942fa35125e69d5585833e46fe4f6",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/fusedb-diag-build.log",
+      "sha256": "70da7e17facbb8afd23a7ac17b33e94c4c63a891f8b8a2f265573a8b987dda3b",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/fusedb-diag.log",
+      "sha256": "f799a3d24d9a18ceafba48f9341365cf1a6f5ba50815948085c217b40a1e808d",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/fusedb-fixed-2cpu.log",
+      "sha256": "af34702ce8f6dfabe23e8ed9a52dcef7360532b7a9fa68fec6f4e59cd0679ded",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/fusedb-fixed-4cpu.log",
+      "sha256": "4660bdf005c476916f1ead8f9e5032cb5575b5f90826b2f33cbb921044fde080",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/fusedb-fuzz.log",
+      "sha256": "aff612b7c6c0777c6102d81208271f9662106a02553f66de9fba71e29bd4efaa",
+      "result_lines": [
+        "fuzz: elapsed: 31s, execs: 449625 (0/sec), new interesting: 3 (total: 9)",
+        "PASS",
+        "ok  \toimobbs/internal/store\t30.710s"
+      ]
+    },
+    {
+      "artifact": "var/posting-pipeline-160/fusedb-normal.log",
+      "sha256": "b195f2cc5364b5bd195d7c40a0c0ee748d1df7806de43d384337e40784fdc443",
+      "result_lines": [
+        "ok  \toimobbs/internal/store\t19.377s",
+        "ok  \toimobbs/internal/evidence\t79.770s",
+        "ok  \toimobbs/internal/app\t45.303s"
+      ]
+    },
+    {
+      "artifact": "var/posting-pipeline-160/fusedb-race.log",
+      "sha256": "25dfcb172f07ea2d5bd4445e24046496c7369debe6b86236150d7cf7a0bd5c24",
+      "result_lines": [
+        "ok  \toimobbs/internal/store\t2.282s",
+        "ok  \toimobbs/internal/evidence\t1.318s",
+        "ok  \toimobbs/internal/app\t44.160s"
+      ]
+    },
+    {
+      "artifact": "var/posting-pipeline-160/fusedb-runner.log",
+      "sha256": "9360e0374524a509d4d0e05a621c1e5fa16a9d7eee8c71969475ef1e79460595",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/overlap-bootstrap-race.log",
+      "sha256": "a03a8a119b167d327f4dd04509b0a6d4fc3876598c29acf3e6274193ea1a35fe",
+      "result_lines": [
+        "ok  \toimobbs/internal/bootstrap\t3.924s"
+      ]
+    },
+    {
+      "artifact": "var/posting-pipeline-160/overlap-build.log",
+      "sha256": "8b8b1711b2a32364176a030050254da98b569fad4d2c38db297e811cb33c18c0",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/overlap-diag-build.log",
+      "sha256": "4906013529a54c1f3e66f59710966f8b7f59b58bd2764724c6d47b3e6adc7931",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/overlap-diag.log",
+      "sha256": "04179547034c185f1c0c23bd1b20632a4ca7a9b158e485547954dbaa0daa437c",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/overlap-evidence-race.log",
+      "sha256": "0d52b06a7a201b08e71532e5409cfa8ba9f276bee771f74d04c38b351591194d",
+      "result_lines": [
+        "ok  \toimobbs/internal/evidence\t1.347s"
+      ]
+    },
+    {
+      "artifact": "var/posting-pipeline-160/overlap-fixed-2cpu.log",
+      "sha256": "fe16be3f1d71f4eae7eade2776844f11877309b0c99f76a54c8d9e9ba6b49d55",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/overlap-fixed-4cpu.log",
+      "sha256": "41e0cee06ad5d1be79267c3a27d5daeeb40ae7448fdd9c3992270ed204d3a62f",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/overlap-fuzz.log",
+      "sha256": "4f682761097649943b882e28ab25b394582b22273327fcc75f7c362fa5eaa97d",
+      "result_lines": [
+        "fuzz: elapsed: 31s, execs: 21850 (0/sec), new interesting: 0 (total: 9)",
+        "PASS",
+        "ok  \toimobbs/internal/store\t31.010s"
+      ]
+    },
+    {
+      "artifact": "var/posting-pipeline-160/overlap-initial.log",
+      "sha256": "42a38dd175407d5dc03348b50c828b11c06018cd24e9f5bfb1d1c5558911b1b3",
+      "result_lines": [
+        "ok  \toimobbs/internal/store\t0.277s",
+        "ok  \toimobbs/internal/evidence\t0.137s",
+        "ok  \toimobbs/internal/app\t7.505s",
+        "ok  \toimobbs/internal/bootstrap\t23.259s"
+      ]
+    },
+    {
+      "artifact": "var/posting-pipeline-160/overlap-normal.log",
+      "sha256": "4b903fda3fada00052138e4df7750e1442d957486ab3c6d4180a895906ef5a9a",
+      "result_lines": [
+        "ok  \toimobbs/internal/store\t5.535s",
+        "ok  \toimobbs/internal/evidence\t79.579s",
+        "ok  \toimobbs/internal/app\t46.096s"
+      ]
+    },
+    {
+      "artifact": "var/posting-pipeline-160/overlap-prepared-tests.log",
+      "sha256": "927868afa5b37980b6b5d71974318337eca61765b7fd9cc2374d93633bae48b5",
+      "result_lines": [
+        "ok  \toimobbs/internal/store\t4.254s",
+        "ok  \toimobbs/internal/evidence\t2.687s"
+      ]
+    },
+    {
+      "artifact": "var/posting-pipeline-160/overlap-r2-2-runner.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/overlap-r2-4-runner.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/overlap-r2-fixed-2cpu.log",
+      "sha256": "c79deebeab36e368811e0a8178305c0c681518ffdcf0662857eaa0deda219f30",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/overlap-r2-fixed-4cpu.log",
+      "sha256": "4f651c513d0cd8edaf4274dec765f4977ed72ed19fac92c154f638aa990b40c0",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/overlap-r3-2-runner.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/overlap-r3-4-runner.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/overlap-r3-fixed-2cpu.log",
+      "sha256": "882ac1c171ff9da50c27a099e52284b43e113c35beee3cb9e3a69172a6dfa4cb",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/overlap-r3-fixed-4cpu.log",
+      "sha256": "aa6dbd6e01a0e2d129ecc0005b7fdef4b9eda1880504cc01098238878ae477ce",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/overlap-race.log",
+      "sha256": "fc97bdaf2272847cf7de71ff82215854e7288161a48d583b514d9202174a4aa6",
+      "result_lines": [
+        "ok  \toimobbs/internal/store\t15.803s",
+        "ok  \toimobbs/internal/app\t68.301s"
+      ]
+    },
+    {
+      "artifact": "var/posting-pipeline-160/overlap-runner.log",
+      "sha256": "9360e0374524a509d4d0e05a621c1e5fa16a9d7eee8c71969475ef1e79460595",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/overlap-store-tests.log",
+      "sha256": "359f239219b308dbeb38630c1aff3218e08532f13919e7291ff3b5ae8d3422fc",
+      "result_lines": [
+        "ok  \toimobbs/internal/store\t1.522s"
+      ]
+    },
+    {
+      "artifact": "var/posting-pipeline-160/overlap-sustained-4cpu.log",
+      "sha256": "316f90b9550bcb3740e31aa5e3bd871adec07891dc7775fa79d6c632e44a45cf",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/overlap-test-before.log",
+      "sha256": "efda7910c1e7453782d2f7498c02915041d43358553692dc3d2f20895e162f8d",
+      "result_lines": [
+        "FAIL\toimobbs/internal/store [build failed]",
+        "FAIL"
+      ]
+    },
+    {
+      "artifact": "var/posting-pipeline-160/overlap-tests.log",
+      "sha256": "894ab11b1995a97139e776017ce262ce6580834fe8f58b44fb2281b46aa0ea50",
+      "result_lines": [
+        "ok  \toimobbs/internal/store\t0.187s",
+        "ok  \toimobbs/internal/evidence\t0.176s",
+        "ok  \toimobbs/internal/app\t23.214s",
+        "ok  \toimobbs/internal/bootstrap\t25.955s"
+      ]
+    },
+    {
+      "artifact": "var/posting-pipeline-160/overlap-tmpfs-2cpu.log",
+      "sha256": "ce6ffaa4237c668261a2d0ebf51bfef94fa769cce70e36b7048ec825e61a5e5b",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/overlap-tmpfs-4cpu.log",
+      "sha256": "9a2d1b4bdbc82a14aca7529248a6e4946b99d0ac4246241a32234205cc0e0243",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/overlap-window-2cpu.log",
+      "sha256": "4d77e359564f569771742e14784f915bec5ea37fb8420eab5c2d4342b86119e2",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/overlap-window-4cpu.log",
+      "sha256": "49030b971a980dc91f4cc56462a168fb51998f77ee7a069071016e839c0c4a06",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/pgo-build.log",
+      "sha256": "11b28cfba592247e49dd43d0439a47e959e8787344a76c41b1a11b1223c10a54",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/pgo-fixed-2cpu.log",
+      "sha256": "001eb24f69c627b654d6fcd8f776258f3fd5a2eab785dc11a6496e9dd65626d5",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/pgo-fixed-4cpu.log",
+      "sha256": "6b7cfd2a874f799147982bc7646a58fbe4aebb6993a18e89f8928cd54cbe3412",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/pgo-runner.log",
+      "sha256": "07afbf0c78ac187e42af9619751c4a03032d982d9b878ad62262a28069fc3435",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/pgob-build.log",
+      "sha256": "51e93c4844ae62712ba587c5be849b550979a6be1bcaf759397440ab4efe3edc",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/pgob-fixed-2cpu.log",
+      "sha256": "8388e7ded52852b4b3aa38b9c357314bb8265317143c9d3f2762ce5fcef3722e",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/pgob-fixed-4cpu.log",
+      "sha256": "c4f0a9d1344202e490bb7fec83a8608e5f2ff78e81e79508aea946a1d9e9b31d",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/pgob-runner.log",
+      "sha256": "3975a057d10006aa51295eae6f5e2134f7a5b64e407ed735ab4e7b27dcf82ad5",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/prefix-build.log",
+      "sha256": "0b10013fc0978b90116412a7ccbb3cca28b526111239f43e7c574b5cccfce06f",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/prefix-diag-build.log",
+      "sha256": "a65b465a65b1c10e895445f6eaf1a99f4aa3c413b36865d6d68eb2dea4f2066e",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/prefix-diag.log",
+      "sha256": "49ceb087c1c1712dba2aae2e613db18c8465e27670d1c052e5e789b7c824e729",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/prefix-fixed-2cpu.log",
+      "sha256": "61ba8ea9f1b8ce149cdf4a28a0d375507d2551fac231f00b8e443f227104b5bf",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/prefix-fixed-4cpu.log",
+      "sha256": "a9b55d9a1dccb8d5bd558b1151bb1424c6b6e177e2987dfa251a1f1460286846",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/prefix-more-tests.log",
+      "sha256": "ccdd2784fa5051db08f9bfb865865c92a26814bbf4d776a614554c01dff33729",
+      "result_lines": [
+        "ok  \toimobbs/internal/bootstrap\t1.712s"
+      ]
+    },
+    {
+      "artifact": "var/posting-pipeline-160/prefix-race.log",
+      "sha256": "7f3b04837cce978db746c0ebe2d12e837724d81afc6316f33bc9a8462fc1e536",
+      "result_lines": [
+        "ok  \toimobbs/internal/bootstrap\t3.393s"
+      ]
+    },
+    {
+      "artifact": "var/posting-pipeline-160/prefix-runner.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/prefix-test-before.log",
+      "sha256": "b362e2172819b4a21c84b74c502f98e0ee4369cb40bef2838bff7c363213ad84",
+      "result_lines": [
+        "FAIL\toimobbs/internal/bootstrap [build failed]",
+        "FAIL"
+      ]
+    },
+    {
+      "artifact": "var/posting-pipeline-160/prefix-tests-2.log",
+      "sha256": "9b3bfec894a9e209b35d09cc1e3530b3a6fc64162426eeb8ee07c4a13d8b5d45",
+      "result_lines": [
+        "signal: terminated",
+        "FAIL\toimobbs/internal/bootstrap\t22.016s",
+        "FAIL"
+      ]
+    },
+    {
+      "artifact": "var/posting-pipeline-160/prefix-tests-3.log",
+      "sha256": "f8513bd63257af96da2f493954aa33269b92ac667023f576e651c6af695edec1",
+      "result_lines": [
+        "PASS",
+        "ok  \toimobbs/internal/bootstrap\t1.454s"
+      ]
+    },
+    {
+      "artifact": "var/posting-pipeline-160/prefix-tests.log",
+      "sha256": "0f67447ce3ddc9d4ffc5b9c8884c954fbba94ddbc13e1e4a1796b2ef26425003",
+      "result_lines": [
+        "signal: terminated",
+        "FAIL\toimobbs/internal/bootstrap\t93.132s",
+        "FAIL"
+      ]
+    },
+    {
+      "artifact": "var/posting-pipeline-160/repeated-runner.log",
+      "sha256": "f339b284a63a09a3dab8041d94a230f6ff45925fdc59478b28dcf0b12a62ed9d",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/report-designcheck.log",
+      "sha256": "a208375ec66ada4afa80cfa66fea7ccb282c7ef44badb31bdd0270b517f5ec0b",
+      "result_lines": [
+        "PASS: 45 Markdown files, 57 JSON files, current documents, 476 local links including headings, fences and strict JSON",
+        "PASS: standard Go CRC32C, header/frame offsets, dedup section, create DAT lengths and sample expiry",
+        "PASS: pack offsets/CRC/SHA, raw+gzip blocks, compressed audit, 5 DAT ranges, current/prefix stability through seq=4, 4 invalid gzip samples",
+        "PASS: control frame/snapshot/current bytes, CRC/SHA, JSON equality, 4 invalid control examples",
+        "PASS: 26 HTTP decision examples (not a live HTTP server)",
+        "PASS: independent HMAC ID/token vector, token tamper, 3 six-calendar-month boundaries",
+        "PASS: design checks only; application, crash, device and load tests NOT RUN"
+      ]
+    },
+    {
+      "artifact": "var/posting-pipeline-160/zero-build.log",
+      "sha256": "9684c65a597456c2636fb599d868164547d1bdad7ade37dd28b6d6be07ce68e9",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/zero-fixed-2cpu.log",
+      "sha256": "9b034bad1b795c7ead232e5fd9a715005da10593bea70061d1917ac478b8318b",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/zero-fixed-4cpu.log",
+      "sha256": "990a95757451b175cea6ea795723b83d31ffb95fdd2298ff1039e462ad0f44d1",
+      "result_lines": []
+    },
+    {
+      "artifact": "var/posting-pipeline-160/zero-runner.log",
+      "sha256": "dff79e18d8576f88466882565d061fd76e16945ce1de7b1a12ca6a41e0610a29",
+      "result_lines": []
+    }
+  ],
+  "rejected_sources": {
+    "rejected-prefix": {
+      "candidate.patch": "827eb8e1c3cd5d889a8db29f669f33fc295d794a3d473d5fadd33636cf373ecd",
+      "internal/bootstrap/posting.go": "1a27d4e503dceebbc8eaab0c7519622bd9203d7b76245de440db00d61bcbf429",
+      "internal/bootstrap/posting_batch.go": "2c7f2923918517629fd13bcb8710b455df69a96f25a6b4f1a51cf47663da265c",
+      "internal/bootstrap/posting_form.go": "62b74e0e877d80f6ffc0e6ac4381dc3220c0f901e6e827e75d5d6a94060884aa",
+      "internal/bootstrap/posting_preparation.go": "ad9787770e02dbe6ebfd0c13976f36be755b5af21ec5c58de385b6810c0db0bd",
+      "internal/bootstrap/posting_preparation_pipeline_test.go": "58a56573242fb5fd66356d31b4b9902d8fc1f38b9e929072250df1815d599dc9"
+    },
+    "fused-a-source": {
+      "internal/evidence/required_batch.go": "e0c0c26ed5f608c4369b638ee6f1a784d2acc57c9f66516f967e73e892f29655",
+      "internal/evidence/required_batch_build.go": "95b48dbc83f2f2da19b345221938c910a3392fe7f6848195c3fd983a1a770763",
+      "internal/evidence/required_batch_frames.go": "2b919932be3e16a4fdbae84cc793075fba5fdf61f25e5455fd188c9d58b0d312",
+      "internal/store/control_build.go": "24126bb705ccd99f4de78adc465560b1d7fe389ebb8472c58b2d816b322855a7",
+      "internal/store/control_build_test.go": "afa3c83b4227daaa9d1e02539802e29c828a832bd25c400871762a3c6fadaf61",
+      "internal/store/control_independent.go": "c6372060529dee504905bfa62a72e9927592ccab8d65003084edead9502c04bb",
+      "internal/store/control_log.go": "6c8656e939593d8b5c68faca2fc5c4a5def4c4ec35f853827294afbab1c2139b",
+      "source.patch": "e98973e7a04d21276c09d7faeb08767e3cbb099c1dca549273116bbaadd2c40d"
+    },
+    "fused-b-source": {
+      "internal/evidence/required_batch.go": "1127eccbd3d6a233525422d8e35ad3d304ec54f185b99c7d45007c89dafb622e",
+      "internal/evidence/required_batch_build.go": "95b48dbc83f2f2da19b345221938c910a3392fe7f6848195c3fd983a1a770763",
+      "internal/evidence/required_batch_frames.go": "04b53a803421259070dd1158a01261c5fbd946767eb7df54dfa25d2128f2fc15",
+      "internal/store/control_build.go": "b2690027f1fd28d86da7db06007ce343eb9e12423756eee7128c16d95a893fb2",
+      "internal/store/control_build_test.go": "ad01ed9fd4343bf5c3bbd7787df2b5b71e1fe8143af01b711807ec928cd90524",
+      "internal/store/control_independent.go": "c6372060529dee504905bfa62a72e9927592ccab8d65003084edead9502c04bb",
+      "internal/store/control_log.go": "fccec01d265b858e988f08ac5763a289bcf773869747f72ccff4fa03b5c0759d",
+      "internal/store/frame.go": "a28bf4e58a1945c1648ef5bbb38fbaca7d5dd542c2f10d47fd8f666a6ced6500",
+      "internal/store/wal_compression.go": "3b973bfd959f78f9a60b0908b3f808b67acd2b5d333a12a86b38471c6ce38f23",
+      "internal/store/wal_parallel.go": "721055497f0226386c30c2830b6f4b51eb16e3563c5b5a6dfe49cfae7554efe5",
+      "source.patch": "b702deb91abc00414a67ec08140d0906ec4fc29e331e25138d5ba47c136baf8f"
+    },
+    "rejected-overlap": {
+      "internal/app/posting_batch.go": "1193333a82c19ab23aa8278b475798be1bb7880a51bfaa6c637b744d6e323181",
+      "internal/app/posting_multi_batch_test.go": "0fa1efda19e571439910d2592c5a2f647157cb43f8ad0ab7fac5a4bc85e98358",
+      "internal/bootstrap/posting_batch.go": "e380c974f9a7434fcb2b08bee0610d2c080f326bf590a5ff69f43207cc7b9753",
+      "internal/evidence/required_batch.go": "48f7a366447281ee883c5bcd3d3faa9f7bf53fc4ac9ad7263b84df266513e7f5",
+      "internal/evidence/required_batch_build.go": "95b48dbc83f2f2da19b345221938c910a3392fe7f6848195c3fd983a1a770763",
+      "internal/evidence/required_batch_frames.go": "04b53a803421259070dd1158a01261c5fbd946767eb7df54dfa25d2128f2fc15",
+      "internal/evidence/required_prepared.go": "41913d383e6f3c980e68a1f37d4e943aa96d62997dabc59f94abfeabde096088",
+      "internal/evidence/required_prepared_test.go": "b9ea0b655cb1916763cb798419734724ac8903faff62888df741dc14feeb1d34",
+      "internal/store/control_build.go": "c27135437e0fec7a46099ae6a7f881a0e83a943be7437755b387b1d0a1de5e23",
+      "internal/store/control_build_test.go": "ad01ed9fd4343bf5c3bbd7787df2b5b71e1fe8143af01b711807ec928cd90524",
+      "internal/store/control_independent.go": "c6372060529dee504905bfa62a72e9927592ccab8d65003084edead9502c04bb",
+      "internal/store/control_log.go": "9d62fa5822f756e61381262ca86f8c95e676558ec28506ade7e463d3041b5b4b",
+      "internal/store/control_prepared_test.go": "2694009ff11a09fd1930a5331ac19c0adbdbc00a3e1d9386b52a4b23a55d9554",
+      "internal/store/durable.go": "1f47ad314e33ffcb78133dfa8da32e95b5b4ab86b44f2724cbafffbb15119cee",
+      "internal/store/frame.go": "a28bf4e58a1945c1648ef5bbb38fbaca7d5dd542c2f10d47fd8f666a6ced6500",
+      "internal/store/wal_compression.go": "3b973bfd959f78f9a60b0908b3f808b67acd2b5d333a12a86b38471c6ce38f23",
+      "internal/store/wal_parallel.go": "721055497f0226386c30c2830b6f4b51eb16e3563c5b5a6dfe49cfae7554efe5",
+      "source-sha256.json": "2f2b992d9c1f992f0fccb16e1d87646d63af76c89425d940b0c269fad0c01b95",
+      "source.patch": "bc1083d13ed0c6ecaada56468672df8eecce76299da6911cd0181db45344a85b"
+    }
+  },
+  "scripts": {
+    "var/posting-pipeline-160/candidate.py": "f9310fbeb0df3b2a11b847fb84d96addae2d770563419e9b72c0a4d0edc126ba",
+    "var/posting-pipeline-160/diagnostics.py": "9200f40e464efec73aeec5214321049fb834d44d01c1d2cd548cc85be0b6f252",
+    "var/posting-pipeline-160/fused-candidate.py": "0464718500aeb246472712395a34ff83eaf7da5d89e42ec6a38a15c0fc4e73f1",
+    "var/posting-pipeline-160/fused-resume.py": "183aa2dd1ace98a8cc3154493901e3738a15349a75b5f550fdb219f18ac1f043",
+    "var/posting-pipeline-160/fusedb-candidate.py": "73e354006b507e6435cf11227d91ee9f1bcfe4346bedc7c33a0b28987f0b2231",
+    "var/posting-pipeline-160/overlap-candidate.py": "815d1f1801451f99eb643b2dabeed9abfae217da96b1d39a28a86508f163b928",
+    "var/posting-pipeline-160/pgo-b.py": "09e1956648cd7e4287f230338c09a8efc8999e498a82fb0048c4e6c9e0e188a2",
+    "var/posting-pipeline-160/pgo.py": "d7999d899249f0c3497cc5cd50443873d958ecc298311b32d10daa24973c35cb",
+    "var/posting-pipeline-160/repeated.py": "b5eed84c638860d1435796ab1542be971860a415a251460d4fb1b6afc1d5c1ce",
+    "var/posting-pipeline-160/run.py": "653993d6f62bd0a3fc9f592c810048335dd0224f5eed33dce91e907381d079c2",
+    "var/posting-pipeline-160/zero.py": "583ae90ac6ef4933640fbbc569b05513d7eac81bb905db2250a3ac31c58e6339"
+  },
+  "limitations": [
+    "CPU scaling is not established from the baseline observed ratio > 1.6 because two baseline 2CPU trials had major I/O stalls.",
+    "The overlap prototype could not reproduce an SSD throughput improvement and had worse sustained latency; it was rejected.",
+    "tmpfs provides no durable-storage or power-loss proof.",
+    "After restart, optional queue counts describe only the last boot; both sustained trials show 17 failed optional records. Do not claim optional logs were lossless or infer a regression from those counters alone.",
+    "Two overlap trials contain Web POST HTTP 429 rejections after catch-up; keep them as failures and do not treat their durations as equal successful work.",
+    "No candidate is deployed; the 17 verified candidate source files were restored to HEAD after their exact source was archived."
+  ]
+}

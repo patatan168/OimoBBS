@@ -1,0 +1,10 @@
+<!-- 三角耳とAA風の顔を、小さなタブでも判別できる太い線で描く。 -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <title>OimoBBS</title>
+  <path d="M5 13V4l7 5h8l7-5v9c2 3 2 7-1 10-5 5-15 5-20 0-3-3-3-7-1-10Z" fill="#fff" stroke="#222" stroke-width="2" stroke-linejoin="round"/>
+  <g fill="#222">
+    <circle cx="10" cy="15" r="1.5"/>
+    <circle cx="22" cy="15" r="1.5"/>
+    <path d="M12 19h8l-4 5Z"/>
+  </g>
+</svg>

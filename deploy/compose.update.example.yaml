@@ -1,0 +1,7 @@
+# 既存構成の最後に追加する。Docker socketやホストの更新設定・バックアップは掲示板へ渡さない。
+services:
+  bbs:
+    environment:
+      OIMO_UPDATE_SOCKET: /run/oimobbs-update/control.sock
+    volumes:
+      - /run/oimobbs-update:/run/oimobbs-update:ro

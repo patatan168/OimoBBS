@@ -1,0 +1,3503 @@
+{
+  "date": "2026-10-23",
+  "baseline_commit": "2b4f56ec962bc2c732f185709a8d2458d30169d4",
+  "scope": "isolated synthetic loopback HTTPS HTTP/1.1, no production changes",
+  "notes": [
+    "All 14 load trials retained. The diagnostic trial is separate and excluded from capacity comparisons.",
+    "Saturation trials drop optional HTTP log records; they do not establish a zero-loss sustainable operating limit.",
+    "Cgroup CPU includes background log processing; client CPU is recorded separately.",
+    "The 96MiB working-set benchmark uses actual HTML with calculated memory budgets in-process; it is not a cgroup pressure or network test.",
+    "Initial matrix uses v1 Go client; core repeats and steady trials use v2 with rate support. Compare conditions within each client version.",
+    "Mutex profile times are summed across waiting goroutines, not response latency."
+  ],
+  "production_source_files": {
+    "internal/bootstrap/repository.go": {
+      "baseline_sha256": "ea9907b4d1f0a888488e2f3648ad5ed4806e465ed1263c142cd65cf2a7fe5d50",
+      "after_sha256": "cc35ccaa52be9ab61f551248ac5febf494d0c66a30a0e04b4bdfd349e7db3b35"
+    },
+    "internal/bootstrap/posting.go": {
+      "baseline_sha256": "9778000a45f4f994f4bece8339a49d1a4399b9ba7ffaffd9c94cf4cef66cac80",
+      "after_sha256": "5d88dae91590a37f021fd1d457bc877d96c25bfd844a3d4a99438e4b58f0621e"
+    },
+    "internal/bootstrap/site_web.go": {
+      "baseline_sha256": "9429f0f66d7ddfe5d918cf0c06751bbce8830481c1a00ea4ee61b4503bc7a35a",
+      "after_sha256": "ef1925b3b6943ad8574cb0cfa47c478752ac160c3f94cd6e9c46475113bf9c28"
+    },
+    "internal/bootstrap/hidden_board.go": {
+      "baseline_sha256": "0b4bcab6dbf4dc6f073903ecd1c6dba4ab91637ff64ae1c3511b9337f9fa6f2a",
+      "after_sha256": "08b7e174f0360af7a506b7b9ebf6e26d4ff34696a1477eaed64c0d2bc0efe00f"
+    },
+    "internal/bootstrap/reprint_policy.go": {
+      "baseline_sha256": "59d5e0d876e27dad09128d3bd6e211729a9a53e0e104d6018db31af96c0fc6ab",
+      "after_sha256": "2cf5b40406b322cd7e0582b2987704c4b5d7509338350a3f5ebaf2316e6b1251"
+    }
+  },
+  "images": {
+    "oimobbs:reading-optimized-20261023": "sha256:95f8cc813f12727ccdde208d35bc1ccd69c4764de003523c012d9a203587f33d",
+    "oimobbs:reading-shared-20261023": "sha256:d032957c785d32cade5e59dd245ddf5b30fed5df207b397b6861cbed7d025497",
+    "oimobbs:reading-scaling-diag-20261023": "sha256:00ebea1c34133cffe98838d26bcacd13bff99c9bf553f96804d6b29e73743d26"
+  },
+  "clients": {
+    "v1_source": "// readload は隔離loopback TLSの固定表現を複数コアで取得し、全応答の内容を照合する。\npackage main\n\nimport (\n\t\"crypto/sha256\"\n\t\"crypto/tls\"\n\t\"crypto/x509\"\n\t\"encoding/hex\"\n\t\"encoding/json\"\n\t\"flag\"\n\t\"fmt\"\n\t\"io\"\n\t\"net\"\n\t\"net/http\"\n\t\"net/url\"\n\t\"os\"\n\t\"runtime\"\n\t\"sort\"\n\t\"sync\"\n\t\"sync/atomic\"\n\t\"syscall\"\n\t\"time\"\n)\n\ntype config struct {\n\tURL             string            `json:\"url\"`\n\tCertificate     string            `json:\"certificate\"`\n\tHeaders         map[string]string `json:\"headers\"`\n\tResponseHeaders map[string]string `json:\"response_headers\"`\n\tStatus          int               `json:\"status\"`\n\tSHA256          string            `json:\"body_sha256\"`\n\tBodyBytes       int               `json:\"body_bytes\"`\n\tRequests        int               `json:\"requests\"`\n\tWorkers         int               `json:\"workers\"`\n}\n\ntype outcome struct {\n\tduration      time.Duration\n\tstatus, bytes int\n\tvalid         bool\n}\ntype report struct {\n\tRequests  int         `json:\"requests\"`\n\tErrors    int         `json:\"errors\"`\n\tStatus    map[int]int `json:\"status\"`\n\tBodyBytes int64       `json:\"body_bytes\"`\n\tSeconds   float64     `json:\"seconds\"`\n\tRPS       float64     `json:\"requests_per_second\"`\n\tP50       float64     `json:\"p50_ms\"`\n\tP95       float64     `json:\"p95_ms\"`\n\tMax       float64     `json:\"max_ms\"`\n\tCPU       float64     `json:\"client_cpu_seconds\"`\n\tCPUs      int         `json:\"client_gomaxprocs\"`\n}\n\nfunc main() {\n\tpath := flag.String(\"config\", \"\", \"隔離対象と期待応答のJSON\")\n\tcpus := flag.Int(\"cpus\", 2, \"負荷生成側のCPU並列数\")\n\tflag.Parse()\n\truntime.GOMAXPROCS(*cpus)\n\traw, err := os.ReadFile(*path)\n\tvar c config\n\tif err == nil {\n\t\terr = json.Unmarshal(raw, &c)\n\t}\n\tif err != nil {\n\t\tfmt.Fprintln(os.Stderr, err)\n\t\tos.Exit(1)\n\t}\n\tresult, err := run(c)\n\tif err != nil {\n\t\tfmt.Fprintln(os.Stderr, err)\n\t\tos.Exit(1)\n\t}\n\tif err = json.NewEncoder(os.Stdout).Encode(result); err != nil || result.Errors > 0 {\n\t\tos.Exit(1)\n\t}\n}\n\n// run は明示したCAを信頼する実HTTPSを使い、失敗も含め全予定要求を試行する。\n// 接続はworkerごとに再利用し、本文・状態・検証子を照合する。外部ホストは受け付けない。\nfunc run(c config) (report, error) {\n\tu, err := url.Parse(c.URL)\n\tif err != nil || u.Scheme != \"https\" || u.Hostname() != \"127.0.0.1\" || u.Port() == \"\" || u.User != nil || c.Requests < 1 || c.Workers < 1 || c.Workers > 256 || c.BodyBytes < 0 || c.BodyBytes > 16<<20 {\n\t\treturn report{}, fmt.Errorf(\"invalid isolated load configuration\")\n\t}\n\tdigest, err := hex.DecodeString(c.SHA256)\n\tif err != nil || len(digest) != sha256.Size {\n\t\treturn report{}, fmt.Errorf(\"invalid expected digest\")\n\t}\n\troots := x509.NewCertPool()\n\tpem, err := os.ReadFile(c.Certificate)\n\tif err != nil {\n\t\treturn report{}, err\n\t}\n\tif !roots.AppendCertsFromPEM(pem) {\n\t\treturn report{}, fmt.Errorf(\"invalid CA\")\n\t}\n\tresults := make([]outcome, c.Requests)\n\tvar next atomic.Int64\n\tvar group sync.WaitGroup\n\tbefore := cpuSeconds()\n\tstart := time.Now()\n\tfor worker := range min(c.Workers, c.Requests) {\n\t\tgroup.Go(func() {\n\t\t\tdialer := &net.Dialer{Timeout: 5 * time.Second, LocalAddr: &net.TCPAddr{IP: net.IPv4(127, 2, byte(worker/250), byte(worker%250+1))}}\n\t\t\ttransport := &http.Transport{DialContext: dialer.DialContext, TLSClientConfig: &tls.Config{RootCAs: roots, MinVersion: tls.VersionTLS12}, DisableCompression: true, MaxConnsPerHost: 1, MaxIdleConnsPerHost: 1}\n\t\t\tdefer transport.CloseIdleConnections()\n\t\t\tclient := &http.Client{Transport: transport, Timeout: 30 * time.Second, CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}\n\t\t\tfor {\n\t\t\t\tindex := int(next.Add(1) - 1)\n\t\t\t\tif index >= c.Requests {\n\t\t\t\t\treturn\n\t\t\t\t}\n\t\t\t\tstarted := time.Now()\n\t\t\t\tresult := outcome{}\n\t\t\t\treq, err := http.NewRequest(\"GET\", c.URL, nil)\n\t\t\t\tif err == nil {\n\t\t\t\t\tfor name, value := range c.Headers {\n\t\t\t\t\t\treq.Header.Set(name, value)\n\t\t\t\t\t}\n\t\t\t\t\tvar response *http.Response\n\t\t\t\t\tresponse, err = client.Do(req)\n\t\t\t\t\tif err == nil {\n\t\t\t\t\t\tresult.status = response.StatusCode\n\t\t\t\t\t\tbody, readErr := io.ReadAll(io.LimitReader(response.Body, int64(c.BodyBytes)+1))\n\t\t\t\t\t\tcloseErr := response.Body.Close()\n\t\t\t\t\t\tresult.bytes = len(body)\n\t\t\t\t\t\tsum := sha256.Sum256(body)\n\t\t\t\t\t\tresult.valid = readErr == nil && closeErr == nil && len(body) == c.BodyBytes && response.StatusCode == c.Status && hex.EncodeToString(sum[:]) == c.SHA256\n\t\t\t\t\t\tfor name, value := range c.ResponseHeaders {\n\t\t\t\t\t\t\tresult.valid = result.valid && response.Header.Get(name) == value\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\tresult.duration = time.Since(started)\n\t\t\t\tresults[index] = result\n\t\t\t}\n\t\t})\n\t}\n\tgroup.Wait()\n\tout := report{Requests: c.Requests, Status: map[int]int{}, Seconds: time.Since(start).Seconds(), CPU: cpuSeconds() - before, CPUs: runtime.GOMAXPROCS(0)}\n\tdurations := make([]time.Duration, len(results))\n\tfor i, result := range results {\n\t\tif !result.valid {\n\t\t\tout.Errors++\n\t\t}\n\t\tout.Status[result.status]++\n\t\tout.BodyBytes += int64(result.bytes)\n\t\tdurations[i] = result.duration\n\t}\n\tsort.Slice(durations, func(i, j int) bool { return durations[i] < durations[j] })\n\tout.P50 = float64(durations[len(durations)/2]) / 1e6\n\tout.P95 = float64(durations[min(len(durations)-1, len(durations)*95/100)]) / 1e6\n\tout.Max = float64(durations[len(durations)-1]) / 1e6\n\tout.RPS = float64(c.Requests) / out.Seconds\n\treturn out, nil\n}\n\n// cpuSeconds は負荷生成プロセス自身の全スレッドのuser+system CPU時間を返す。\nfunc cpuSeconds() float64 {\n\tvar usage syscall.Rusage\n\tif err := syscall.Getrusage(syscall.RUSAGE_SELF, &usage); err != nil {\n\t\tpanic(err)\n\t}\n\treturn float64(usage.Utime.Sec+usage.Stime.Sec) + float64(usage.Utime.Usec+usage.Stime.Usec)/1e6\n}\n",
+    "v1_binary_sha256": "b01c1e60534250d72d7d42cd0b8b1778781abf48925b1bd3a832473ab403c1d5",
+    "v2_source_sha256": "d72f51e61d30881a312ba407aaa64d84c96dece9ac589afd19d37523035f3676",
+    "v2_binary_sha256": "540058668753101afff1804f7f9f37d5f4fd84ba7e3c96c3a170f6a2011a0815"
+  },
+  "matrix": [
+    {
+      "kind": "base",
+      "cpus": 2,
+      "memory": "512m",
+      "image": "oimobbs:reading-optimized-20261023",
+      "output": "var/reading-scaling/matrix-0-base-2cpu-512m.json",
+      "command": [
+        "python3",
+        "scripts/probe-thread-resources.py",
+        "--image",
+        "oimobbs:reading-optimized-20261023",
+        "--cpus",
+        "2",
+        "--memory",
+        "512m",
+        "--reading-only",
+        "--reading-go-client",
+        "/tmp/oimo-readload",
+        "--reading-cases",
+        "dat_identity_304",
+        "html_gzip_304",
+        "subject_identity_full",
+        "--requests",
+        "4000",
+        "--egress-bps",
+        "8000000000",
+        "--optional-log-stats",
+        "--collect-server-log",
+        "--output",
+        "var/reading-scaling/matrix-0-base-2cpu-512m.json"
+      ],
+      "exit_code": 0,
+      "seconds": 32.839332580566406,
+      "raw_sha256": "a2c3ab46e9edf7791d08e929ba7466d27b5e24b4a8246ead9ad16f1950b823b4",
+      "result": {
+        "scope": "isolated HTTPS HTTP/1.1 on loopback; warmed immutable public representations; no WAN or production proof",
+        "image": "sha256:95f8cc813f12727ccdde208d35bc1ccd69c4764de003523c012d9a203587f33d",
+        "cpu_max": "200000 100000",
+        "memory_max": "536870912",
+        "egress_budget_bits_per_second": 8000000000,
+        "prepare_post_rate": 40,
+        "waf": null,
+        "reading_kinds": [
+          "dat",
+          "html",
+          "subject"
+        ],
+        "reading_cases": [
+          "dat_identity_304",
+          "html_gzip_304",
+          "subject_identity_full"
+        ],
+        "reading_go_client": "/tmp/oimo-readload",
+        "dat_lines": 1001,
+        "dat_bytes": 454767,
+        "fixture_sha256": "82e2863a14f56c3018af99a4bf59425726410d96c7cfd94168315422b7092b12",
+        "phases": [
+          {
+            "requests": 4000,
+            "errors": 0,
+            "status": {
+              "304": 4000
+            },
+            "body_bytes": 0,
+            "seconds": 0.567444012,
+            "requests_per_second": 7049.153600020718,
+            "p50_ms": 7.627489,
+            "p95_ms": 18.147938,
+            "max_ms": 80.76341,
+            "client_cpu_seconds": 0.561719,
+            "client_gomaxprocs": 2,
+            "name": "dat_identity_304",
+            "workers": 64,
+            "go_exit_code": 0,
+            "generator": "Go HTTP/1.1, 64 independent loopback sources, no retries",
+            "http_p95_ms": 18.147938,
+            "server_observation_seconds": 0.5744719398207963,
+            "server_cpu_us_per_request": 279.85775,
+            "cpu_cores_average": 1.948626072753355,
+            "memory_peak_sampled_bytes": 243245056,
+            "rbytes_delta": 0,
+            "wbytes_delta": 659456,
+            "rios_delta": 0,
+            "wios_delta": 14,
+            "throttled_usec_delta": 63,
+            "oom_kill_delta": 0
+          },
+          {
+            "requests": 4000,
+            "errors": 0,
+            "status": {
+              "304": 4000
+            },
+            "body_bytes": 0,
+            "seconds": 0.636042025,
+            "requests_per_second": 6288.8926246658,
+            "p50_ms": 8.253171,
+            "p95_ms": 27.862711,
+            "max_ms": 95.228216,
+            "client_cpu_seconds": 0.5863689999999999,
+            "client_gomaxprocs": 2,
+            "name": "html_gzip_304",
+            "workers": 64,
+            "go_exit_code": 0,
+            "generator": "Go HTTP/1.1, 64 independent loopback sources, no retries",
+            "http_p95_ms": 27.862711,
+            "server_observation_seconds": 0.641353621147573,
+            "server_cpu_us_per_request": 311.7255,
+            "cpu_cores_average": 1.9441723861618185,
+            "memory_peak_sampled_bytes": 262172672,
+            "rbytes_delta": 0,
+            "wbytes_delta": 974848,
+            "rios_delta": 0,
+            "wios_delta": 19,
+            "throttled_usec_delta": 0,
+            "oom_kill_delta": 0
+          },
+          {
+            "requests": 4000,
+            "errors": 0,
+            "status": {
+              "200": 4000
+            },
+            "body_bytes": 176000,
+            "seconds": 0.71882057,
+            "requests_per_second": 5564.671027708626,
+            "p50_ms": 5.188388,
+            "p95_ms": 34.48574,
+            "max_ms": 103.580151,
+            "client_cpu_seconds": 0.620769,
+            "client_gomaxprocs": 2,
+            "name": "subject_identity_full",
+            "workers": 64,
+            "go_exit_code": 0,
+            "generator": "Go HTTP/1.1, 64 independent loopback sources, no retries",
+            "http_p95_ms": 34.48574,
+            "server_observation_seconds": 0.7240600842051208,
+            "server_cpu_us_per_request": 354.40225,
+            "cpu_cores_average": 1.9578609992791731,
+            "memory_peak_sampled_bytes": 289005568,
+            "rbytes_delta": 0,
+            "wbytes_delta": 757760,
+            "rios_delta": 0,
+            "wios_delta": 14,
+            "throttled_usec_delta": 6930,
+            "oom_kill_delta": 0
+          }
+        ],
+        "memory_peak_bytes": 289255424,
+        "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+        "optional_shutdown": {
+          "clean": true,
+          "queue": {
+            "accepted": 11815,
+            "saved": 11815,
+            "failed": 0,
+            "dropped_capacity": 2282,
+            "dropped_invalid": 0,
+            "dropped_closed": 0,
+            "dropped_shutdown": 0,
+            "loss_started_at_ns": "1792762349398297345",
+            "loss_finished_at_ns": "1792762350177448927",
+            "pending": 0,
+            "pending_bytes": 0,
+            "closed": true
+          }
+        },
+        "optional_storage": {
+          "file_bytes": 5014745,
+          "day_file_bytes": {
+            "20261023": 5014745
+          }
+        }
+      },
+      "observed_runtime": {
+        "gomaxprocs": [
+          2
+        ],
+        "memory_limit_bytes": [
+          402653184
+        ],
+        "server_log_sha256": "6e7d96ccd12d01abcba5def6d6e1207477e377b148b73d38851b9d48a42b5bb1"
+      }
+    },
+    {
+      "kind": "after",
+      "cpus": 4,
+      "memory": "2g",
+      "image": "oimobbs:reading-shared-20261023",
+      "output": "var/reading-scaling/matrix-1-after-4cpu-2g.json",
+      "command": [
+        "python3",
+        "scripts/probe-thread-resources.py",
+        "--image",
+        "oimobbs:reading-shared-20261023",
+        "--cpus",
+        "4",
+        "--memory",
+        "2g",
+        "--reading-only",
+        "--reading-go-client",
+        "/tmp/oimo-readload",
+        "--reading-cases",
+        "dat_identity_304",
+        "html_gzip_304",
+        "subject_identity_full",
+        "--requests",
+        "4000",
+        "--egress-bps",
+        "8000000000",
+        "--optional-log-stats",
+        "--collect-server-log",
+        "--output",
+        "var/reading-scaling/matrix-1-after-4cpu-2g.json"
+      ],
+      "exit_code": 0,
+      "seconds": 42.51729393005371,
+      "raw_sha256": "1599d12d52ed7eaf4046d9e9d87d8e941a5dbeb0e11e0d763ba57c9a7b4a98ba",
+      "result": {
+        "scope": "isolated HTTPS HTTP/1.1 on loopback; warmed immutable public representations; no WAN or production proof",
+        "image": "sha256:d032957c785d32cade5e59dd245ddf5b30fed5df207b397b6861cbed7d025497",
+        "cpu_max": "400000 100000",
+        "memory_max": "2147483648",
+        "egress_budget_bits_per_second": 8000000000,
+        "prepare_post_rate": 40,
+        "waf": null,
+        "reading_kinds": [
+          "dat",
+          "html",
+          "subject"
+        ],
+        "reading_cases": [
+          "dat_identity_304",
+          "html_gzip_304",
+          "subject_identity_full"
+        ],
+        "reading_go_client": "/tmp/oimo-readload",
+        "dat_lines": 1001,
+        "dat_bytes": 454767,
+        "fixture_sha256": "55ca674af843cfc100c45f1cfe550fad102737df63fca1a0b647c58f91ce5639",
+        "phases": [
+          {
+            "requests": 4000,
+            "errors": 0,
+            "status": {
+              "304": 4000
+            },
+            "body_bytes": 0,
+            "seconds": 0.302181986,
+            "requests_per_second": 13237.05642731463,
+            "p50_ms": 2.771359,
+            "p95_ms": 10.988489,
+            "max_ms": 114.25559,
+            "client_cpu_seconds": 0.42420800000000003,
+            "client_gomaxprocs": 2,
+            "name": "dat_identity_304",
+            "workers": 64,
+            "go_exit_code": 0,
+            "generator": "Go HTTP/1.1, 64 independent loopback sources, no retries",
+            "http_p95_ms": 10.988489,
+            "server_observation_seconds": 0.3075956981629133,
+            "server_cpu_us_per_request": 252.2675,
+            "cpu_cores_average": 3.2805075169340037,
+            "memory_peak_sampled_bytes": 223657984,
+            "rbytes_delta": 0,
+            "wbytes_delta": 274432,
+            "rios_delta": 0,
+            "wios_delta": 6,
+            "throttled_usec_delta": 0,
+            "oom_kill_delta": 0
+          },
+          {
+            "requests": 4000,
+            "errors": 0,
+            "status": {
+              "304": 4000
+            },
+            "body_bytes": 0,
+            "seconds": 0.28193489,
+            "requests_per_second": 14187.672905613066,
+            "p50_ms": 3.048788,
+            "p95_ms": 9.504676,
+            "max_ms": 65.035158,
+            "client_cpu_seconds": 0.411485,
+            "client_gomaxprocs": 2,
+            "name": "html_gzip_304",
+            "workers": 64,
+            "go_exit_code": 0,
+            "generator": "Go HTTP/1.1, 64 independent loopback sources, no retries",
+            "http_p95_ms": 9.504676,
+            "server_observation_seconds": 0.2878496781922877,
+            "server_cpu_us_per_request": 277.925,
+            "cpu_cores_average": 3.8620852626327014,
+            "memory_peak_sampled_bytes": 239099904,
+            "rbytes_delta": 0,
+            "wbytes_delta": 327680,
+            "rios_delta": 0,
+            "wios_delta": 6,
+            "throttled_usec_delta": 0,
+            "oom_kill_delta": 0
+          },
+          {
+            "requests": 4000,
+            "errors": 0,
+            "status": {
+              "200": 4000
+            },
+            "body_bytes": 176000,
+            "seconds": 0.283609803,
+            "requests_per_second": 14103.884836449042,
+            "p50_ms": 2.801114,
+            "p95_ms": 11.655451,
+            "max_ms": 73.015998,
+            "client_cpu_seconds": 0.450004,
+            "client_gomaxprocs": 2,
+            "name": "subject_identity_full",
+            "workers": 64,
+            "go_exit_code": 0,
+            "generator": "Go HTTP/1.1, 64 independent loopback sources, no retries",
+            "http_p95_ms": 11.655451,
+            "server_observation_seconds": 0.288483043666929,
+            "server_cpu_us_per_request": 274.66825,
+            "cpu_cores_average": 3.8084491415325052,
+            "memory_peak_sampled_bytes": 255389696,
+            "rbytes_delta": 0,
+            "wbytes_delta": 434176,
+            "rios_delta": 0,
+            "wios_delta": 9,
+            "throttled_usec_delta": 0,
+            "oom_kill_delta": 0
+          }
+        ],
+        "memory_peak_bytes": 255643648,
+        "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+        "optional_shutdown": {
+          "clean": true,
+          "queue": {
+            "accepted": 8861,
+            "saved": 8861,
+            "failed": 0,
+            "dropped_capacity": 5236,
+            "dropped_invalid": 0,
+            "dropped_closed": 0,
+            "dropped_shutdown": 0,
+            "loss_started_at_ns": "1792762392293067526",
+            "loss_finished_at_ns": "1792762392742090816",
+            "pending": 0,
+            "pending_bytes": 0,
+            "closed": true
+          }
+        },
+        "optional_storage": {
+          "file_bytes": 3891442,
+          "day_file_bytes": {
+            "20261023": 3891442
+          }
+        }
+      },
+      "observed_runtime": {
+        "gomaxprocs": [
+          4
+        ],
+        "memory_limit_bytes": [
+          1610612736
+        ],
+        "server_log_sha256": "58c86584b8617d2a1731b4a85216526613430878ccffc018dccf46c8e050443c"
+      }
+    },
+    {
+      "kind": "after",
+      "cpus": 2,
+      "memory": "512m",
+      "image": "oimobbs:reading-shared-20261023",
+      "output": "var/reading-scaling/matrix-2-after-2cpu-512m.json",
+      "command": [
+        "python3",
+        "scripts/probe-thread-resources.py",
+        "--image",
+        "oimobbs:reading-shared-20261023",
+        "--cpus",
+        "2",
+        "--memory",
+        "512m",
+        "--reading-only",
+        "--reading-go-client",
+        "/tmp/oimo-readload",
+        "--reading-cases",
+        "dat_identity_304",
+        "html_gzip_304",
+        "subject_identity_full",
+        "--requests",
+        "4000",
+        "--egress-bps",
+        "8000000000",
+        "--optional-log-stats",
+        "--collect-server-log",
+        "--output",
+        "var/reading-scaling/matrix-2-after-2cpu-512m.json"
+      ],
+      "exit_code": 0,
+      "seconds": 43.611231565475464,
+      "raw_sha256": "552061ee1f17ee2d3d9860545fc87a9ddacb3a96ab2655a38caa722656d56100",
+      "result": {
+        "scope": "isolated HTTPS HTTP/1.1 on loopback; warmed immutable public representations; no WAN or production proof",
+        "image": "sha256:d032957c785d32cade5e59dd245ddf5b30fed5df207b397b6861cbed7d025497",
+        "cpu_max": "200000 100000",
+        "memory_max": "536870912",
+        "egress_budget_bits_per_second": 8000000000,
+        "prepare_post_rate": 40,
+        "waf": null,
+        "reading_kinds": [
+          "dat",
+          "html",
+          "subject"
+        ],
+        "reading_cases": [
+          "dat_identity_304",
+          "html_gzip_304",
+          "subject_identity_full"
+        ],
+        "reading_go_client": "/tmp/oimo-readload",
+        "dat_lines": 1001,
+        "dat_bytes": 454767,
+        "fixture_sha256": "562d1536cd65c3d3fd417cf0ce01eae442acfd48e888b78e2dc73e93367fc994",
+        "phases": [
+          {
+            "requests": 4000,
+            "errors": 0,
+            "status": {
+              "304": 4000
+            },
+            "body_bytes": 0,
+            "seconds": 0.55845426,
+            "requests_per_second": 7162.627786204012,
+            "p50_ms": 6.941179,
+            "p95_ms": 22.959226,
+            "max_ms": 69.204629,
+            "client_cpu_seconds": 0.5669460000000001,
+            "client_gomaxprocs": 2,
+            "name": "dat_identity_304",
+            "workers": 64,
+            "go_exit_code": 0,
+            "generator": "Go HTTP/1.1, 64 independent loopback sources, no retries",
+            "http_p95_ms": 22.959226,
+            "server_observation_seconds": 0.5635134321637452,
+            "server_cpu_us_per_request": 274.728,
+            "cpu_cores_average": 1.9501079074201717,
+            "memory_peak_sampled_bytes": 242806784,
+            "rbytes_delta": 0,
+            "wbytes_delta": 659456,
+            "rios_delta": 0,
+            "wios_delta": 14,
+            "throttled_usec_delta": 4364,
+            "oom_kill_delta": 0
+          },
+          {
+            "requests": 4000,
+            "errors": 0,
+            "status": {
+              "304": 4000
+            },
+            "body_bytes": 0,
+            "seconds": 0.61665196,
+            "requests_per_second": 6486.641184112997,
+            "p50_ms": 8.66254,
+            "p95_ms": 18.431514,
+            "max_ms": 99.366469,
+            "client_cpu_seconds": 0.575457,
+            "client_gomaxprocs": 2,
+            "name": "html_gzip_304",
+            "workers": 64,
+            "go_exit_code": 0,
+            "generator": "Go HTTP/1.1, 64 independent loopback sources, no retries",
+            "http_p95_ms": 18.431514,
+            "server_observation_seconds": 0.6234635738655925,
+            "server_cpu_us_per_request": 305.73825,
+            "cpu_cores_average": 1.961546834913641,
+            "memory_peak_sampled_bytes": 269602816,
+            "rbytes_delta": 0,
+            "wbytes_delta": 868352,
+            "rios_delta": 0,
+            "wios_delta": 17,
+            "throttled_usec_delta": 1436,
+            "oom_kill_delta": 0
+          },
+          {
+            "requests": 4000,
+            "errors": 0,
+            "status": {
+              "200": 4000
+            },
+            "body_bytes": 176000,
+            "seconds": 0.430575159,
+            "requests_per_second": 9289.89960612196,
+            "p50_ms": 2.575929,
+            "p95_ms": 32.033789,
+            "max_ms": 155.512716,
+            "client_cpu_seconds": 0.5188349999999999,
+            "client_gomaxprocs": 2,
+            "name": "subject_identity_full",
+            "workers": 64,
+            "go_exit_code": 0,
+            "generator": "Go HTTP/1.1, 64 independent loopback sources, no retries",
+            "http_p95_ms": 32.033789,
+            "server_observation_seconds": 0.4363842708989978,
+            "server_cpu_us_per_request": 213.06025,
+            "cpu_cores_average": 1.9529599411186231,
+            "memory_peak_sampled_bytes": 276766720,
+            "rbytes_delta": 0,
+            "wbytes_delta": 323584,
+            "rios_delta": 0,
+            "wios_delta": 6,
+            "throttled_usec_delta": 2915,
+            "oom_kill_delta": 0
+          }
+        ],
+        "memory_peak_bytes": 277467136,
+        "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+        "optional_shutdown": {
+          "clean": true,
+          "queue": {
+            "accepted": 10282,
+            "saved": 10282,
+            "failed": 0,
+            "dropped_capacity": 3815,
+            "dropped_invalid": 0,
+            "dropped_closed": 0,
+            "dropped_shutdown": 0,
+            "loss_started_at_ns": "1792762435752295888",
+            "loss_finished_at_ns": "1792762436316794361",
+            "pending": 0,
+            "pending_bytes": 0,
+            "closed": true
+          }
+        },
+        "optional_storage": {
+          "file_bytes": 4447111,
+          "day_file_bytes": {
+            "20261023": 4447111
+          }
+        }
+      },
+      "observed_runtime": {
+        "gomaxprocs": [
+          2
+        ],
+        "memory_limit_bytes": [
+          402653184
+        ],
+        "server_log_sha256": "398ddf06e04604d15d9c71dae0a20924b6fb23a853768175b97f326309071694"
+      }
+    },
+    {
+      "kind": "base",
+      "cpus": 4,
+      "memory": "2g",
+      "image": "oimobbs:reading-optimized-20261023",
+      "output": "var/reading-scaling/matrix-3-base-4cpu-2g.json",
+      "command": [
+        "python3",
+        "scripts/probe-thread-resources.py",
+        "--image",
+        "oimobbs:reading-optimized-20261023",
+        "--cpus",
+        "4",
+        "--memory",
+        "2g",
+        "--reading-only",
+        "--reading-go-client",
+        "/tmp/oimo-readload",
+        "--reading-cases",
+        "dat_identity_304",
+        "html_gzip_304",
+        "subject_identity_full",
+        "--requests",
+        "4000",
+        "--egress-bps",
+        "8000000000",
+        "--optional-log-stats",
+        "--collect-server-log",
+        "--output",
+        "var/reading-scaling/matrix-3-base-4cpu-2g.json"
+      ],
+      "exit_code": 0,
+      "seconds": 30.56687307357788,
+      "raw_sha256": "89f4aa19b79acbc1393c1d409d7f90146adf596a028688d0ced90d105b9c0096",
+      "result": {
+        "scope": "isolated HTTPS HTTP/1.1 on loopback; warmed immutable public representations; no WAN or production proof",
+        "image": "sha256:95f8cc813f12727ccdde208d35bc1ccd69c4764de003523c012d9a203587f33d",
+        "cpu_max": "400000 100000",
+        "memory_max": "2147483648",
+        "egress_budget_bits_per_second": 8000000000,
+        "prepare_post_rate": 40,
+        "waf": null,
+        "reading_kinds": [
+          "dat",
+          "html",
+          "subject"
+        ],
+        "reading_cases": [
+          "dat_identity_304",
+          "html_gzip_304",
+          "subject_identity_full"
+        ],
+        "reading_go_client": "/tmp/oimo-readload",
+        "dat_lines": 1001,
+        "dat_bytes": 454767,
+        "fixture_sha256": "9f75168514f8b0e893d26e2cdfbdb5ec745729e071ab481dcc60903f6d2a9e2a",
+        "phases": [
+          {
+            "requests": 4000,
+            "errors": 0,
+            "status": {
+              "304": 4000
+            },
+            "body_bytes": 0,
+            "seconds": 0.285948331,
+            "requests_per_second": 13988.54116759996,
+            "p50_ms": 2.844768,
+            "p95_ms": 8.543522,
+            "max_ms": 89.347726,
+            "client_cpu_seconds": 0.413982,
+            "client_gomaxprocs": 2,
+            "name": "dat_identity_304",
+            "workers": 64,
+            "go_exit_code": 0,
+            "generator": "Go HTTP/1.1, 64 independent loopback sources, no retries",
+            "http_p95_ms": 8.543522,
+            "server_observation_seconds": 0.29064772464334965,
+            "server_cpu_us_per_request": 241.64775,
+            "cpu_cores_average": 3.3256444762679367,
+            "memory_peak_sampled_bytes": 228290560,
+            "rbytes_delta": 0,
+            "wbytes_delta": 217088,
+            "rios_delta": 0,
+            "wios_delta": 4,
+            "throttled_usec_delta": 0,
+            "oom_kill_delta": 0
+          },
+          {
+            "requests": 4000,
+            "errors": 0,
+            "status": {
+              "304": 4000
+            },
+            "body_bytes": 0,
+            "seconds": 0.290586471,
+            "requests_per_second": 13765.265761460725,
+            "p50_ms": 3.015122,
+            "p95_ms": 9.946594,
+            "max_ms": 70.285431,
+            "client_cpu_seconds": 0.41832600000000003,
+            "client_gomaxprocs": 2,
+            "name": "html_gzip_304",
+            "workers": 64,
+            "go_exit_code": 0,
+            "generator": "Go HTTP/1.1, 64 independent loopback sources, no retries",
+            "http_p95_ms": 9.946594,
+            "server_observation_seconds": 0.2957659186795354,
+            "server_cpu_us_per_request": 280.1365,
+            "cpu_cores_average": 3.788624480476806,
+            "memory_peak_sampled_bytes": 249929728,
+            "rbytes_delta": 0,
+            "wbytes_delta": 430080,
+            "rios_delta": 0,
+            "wios_delta": 8,
+            "throttled_usec_delta": 0,
+            "oom_kill_delta": 0
+          },
+          {
+            "requests": 4000,
+            "errors": 0,
+            "status": {
+              "200": 4000
+            },
+            "body_bytes": 176000,
+            "seconds": 0.509003828,
+            "requests_per_second": 7858.487068195487,
+            "p50_ms": 5.879237,
+            "p95_ms": 22.065963,
+            "max_ms": 64.511522,
+            "client_cpu_seconds": 0.532739,
+            "client_gomaxprocs": 2,
+            "name": "subject_identity_full",
+            "workers": 64,
+            "go_exit_code": 0,
+            "generator": "Go HTTP/1.1, 64 independent loopback sources, no retries",
+            "http_p95_ms": 22.065963,
+            "server_observation_seconds": 0.5145452879369259,
+            "server_cpu_us_per_request": 440.65475,
+            "cpu_cores_average": 3.4255857381713417,
+            "memory_peak_sampled_bytes": 271110144,
+            "rbytes_delta": 0,
+            "wbytes_delta": 761856,
+            "rios_delta": 0,
+            "wios_delta": 15,
+            "throttled_usec_delta": 0,
+            "oom_kill_delta": 0
+          }
+        ],
+        "memory_peak_bytes": 272474112,
+        "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+        "optional_shutdown": {
+          "clean": true,
+          "queue": {
+            "accepted": 9762,
+            "saved": 9762,
+            "failed": 0,
+            "dropped_capacity": 4335,
+            "dropped_invalid": 0,
+            "dropped_closed": 0,
+            "dropped_shutdown": 0,
+            "loss_started_at_ns": "1792762466263660369",
+            "loss_finished_at_ns": "1792762466923953103",
+            "pending": 0,
+            "pending_bytes": 0,
+            "closed": true
+          }
+        },
+        "optional_storage": {
+          "file_bytes": 4210525,
+          "day_file_bytes": {
+            "20261023": 4210525
+          }
+        }
+      },
+      "observed_runtime": {
+        "gomaxprocs": [
+          4
+        ],
+        "memory_limit_bytes": [
+          1610612736
+        ],
+        "server_log_sha256": "d2b23a5f9072270a16f8e7a54fd036fdb132b57034c835a09d9938c64fb08c57"
+      }
+    },
+    {
+      "kind": "base",
+      "cpus": 4,
+      "memory": "512m",
+      "image": "oimobbs:reading-optimized-20261023",
+      "output": "var/reading-scaling/matrix-4-base-4cpu-512m.json",
+      "command": [
+        "python3",
+        "scripts/probe-thread-resources.py",
+        "--image",
+        "oimobbs:reading-optimized-20261023",
+        "--cpus",
+        "4",
+        "--memory",
+        "512m",
+        "--reading-only",
+        "--reading-go-client",
+        "/tmp/oimo-readload",
+        "--reading-cases",
+        "dat_identity_304",
+        "html_gzip_304",
+        "subject_identity_full",
+        "--requests",
+        "4000",
+        "--egress-bps",
+        "8000000000",
+        "--optional-log-stats",
+        "--collect-server-log",
+        "--output",
+        "var/reading-scaling/matrix-4-base-4cpu-512m.json"
+      ],
+      "exit_code": 0,
+      "seconds": 43.23621368408203,
+      "raw_sha256": "55f2190a5099cac182f45f4352f29228be27311e0f0ed9fe319ede19b2f004c7",
+      "result": {
+        "scope": "isolated HTTPS HTTP/1.1 on loopback; warmed immutable public representations; no WAN or production proof",
+        "image": "sha256:95f8cc813f12727ccdde208d35bc1ccd69c4764de003523c012d9a203587f33d",
+        "cpu_max": "400000 100000",
+        "memory_max": "536870912",
+        "egress_budget_bits_per_second": 8000000000,
+        "prepare_post_rate": 40,
+        "waf": null,
+        "reading_kinds": [
+          "dat",
+          "html",
+          "subject"
+        ],
+        "reading_cases": [
+          "dat_identity_304",
+          "html_gzip_304",
+          "subject_identity_full"
+        ],
+        "reading_go_client": "/tmp/oimo-readload",
+        "dat_lines": 1001,
+        "dat_bytes": 454767,
+        "fixture_sha256": "2e9788f429ba8a34035cdbea361f93197f5d0959b8f85e6a58e1ab6ede7bcedb",
+        "phases": [
+          {
+            "requests": 4000,
+            "errors": 0,
+            "status": {
+              "304": 4000
+            },
+            "body_bytes": 0,
+            "seconds": 0.303652121,
+            "requests_per_second": 13172.96907667574,
+            "p50_ms": 2.973774,
+            "p95_ms": 10.664403,
+            "max_ms": 86.052103,
+            "client_cpu_seconds": 0.420105,
+            "client_gomaxprocs": 2,
+            "name": "dat_identity_304",
+            "workers": 64,
+            "go_exit_code": 0,
+            "generator": "Go HTTP/1.1, 64 independent loopback sources, no retries",
+            "http_p95_ms": 10.664403,
+            "server_observation_seconds": 0.3097501168958843,
+            "server_cpu_us_per_request": 257.9215,
+            "cpu_cores_average": 3.3307041506195096,
+            "memory_peak_sampled_bytes": 230555648,
+            "rbytes_delta": 0,
+            "wbytes_delta": 217088,
+            "rios_delta": 0,
+            "wios_delta": 4,
+            "throttled_usec_delta": 0,
+            "oom_kill_delta": 0
+          },
+          {
+            "requests": 4000,
+            "errors": 0,
+            "status": {
+              "304": 4000
+            },
+            "body_bytes": 0,
+            "seconds": 0.286877499,
+            "requests_per_second": 13943.23365876806,
+            "p50_ms": 3.324611,
+            "p95_ms": 10.287373,
+            "max_ms": 64.254767,
+            "client_cpu_seconds": 0.394136,
+            "client_gomaxprocs": 2,
+            "name": "html_gzip_304",
+            "workers": 64,
+            "go_exit_code": 0,
+            "generator": "Go HTTP/1.1, 64 independent loopback sources, no retries",
+            "http_p95_ms": 10.287373,
+            "server_observation_seconds": 0.2921568970195949,
+            "server_cpu_us_per_request": 278.2315,
+            "cpu_cores_average": 3.8093435799510025,
+            "memory_peak_sampled_bytes": 250662912,
+            "rbytes_delta": 0,
+            "wbytes_delta": 434176,
+            "rios_delta": 0,
+            "wios_delta": 8,
+            "throttled_usec_delta": 0,
+            "oom_kill_delta": 0
+          },
+          {
+            "requests": 4000,
+            "errors": 0,
+            "status": {
+              "200": 4000
+            },
+            "body_bytes": 176000,
+            "seconds": 0.524212293,
+            "requests_per_second": 7630.496372201633,
+            "p50_ms": 5.778868,
+            "p95_ms": 21.110117,
+            "max_ms": 80.323942,
+            "client_cpu_seconds": 0.536784,
+            "client_gomaxprocs": 2,
+            "name": "subject_identity_full",
+            "workers": 64,
+            "go_exit_code": 0,
+            "generator": "Go HTTP/1.1, 64 independent loopback sources, no retries",
+            "http_p95_ms": 21.110117,
+            "server_observation_seconds": 0.529832889791578,
+            "server_cpu_us_per_request": 441.6635,
+            "cpu_cores_average": 3.334360765514111,
+            "memory_peak_sampled_bytes": 269746176,
+            "rbytes_delta": 0,
+            "wbytes_delta": 872448,
+            "rios_delta": 0,
+            "wios_delta": 17,
+            "throttled_usec_delta": 0,
+            "oom_kill_delta": 0
+          }
+        ],
+        "memory_peak_bytes": 270831616,
+        "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+        "optional_shutdown": {
+          "clean": true,
+          "queue": {
+            "accepted": 9854,
+            "saved": 9854,
+            "failed": 0,
+            "dropped_capacity": 4243,
+            "dropped_invalid": 0,
+            "dropped_closed": 0,
+            "dropped_shutdown": 0,
+            "loss_started_at_ns": "1792762509469580816",
+            "loss_finished_at_ns": "1792762510174388591",
+            "pending": 0,
+            "pending_bytes": 0,
+            "closed": true
+          }
+        },
+        "optional_storage": {
+          "file_bytes": 4303431,
+          "day_file_bytes": {
+            "20261023": 4303431
+          }
+        }
+      },
+      "observed_runtime": {
+        "gomaxprocs": [
+          4
+        ],
+        "memory_limit_bytes": [
+          402653184
+        ],
+        "server_log_sha256": "edf6a1ab371b8b7ecfafac225aa8efcdd3da31c64597b00861e7e628d1225903"
+      }
+    },
+    {
+      "kind": "after",
+      "cpus": 2,
+      "memory": "2g",
+      "image": "oimobbs:reading-shared-20261023",
+      "output": "var/reading-scaling/matrix-5-after-2cpu-2g.json",
+      "command": [
+        "python3",
+        "scripts/probe-thread-resources.py",
+        "--image",
+        "oimobbs:reading-shared-20261023",
+        "--cpus",
+        "2",
+        "--memory",
+        "2g",
+        "--reading-only",
+        "--reading-go-client",
+        "/tmp/oimo-readload",
+        "--reading-cases",
+        "dat_identity_304",
+        "html_gzip_304",
+        "subject_identity_full",
+        "--requests",
+        "4000",
+        "--egress-bps",
+        "8000000000",
+        "--optional-log-stats",
+        "--collect-server-log",
+        "--output",
+        "var/reading-scaling/matrix-5-after-2cpu-2g.json"
+      ],
+      "exit_code": 0,
+      "seconds": 31.739786863327026,
+      "raw_sha256": "daf06cb3866b169981dcd3362ffe7a38e92448d9515dc0b7b171e459f2336d59",
+      "result": {
+        "scope": "isolated HTTPS HTTP/1.1 on loopback; warmed immutable public representations; no WAN or production proof",
+        "image": "sha256:d032957c785d32cade5e59dd245ddf5b30fed5df207b397b6861cbed7d025497",
+        "cpu_max": "200000 100000",
+        "memory_max": "2147483648",
+        "egress_budget_bits_per_second": 8000000000,
+        "prepare_post_rate": 40,
+        "waf": null,
+        "reading_kinds": [
+          "dat",
+          "html",
+          "subject"
+        ],
+        "reading_cases": [
+          "dat_identity_304",
+          "html_gzip_304",
+          "subject_identity_full"
+        ],
+        "reading_go_client": "/tmp/oimo-readload",
+        "dat_lines": 1001,
+        "dat_bytes": 454767,
+        "fixture_sha256": "b06ed36b15ee54c953b48f6d6a2d23528b8773a9c1739f055957edfae26fe970",
+        "phases": [
+          {
+            "requests": 4000,
+            "errors": 0,
+            "status": {
+              "304": 4000
+            },
+            "body_bytes": 0,
+            "seconds": 0.598496776,
+            "requests_per_second": 6683.411106628919,
+            "p50_ms": 8.143233,
+            "p95_ms": 18.029759,
+            "max_ms": 97.461766,
+            "client_cpu_seconds": 0.567229,
+            "client_gomaxprocs": 2,
+            "name": "dat_identity_304",
+            "workers": 64,
+            "go_exit_code": 0,
+            "generator": "Go HTTP/1.1, 64 independent loopback sources, no retries",
+            "http_p95_ms": 18.029759,
+            "server_observation_seconds": 0.604365746024996,
+            "server_cpu_us_per_request": 288.09725,
+            "cpu_cores_average": 1.9067741803360547,
+            "memory_peak_sampled_bytes": 248336384,
+            "rbytes_delta": 0,
+            "wbytes_delta": 663552,
+            "rios_delta": 0,
+            "wios_delta": 14,
+            "throttled_usec_delta": 0,
+            "oom_kill_delta": 0
+          },
+          {
+            "requests": 4000,
+            "errors": 0,
+            "status": {
+              "304": 4000
+            },
+            "body_bytes": 0,
+            "seconds": 0.662336099,
+            "requests_per_second": 6039.2299408702465,
+            "p50_ms": 9.357021,
+            "p95_ms": 18.390235,
+            "max_ms": 98.577419,
+            "client_cpu_seconds": 0.6045670000000001,
+            "client_gomaxprocs": 2,
+            "name": "html_gzip_304",
+            "workers": 64,
+            "go_exit_code": 0,
+            "generator": "Go HTTP/1.1, 64 independent loopback sources, no retries",
+            "http_p95_ms": 18.390235,
+            "server_observation_seconds": 0.6671540220268071,
+            "server_cpu_us_per_request": 320.341,
+            "cpu_cores_average": 1.9206419472781253,
+            "memory_peak_sampled_bytes": 264884224,
+            "rbytes_delta": 0,
+            "wbytes_delta": 974848,
+            "rios_delta": 0,
+            "wios_delta": 19,
+            "throttled_usec_delta": 0,
+            "oom_kill_delta": 0
+          },
+          {
+            "requests": 4000,
+            "errors": 0,
+            "status": {
+              "200": 4000
+            },
+            "body_bytes": 176000,
+            "seconds": 0.557864844,
+            "requests_per_second": 7170.195510653114,
+            "p50_ms": 4.810171,
+            "p95_ms": 29.437955,
+            "max_ms": 82.381543,
+            "client_cpu_seconds": 0.554457,
+            "client_gomaxprocs": 2,
+            "name": "subject_identity_full",
+            "workers": 64,
+            "go_exit_code": 0,
+            "generator": "Go HTTP/1.1, 64 independent loopback sources, no retries",
+            "http_p95_ms": 29.437955,
+            "server_observation_seconds": 0.5640051662921906,
+            "server_cpu_us_per_request": 273.68275,
+            "cpu_cores_average": 1.9409946316570792,
+            "memory_peak_sampled_bytes": 289546240,
+            "rbytes_delta": 0,
+            "wbytes_delta": 647168,
+            "rios_delta": 0,
+            "wios_delta": 12,
+            "throttled_usec_delta": 0,
+            "oom_kill_delta": 0
+          }
+        ],
+        "memory_peak_bytes": 289812480,
+        "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+        "optional_shutdown": {
+          "clean": true,
+          "queue": {
+            "accepted": 11816,
+            "saved": 11816,
+            "failed": 0,
+            "dropped_capacity": 2281,
+            "dropped_invalid": 0,
+            "dropped_closed": 0,
+            "dropped_shutdown": 0,
+            "loss_started_at_ns": "1792762541334053593",
+            "loss_finished_at_ns": "1792762541913160425",
+            "pending": 0,
+            "pending_bytes": 0,
+            "closed": true
+          }
+        },
+        "optional_storage": {
+          "file_bytes": 5036629,
+          "day_file_bytes": {
+            "20261023": 5036629
+          }
+        }
+      },
+      "observed_runtime": {
+        "gomaxprocs": [
+          2
+        ],
+        "memory_limit_bytes": [
+          1610612736
+        ],
+        "server_log_sha256": "c6ec9792c4186dbb294722031b4b12e1e8b8a14576ecf3f15ede6d2f438862d1"
+      }
+    },
+    {
+      "kind": "after",
+      "cpus": 4,
+      "memory": "512m",
+      "image": "oimobbs:reading-shared-20261023",
+      "output": "var/reading-scaling/matrix-6-after-4cpu-512m.json",
+      "command": [
+        "python3",
+        "scripts/probe-thread-resources.py",
+        "--image",
+        "oimobbs:reading-shared-20261023",
+        "--cpus",
+        "4",
+        "--memory",
+        "512m",
+        "--reading-only",
+        "--reading-go-client",
+        "/tmp/oimo-readload",
+        "--reading-cases",
+        "dat_identity_304",
+        "html_gzip_304",
+        "subject_identity_full",
+        "--requests",
+        "4000",
+        "--egress-bps",
+        "8000000000",
+        "--optional-log-stats",
+        "--collect-server-log",
+        "--output",
+        "var/reading-scaling/matrix-6-after-4cpu-512m.json"
+      ],
+      "exit_code": 0,
+      "seconds": 42.525285482406616,
+      "raw_sha256": "67d03d63db6cdd9d0505a7aa025b796225a5e1c79cd2b90bb1a2ad863618e0a6",
+      "result": {
+        "scope": "isolated HTTPS HTTP/1.1 on loopback; warmed immutable public representations; no WAN or production proof",
+        "image": "sha256:d032957c785d32cade5e59dd245ddf5b30fed5df207b397b6861cbed7d025497",
+        "cpu_max": "400000 100000",
+        "memory_max": "536870912",
+        "egress_budget_bits_per_second": 8000000000,
+        "prepare_post_rate": 40,
+        "waf": null,
+        "reading_kinds": [
+          "dat",
+          "html",
+          "subject"
+        ],
+        "reading_cases": [
+          "dat_identity_304",
+          "html_gzip_304",
+          "subject_identity_full"
+        ],
+        "reading_go_client": "/tmp/oimo-readload",
+        "dat_lines": 1001,
+        "dat_bytes": 454767,
+        "fixture_sha256": "204a52089ad3bd77610a98cb21ff1c45fbd1c3a4718f9c70671fd8afdbddd6eb",
+        "phases": [
+          {
+            "requests": 4000,
+            "errors": 0,
+            "status": {
+              "304": 4000
+            },
+            "body_bytes": 0,
+            "seconds": 0.301567146,
+            "requests_per_second": 13264.044353160407,
+            "p50_ms": 2.705075,
+            "p95_ms": 9.911391,
+            "max_ms": 113.247506,
+            "client_cpu_seconds": 0.41476900000000005,
+            "client_gomaxprocs": 2,
+            "name": "dat_identity_304",
+            "workers": 64,
+            "go_exit_code": 0,
+            "generator": "Go HTTP/1.1, 64 independent loopback sources, no retries",
+            "http_p95_ms": 9.911391,
+            "server_observation_seconds": 0.3063032808713615,
+            "server_cpu_us_per_request": 245.4455,
+            "cpu_cores_average": 3.205261129450063,
+            "memory_peak_sampled_bytes": 233562112,
+            "rbytes_delta": 0,
+            "wbytes_delta": 233472,
+            "rios_delta": 0,
+            "wios_delta": 6,
+            "throttled_usec_delta": 0,
+            "oom_kill_delta": 0
+          },
+          {
+            "requests": 4000,
+            "errors": 0,
+            "status": {
+              "304": 4000
+            },
+            "body_bytes": 0,
+            "seconds": 0.298695279,
+            "requests_per_second": 13391.574227057,
+            "p50_ms": 3.193929,
+            "p95_ms": 10.519263,
+            "max_ms": 65.063588,
+            "client_cpu_seconds": 0.406985,
+            "client_gomaxprocs": 2,
+            "name": "html_gzip_304",
+            "workers": 64,
+            "go_exit_code": 0,
+            "generator": "Go HTTP/1.1, 64 independent loopback sources, no retries",
+            "http_p95_ms": 10.519263,
+            "server_observation_seconds": 0.3044992918148637,
+            "server_cpu_us_per_request": 272.73675,
+            "cpu_cores_average": 3.582757101002713,
+            "memory_peak_sampled_bytes": 249393152,
+            "rbytes_delta": 0,
+            "wbytes_delta": 540672,
+            "rios_delta": 0,
+            "wios_delta": 10,
+            "throttled_usec_delta": 0,
+            "oom_kill_delta": 0
+          },
+          {
+            "requests": 4000,
+            "errors": 0,
+            "status": {
+              "200": 4000
+            },
+            "body_bytes": 176000,
+            "seconds": 0.313550875,
+            "requests_per_second": 12757.10042269855,
+            "p50_ms": 2.795387,
+            "p95_ms": 11.990434,
+            "max_ms": 68.51071,
+            "client_cpu_seconds": 0.437467,
+            "client_gomaxprocs": 2,
+            "name": "subject_identity_full",
+            "workers": 64,
+            "go_exit_code": 0,
+            "generator": "Go HTTP/1.1, 64 independent loopback sources, no retries",
+            "http_p95_ms": 11.990434,
+            "server_observation_seconds": 0.31811777083203197,
+            "server_cpu_us_per_request": 286.41475,
+            "cpu_cores_average": 3.601367496708993,
+            "memory_peak_sampled_bytes": 267988992,
+            "rbytes_delta": 0,
+            "wbytes_delta": 434176,
+            "rios_delta": 0,
+            "wios_delta": 9,
+            "throttled_usec_delta": 0,
+            "oom_kill_delta": 0
+          }
+        ],
+        "memory_peak_bytes": 268787712,
+        "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+        "optional_shutdown": {
+          "clean": true,
+          "queue": {
+            "accepted": 9009,
+            "saved": 9009,
+            "failed": 0,
+            "dropped_capacity": 5088,
+            "dropped_invalid": 0,
+            "dropped_closed": 0,
+            "dropped_shutdown": 0,
+            "loss_started_at_ns": "1792762583951374148",
+            "loss_finished_at_ns": "1792762584438441942",
+            "pending": 0,
+            "pending_bytes": 0,
+            "closed": true
+          }
+        },
+        "optional_storage": {
+          "file_bytes": 3946143,
+          "day_file_bytes": {
+            "20261023": 3946143
+          }
+        }
+      },
+      "observed_runtime": {
+        "gomaxprocs": [
+          4
+        ],
+        "memory_limit_bytes": [
+          402653184
+        ],
+        "server_log_sha256": "aae1319d7082794946af7ee3ca5a257b63583f38879c5a028e1fbf99c1094d07"
+      }
+    },
+    {
+      "kind": "base",
+      "cpus": 2,
+      "memory": "2g",
+      "image": "oimobbs:reading-optimized-20261023",
+      "output": "var/reading-scaling/matrix-7-base-2cpu-2g.json",
+      "command": [
+        "python3",
+        "scripts/probe-thread-resources.py",
+        "--image",
+        "oimobbs:reading-optimized-20261023",
+        "--cpus",
+        "2",
+        "--memory",
+        "2g",
+        "--reading-only",
+        "--reading-go-client",
+        "/tmp/oimo-readload",
+        "--reading-cases",
+        "dat_identity_304",
+        "html_gzip_304",
+        "subject_identity_full",
+        "--requests",
+        "4000",
+        "--egress-bps",
+        "8000000000",
+        "--optional-log-stats",
+        "--collect-server-log",
+        "--output",
+        "var/reading-scaling/matrix-7-base-2cpu-2g.json"
+      ],
+      "exit_code": 0,
+      "seconds": 31.604039907455444,
+      "raw_sha256": "cb66c2499cda17e8204673d42c2e1b272df2890aa09c977e4619ecb5c416da22",
+      "result": {
+        "scope": "isolated HTTPS HTTP/1.1 on loopback; warmed immutable public representations; no WAN or production proof",
+        "image": "sha256:95f8cc813f12727ccdde208d35bc1ccd69c4764de003523c012d9a203587f33d",
+        "cpu_max": "200000 100000",
+        "memory_max": "2147483648",
+        "egress_budget_bits_per_second": 8000000000,
+        "prepare_post_rate": 40,
+        "waf": null,
+        "reading_kinds": [
+          "dat",
+          "html",
+          "subject"
+        ],
+        "reading_cases": [
+          "dat_identity_304",
+          "html_gzip_304",
+          "subject_identity_full"
+        ],
+        "reading_go_client": "/tmp/oimo-readload",
+        "dat_lines": 1001,
+        "dat_bytes": 454767,
+        "fixture_sha256": "7785a50d6742a2402f6305e723df3c4f36dfa6c2451fba1077df12f47da96481",
+        "phases": [
+          {
+            "requests": 4000,
+            "errors": 0,
+            "status": {
+              "304": 4000
+            },
+            "body_bytes": 0,
+            "seconds": 0.59989881,
+            "requests_per_second": 6667.791189650801,
+            "p50_ms": 7.624485,
+            "p95_ms": 17.928133,
+            "max_ms": 122.902561,
+            "client_cpu_seconds": 0.58329,
+            "client_gomaxprocs": 2,
+            "name": "dat_identity_304",
+            "workers": 64,
+            "go_exit_code": 0,
+            "generator": "Go HTTP/1.1, 64 independent loopback sources, no retries",
+            "http_p95_ms": 17.928133,
+            "server_observation_seconds": 0.6055109547451138,
+            "server_cpu_us_per_request": 273.99575,
+            "cpu_cores_average": 1.8100134958934764,
+            "memory_peak_sampled_bytes": 230047744,
+            "rbytes_delta": 0,
+            "wbytes_delta": 610304,
+            "rios_delta": 0,
+            "wios_delta": 12,
+            "throttled_usec_delta": 0,
+            "oom_kill_delta": 0
+          },
+          {
+            "requests": 4000,
+            "errors": 0,
+            "status": {
+              "304": 4000
+            },
+            "body_bytes": 0,
+            "seconds": 0.620111754,
+            "requests_per_second": 6450.450219977608,
+            "p50_ms": 8.283345,
+            "p95_ms": 19.786252,
+            "max_ms": 94.756762,
+            "client_cpu_seconds": 0.587351,
+            "client_gomaxprocs": 2,
+            "name": "html_gzip_304",
+            "workers": 64,
+            "go_exit_code": 0,
+            "generator": "Go HTTP/1.1, 64 independent loopback sources, no retries",
+            "http_p95_ms": 19.786252,
+            "server_observation_seconds": 0.6258499720133841,
+            "server_cpu_us_per_request": 307.21225,
+            "cpu_cores_average": 1.9634881440463188,
+            "memory_peak_sampled_bytes": 261484544,
+            "rbytes_delta": 0,
+            "wbytes_delta": 868352,
+            "rios_delta": 0,
+            "wios_delta": 17,
+            "throttled_usec_delta": 0,
+            "oom_kill_delta": 0
+          },
+          {
+            "requests": 4000,
+            "errors": 0,
+            "status": {
+              "200": 4000
+            },
+            "body_bytes": 176000,
+            "seconds": 0.744821866,
+            "requests_per_second": 5370.41161463431,
+            "p50_ms": 5.894114,
+            "p95_ms": 34.6554,
+            "max_ms": 108.371401,
+            "client_cpu_seconds": 0.646132,
+            "client_gomaxprocs": 2,
+            "name": "subject_identity_full",
+            "workers": 64,
+            "go_exit_code": 0,
+            "generator": "Go HTTP/1.1, 64 independent loopback sources, no retries",
+            "http_p95_ms": 34.6554,
+            "server_observation_seconds": 0.7507074601016939,
+            "server_cpu_us_per_request": 367.01475,
+            "cpu_cores_average": 1.955567352162893,
+            "memory_peak_sampled_bytes": 277364736,
+            "rbytes_delta": 0,
+            "wbytes_delta": 868352,
+            "rios_delta": 0,
+            "wios_delta": 16,
+            "throttled_usec_delta": 5094,
+            "oom_kill_delta": 0
+          }
+        ],
+        "memory_peak_bytes": 277921792,
+        "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+        "optional_shutdown": {
+          "clean": true,
+          "queue": {
+            "accepted": 11715,
+            "saved": 11715,
+            "failed": 0,
+            "dropped_capacity": 2382,
+            "dropped_invalid": 0,
+            "dropped_closed": 0,
+            "dropped_shutdown": 0,
+            "loss_started_at_ns": "1792762615169474273",
+            "loss_finished_at_ns": "1792762616019740214",
+            "pending": 0,
+            "pending_bytes": 0,
+            "closed": true
+          }
+        },
+        "optional_storage": {
+          "file_bytes": 4988573,
+          "day_file_bytes": {
+            "20261023": 4988573
+          }
+        }
+      },
+      "observed_runtime": {
+        "gomaxprocs": [
+          2
+        ],
+        "memory_limit_bytes": [
+          1610612736
+        ],
+        "server_log_sha256": "fda75b51bef1fae83247425b2979a4fdf713409873d829c7f2987e82ade32e8d"
+      }
+    }
+  ],
+  "followup": [
+    {
+      "kind": "after",
+      "cpus": 2,
+      "rate": 0,
+      "label": "cores-2cpu",
+      "image": "oimobbs:reading-shared-20261023",
+      "output": "var/reading-scaling/cores-2cpu.json",
+      "command": [
+        "python3",
+        "scripts/probe-thread-resources.py",
+        "--image",
+        "oimobbs:reading-shared-20261023",
+        "--cpus",
+        "2",
+        "--memory",
+        "2g",
+        "--output",
+        "var/reading-scaling/cores-2cpu.json",
+        "--reading-only",
+        "--reading-go-client",
+        "/tmp/oimo-readload-rate",
+        "--reading-cases",
+        "dat_identity_304",
+        "html_gzip_304",
+        "subject_identity_full",
+        "--requests",
+        "4000",
+        "--egress-bps",
+        "8000000000",
+        "--optional-log-stats",
+        "--collect-server-log"
+      ],
+      "exit_code": 0,
+      "seconds": 43.22081232070923,
+      "raw_sha256": "51ab439426ed6fde86b2c466c1423419e18d0276f1cfb0fb0105aff53551ef0b",
+      "result": {
+        "scope": "isolated HTTPS HTTP/1.1 on loopback; warmed immutable public representations; no WAN or production proof",
+        "image": "sha256:d032957c785d32cade5e59dd245ddf5b30fed5df207b397b6861cbed7d025497",
+        "cpu_max": "200000 100000",
+        "memory_max": "2147483648",
+        "egress_budget_bits_per_second": 8000000000,
+        "prepare_post_rate": 40,
+        "waf": null,
+        "reading_kinds": [
+          "dat",
+          "html",
+          "subject"
+        ],
+        "reading_cases": [
+          "dat_identity_304",
+          "html_gzip_304",
+          "subject_identity_full"
+        ],
+        "reading_go_client": "/tmp/oimo-readload-rate",
+        "reading_rate": 0,
+        "dat_lines": 1001,
+        "dat_bytes": 454767,
+        "fixture_sha256": "838bceb4fc3c6f098e6cca5c8ea6b125c8db80fb88cf5bd24073d5c7bcbe17ad",
+        "phases": [
+          {
+            "requests": 4000,
+            "errors": 0,
+            "status": {
+              "304": 4000
+            },
+            "body_bytes": 0,
+            "seconds": 0.528152148,
+            "requests_per_second": 7573.575181218424,
+            "p50_ms": 6.776133,
+            "p95_ms": 17.209276,
+            "max_ms": 61.875181,
+            "client_cpu_seconds": 0.546288,
+            "client_gomaxprocs": 2,
+            "scheduled_p95_ms": 17.209276,
+            "generator_max_lag_ms": 0,
+            "name": "dat_identity_304",
+            "workers": 64,
+            "go_exit_code": 0,
+            "generator": "Go HTTP/1.1, 64 independent loopback sources, no retries",
+            "http_p95_ms": 17.209276,
+            "server_observation_seconds": 0.5338195408694446,
+            "server_cpu_us_per_request": 262.72925,
+            "cpu_cores_average": 1.9686746541506264,
+            "memory_peak_sampled_bytes": 234586112,
+            "rbytes_delta": 0,
+            "wbytes_delta": 663552,
+            "rios_delta": 0,
+            "wios_delta": 14,
+            "throttled_usec_delta": 1015,
+            "oom_kill_delta": 0
+          },
+          {
+            "requests": 4000,
+            "errors": 0,
+            "status": {
+              "304": 4000
+            },
+            "body_bytes": 0,
+            "seconds": 0.656348851,
+            "requests_per_second": 6094.320107219934,
+            "p50_ms": 9.120872,
+            "p95_ms": 19.322335,
+            "max_ms": 120.55287,
+            "client_cpu_seconds": 0.6000749999999999,
+            "client_gomaxprocs": 2,
+            "scheduled_p95_ms": 19.322335,
+            "generator_max_lag_ms": 0,
+            "name": "html_gzip_304",
+            "workers": 64,
+            "go_exit_code": 0,
+            "generator": "Go HTTP/1.1, 64 independent loopback sources, no retries",
+            "http_p95_ms": 19.322335,
+            "server_observation_seconds": 0.6618756442330778,
+            "server_cpu_us_per_request": 324.52875,
+            "cpu_cores_average": 1.9612672128223414,
+            "memory_peak_sampled_bytes": 263729152,
+            "rbytes_delta": 0,
+            "wbytes_delta": 970752,
+            "rios_delta": 0,
+            "wios_delta": 19,
+            "throttled_usec_delta": 0,
+            "oom_kill_delta": 0
+          },
+          {
+            "requests": 4000,
+            "errors": 0,
+            "status": {
+              "200": 4000
+            },
+            "body_bytes": 176000,
+            "seconds": 0.484462205,
+            "requests_per_second": 8256.578033780777,
+            "p50_ms": 2.43945,
+            "p95_ms": 35.680394,
+            "max_ms": 150.209934,
+            "client_cpu_seconds": 0.547378,
+            "client_gomaxprocs": 2,
+            "scheduled_p95_ms": 35.680394,
+            "generator_max_lag_ms": 0,
+            "name": "subject_identity_full",
+            "workers": 64,
+            "go_exit_code": 0,
+            "generator": "Go HTTP/1.1, 64 independent loopback sources, no retries",
+            "http_p95_ms": 35.680394,
+            "server_observation_seconds": 0.48944468703120947,
+            "server_cpu_us_per_request": 240.4705,
+            "cpu_cores_average": 1.9652516933719735,
+            "memory_peak_sampled_bytes": 285335552,
+            "rbytes_delta": 0,
+            "wbytes_delta": 327680,
+            "rios_delta": 0,
+            "wios_delta": 6,
+            "throttled_usec_delta": 1000,
+            "oom_kill_delta": 0
+          }
+        ],
+        "memory_peak_bytes": 286216192,
+        "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+        "optional_shutdown": {
+          "clean": true,
+          "queue": {
+            "accepted": 10790,
+            "saved": 10790,
+            "failed": 0,
+            "dropped_capacity": 3307,
+            "dropped_invalid": 0,
+            "dropped_closed": 0,
+            "dropped_shutdown": 0,
+            "loss_started_at_ns": "1792762873598540900",
+            "loss_finished_at_ns": "1792762874109824761",
+            "pending": 0,
+            "pending_bytes": 0,
+            "closed": true
+          }
+        },
+        "optional_storage": {
+          "file_bytes": 4657832,
+          "day_file_bytes": {
+            "20261023": 4657832
+          }
+        }
+      },
+      "observed_runtime": {
+        "gomaxprocs": [
+          2
+        ],
+        "memory_limit_bytes": [
+          1610612736
+        ],
+        "server_log_sha256": "4c22c69d6d300e6c38d47b1acab78a06beb629541a8a9d03e1ba385e995cbf42"
+      }
+    },
+    {
+      "kind": "after",
+      "cpus": 4,
+      "rate": 0,
+      "label": "cores-4cpu",
+      "image": "oimobbs:reading-shared-20261023",
+      "output": "var/reading-scaling/cores-4cpu.json",
+      "command": [
+        "python3",
+        "scripts/probe-thread-resources.py",
+        "--image",
+        "oimobbs:reading-shared-20261023",
+        "--cpus",
+        "4",
+        "--memory",
+        "2g",
+        "--output",
+        "var/reading-scaling/cores-4cpu.json",
+        "--reading-only",
+        "--reading-go-client",
+        "/tmp/oimo-readload-rate",
+        "--reading-cases",
+        "dat_identity_304",
+        "html_gzip_304",
+        "subject_identity_full",
+        "--requests",
+        "4000",
+        "--egress-bps",
+        "8000000000",
+        "--optional-log-stats",
+        "--collect-server-log"
+      ],
+      "exit_code": 0,
+      "seconds": 30.35816740989685,
+      "raw_sha256": "cf5660322804245b5a53b00cec3508bd93f01f2078c561fdbaf0723a721c978d",
+      "result": {
+        "scope": "isolated HTTPS HTTP/1.1 on loopback; warmed immutable public representations; no WAN or production proof",
+        "image": "sha256:d032957c785d32cade5e59dd245ddf5b30fed5df207b397b6861cbed7d025497",
+        "cpu_max": "400000 100000",
+        "memory_max": "2147483648",
+        "egress_budget_bits_per_second": 8000000000,
+        "prepare_post_rate": 40,
+        "waf": null,
+        "reading_kinds": [
+          "dat",
+          "html",
+          "subject"
+        ],
+        "reading_cases": [
+          "dat_identity_304",
+          "html_gzip_304",
+          "subject_identity_full"
+        ],
+        "reading_go_client": "/tmp/oimo-readload-rate",
+        "reading_rate": 0,
+        "dat_lines": 1001,
+        "dat_bytes": 454767,
+        "fixture_sha256": "fa2ae2fd08ba12b15820e64c9ab3975d49903fc34626a7cb18063e076928c1ad",
+        "phases": [
+          {
+            "requests": 4000,
+            "errors": 0,
+            "status": {
+              "304": 4000
+            },
+            "body_bytes": 0,
+            "seconds": 0.30062424,
+            "requests_per_second": 13305.646943173977,
+            "p50_ms": 2.891984,
+            "p95_ms": 11.265291,
+            "max_ms": 87.655709,
+            "client_cpu_seconds": 0.403211,
+            "client_gomaxprocs": 2,
+            "scheduled_p95_ms": 11.265291,
+            "generator_max_lag_ms": 0,
+            "name": "dat_identity_304",
+            "workers": 64,
+            "go_exit_code": 0,
+            "generator": "Go HTTP/1.1, 64 independent loopback sources, no retries",
+            "http_p95_ms": 11.265291,
+            "server_observation_seconds": 0.30656123999506235,
+            "server_cpu_us_per_request": 257.03,
+            "cpu_cores_average": 3.3537181674257304,
+            "memory_peak_sampled_bytes": 246964224,
+            "rbytes_delta": 0,
+            "wbytes_delta": 323584,
+            "rios_delta": 0,
+            "wios_delta": 6,
+            "throttled_usec_delta": 3612,
+            "oom_kill_delta": 0
+          },
+          {
+            "requests": 4000,
+            "errors": 0,
+            "status": {
+              "304": 4000
+            },
+            "body_bytes": 0,
+            "seconds": 0.288476511,
+            "requests_per_second": 13865.94695746303,
+            "p50_ms": 3.084759,
+            "p95_ms": 10.202581,
+            "max_ms": 66.155079,
+            "client_cpu_seconds": 0.414384,
+            "client_gomaxprocs": 2,
+            "scheduled_p95_ms": 10.202581,
+            "generator_max_lag_ms": 0,
+            "name": "html_gzip_304",
+            "workers": 64,
+            "go_exit_code": 0,
+            "generator": "Go HTTP/1.1, 64 independent loopback sources, no retries",
+            "http_p95_ms": 10.202581,
+            "server_observation_seconds": 0.2943277400918305,
+            "server_cpu_us_per_request": 275.18425,
+            "cpu_cores_average": 3.739834375300708,
+            "memory_peak_sampled_bytes": 262680576,
+            "rbytes_delta": 0,
+            "wbytes_delta": 544768,
+            "rios_delta": 0,
+            "wios_delta": 10,
+            "throttled_usec_delta": 0,
+            "oom_kill_delta": 0
+          },
+          {
+            "requests": 4000,
+            "errors": 0,
+            "status": {
+              "200": 4000
+            },
+            "body_bytes": 176000,
+            "seconds": 0.289497104,
+            "requests_per_second": 13817.06395239104,
+            "p50_ms": 3.317138,
+            "p95_ms": 10.389629,
+            "max_ms": 55.807149,
+            "client_cpu_seconds": 0.44849500000000003,
+            "client_gomaxprocs": 2,
+            "scheduled_p95_ms": 10.389629,
+            "generator_max_lag_ms": 0,
+            "name": "subject_identity_full",
+            "workers": 64,
+            "go_exit_code": 0,
+            "generator": "Go HTTP/1.1, 64 independent loopback sources, no retries",
+            "http_p95_ms": 10.389629,
+            "server_observation_seconds": 0.29444033186882734,
+            "server_cpu_us_per_request": 281.27475,
+            "cpu_cores_average": 3.8211443142280848,
+            "memory_peak_sampled_bytes": 283623424,
+            "rbytes_delta": 0,
+            "wbytes_delta": 434176,
+            "rios_delta": 0,
+            "wios_delta": 9,
+            "throttled_usec_delta": 0,
+            "oom_kill_delta": 0
+          }
+        ],
+        "memory_peak_bytes": 283906048,
+        "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+        "optional_shutdown": {
+          "clean": true,
+          "queue": {
+            "accepted": 8994,
+            "saved": 8994,
+            "failed": 0,
+            "dropped_capacity": 5103,
+            "dropped_invalid": 0,
+            "dropped_closed": 0,
+            "dropped_shutdown": 0,
+            "loss_started_at_ns": "1792762904025221746",
+            "loss_finished_at_ns": "1792762904477694234",
+            "pending": 0,
+            "pending_bytes": 0,
+            "closed": true
+          }
+        },
+        "optional_storage": {
+          "file_bytes": 3890185,
+          "day_file_bytes": {
+            "20261023": 3890185
+          }
+        }
+      },
+      "observed_runtime": {
+        "gomaxprocs": [
+          4
+        ],
+        "memory_limit_bytes": [
+          1610612736
+        ],
+        "server_log_sha256": "92cc97068c60f7ba2a35dfcc7be9d8d468c509afa85e9842b839c0b1f1012005"
+      }
+    },
+    {
+      "kind": "base",
+      "cpus": 4,
+      "rate": 1500,
+      "label": "steady-base",
+      "image": "oimobbs:reading-optimized-20261023",
+      "output": "var/reading-scaling/steady-base.json",
+      "command": [
+        "python3",
+        "scripts/probe-thread-resources.py",
+        "--image",
+        "oimobbs:reading-optimized-20261023",
+        "--cpus",
+        "4",
+        "--memory",
+        "2g",
+        "--output",
+        "var/reading-scaling/steady-base.json",
+        "--reading-only",
+        "--reading-go-client",
+        "/tmp/oimo-readload-rate",
+        "--reading-cases",
+        "dat_identity_304",
+        "html_gzip_304",
+        "subject_identity_full",
+        "--requests",
+        "6000",
+        "--egress-bps",
+        "8000000000",
+        "--optional-log-stats",
+        "--collect-server-log",
+        "--reading-rate",
+        "1500"
+      ],
+      "exit_code": 0,
+      "seconds": 52.57803153991699,
+      "raw_sha256": "3ba96fc528ddf226b72c647cbb6cac6e3603782057e3723234de30f0f15b2bbb",
+      "result": {
+        "scope": "isolated HTTPS HTTP/1.1 on loopback; warmed immutable public representations; no WAN or production proof",
+        "image": "sha256:95f8cc813f12727ccdde208d35bc1ccd69c4764de003523c012d9a203587f33d",
+        "cpu_max": "400000 100000",
+        "memory_max": "2147483648",
+        "egress_budget_bits_per_second": 8000000000,
+        "prepare_post_rate": 40,
+        "waf": null,
+        "reading_kinds": [
+          "dat",
+          "html",
+          "subject"
+        ],
+        "reading_cases": [
+          "dat_identity_304",
+          "html_gzip_304",
+          "subject_identity_full"
+        ],
+        "reading_go_client": "/tmp/oimo-readload-rate",
+        "reading_rate": 1500,
+        "dat_lines": 1001,
+        "dat_bytes": 454767,
+        "fixture_sha256": "cbe79e0b165bd642bf2c67d29521beff2eaa14c5376eb7d7aee615787dda6411",
+        "phases": [
+          {
+            "requests": 6000,
+            "errors": 0,
+            "status": {
+              "304": 6000
+            },
+            "body_bytes": 0,
+            "seconds": 3.999859362,
+            "requests_per_second": 1500.0527411043508,
+            "p50_ms": 0.344132,
+            "p95_ms": 0.525453,
+            "max_ms": 59.562502,
+            "client_cpu_seconds": 1.535545,
+            "client_gomaxprocs": 2,
+            "scheduled_p95_ms": 1.465706,
+            "generator_max_lag_ms": 37.250923,
+            "name": "dat_identity_304",
+            "workers": 64,
+            "go_exit_code": 0,
+            "generator": "Go HTTP/1.1, 64 independent loopback sources, no retries",
+            "http_p95_ms": 0.525453,
+            "server_observation_seconds": 4.005430438090116,
+            "server_cpu_us_per_request": 535.8186666666667,
+            "cpu_cores_average": 0.8026383305592859,
+            "memory_peak_sampled_bytes": 258863104,
+            "rbytes_delta": 0,
+            "wbytes_delta": 2486272,
+            "rios_delta": 0,
+            "wios_delta": 47,
+            "throttled_usec_delta": 0,
+            "oom_kill_delta": 0
+          },
+          {
+            "requests": 6000,
+            "errors": 0,
+            "status": {
+              "304": 6000
+            },
+            "body_bytes": 0,
+            "seconds": 4.000686134,
+            "requests_per_second": 1499.7427438780428,
+            "p50_ms": 0.312561,
+            "p95_ms": 0.518958,
+            "max_ms": 37.080533,
+            "client_cpu_seconds": 1.4217529999999998,
+            "client_gomaxprocs": 2,
+            "scheduled_p95_ms": 1.420157,
+            "generator_max_lag_ms": 29.047118,
+            "name": "html_gzip_304",
+            "workers": 64,
+            "go_exit_code": 0,
+            "generator": "Go HTTP/1.1, 64 independent loopback sources, no retries",
+            "http_p95_ms": 0.518958,
+            "server_observation_seconds": 4.007130567915738,
+            "server_cpu_us_per_request": 514.6191666666666,
+            "cpu_cores_average": 0.7705551260851575,
+            "memory_peak_sampled_bytes": 324198400,
+            "rbytes_delta": 0,
+            "wbytes_delta": 2551808,
+            "rios_delta": 0,
+            "wios_delta": 47,
+            "throttled_usec_delta": 0,
+            "oom_kill_delta": 0
+          },
+          {
+            "requests": 6000,
+            "errors": 0,
+            "status": {
+              "200": 6000
+            },
+            "body_bytes": 264000,
+            "seconds": 3.999854337,
+            "requests_per_second": 1500.0546256142327,
+            "p50_ms": 0.447016,
+            "p95_ms": 0.702094,
+            "max_ms": 71.096841,
+            "client_cpu_seconds": 1.472189,
+            "client_gomaxprocs": 2,
+            "scheduled_p95_ms": 1.602187,
+            "generator_max_lag_ms": 45.957677,
+            "name": "subject_identity_full",
+            "workers": 64,
+            "go_exit_code": 0,
+            "generator": "Go HTTP/1.1, 64 independent loopback sources, no retries",
+            "http_p95_ms": 0.702094,
+            "server_observation_seconds": 4.005293963011354,
+            "server_cpu_us_per_request": 644.022,
+            "cpu_cores_average": 0.9647561541512367,
+            "memory_peak_sampled_bytes": 360988672,
+            "rbytes_delta": 0,
+            "wbytes_delta": 2625536,
+            "rios_delta": 0,
+            "wios_delta": 48,
+            "throttled_usec_delta": 0,
+            "oom_kill_delta": 0
+          }
+        ],
+        "memory_peak_bytes": 361725952,
+        "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+        "optional_shutdown": {
+          "clean": true,
+          "queue": {
+            "accepted": 20097,
+            "saved": 20097,
+            "failed": 0,
+            "dropped_capacity": 0,
+            "dropped_invalid": 0,
+            "dropped_closed": 0,
+            "dropped_shutdown": 0,
+            "loss_started_at_ns": "0",
+            "loss_finished_at_ns": "0",
+            "pending": 0,
+            "pending_bytes": 0,
+            "closed": true
+          }
+        },
+        "optional_storage": {
+          "file_bytes": 8642306,
+          "day_file_bytes": {
+            "20261023": 8642306
+          }
+        }
+      },
+      "observed_runtime": {
+        "gomaxprocs": [
+          4
+        ],
+        "memory_limit_bytes": [
+          1610612736
+        ],
+        "server_log_sha256": "d91c5998bb630659ea45720afc07ce64f3242546363cdcc486dba9430a5ddd99"
+      }
+    },
+    {
+      "kind": "after",
+      "cpus": 4,
+      "rate": 1500,
+      "label": "steady-after",
+      "image": "oimobbs:reading-shared-20261023",
+      "output": "var/reading-scaling/steady-after.json",
+      "command": [
+        "python3",
+        "scripts/probe-thread-resources.py",
+        "--image",
+        "oimobbs:reading-shared-20261023",
+        "--cpus",
+        "4",
+        "--memory",
+        "2g",
+        "--output",
+        "var/reading-scaling/steady-after.json",
+        "--reading-only",
+        "--reading-go-client",
+        "/tmp/oimo-readload-rate",
+        "--reading-cases",
+        "dat_identity_304",
+        "html_gzip_304",
+        "subject_identity_full",
+        "--requests",
+        "6000",
+        "--egress-bps",
+        "8000000000",
+        "--optional-log-stats",
+        "--collect-server-log",
+        "--reading-rate",
+        "1500"
+      ],
+      "exit_code": 0,
+      "seconds": 40.65662431716919,
+      "raw_sha256": "130d7a3ee73fd4aac18aea55cf6f7a9677a70dec59eda25af620678d8cfc2316",
+      "result": {
+        "scope": "isolated HTTPS HTTP/1.1 on loopback; warmed immutable public representations; no WAN or production proof",
+        "image": "sha256:d032957c785d32cade5e59dd245ddf5b30fed5df207b397b6861cbed7d025497",
+        "cpu_max": "400000 100000",
+        "memory_max": "2147483648",
+        "egress_budget_bits_per_second": 8000000000,
+        "prepare_post_rate": 40,
+        "waf": null,
+        "reading_kinds": [
+          "dat",
+          "html",
+          "subject"
+        ],
+        "reading_cases": [
+          "dat_identity_304",
+          "html_gzip_304",
+          "subject_identity_full"
+        ],
+        "reading_go_client": "/tmp/oimo-readload-rate",
+        "reading_rate": 1500,
+        "dat_lines": 1001,
+        "dat_bytes": 454767,
+        "fixture_sha256": "ee51b701072a001e5aaa4a583af2895d970223182cfc19bc49c8eddcd618ff0f",
+        "phases": [
+          {
+            "requests": 6000,
+            "errors": 0,
+            "status": {
+              "304": 6000
+            },
+            "body_bytes": 0,
+            "seconds": 4.000562872,
+            "requests_per_second": 1499.7889526981544,
+            "p50_ms": 0.301177,
+            "p95_ms": 0.48627,
+            "max_ms": 64.455092,
+            "client_cpu_seconds": 1.396571,
+            "client_gomaxprocs": 2,
+            "scheduled_p95_ms": 1.400427,
+            "generator_max_lag_ms": 30.054176,
+            "name": "dat_identity_304",
+            "workers": 64,
+            "go_exit_code": 0,
+            "generator": "Go HTTP/1.1, 64 independent loopback sources, no retries",
+            "http_p95_ms": 0.48627,
+            "server_observation_seconds": 4.0070464899763465,
+            "server_cpu_us_per_request": 502.6415,
+            "cpu_cores_average": 0.7526363888076084,
+            "memory_peak_sampled_bytes": 260624384,
+            "rbytes_delta": 0,
+            "wbytes_delta": 2641920,
+            "rios_delta": 0,
+            "wios_delta": 49,
+            "throttled_usec_delta": 0,
+            "oom_kill_delta": 0
+          },
+          {
+            "requests": 6000,
+            "errors": 0,
+            "status": {
+              "304": 6000
+            },
+            "body_bytes": 0,
+            "seconds": 3.99990171,
+            "requests_per_second": 1500.036859655734,
+            "p50_ms": 0.376821,
+            "p95_ms": 0.615555,
+            "max_ms": 69.737284,
+            "client_cpu_seconds": 1.567374,
+            "client_gomaxprocs": 2,
+            "scheduled_p95_ms": 1.536956,
+            "generator_max_lag_ms": 44.920671,
+            "name": "html_gzip_304",
+            "workers": 64,
+            "go_exit_code": 0,
+            "generator": "Go HTTP/1.1, 64 independent loopback sources, no retries",
+            "http_p95_ms": 0.615555,
+            "server_observation_seconds": 4.005694757215679,
+            "server_cpu_us_per_request": 569.4736666666666,
+            "cpu_cores_average": 0.852996098578169,
+            "memory_peak_sampled_bytes": 323457024,
+            "rbytes_delta": 0,
+            "wbytes_delta": 2670592,
+            "rios_delta": 0,
+            "wios_delta": 49,
+            "throttled_usec_delta": 0,
+            "oom_kill_delta": 0
+          },
+          {
+            "requests": 6000,
+            "errors": 0,
+            "status": {
+              "200": 6000
+            },
+            "body_bytes": 264000,
+            "seconds": 3.999879081,
+            "requests_per_second": 1500.045345995798,
+            "p50_ms": 0.375424,
+            "p95_ms": 0.641747,
+            "max_ms": 52.51802,
+            "client_cpu_seconds": 1.629742,
+            "client_gomaxprocs": 2,
+            "scheduled_p95_ms": 1.518419,
+            "generator_max_lag_ms": 37.954749,
+            "name": "subject_identity_full",
+            "workers": 64,
+            "go_exit_code": 0,
+            "generator": "Go HTTP/1.1, 64 independent loopback sources, no retries",
+            "http_p95_ms": 0.641747,
+            "server_observation_seconds": 4.006146453786641,
+            "server_cpu_us_per_request": 564.2353333333333,
+            "cpu_cores_average": 0.8450544779260583,
+            "memory_peak_sampled_bytes": 363335680,
+            "rbytes_delta": 0,
+            "wbytes_delta": 2568192,
+            "rios_delta": 0,
+            "wios_delta": 47,
+            "throttled_usec_delta": 0,
+            "oom_kill_delta": 0
+          }
+        ],
+        "memory_peak_bytes": 367476736,
+        "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+        "optional_shutdown": {
+          "clean": true,
+          "queue": {
+            "accepted": 20097,
+            "saved": 20097,
+            "failed": 0,
+            "dropped_capacity": 0,
+            "dropped_invalid": 0,
+            "dropped_closed": 0,
+            "dropped_shutdown": 0,
+            "loss_started_at_ns": "0",
+            "loss_finished_at_ns": "0",
+            "pending": 0,
+            "pending_bytes": 0,
+            "closed": true
+          }
+        },
+        "optional_storage": {
+          "file_bytes": 8641470,
+          "day_file_bytes": {
+            "20261023": 8641470
+          }
+        }
+      },
+      "observed_runtime": {
+        "gomaxprocs": [
+          4
+        ],
+        "memory_limit_bytes": [
+          1610612736
+        ],
+        "server_log_sha256": "06a9214f8a1e55c7af8ec7564f7c1f830783d1c206538fef81249c4dda058bb2"
+      }
+    },
+    {
+      "kind": "base",
+      "cpus": 4,
+      "rate": null,
+      "label": "mixed-base",
+      "image": "oimobbs:reading-optimized-20261023",
+      "output": "var/reading-scaling/mixed-base.json",
+      "command": [
+        "python3",
+        "scripts/probe-thread-resources.py",
+        "--image",
+        "oimobbs:reading-optimized-20261023",
+        "--cpus",
+        "4",
+        "--memory",
+        "2g",
+        "--output",
+        "var/reading-scaling/mixed-base.json",
+        "--requests",
+        "100",
+        "--peak-mix",
+        "--peak-no-capacity",
+        "--peak-post-workers",
+        "5",
+        "--waf",
+        "--waf-posting-rate",
+        "400",
+        "--waf-posting-concurrent",
+        "64",
+        "--crash-recovery"
+      ],
+      "exit_code": 0,
+      "seconds": 69.27015852928162,
+      "raw_sha256": "5b2d73dc2b47f6155d73b2851d2dc5cc150c1724a655c350aa9bb9bc4abb0530",
+      "result": {
+        "image": "sha256:95f8cc813f12727ccdde208d35bc1ccd69c4764de003523c012d9a203587f33d",
+        "waf": {
+          "enabled": true,
+          "traffic": {
+            "posting": {
+              "client_rate": 10,
+              "client_burst": 30,
+              "global_rate": 400,
+              "global_burst": 800,
+              "client_concurrent": 8,
+              "global_concurrent": 64
+            },
+            "client_enabled": true,
+            "enabled": true,
+            "client_rate": 10000,
+            "client_burst": 100000,
+            "global_rate": 100000,
+            "global_burst": 200000,
+            "client_concurrent": 32,
+            "global_concurrent": 128,
+            "search_rate": 2,
+            "search_burst": 10,
+            "search_global_rate": 12,
+            "search_global_burst": 24,
+            "search_concurrent": 4
+          }
+        },
+        "crash_recovery": {
+          "scope": "SIGKILL of isolated container after 1000 acknowledged posts; no power-loss/media-failure proof",
+          "signal_exit": "137 false",
+          "acknowledged_posts": 1000,
+          "dat_lines": 1001,
+          "dat_bytes_equal": true,
+          "etag_equal": true,
+          "crash_to_verified_dat_ms": 4151.406961027533,
+          "start_to_verified_dat_ms": 4049.315121024847,
+          "start_to_verified_dat_cpu_ms": 4938.567,
+          "start_to_verified_dat_throttled_ms": 0.0,
+          "waf_block_persisted": true,
+          "memory_events_before_crash": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+          "optional_log_stats_scope": "last process only; queued optional records may be lost at SIGKILL"
+        },
+        "prepare_post_rate": 40,
+        "cpu_max": "400000 100000",
+        "memory_max": "2147483648",
+        "go_memory_limit": "auto",
+        "representation_resources": "automatic",
+        "egress_budget_bits_per_second": 80000000,
+        "dat_bytes": 454767,
+        "fixture_sha256": "122c1abf5f64b2e26c49f251019e4a04a9fb138acd13f4db0e8709d5638b7091",
+        "full_representation_bytes": {
+          "identity": 454767,
+          "gzip": 188911,
+          "zstd": 177805
+        },
+        "public_assets": {
+          "ui.js": {
+            "identity": 876,
+            "gzip": 573,
+            "zstd": 595
+          },
+          "ui.css": {
+            "identity": 8535,
+            "gzip": 2912,
+            "zstd": 3117
+          }
+        },
+        "scope": "isolated actual server, verified TLS HTTP/1.1; resources in cpu_max/memory_max; loopback, no WAN/NIC/device proof",
+        "reader_mix": {
+          "legacy": 32,
+          "web": 8
+        },
+        "post_mix": "80% legacy / 20% Web including CSRF, confirmation and redirect",
+        "posting_workers": 5,
+        "io_contention": null,
+        "load_started_monotonic": 2177469.799124028,
+        "peak_legacy_full_fraction": 0.1,
+        "peak_legacy_full_coding": "identity",
+        "web_coding": "gzip",
+        "peak_legacy_full_conditional": false,
+        "full_transfer": {
+          "requests": 192,
+          "body_bytes": 87315264,
+          "not_modified": 0,
+          "success": 192
+        },
+        "phases": [
+          {
+            "name": "normal",
+            "seconds": 4,
+            "read_rate": 200,
+            "legacy": {
+              "planned": 640,
+              "sent": 640,
+              "success": 640,
+              "errors": 0,
+              "skipped": 0,
+              "success_per_second": 160.0,
+              "body_mbps": 2.867644,
+              "http_p95_ms": 3.216030076146126,
+              "scheduled_p95_ms": 3.3558220602571964,
+              "completed_in_window": 640,
+              "completed_per_second": 160.0,
+              "completed_body_mbps": 2.867644
+            },
+            "web": {
+              "planned": 160,
+              "sent": 160,
+              "success": 160,
+              "errors": 0,
+              "skipped": 0,
+              "success_per_second": 40.0,
+              "body_mbps": 3.96772,
+              "http_p95_ms": 4.415142349898815,
+              "scheduled_p95_ms": 4.8628756776452065,
+              "completed_in_window": 160,
+              "completed_per_second": 40.0,
+              "completed_body_mbps": 3.96772
+            },
+            "posting": {
+              "legacy": {
+                "planned": 64,
+                "sent": 64,
+                "success": 64,
+                "errors": 0,
+                "skipped": 0,
+                "success_per_second": 16.0,
+                "body_mbps": 0.0,
+                "http_p95_ms": 27.945830021053553,
+                "scheduled_p95_ms": 28.73984770849347,
+                "completed_in_window": 64,
+                "completed_per_second": 16.0
+              },
+              "web": {
+                "planned": 16,
+                "sent": 16,
+                "success": 16,
+                "errors": 0,
+                "skipped": 0,
+                "success_per_second": 4.0,
+                "body_mbps": 0.0,
+                "http_p95_ms": 38.225500844419,
+                "scheduled_p95_ms": 38.504374679178,
+                "completed_in_window": 16,
+                "completed_per_second": 4.0
+              }
+            }
+          },
+          {
+            "name": "peak",
+            "seconds": 12,
+            "read_rate": 2000,
+            "legacy": {
+              "planned": 19200,
+              "sent": 1634,
+              "success": 1634,
+              "errors": 0,
+              "skipped": 17566,
+              "success_per_second": 136.16666666666666,
+              "body_mbps": 59.975012,
+              "http_p95_ms": 1902.8567979112267,
+              "scheduled_p95_ms": 1903.0368239618838,
+              "completed_in_window": 1603,
+              "completed_per_second": 133.58333333333334,
+              "completed_body_mbps": 50.576494
+            },
+            "web": {
+              "planned": 4800,
+              "sent": 1569,
+              "success": 1569,
+              "errors": 0,
+              "skipped": 3231,
+              "success_per_second": 130.75,
+              "body_mbps": 13.057706,
+              "http_p95_ms": 66.83590402826667,
+              "scheduled_p95_ms": 67.11129518225789,
+              "completed_in_window": 1561,
+              "completed_per_second": 130.08333333333334,
+              "completed_body_mbps": 12.991093333333334
+            },
+            "posting": {
+              "legacy": {
+                "planned": 192,
+                "sent": 192,
+                "success": 192,
+                "errors": 0,
+                "skipped": 0,
+                "success_per_second": 16.0,
+                "body_mbps": 0.0,
+                "http_p95_ms": 29.660755302757025,
+                "scheduled_p95_ms": 29.900848865509033,
+                "completed_in_window": 192,
+                "completed_per_second": 16.0
+              },
+              "web": {
+                "planned": 48,
+                "sent": 48,
+                "success": 48,
+                "errors": 0,
+                "skipped": 0,
+                "success_per_second": 4.0,
+                "body_mbps": 0.0,
+                "http_p95_ms": 96.76267392933369,
+                "scheduled_p95_ms": 96.86937276273966,
+                "completed_in_window": 47,
+                "completed_per_second": 3.9166666666666665
+              }
+            }
+          },
+          {
+            "name": "recovery",
+            "seconds": 5,
+            "read_rate": 200,
+            "legacy": {
+              "planned": 800,
+              "sent": 753,
+              "success": 753,
+              "errors": 0,
+              "skipped": 47,
+              "success_per_second": 150.6,
+              "body_mbps": 2.4065887999999998,
+              "http_p95_ms": 1.235573086887598,
+              "scheduled_p95_ms": 1.8233046866953373,
+              "completed_in_window": 784,
+              "completed_per_second": 156.8,
+              "completed_body_mbps": 24.963032
+            },
+            "web": {
+              "planned": 200,
+              "sent": 200,
+              "success": 200,
+              "errors": 0,
+              "skipped": 0,
+              "success_per_second": 40.0,
+              "body_mbps": 3.9940784,
+              "http_p95_ms": 13.35479412227869,
+              "scheduled_p95_ms": 13.7589150108397,
+              "completed_in_window": 208,
+              "completed_per_second": 41.6,
+              "completed_body_mbps": 4.1539488
+            },
+            "posting": {
+              "legacy": {
+                "planned": 80,
+                "sent": 80,
+                "success": 80,
+                "errors": 0,
+                "skipped": 0,
+                "success_per_second": 16.0,
+                "body_mbps": 0.0,
+                "http_p95_ms": 28.393378015607595,
+                "scheduled_p95_ms": 28.822184074670076,
+                "completed_in_window": 80,
+                "completed_per_second": 16.0
+              },
+              "web": {
+                "planned": 20,
+                "sent": 20,
+                "success": 20,
+                "errors": 0,
+                "skipped": 0,
+                "success_per_second": 4.0,
+                "body_mbps": 0.0,
+                "http_p95_ms": 61.20580714195967,
+                "scheduled_p95_ms": 61.32779689505696,
+                "completed_in_window": 21,
+                "completed_per_second": 4.2
+              }
+            }
+          }
+        ],
+        "recovery_seconds": [
+          {
+            "planned": 200,
+            "sent": 153,
+            "success": 153,
+            "errors": 0,
+            "skipped": 47,
+            "success_per_second": 153.0,
+            "body_mbps": 8.215504,
+            "http_p95_ms": 28.136621695011854,
+            "scheduled_p95_ms": 495.68685702979565
+          },
+          {
+            "planned": 200,
+            "sent": 200,
+            "success": 200,
+            "errors": 0,
+            "skipped": 0,
+            "success_per_second": 200.0,
+            "body_mbps": 5.941024,
+            "http_p95_ms": 1.217481680214405,
+            "scheduled_p95_ms": 1.5855999663472176
+          },
+          {
+            "planned": 200,
+            "sent": 200,
+            "success": 200,
+            "errors": 0,
+            "skipped": 0,
+            "success_per_second": 200.0,
+            "body_mbps": 5.9474,
+            "http_p95_ms": 1.1201109737157822,
+            "scheduled_p95_ms": 1.7213462851941586
+          },
+          {
+            "planned": 200,
+            "sent": 200,
+            "success": 200,
+            "errors": 0,
+            "skipped": 0,
+            "success_per_second": 200.0,
+            "body_mbps": 5.94792,
+            "http_p95_ms": 1.02281104773283,
+            "scheduled_p95_ms": 1.4049308374524117
+          },
+          {
+            "planned": 200,
+            "sent": 200,
+            "success": 200,
+            "errors": 0,
+            "skipped": 0,
+            "success_per_second": 200.0,
+            "body_mbps": 5.951488,
+            "http_p95_ms": 1.0646497830748558,
+            "scheduled_p95_ms": 1.5928689390420914
+          }
+        ],
+        "recovery_actual_arrivals": [
+          {
+            "planned": 153,
+            "sent": 153,
+            "success": 153,
+            "errors": 0,
+            "skipped": 0,
+            "success_per_second": 153.0,
+            "body_mbps": 8.215504,
+            "http_p95_ms": 28.136621695011854,
+            "scheduled_p95_ms": 495.68685702979565
+          },
+          {
+            "planned": 200,
+            "sent": 200,
+            "success": 200,
+            "errors": 0,
+            "skipped": 0,
+            "success_per_second": 200.0,
+            "body_mbps": 5.941024,
+            "http_p95_ms": 1.217481680214405,
+            "scheduled_p95_ms": 1.5855999663472176
+          },
+          {
+            "planned": 200,
+            "sent": 200,
+            "success": 200,
+            "errors": 0,
+            "skipped": 0,
+            "success_per_second": 200.0,
+            "body_mbps": 5.9474,
+            "http_p95_ms": 1.1201109737157822,
+            "scheduled_p95_ms": 1.7213462851941586
+          },
+          {
+            "planned": 200,
+            "sent": 200,
+            "success": 200,
+            "errors": 0,
+            "skipped": 0,
+            "success_per_second": 200.0,
+            "body_mbps": 5.94792,
+            "http_p95_ms": 1.02281104773283,
+            "scheduled_p95_ms": 1.4049308374524117
+          },
+          {
+            "planned": 200,
+            "sent": 200,
+            "success": 200,
+            "errors": 0,
+            "skipped": 0,
+            "success_per_second": 200.0,
+            "body_mbps": 5.951488,
+            "http_p95_ms": 1.0646497830748558,
+            "scheduled_p95_ms": 1.5928689390420914
+          }
+        ],
+        "peak_inflight_at_end": 39,
+        "last_peak_completion_delay_ms": 627.6090340688825,
+        "posting_success": 420,
+        "posting_planned": 420,
+        "posting_drain_seconds": 20.981157954782248,
+        "post_numbers_verified": 461,
+        "post_numbers_match": true,
+        "missing_post_numbers": [],
+        "acknowledged_missing_post_numbers": [],
+        "unexpected_post_numbers": [],
+        "duplicate_post_numbers": [],
+        "invalid_post_bodies": 0,
+        "final_lines": 461,
+        "invalid_prefixes": 0,
+        "posting_capacity": {
+          "planned": 0,
+          "sent": 0,
+          "success": 0,
+          "errors": 0,
+          "skipped": 0,
+          "success_per_second": 0.0,
+          "body_mbps": 0.0,
+          "http_p95_ms": null,
+          "scheduled_p95_ms": null,
+          "enabled": false,
+          "seconds": null,
+          "workers": 5,
+          "during_peak": false,
+          "started_s": null,
+          "finished_s": null,
+          "legacy_posts": 0,
+          "web_posts": 0
+        },
+        "memory_peak_bytes": 359649280,
+        "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n"
+      }
+    },
+    {
+      "kind": "after",
+      "cpus": 4,
+      "rate": null,
+      "label": "mixed-after",
+      "image": "oimobbs:reading-shared-20261023",
+      "output": "var/reading-scaling/mixed-after.json",
+      "command": [
+        "python3",
+        "scripts/probe-thread-resources.py",
+        "--image",
+        "oimobbs:reading-shared-20261023",
+        "--cpus",
+        "4",
+        "--memory",
+        "2g",
+        "--output",
+        "var/reading-scaling/mixed-after.json",
+        "--requests",
+        "100",
+        "--peak-mix",
+        "--peak-no-capacity",
+        "--peak-post-workers",
+        "5",
+        "--waf",
+        "--waf-posting-rate",
+        "400",
+        "--waf-posting-concurrent",
+        "64",
+        "--crash-recovery"
+      ],
+      "exit_code": 0,
+      "seconds": 55.99766707420349,
+      "raw_sha256": "e83eeea4733db419e2c6d864d58fa7ec06b184272b6fd7e3a1ee7e5c1b470493",
+      "result": {
+        "image": "sha256:d032957c785d32cade5e59dd245ddf5b30fed5df207b397b6861cbed7d025497",
+        "waf": {
+          "enabled": true,
+          "traffic": {
+            "posting": {
+              "client_rate": 10,
+              "client_burst": 30,
+              "global_rate": 400,
+              "global_burst": 800,
+              "client_concurrent": 8,
+              "global_concurrent": 64
+            },
+            "client_enabled": true,
+            "enabled": true,
+            "client_rate": 10000,
+            "client_burst": 100000,
+            "global_rate": 100000,
+            "global_burst": 200000,
+            "client_concurrent": 32,
+            "global_concurrent": 128,
+            "search_rate": 2,
+            "search_burst": 10,
+            "search_global_rate": 12,
+            "search_global_burst": 24,
+            "search_concurrent": 4
+          }
+        },
+        "crash_recovery": {
+          "scope": "SIGKILL of isolated container after 1000 acknowledged posts; no power-loss/media-failure proof",
+          "signal_exit": "137 false",
+          "acknowledged_posts": 1000,
+          "dat_lines": 1001,
+          "dat_bytes_equal": true,
+          "etag_equal": true,
+          "crash_to_verified_dat_ms": 4095.0429500080645,
+          "start_to_verified_dat_ms": 3988.674644846469,
+          "start_to_verified_dat_cpu_ms": 4844.402,
+          "start_to_verified_dat_throttled_ms": 0.0,
+          "waf_block_persisted": true,
+          "memory_events_before_crash": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+          "optional_log_stats_scope": "last process only; queued optional records may be lost at SIGKILL"
+        },
+        "prepare_post_rate": 40,
+        "cpu_max": "400000 100000",
+        "memory_max": "2147483648",
+        "go_memory_limit": "auto",
+        "representation_resources": "automatic",
+        "egress_budget_bits_per_second": 80000000,
+        "dat_bytes": 454767,
+        "fixture_sha256": "ba85c28c793b93cc7067d70a245b68e32d00d16b8ea85353a28607a8efbbd5f8",
+        "full_representation_bytes": {
+          "identity": 454767,
+          "gzip": 188834,
+          "zstd": 177608
+        },
+        "public_assets": {
+          "ui.js": {
+            "identity": 876,
+            "gzip": 573,
+            "zstd": 595
+          },
+          "ui.css": {
+            "identity": 8535,
+            "gzip": 2912,
+            "zstd": 3117
+          }
+        },
+        "scope": "isolated actual server, verified TLS HTTP/1.1; resources in cpu_max/memory_max; loopback, no WAN/NIC/device proof",
+        "reader_mix": {
+          "legacy": 32,
+          "web": 8
+        },
+        "post_mix": "80% legacy / 20% Web including CSRF, confirmation and redirect",
+        "posting_workers": 5,
+        "io_contention": null,
+        "load_started_monotonic": 2177525.790943332,
+        "peak_legacy_full_fraction": 0.1,
+        "peak_legacy_full_coding": "identity",
+        "web_coding": "gzip",
+        "peak_legacy_full_conditional": false,
+        "full_transfer": {
+          "requests": 192,
+          "body_bytes": 87315264,
+          "not_modified": 0,
+          "success": 192
+        },
+        "phases": [
+          {
+            "name": "normal",
+            "seconds": 4,
+            "read_rate": 200,
+            "legacy": {
+              "planned": 640,
+              "sent": 640,
+              "success": 640,
+              "errors": 0,
+              "skipped": 0,
+              "success_per_second": 160.0,
+              "body_mbps": 2.867644,
+              "http_p95_ms": 3.25394282117486,
+              "scheduled_p95_ms": 3.395110834389925,
+              "completed_in_window": 640,
+              "completed_per_second": 160.0,
+              "completed_body_mbps": 2.867644
+            },
+            "web": {
+              "planned": 160,
+              "sent": 160,
+              "success": 160,
+              "errors": 0,
+              "skipped": 0,
+              "success_per_second": 40.0,
+              "body_mbps": 3.971066,
+              "http_p95_ms": 4.317053128033876,
+              "scheduled_p95_ms": 4.640636034309864,
+              "completed_in_window": 160,
+              "completed_per_second": 40.0,
+              "completed_body_mbps": 3.971066
+            },
+            "posting": {
+              "legacy": {
+                "planned": 64,
+                "sent": 64,
+                "success": 64,
+                "errors": 0,
+                "skipped": 0,
+                "success_per_second": 16.0,
+                "body_mbps": 0.0,
+                "http_p95_ms": 28.324276208877563,
+                "scheduled_p95_ms": 28.843895066529512,
+                "completed_in_window": 64,
+                "completed_per_second": 16.0
+              },
+              "web": {
+                "planned": 16,
+                "sent": 16,
+                "success": 16,
+                "errors": 0,
+                "skipped": 0,
+                "success_per_second": 4.0,
+                "body_mbps": 0.0,
+                "http_p95_ms": 36.71293519437313,
+                "scheduled_p95_ms": 36.9395948946476,
+                "completed_in_window": 16,
+                "completed_per_second": 4.0
+              }
+            }
+          },
+          {
+            "name": "peak",
+            "seconds": 12,
+            "read_rate": 2000,
+            "legacy": {
+              "planned": 19200,
+              "sent": 1632,
+              "success": 1632,
+              "errors": 0,
+              "skipped": 17568,
+              "success_per_second": 136.0,
+              "body_mbps": 59.96628533333334,
+              "http_p95_ms": 1908.3977341651917,
+              "scheduled_p95_ms": 1908.5630308836699,
+              "completed_in_window": 1600,
+              "completed_per_second": 133.33333333333334,
+              "completed_body_mbps": 50.26458933333333
+            },
+            "web": {
+              "planned": 4800,
+              "sent": 1592,
+              "success": 1592,
+              "errors": 0,
+              "skipped": 3208,
+              "success_per_second": 132.66666666666666,
+              "body_mbps": 13.260447333333333,
+              "http_p95_ms": 65.92873204499483,
+              "scheduled_p95_ms": 66.17817422375083,
+              "completed_in_window": 1584,
+              "completed_per_second": 132.0,
+              "completed_body_mbps": 13.19379
+            },
+            "posting": {
+              "legacy": {
+                "planned": 192,
+                "sent": 192,
+                "success": 192,
+                "errors": 0,
+                "skipped": 0,
+                "success_per_second": 16.0,
+                "body_mbps": 0.0,
+                "http_p95_ms": 28.59165007248521,
+                "scheduled_p95_ms": 28.836044017225504,
+                "completed_in_window": 192,
+                "completed_per_second": 16.0
+              },
+              "web": {
+                "planned": 48,
+                "sent": 48,
+                "success": 48,
+                "errors": 0,
+                "skipped": 0,
+                "success_per_second": 4.0,
+                "body_mbps": 0.0,
+                "http_p95_ms": 96.90586291253567,
+                "scheduled_p95_ms": 97.00996801257133,
+                "completed_in_window": 47,
+                "completed_per_second": 3.9166666666666665
+              }
+            }
+          },
+          {
+            "name": "recovery",
+            "seconds": 5,
+            "read_rate": 200,
+            "legacy": {
+              "planned": 800,
+              "sent": 748,
+              "success": 748,
+              "errors": 0,
+              "skipped": 52,
+              "success_per_second": 149.6,
+              "body_mbps": 2.4267936,
+              "http_p95_ms": 1.6768760979175568,
+              "scheduled_p95_ms": 2.0048636943101883,
+              "completed_in_window": 780,
+              "completed_per_second": 156.0,
+              "completed_body_mbps": 25.710864
+            },
+            "web": {
+              "planned": 200,
+              "sent": 200,
+              "success": 200,
+              "errors": 0,
+              "skipped": 0,
+              "success_per_second": 40.0,
+              "body_mbps": 3.997224,
+              "http_p95_ms": 15.737296547740698,
+              "scheduled_p95_ms": 16.027960926294327,
+              "completed_in_window": 208,
+              "completed_per_second": 41.6,
+              "completed_body_mbps": 4.1572016000000005
+            },
+            "posting": {
+              "legacy": {
+                "planned": 80,
+                "sent": 80,
+                "success": 80,
+                "errors": 0,
+                "skipped": 0,
+                "success_per_second": 16.0,
+                "body_mbps": 0.0,
+                "http_p95_ms": 28.509689960628748,
+                "scheduled_p95_ms": 29.014132916927338,
+                "completed_in_window": 80,
+                "completed_per_second": 16.0
+              },
+              "web": {
+                "planned": 20,
+                "sent": 20,
+                "success": 20,
+                "errors": 0,
+                "skipped": 0,
+                "success_per_second": 4.0,
+                "body_mbps": 0.0,
+                "http_p95_ms": 37.95187780633569,
+                "scheduled_p95_ms": 38.22055086493492,
+                "completed_in_window": 21,
+                "completed_per_second": 4.2
+              }
+            }
+          }
+        ],
+        "recovery_seconds": [
+          {
+            "planned": 200,
+            "sent": 148,
+            "success": 148,
+            "errors": 0,
+            "skipped": 52,
+            "success_per_second": 148.0,
+            "body_mbps": 8.323272,
+            "http_p95_ms": 36.19041293859482,
+            "scheduled_p95_ms": 540.9410567954183
+          },
+          {
+            "planned": 200,
+            "sent": 200,
+            "success": 200,
+            "errors": 0,
+            "skipped": 0,
+            "success_per_second": 200.0,
+            "body_mbps": 5.947672,
+            "http_p95_ms": 1.172563061118126,
+            "scheduled_p95_ms": 1.5106149949133396
+          },
+          {
+            "planned": 200,
+            "sent": 200,
+            "success": 200,
+            "errors": 0,
+            "skipped": 0,
+            "success_per_second": 200.0,
+            "body_mbps": 5.952768,
+            "http_p95_ms": 1.1935178190469742,
+            "scheduled_p95_ms": 1.7072800546884537
+          },
+          {
+            "planned": 200,
+            "sent": 200,
+            "success": 200,
+            "errors": 0,
+            "skipped": 0,
+            "success_per_second": 200.0,
+            "body_mbps": 5.94128,
+            "http_p95_ms": 1.2188740074634552,
+            "scheduled_p95_ms": 1.6527208499610424
+          },
+          {
+            "planned": 200,
+            "sent": 200,
+            "success": 200,
+            "errors": 0,
+            "skipped": 0,
+            "success_per_second": 200.0,
+            "body_mbps": 5.955096,
+            "http_p95_ms": 1.1823419481515884,
+            "scheduled_p95_ms": 1.6427487134933472
+          }
+        ],
+        "recovery_actual_arrivals": [
+          {
+            "planned": 148,
+            "sent": 148,
+            "success": 148,
+            "errors": 0,
+            "skipped": 0,
+            "success_per_second": 148.0,
+            "body_mbps": 8.323272,
+            "http_p95_ms": 36.19041293859482,
+            "scheduled_p95_ms": 540.9410567954183
+          },
+          {
+            "planned": 200,
+            "sent": 200,
+            "success": 200,
+            "errors": 0,
+            "skipped": 0,
+            "success_per_second": 200.0,
+            "body_mbps": 5.947672,
+            "http_p95_ms": 1.172563061118126,
+            "scheduled_p95_ms": 1.5106149949133396
+          },
+          {
+            "planned": 200,
+            "sent": 200,
+            "success": 200,
+            "errors": 0,
+            "skipped": 0,
+            "success_per_second": 200.0,
+            "body_mbps": 5.952768,
+            "http_p95_ms": 1.1935178190469742,
+            "scheduled_p95_ms": 1.7072800546884537
+          },
+          {
+            "planned": 200,
+            "sent": 200,
+            "success": 200,
+            "errors": 0,
+            "skipped": 0,
+            "success_per_second": 200.0,
+            "body_mbps": 5.94128,
+            "http_p95_ms": 1.2188740074634552,
+            "scheduled_p95_ms": 1.6527208499610424
+          },
+          {
+            "planned": 200,
+            "sent": 200,
+            "success": 200,
+            "errors": 0,
+            "skipped": 0,
+            "success_per_second": 200.0,
+            "body_mbps": 5.955096,
+            "http_p95_ms": 1.1823419481515884,
+            "scheduled_p95_ms": 1.6427487134933472
+          }
+        ],
+        "peak_inflight_at_end": 40,
+        "last_peak_completion_delay_ms": 663.7724791653454,
+        "posting_success": 420,
+        "posting_planned": 420,
+        "posting_drain_seconds": 20.981429742183536,
+        "post_numbers_verified": 461,
+        "post_numbers_match": true,
+        "missing_post_numbers": [],
+        "acknowledged_missing_post_numbers": [],
+        "unexpected_post_numbers": [],
+        "duplicate_post_numbers": [],
+        "invalid_post_bodies": 0,
+        "final_lines": 461,
+        "invalid_prefixes": 0,
+        "posting_capacity": {
+          "planned": 0,
+          "sent": 0,
+          "success": 0,
+          "errors": 0,
+          "skipped": 0,
+          "success_per_second": 0.0,
+          "body_mbps": 0.0,
+          "http_p95_ms": null,
+          "scheduled_p95_ms": null,
+          "enabled": false,
+          "seconds": null,
+          "workers": 5,
+          "during_peak": false,
+          "started_s": null,
+          "finished_s": null,
+          "legacy_posts": 0,
+          "web_posts": 0
+        },
+        "memory_peak_bytes": 405020672,
+        "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n"
+      }
+    }
+  ],
+  "benchmarks": [
+    {
+      "path": "var/reading-scaling/routing-before.txt",
+      "sha256": "a5d4a628321c3daa3777238b05b21aa4916c06316b3f4d44022b4b8350a78821",
+      "text": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/bootstrap\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkPublicBoardRoutingParallel-2   \t  221029\t      5407 ns/op\t      96 B/op\t       1 allocs/op\nBenchmarkPublicBoardRoutingParallel-2   \t  217054\t      5535 ns/op\t      96 B/op\t       1 allocs/op\nBenchmarkPublicBoardRoutingParallel-2   \t  223047\t      5545 ns/op\t      96 B/op\t       1 allocs/op\nBenchmarkPublicBoardRoutingParallel-4   \t  217977\t      5437 ns/op\t      96 B/op\t       1 allocs/op\nBenchmarkPublicBoardRoutingParallel-4   \t  221118\t      5358 ns/op\t      96 B/op\t       1 allocs/op\nBenchmarkPublicBoardRoutingParallel-4   \t  222993\t      5378 ns/op\t      96 B/op\t       1 allocs/op\nPASS\nok  \toimobbs/internal/bootstrap\t7.612s\n"
+    },
+    {
+      "path": "var/reading-scaling/routing-after.txt",
+      "sha256": "39b05ff025ab4b19a8a5e3f3e2351a9c66357a417a8edab70ab2b95753299cce",
+      "text": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/bootstrap\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkPublicBoardRoutingParallel-2   \t  442636\t      2989 ns/op\t      96 B/op\t       1 allocs/op\nBenchmarkPublicBoardRoutingParallel-2   \t  404370\t      2995 ns/op\t      96 B/op\t       1 allocs/op\nBenchmarkPublicBoardRoutingParallel-2   \t  449472\t      2827 ns/op\t      96 B/op\t       1 allocs/op\nBenchmarkPublicBoardRoutingParallel-4   \t  752000\t      1595 ns/op\t      96 B/op\t       1 allocs/op\nBenchmarkPublicBoardRoutingParallel-4   \t  755892\t      1598 ns/op\t      96 B/op\t       1 allocs/op\nBenchmarkPublicBoardRoutingParallel-4   \t  759007\t      1604 ns/op\t      96 B/op\t       1 allocs/op\nPASS\nok  \toimobbs/internal/bootstrap\t7.645s\n"
+    },
+    {
+      "path": "var/reading-scaling/memory-working-set.txt",
+      "sha256": "07be58cf081726399dd1b23a30c0fc34068a448896004e97560c69054dfe7b8d",
+      "text": "goos: linux\ngoarch: amd64\npkg: oimobbs/internal/bootstrap\ncpu: AMD Ryzen 5 5500U with Radeon Graphics         \nBenchmarkReadingAdaptiveMemory/container=512MiB-4         \t     325\t   3710263 ns/op\t         1.000 builds/op\t        47.87 retained-MiB\t 1336136 B/op\t   21608 allocs/op\nBenchmarkReadingAdaptiveMemory/container=512MiB-4         \t     319\t   3868057 ns/op\t         1.000 builds/op\t        47.87 retained-MiB\t 1336142 B/op\t   21608 allocs/op\nBenchmarkReadingAdaptiveMemory/container=512MiB-4         \t     320\t   3774747 ns/op\t         1.000 builds/op\t        47.87 retained-MiB\t 1336145 B/op\t   21608 allocs/op\nBenchmarkReadingAdaptiveMemory/container=2048MiB-4        \t19623818\t        61.76 ns/op\t         0 builds/op\t        96.36 retained-MiB\t       0 B/op\t       0 allocs/op\nBenchmarkReadingAdaptiveMemory/container=2048MiB-4        \t18978420\t        61.88 ns/op\t         0 builds/op\t        96.36 retained-MiB\t       0 B/op\t       0 allocs/op\nBenchmarkReadingAdaptiveMemory/container=2048MiB-4        \t19540233\t        61.49 ns/op\t         0 builds/op\t        96.36 retained-MiB\t       0 B/op\t       0 allocs/op\nPASS\nok  \toimobbs/internal/bootstrap\t14.415s\n"
+    }
+  ],
+  "diagnostic": {
+    "result": {
+      "scope": "isolated HTTPS HTTP/1.1 on loopback; warmed immutable public representations; no WAN or production proof",
+      "image": "sha256:00ebea1c34133cffe98838d26bcacd13bff99c9bf553f96804d6b29e73743d26",
+      "cpu_max": "400000 100000",
+      "memory_max": "2147483648",
+      "egress_budget_bits_per_second": 8000000000,
+      "prepare_post_rate": 40,
+      "waf": null,
+      "reading_kinds": [
+        "dat",
+        "html",
+        "subject"
+      ],
+      "reading_cases": [
+        "dat_identity_304",
+        "html_gzip_304",
+        "subject_identity_full"
+      ],
+      "reading_go_client": "/tmp/oimo-readload",
+      "dat_lines": 1001,
+      "dat_bytes": 454767,
+      "fixture_sha256": "f4071de427a980fe383e26c30097700f2a492a67c4b94932977655d47d3e29f7",
+      "phases": [
+        {
+          "requests": 4000,
+          "errors": 0,
+          "status": {
+            "304": 4000
+          },
+          "body_bytes": 0,
+          "seconds": 0.270373191,
+          "requests_per_second": 14794.366206226414,
+          "p50_ms": 2.832753,
+          "p95_ms": 9.534708,
+          "max_ms": 66.18635,
+          "client_cpu_seconds": 0.38992099999999996,
+          "client_gomaxprocs": 2,
+          "name": "dat_identity_304",
+          "workers": 64,
+          "go_exit_code": 0,
+          "generator": "Go HTTP/1.1, 64 independent loopback sources, no retries",
+          "http_p95_ms": 9.534708,
+          "server_observation_seconds": 0.27568939700722694,
+          "server_cpu_us_per_request": 242.87775,
+          "cpu_cores_average": 3.5239331310755224,
+          "memory_peak_sampled_bytes": 228388864,
+          "rbytes_delta": 0,
+          "wbytes_delta": 221184,
+          "rios_delta": 0,
+          "wios_delta": 5,
+          "throttled_usec_delta": 0,
+          "oom_kill_delta": 0
+        },
+        {
+          "requests": 4000,
+          "errors": 0,
+          "status": {
+            "304": 4000
+          },
+          "body_bytes": 0,
+          "seconds": 0.276891101,
+          "requests_per_second": 14446.112516992738,
+          "p50_ms": 2.960572,
+          "p95_ms": 10.695552,
+          "max_ms": 52.793686,
+          "client_cpu_seconds": 0.404676,
+          "client_gomaxprocs": 2,
+          "name": "html_gzip_304",
+          "workers": 64,
+          "go_exit_code": 0,
+          "generator": "Go HTTP/1.1, 64 independent loopback sources, no retries",
+          "http_p95_ms": 10.695552,
+          "server_observation_seconds": 0.2831729296594858,
+          "server_cpu_us_per_request": 266.3655,
+          "cpu_cores_average": 3.7625842317668337,
+          "memory_peak_sampled_bytes": 253128704,
+          "rbytes_delta": 0,
+          "wbytes_delta": 323584,
+          "rios_delta": 0,
+          "wios_delta": 6,
+          "throttled_usec_delta": 0,
+          "oom_kill_delta": 0
+        },
+        {
+          "requests": 4000,
+          "errors": 0,
+          "status": {
+            "200": 4000
+          },
+          "body_bytes": 176000,
+          "seconds": 0.547004254,
+          "requests_per_second": 7312.557390092985,
+          "p50_ms": 5.805967,
+          "p95_ms": 23.45485,
+          "max_ms": 83.875535,
+          "client_cpu_seconds": 0.5680219999999999,
+          "client_gomaxprocs": 2,
+          "name": "subject_identity_full",
+          "workers": 64,
+          "go_exit_code": 0,
+          "generator": "Go HTTP/1.1, 64 independent loopback sources, no retries",
+          "http_p95_ms": 23.45485,
+          "server_observation_seconds": 0.552390166092664,
+          "server_cpu_us_per_request": 472.06725,
+          "cpu_cores_average": 3.418360998995846,
+          "memory_peak_sampled_bytes": 271081472,
+          "rbytes_delta": 0,
+          "wbytes_delta": 868352,
+          "rios_delta": 0,
+          "wios_delta": 17,
+          "throttled_usec_delta": 0,
+          "oom_kill_delta": 0
+        }
+      ],
+      "memory_peak_bytes": 283213824,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "optional_shutdown": {
+        "clean": true,
+        "queue": {
+          "accepted": 9769,
+          "saved": 9769,
+          "failed": 0,
+          "dropped_capacity": 4328,
+          "dropped_invalid": 0,
+          "dropped_closed": 0,
+          "dropped_shutdown": 0,
+          "loss_started_at_ns": "1792762020382942025",
+          "loss_finished_at_ns": "1792762021102966269",
+          "pending": 0,
+          "pending_bytes": 0,
+          "closed": true
+        }
+      },
+      "optional_storage": {
+        "file_bytes": 4265547,
+        "day_file_bytes": {
+          "20261023": 4265547
+        }
+      }
+    },
+    "sha256": "ddd07cf89947f1b8589a5d1d4202338285438a1f106276f445709d617faed561",
+    "profiles": [
+      {
+        "path": "var/reading-scaling/profile-base.json.profiles/cpu.pprof",
+        "sha256": "fb8692a3d28a09177aab91b39fd8a9611de3449cbf0bd034acf52be19eeafe80"
+      },
+      {
+        "path": "var/reading-scaling/profile-base.json.profiles/mutex.pprof",
+        "sha256": "0cb42c71eede497cbbb8615643c99aceec900c7ab3a154b12b64cbf978d2c73b"
+      },
+      {
+        "path": "var/reading-scaling/profile-base.json.profiles/block.pprof",
+        "sha256": "84b1bad41887ea9c1a283538239a6e5cef840484313b2b967cb6d70140c3b483"
+      },
+      {
+        "path": "var/reading-scaling/profile-base.json.profiles/allocs.pprof",
+        "sha256": "27121a6c9c9e1ff61fa397efb3c08bd4cec75731cd61dac60dd6f4bbeb856b3c"
+      }
+    ],
+    "cpu_top": "File: oimobbs\nBuild ID: ede6e5821f531f53c718aeeb1e95ce901a2a405a\nType: cpu\nTime: 2026-10-23 22:26:59 JST\nDuration: 1.50s, Total samples = 4.03s (269.52%)\nShowing nodes accounting for 2.47s, 61.29% of 4.03s total\nDropped 326 nodes (cum <= 0.02s)\nShowing top 22 nodes out of 294\n      flat  flat%   sum%        cum   cum%\n     0.84s 20.84% 20.84%      0.84s 20.84%  time.runtimeNow\n     0.31s  7.69% 28.54%      0.31s  7.69%  runtime.nanotime\n     0.29s  7.20% 35.73%      0.29s  7.20%  internal/runtime/syscall/linux.Syscall6\n     0.16s  3.97% 39.70%      0.16s  3.97%  crypto/internal/fips140/bigmod.addMulVVW1024\n     0.14s  3.47% 43.18%      0.14s  3.47%  crypto/internal/fips140/edwards25519/field.feMul\n     0.13s  3.23% 46.40%      0.13s  3.23%  encoding/json/internal/jsonwire.ConsumeSimpleString (inline)\n     0.09s  2.23% 48.64%      0.09s  2.23%  runtime.memmove\n     0.05s  1.24% 49.88%      0.05s  1.24%  crypto/internal/fips140/bigmod.(*Nat).shiftIn\n     0.04s  0.99% 50.87%      0.23s  5.71%  crypto/internal/fips140/bigmod.(*Nat).montgomeryMul\n     0.04s  0.99% 51.86%      0.04s  0.99%  encoding/json/jsontext.(*decoderState).PeekKind\n     0.04s  0.99% 52.85%      0.20s  4.96%  encoding/json/v2.makeStructArshaler.func2\n     0.04s  0.99% 53.85%      0.04s  0.99%  oimobbs/internal/zstdencode.(*Encoder).parse\n     0.03s  0.74% 54.59%      0.23s  5.71%  crypto/internal/fips140/edwards25519.(*Point).VarTimeDoubleScalarBaseMult\n     0.03s  0.74% 55.33%      0.04s  0.99%  crypto/internal/fips140/edwards25519/field.(*Element).Subtract\n     0.03s  0.74% 56.08%      0.03s  0.74%  crypto/internal/fips140/edwards25519/field.addMul (inline)\n     0.03s  0.74% 56.82%      0.03s  0.74%  crypto/internal/fips140/mlkem.fieldReduceOnce\n     0.03s  0.74% 57.57%      0.03s  0.74%  encoding/json/internal/jsonwire.AppendQuote\n     0.03s  0.74% 58.31%      0.03s  0.74%  indexbytebody\n     0.03s  0.74% 59.06%      0.03s  0.74%  internal/runtime/maps.ctrlGroup.matchH2\n     0.03s  0.74% 59.80%      0.03s  0.74%  memeqbody\n     0.03s  0.74% 60.55%      0.03s  0.74%  runtime.(*itabTableType).find\n     0.03s  0.74% 61.29%      0.03s  0.74%  runtime.tryDeferToSpanScan\n",
+    "mutex_top": "File: oimobbs\nBuild ID: ede6e5821f531f53c718aeeb1e95ce901a2a405a\nType: delay\nTime: 2026-10-23 22:27:01 JST\nShowing nodes accounting for 21.88s, 100% of 21.88s total\nDropped 67 nodes (cum <= 0.11s)\nShowing top 14 nodes out of 22\n      flat  flat%   sum%        cum   cum%\n    21.88s   100%   100%     21.88s   100%  sync.(*Mutex).Unlock\n         0     0%   100%     21.88s   100%  net/http.(*Server).Serve.gowrap3\n         0     0%   100%     21.88s   100%  net/http.(*conn).serve\n         0     0%   100%     21.88s   100%  net/http.HandlerFunc.ServeHTTP\n         0     0%   100%     21.88s   100%  net/http.serverHandler.ServeHTTP\n         0     0%   100%     21.87s   100%  oimobbs/internal/bootstrap.(*Repository).SiteWebHandler.func1\n         0     0%   100%      5.17s 23.61%  oimobbs/internal/bootstrap.(*Repository).legacyFeed\n         0     0%   100%     21.87s   100%  oimobbs/internal/bootstrap.(*Repository).memoryHandler.func1\n         0     0%   100%      5.16s 23.60%  oimobbs/internal/bootstrap.(*Repository).postingOwner\n         0     0%   100%      2.77s 12.68%  oimobbs/internal/bootstrap.(*Repository).protectedBoardSlugs\n         0     0%   100%     21.87s   100%  oimobbs/internal/bootstrap.(*Repository).publicHTTPServer.func2\n         0     0%   100%      3.26s 14.88%  oimobbs/internal/bootstrap.(*Repository).publicListingWriter\n         0     0%   100%      2.77s 12.68%  oimobbs/internal/bootstrap.(*Repository).reprintCrawlerGate\n         0     0%   100%      1.91s  8.72%  oimobbs/internal/bootstrap.(*Repository).threadListing (inline)\n",
+    "private_source": "package main\nimport(\"os\";\"os/signal\";\"syscall\";\"runtime\";\"runtime/pprof\")\nfunc init(){if len(os.Args)<2||os.Args[1]!=\"validation-serve\"{return};go func(){ch:=make(chan os.Signal,1);signal.Notify(ch,syscall.SIGUSR1,syscall.SIGUSR2);defer signal.Stop(ch);for sig:=range ch {if sig==syscall.SIGUSR1 {os.MkdirAll(\"/data/profiles\",0700);f,e:=os.Create(\"/data/profiles/cpu.pprof\");if e!=nil{panic(e)};runtime.SetMutexProfileFraction(5);runtime.SetBlockProfileRate(1000000);if e=pprof.StartCPUProfile(f);e!=nil{panic(e)}} else {pprof.StopCPUProfile();for _,name:=range []string{\"mutex\",\"block\",\"allocs\"}{f,e:=os.Create(\"/data/profiles/\"+name+\".pprof\");if e!=nil{panic(e)};pprof.Lookup(name).WriteTo(f,0);f.Close()};return}}}()}\n",
+    "driver_source": "import sys,runpy,subprocess,time\nsys.path.insert(0,'scripts')\nimport probe_reading\noriginal=probe_reading.reading_phases\ndef profiled(probe,*args):\n name=subprocess.check_output(['docker','ps','--filter','ancestor=oimobbs:reading-scaling-diag-20261023','--format','{{.Names}}'],text=True).strip()\n assert name and '\\n' not in name\n subprocess.run(['docker','kill','--signal','USR1',name],check=True,stdout=subprocess.DEVNULL)\n time.sleep(.3)\n try: return original(probe,*args)\n finally:\n  subprocess.run(['docker','kill','--signal','USR2',name],check=True,stdout=subprocess.DEVNULL)\n  time.sleep(.5)\nprobe_reading.reading_phases=profiled\nrunpy.run_path('scripts/probe-thread-resources.py',run_name='__main__')\n"
+  },
+  "verification": [
+    {
+      "command": [
+        "mise",
+        "exec",
+        "--",
+        "go",
+        "test",
+        "./cmd/...",
+        "./internal/compat",
+        "./internal/app",
+        "./internal/board",
+        "./internal/parallel",
+        "./internal/textcodec",
+        "./internal/webui",
+        "./tools/...",
+        "-count=1"
+      ],
+      "exit_code": 0,
+      "seconds": 35.18017935752869,
+      "output": "var/reading-scaling/check-0.txt"
+    },
+    {
+      "command": [
+        "mise",
+        "exec",
+        "--",
+        "go",
+        "test",
+        "./internal/bootstrap",
+        "-run",
+        "TestPublicMetadata|TestAdaptive|TestSiteWeb|TestSubject|TestLiveRead|TestReading|TestReprint|TestHiddenBoard|TestPublication|TestAdminCategories|TestRepositoryPosting",
+        "-count=1"
+      ],
+      "exit_code": 0,
+      "seconds": 8.15875506401062,
+      "output": "var/reading-scaling/check-1.txt"
+    },
+    {
+      "command": [
+        "mise",
+        "exec",
+        "--",
+        "go",
+        "test",
+        "-race",
+        "./internal/bootstrap",
+        "./tools/readload",
+        "-run",
+        "TestReadLoad|TestPublicMetadata|TestSiteWeb|TestSubjectCache|TestLiveReads|TestReading|TestReprint|TestHiddenBoard|TestPublication|TestAdminCategories",
+        "-count=1"
+      ],
+      "exit_code": 0,
+      "seconds": 53.7350811958313,
+      "output": "var/reading-scaling/check-2.txt"
+    },
+    {
+      "command": [
+        "mise",
+        "exec",
+        "--",
+        "go",
+        "vet",
+        "./cmd/...",
+        "./internal/...",
+        "./tools/..."
+      ],
+      "exit_code": 0,
+      "seconds": 1.7620768547058105,
+      "output": "var/reading-scaling/check-3.txt"
+    },
+    {
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "scripts",
+        "-p",
+        "test_probe*.py"
+      ],
+      "exit_code": 0,
+      "seconds": 0.11733365058898926,
+      "output": "var/reading-scaling/check-4.txt"
+    },
+    {
+      "command": [
+        "mise",
+        "exec",
+        "--",
+        "python3",
+        "tools/designcheck/check.py"
+      ],
+      "exit_code": 1,
+      "seconds": 0.2024853229522705,
+      "output": "var/reading-scaling/check-5.txt",
+      "reason": "Report links were added before the new report files were written; final rerun passes."
+    },
+    {
+      "command": [
+        "mise",
+        "exec",
+        "--",
+        "python3",
+        "tools/designcheck/check.py"
+      ],
+      "exit_code": 0,
+      "output": "var/reading-scaling/design-final.txt",
+      "scope": "after completed report and measurement archive were written"
+    }
+  ],
+  "validated_read_requests": 156000
+}

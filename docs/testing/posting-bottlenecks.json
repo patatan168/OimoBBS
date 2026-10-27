@@ -1,0 +1,129 @@
+{
+  "date": "2026-10-23",
+  "source_commit": "637f4dddf0169c99f8352ac7deddb74063827693",
+  "diagnostic_only": true,
+  "image": "sha256:08c1168b1cb5e4a59a10cc4bc741fe730a1114727a6423c962532a26521a84e7",
+  "scope": "2CPU, 2GiB, 80Mbps, one board, 16 threads, 40 actors, 200 scheduled posts/s for 60 seconds; instrumentation enabled; not a throughput acceptance test",
+  "artifacts": [
+    {
+      "path": "var/io-latency-diag-2g-200-20261023.json",
+      "sha256": "a9d61c4bf9e0c155737a02ee92a0c432810a447911ce55cc442e8384dfbed22c"
+    },
+    {
+      "path": "var/io-latency-diag-2g-200-20261023.json.profiles/phases.json",
+      "sha256": "46ea0f770cdf95271dc7d95e905a8c6da7796013509e5b352188c1407462ec8b"
+    },
+    {
+      "path": "var/io-latency-diag-2g-200-20261023.json.profiles/cpu.pprof",
+      "sha256": "6a02ec69fd9518261bfecca8c9e37be41b1fef590370189036c062b45c1a0284"
+    },
+    {
+      "path": "var/io-latency-instrumentation-20261023.patch",
+      "sha256": "8cff31c97bfc552412431837a7992ebce1bf233c9bdc0196df04c4be82c2fa06"
+    },
+    {
+      "path": "var/io-latency-phase-20261023.go",
+      "sha256": "6b8c45698b072a0a8dee5314e3474ff3d8afcfbeebce579217d1ec4d7dde9e7b"
+    },
+    {
+      "path": "var/io-latency-profile-20261023.go",
+      "sha256": "d8c5b5fa6e71b4fd8b7506472fe88df69aac3171816bb921acef899c0ea5b2e6"
+    }
+  ],
+  "cpu_profile": {
+    "duration_seconds": 50,
+    "cpu_sample_seconds": 47.51,
+    "owner_cumulative_cpu_seconds": 23.02,
+    "strictjson_cumulative_cpu_seconds": 13.6,
+    "strictjson_cumulative_cpu_percent": 28.63,
+    "guard_prune_cumulative_cpu_seconds": 2.81,
+    "guard_prune_fraction_of_owner_cpu": 0.12206776715899219,
+    "note": "cumulative times overlap; CPU time is distinct from wall-clock occupation"
+  },
+  "wall_clock_window": {
+    "process_begin_seconds": 20,
+    "process_end_seconds": 55,
+    "duration_seconds": 35,
+    "phases": {
+      "writer_sync": {
+        "count": 2342,
+        "seconds": 5.032534729,
+        "max_ms": 30.125168
+      },
+      "shared_sync": {
+        "count": 1138,
+        "seconds": 2.390780122,
+        "max_ms": 10.735086
+      },
+      "body": {
+        "count": 1138,
+        "seconds": 4.43695649,
+        "max_ms": 47.676269
+      },
+      "decision": {
+        "count": 1138,
+        "seconds": 4.160985146,
+        "max_ms": 12.674785
+      },
+      "publish": {
+        "count": 1138,
+        "seconds": 0.257019655,
+        "max_ms": 1.277069
+      },
+      "commit": {
+        "count": 1138,
+        "seconds": 17.988185486,
+        "max_ms": 60.533982
+      },
+      "owner": {
+        "count": 1139,
+        "seconds": 34.963025303,
+        "max_ms": 93.387413
+      },
+      "proposal": {
+        "count": 1138,
+        "seconds": 9.112361864,
+        "max_ms": 36.531603
+      },
+      "checkpoint_sync": {
+        "count": 288,
+        "seconds": 1.284629442,
+        "max_ms": 9.137633
+      }
+    },
+    "note": "Buckets assign calls by start time; calls may end outside a bucket. writer_sync includes other writers and checkpoint syncs may overlap; do not sum all phase durations."
+  },
+  "request_result": {
+    "summary": {
+      "planned": 12000,
+      "sent": 12000,
+      "success": 12000,
+      "acknowledged": 12000,
+      "completion_errors_after_ack": 0,
+      "errors": 0,
+      "skipped": 0,
+      "http_p95_ms": 83.58889585360885,
+      "scheduled_p95_ms": 83.8695908896625,
+      "issuance_wait_p95_ms": 0.45061204582452774
+    },
+    "stable_at_tested_rate": true,
+    "resources": {
+      "cpu_cores_average": 1.1803516541096766,
+      "generator_cpu_seconds": 13.699445904000001,
+      "wbytes_delta": 151572480,
+      "wios_delta": 12600,
+      "oom_kill_delta": 0,
+      "throttled_usec_delta": 0,
+      "io_some_usec_delta": 302107
+    },
+    "integrity_ok": true,
+    "warmup_seconds": 15.374748965259641
+  },
+  "limitations": [
+    "The previous failing interval was not reproduced in this diagnostic run.",
+    "Warmup was about 15.4s, versus about 4.2s in the earlier uninstrumented 2GiB run.",
+    "The exact cause of variability in the earlier failure cannot be assigned from this successful diagnostic run.",
+    "40 actors with one request each bound the offered load when latency rises.",
+    "No product code or live service was changed."
+  ]
+}

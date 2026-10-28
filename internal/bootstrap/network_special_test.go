@@ -126,8 +126,9 @@ func TestHostingMultipleOriginsAreOrderIndependent(t *testing.T) {
 		case "suffix":
 			bad.Suffix = "8"
 		}
-		if _, ok := mergeHostingNetwork(a, bad); ok {
-			t.Fatal("unsafe collision", change)
+		merged, ok := mergeAutomaticNetwork(a, bad)
+		if !ok || merged.Kind != "unknown" || merged.Provider != "" || merged.Label != "ﾜｯﾁｮｲ" || merged.Suffix != "0" {
+			t.Fatal("conflicting classification was not made unknown", change, merged)
 		}
 	}
 	if slices.Contains([]string{"C", "U", "0"}, a.Suffix) {

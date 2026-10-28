@@ -62,7 +62,7 @@ func fetchNetworkBody(ctx context.Context, client *http.Client, target string) (
 	return raw, nil
 }
 
-// fetchNetworkRows は全取得元を検査し、prefix衝突・空集合・容量超過を拒否する。
+// fetchNetworkRows は全取得元を検査し、分類衝突を不明化して空集合・容量超過を拒否する。
 func fetchNetworkRows(ctx context.Context, client *http.Client, sources []NetworkSource) ([]identity.NetworkClass, error) {
 	if len(sources) > networkSourceLimit {
 		return nil, errNetworkData
@@ -81,7 +81,7 @@ func mergeNetworkBatches(batches []networkBatch, sources []NetworkSource) ([]ide
 		batch := result.rows
 		for _, r := range batch {
 			if old, ok := seen[r.CIDR]; ok {
-				merged, ok := mergeHostingNetwork(old, r)
+				merged, ok := mergeAutomaticNetwork(old, r)
 				if !ok {
 					return nil, errNetworkData
 				}
@@ -299,7 +299,7 @@ func retainNetworkBatch(rows []identity.NetworkClass, seen map[string]identity.N
 	retained := []identity.NetworkClass{}
 	for _, row := range rows {
 		if old, ok := seen[row.CIDR]; ok {
-			merged, ok := mergeHostingNetwork(old, row)
+			merged, ok := mergeAutomaticNetwork(old, row)
 			if !ok {
 				return nil, errNetworkData
 			}
@@ -318,14 +318,19 @@ func retainNetworkBatch(rows []identity.NetworkClass, seen map[string]identity.N
 	return retained, nil
 }
 
-// mergeHostingNetwork は同じクラウド分類の複数起源prefixだけ事業者不明として統合する。
-// 異なる回線種別・表示・末尾の衝突は拒否し、到着順で業者名を選ばない。
-func mergeHostingNetwork(a, b identity.NetworkClass) (identity.NetworkClass, bool) {
+// mergeAutomaticNetwork は検査済みの同一prefixを統合し、食い違う分類を不明として残す。
+// 不明化した値は後続の一致行でも復活させず、完了順と設定順による再統合の差を防ぐ。
+// 管理者の手動上書きと、独立した国・VPNの判定には適用しない。
+func mergeAutomaticNetwork(a, b identity.NetworkClass) (identity.NetworkClass, bool) {
+	if a.CIDR != b.CIDR {
+		return identity.NetworkClass{}, false
+	}
 	if a == b {
 		return a, true
 	}
-	if a.CIDR != b.CIDR || a.Kind != "hosting" || b.Kind != "hosting" || a.Label != b.Label || a.Suffix != b.Suffix {
-		return identity.NetworkClass{}, false
+	if a.Kind != b.Kind || a.Label != b.Label || a.Suffix != b.Suffix {
+		label, suffix := identity.DefaultNetworkDisplay("unknown")
+		return identity.NetworkClass{CIDR: a.CIDR, Kind: "unknown", Label: label, Suffix: suffix}, true
 	}
 	a.Provider = ""
 	return a, true

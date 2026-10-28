@@ -2,6 +2,8 @@
 
 Linuxでサイトを作成し、ローカル起動・HTTPS公開・systemd登録を行う手順です。コマンドはリポジトリのルートで、データを所有する同じOSユーザーから実行します。Dockerを使う場合は[Dockerセットアップ](../deploy/README.md)を参照してください。
 
+この文書の `./bin/oimobbs` は、リポジトリ直下で既定の `config.json` を使う場合のビルド先です。`bin` は必須のフォルダーではなく、ビルドの `-o` で指定している出力先です。ソースコードを取得しただけでは作成されません。`setup.sh` で別の `--config` を指定した場合は、その設定ファイルと同じディレクトリの `bin/oimobbs` に作成します。`--binary` を指定した場合は、その実行ファイルを使います。セットアップ完了時に表示された起動コマンドでも、実際の配置先を確認できます。
+
 ## 手順を選ぶ
 
 | 目的 | 手順 |
@@ -333,14 +335,41 @@ sudo setcap cap_net_bind_service=+ep ./bin/oimobbs
 
 ### 3. 公開用コマンドで起動する
 
-手動起動では、443番の待受権限をバイナリへ付与してから起動します。setcapはlibcapのコマンドです。systemdで運用する場合は、サービスの起動コマンドを確認して次の登録・起動へ進みます。サービスではsetcapは不要です。
+まず実行ファイルの配置先を確認します。以下は、リポジトリ直下（`go.mod` のあるディレクトリ）に移動し、既存の `config.json` を使う場合の例です。
+
+```sh
+pwd
+ls -l ./bin/oimobbs
+```
+
+`No such file or directory` なら、まだビルドしていないか、別の場所へ配置しています。`--binary` を指定した場合やsystemdへ登録済みの場合は、既存の実行ファイルの場所を使ってください。既定の場所へまだ作成していない場合は、リポジトリ直下で次を実行します。
+
+```sh
+mkdir -p bin
+CGO_ENABLED=0 go build -trimpath -o ./bin/oimobbs ./cmd/oimobbs
+```
+
+miseでGoを用意している場合は、ビルドの `go build` を `mise exec -- go build` に置き換えます。この操作は実行ファイルを作るだけです。既存の設定・保存データは使い続け、`init`・板作成・管理者登録は繰り返しません。
+
+**手動で起動する場合**は、ビルド成功後に443番の待受権限を付与します。setcapはlibcapのコマンドです。実行ファイルを別の場所へ配置した場合は、以降の `./bin/oimobbs` をそのパスに置き換えてください。
 
 ```sh
 sudo setcap cap_net_bind_service=+ep ./bin/oimobbs
+```
+
+その後、別のコマンドとして起動します。
+
+```sh
 ./bin/oimobbs serve --config config.json
 ```
 
-`serve` は作成済みサイトを起動します。`init`・板作成・管理者登録は繰り返しません。同じ待受の管理画面も起動するため `--admin` は不要です。
+`serve` は作成済みサイトを起動します。同じ待受の管理画面も起動するため `--admin` は不要です。
+
+**systemdで運用する場合**は、上の手動起動・setcapは不要です。登録済みのサービスでは、実際のバイナリ・設定のパスを次で確認できます。
+
+```sh
+systemctl show oimobbs.service --property=ExecStart --no-pager
+```
 
 HTTPで登録したsystemdサービスは、設定JSONだけを変更しても起動コマンドが `validation-serve` のままです。`sudo systemctl edit --full oimobbs.service` で `ExecStart` のサブコマンドを `serve` に変更し、末尾の `--admin` を外します。バイナリ・設定の絶対パス、User、Groupは維持してください。
 
@@ -400,6 +429,7 @@ OimoBBSを1台で専用運用する場合の、運用開始時の構成目安で
 | 症状 | 対応 |
 | --- | --- |
 | Goのバージョンが違う | Go1.27.3を用意。mise利用時は `mise exec -- go` で実行 |
+| setcapで `No such file or directory` | 実行ファイルが指定先にありません。[配置先の確認とビルド](#3-公開用コマンドで起動する)を行い、存在するファイルへsetcapを実行 |
 | サービス登録に失敗 | 初期化前なら原因を解消して再実行。初期化後は[登録失敗時の対応](#登録に失敗した場合)を確認 |
 | 保存先が既にある | 初期化済みなら `init` を省略。不完全な初期化は内容を調べてから復旧 |
 | ロック・所有者・権限のエラー | 同じ保存先のサーバーを停止し、初期化時と同じOSユーザーで実行 |

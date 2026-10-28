@@ -11,6 +11,7 @@ Linuxでサイトを作成し、ローカル起動・HTTPS公開・systemd登録
 | 自分のPCで試す | [ローカル検証用サイトを作る](#ローカル検証用サイトを作る) |
 | 証明書を自動取得・更新する | [証明書の自動セットアップ](#証明書の自動セットアップ) |
 | 新しいサイトをHTTPSで公開する | [HTTPSで公開するサイトを作る](#httpsで公開するサイトを作る) |
+| 設定と実行ファイルはあるが、サイトは未作成 | [設定ファイルだけある初回導入](#設定ファイルだけある初回導入) |
 | 常駐・OS起動時の自動起動を設定する | [systemdへ自動登録](#systemdへ自動登録) |
 | 初期化を一工程ずつ進める | [手動でローカル起動](#ローカルで起動する) |
 | 作成済みサイトをHTTPSに切り替える | [HTTPSで公開する](#httpsで公開する) |
@@ -308,9 +309,57 @@ sudo setcap cap_net_bind_service=+ep ./bin/oimobbs
 
 起動後は[公開・管理・保存の確認](#起動後の確認)にあるURLを `http://127.0.0.1` へ置き換えて検査します。Ctrl+Cで停止し、再開時は同じ起動コマンドを使います。
 
+## 設定ファイルだけある初回導入
+
+`config.json` と実行ファイルを用意済みで、まだサイトを作成していない場合の手順です。`serve` はサイトを自動作成しません。`data_dir` が `./var/site` なら、未作成の状態で起動すると `lstat .../var/site: no such file or directory` になります。
+
+以下はリポジトリ直下で実行します。既存の `config.json` は維持します。実行ファイルが未作成なら、先に[ビルド手順](#1-バイナリを作る)を実行してください。既にサイトを作成した場合や、既存データを移す場合には、この初期化を実行しません。
+
+### サイト・板・管理者を作成する
+
+保存先が `./var/site` の例です。親の `var` だけを作り、`var/site` 自体は `init` に作成させます。`data_dir` が別の場所なら、その親ディレクトリを用意してください。
+
+```sh
+mkdir -p var
+./bin/oimobbs init --config config.json --name 'OimoBBS'
+./bin/oimobbs board create --validation --config config.json --key operate --name '運営'
+```
+
+次に15〜128文字の管理者パスワードを入力します。入力中の文字は表示されません。ログイン名は `owner` です。
+
+```bash
+read -r -s -p '管理者パスワード: ' oimo_admin_secret
+printf '\n'
+printf '%s\n' "$oimo_admin_secret" | ./bin/oimobbs admin init \
+  --config config.json --login owner --password-stdin
+unset oimo_admin_secret
+```
+
+投稿規制と匿名Cookieを有効にし、最初の板を確認します。
+
+```sh
+./bin/oimobbs admission enable --config config.json
+./bin/oimobbs anonymous enable --config config.json --mode required
+./bin/oimobbs board list --validation --config config.json
+```
+
+### 初回の公開起動
+
+`config.json` の公開URL・管理URL・TLS証明書を[HTTPS公開の設定](#2-サーバーを止めて設定を変更する)に合わせて準備済みなら、手動起動は次の順です。setcapは実行ファイルへ443番の待受権限を付与します。
+
+```sh
+sudo setcap cap_net_bind_service=+ep ./bin/oimobbs
+```
+
+```sh
+./bin/oimobbs serve --config config.json
+```
+
+管理画面は公開URLの `/admin/` です。[起動後の確認](#起動後の確認)を行います。systemdで運用する場合は手動起動・setcapを省略し、[サービス登録](#systemdへ自動登録)へ進みます。次回以降は初期化を繰り返さず、起動だけを行います。
+
 ## HTTPSで公開する
 
-作成済みのローカルサイトをHTTPSへ切り替える手順です。新規サイトは[HTTPSのセットアップ例](#httpsで公開するサイトを作る)を使えます。
+作成済みのローカルサイトをHTTPSへ切り替える手順です。新規サイトは[HTTPSのセットアップ例](#httpsで公開するサイトを作る)、設定と実行ファイルだけ準備済みなら[初回導入の続き](#設定ファイルだけある初回導入)を使います。
 
 ### 1. 公開先と証明書を用意する
 
@@ -430,6 +479,7 @@ OimoBBSを1台で専用運用する場合の、運用開始時の構成目安で
 | --- | --- |
 | Goのバージョンが違う | Go1.27.3を用意。mise利用時は `mise exec -- go` で実行 |
 | setcapで `No such file or directory` | 実行ファイルが指定先にありません。[配置先の確認とビルド](#3-公開用コマンドで起動する)を行い、存在するファイルへsetcapを実行 |
+| `serve` で `lstat .../var/site: no such file or directory` | 初回でサイト未作成なら[初期化手順](#設定ファイルだけある初回導入)を実行。既存サイトなら `config.json` の `data_dir` とデータの配置先を確認 |
 | サービス登録に失敗 | 初期化前なら原因を解消して再実行。初期化後は[登録失敗時の対応](#登録に失敗した場合)を確認 |
 | 保存先が既にある | 初期化済みなら `init` を省略。不完全な初期化は内容を調べてから復旧 |
 | ロック・所有者・権限のエラー | 同じ保存先のサーバーを停止し、初期化時と同じOSユーザーで実行 |

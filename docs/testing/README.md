@@ -79,6 +79,22 @@ PlaywrightとChromiumを検証環境へ用意し、次の環境変数を設定�
 
 これらの環境変数を使うGoのブラウザー試験は、未指定の場合スキップされます。下の `smoke-*.mjs` を直接実行する検査は、各節に記載したNode.js・Chromiumと専用の環境変数を使います。
 
+### 板の追加・名前とキーの変更
+
+```sh
+mise exec -- go test -race ./internal/bootstrap -run '^Test(AdminBoardMetadata|BoardMetadata|BoardDirectoryMetadata|AdminBoardCreate|AdminCapBoardCreate)' -count=1
+```
+
+権限・再認証・CSRF・同一再送・古い画面・キーの重複を検査します。旧キーと新キーの閲覧・投稿、既存DATの保持、並行投稿、保存前後のSIGKILL、再起動・snapshot・オンラインバックアップの隔離再生を含みます。
+
+実画面は、管理者`owner`を登録した新しい隔離サイトで確認します。試験は板と投稿を作り、板名・キーを変更します。[ブラウザー検査の準備](#ブラウザー検査の準備)に加え、`OIMO_BOARD_ADMIN_URL`にそのサイトの`/admin` URL、`OIMO_TEST_PASSWORD`に試験用パスワードを指定します。
+
+```sh
+"$OIMO_BROWSER_NODE" scripts/test-board-management-browser.mjs
+```
+
+`OIMO_BOARD_SCREENSHOTS`を指定すると追加画面の390px・1280px表示と変更画面を保存します。再認証後の戻り先、エラー時の入力保持、JavaScriptなしのフォーム、旧URL・新URLで同じDATを取得できることを検査します。
+
 ## 導入と基本動作
 
 ### セットアップスクリプト

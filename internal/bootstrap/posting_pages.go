@@ -154,7 +154,7 @@ func (repo *Repository) renderEditing(w http.ResponseWriter, r *http.Request, ow
 			page.PostingPolicy = "cap_only"
 		}
 	}
-	page.Heading, page.Message, page.Board, page.Key = heading, message, b.slug, key
+	page.Heading, page.Message, page.Board, page.Key = heading, message, b.boardKey(), key
 	page.Title, page.Body = title, body
 	page.CapOnly = capOnly
 	if page.PostingPolicy == "disabled" {
@@ -198,7 +198,7 @@ func (repo *Repository) postingResultPage(w http.ResponseWriter, r *http.Request
 		if fields["key"] != "" {
 			selection = "l50"
 		}
-		w.Header().Set("Location", fmt.Sprintf("%s/test/read.cgi/%s/%d/%s", repo.cfg.Public.BaseURL, b.slug, result.ThreadKey, selection))
+		w.Header().Set("Location", fmt.Sprintf("%s/test/read.cgi/%s/%d/%s", repo.cfg.Public.BaseURL, b.boardKey(), result.ThreadKey, selection))
 		w.WriteHeader(303)
 		return
 	}

@@ -90,6 +90,7 @@ type AuditPage struct {
 }
 
 var auditActions = map[string][]string{
+	"board_metadata_update":   {"board_directory.name", "board_directory.key", "board_directory.aliases"},
 	"storage_pressure_enable": {"site.minimum_reader_version"},
 	"global_rules_update":     {"global_rules"},
 	"waf_update":              {"waf.enabled"},

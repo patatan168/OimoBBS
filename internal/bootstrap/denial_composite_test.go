@@ -188,7 +188,7 @@ func TestCompositeRuleHTML(t *testing.T) {
 	}
 	path := "/boards/" + board.String() + "/rules"
 	_, page := c.request("GET", path, "", nil)
-	fields := pageFields(page)
+	fields := ruleCreateFields(t, page)
 	for key, value := range map[string]string{"target": "127.0.0.1", "field": "auto", "operator": "exact", "effect": "deny", "operation": "reply", "duration_minutes": "60", "reason_code": "spam", "extra_field": "body", "extra_operator": "contains", "extra_value": "追加条件試験"} {
 		fields.Set(key, value)
 	}

@@ -1,17 +1,44 @@
 <!-- 管理画面。動的な値はhtml/templateでエスケープする。 -->
 <!doctype html>
 <html lang="ja">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>板設定 — OimoBBS管理</title>{{template "admin-assets" .}}
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>{{if .Creating}}新しい板を追加{{else if .Metadata}}板名・キーを変更{{else if .Editing}}板設定{{else}}板の管理{{end}} — OimoBBS管理</title>{{template "admin-assets" .}}
 </head>
 <body class="admin">{{template "admin-header" .}}
 <main id="main" tabindex="-1">
-<h1>板設定{{if .Name}}：{{.Name}}{{end}}
+<h1>{{if .Creating}}新しい板を追加{{else if .Metadata}}板名・キーを変更{{else if .Editing}}板設定：{{.Name}}{{else}}板の管理{{end}}
 </h1>
 <nav><a href="{{adminBase}}/">サイト設定</a> <a href="{{adminBase}}/boards">板一覧</a> <a href="{{adminBase}}/board-categories">板カテゴリー</a>
 </nav>{{if .Message}}
 <p role="alert">{{.Message}}
 </p>{{end}}
-{{if .Editing}}
+{{if .Creating}}
+<p>板の名前とURLを決めます。投稿条件や閲覧制限は、追加後に設定できます。</p>
+{{if not .CreateReady}}<p>板を追加するには本人確認が必要です。<a class="action-button" href="{{adminBase}}/reauth?return_to=%2Fboards%2Fnew">再認証して板を追加する</a></p>{{end}}
+<form method="post" action="{{adminBase}}/boards">
+<input type="hidden" name="csrf" value="{{.Values.Get "csrf"}}">
+<p><label>板の名前<input name="name" value="{{.Values.Get "name"}}" placeholder="例：雑談" maxlength="128" required {{if not .CreateReady}}disabled{{end}}></label><span class="field-hint">板一覧に表示する名前です。日本語を使えます。</span></p>
+<p><label>URLに使う板キー<input name="key" value="{{.Values.Get "key"}}" placeholder="例：chat" pattern="[a-z][a-z0-9_]{0,31}" maxlength="32" required {{if not .CreateReady}}disabled{{end}}></label><span class="field-hint">例：<code>chat</code> → <code>{{.PublicURL}}/chat/</code><br>英小文字で始まる英数字・下線で、32文字以内です。</span></p>
+<details class="admin-help"><summary>使えないキーについて</summary><p><code>test</code>・<code>web</code>・<code>admin</code>と、他の板で使用中のキー・旧キーは使えません。</p></details>
+<p><label>投稿できる人<select name="posting_mode" {{if not .CreateReady}}disabled{{end}}><option value="anyone" {{if ne (.Values.Get "posting_mode") "cap_only"}}selected{{end}}>通常板（一般の利用者）</option><option value="cap_only" {{if eq (.Values.Get "posting_mode") "cap_only"}}selected{{end}}>CAP専用板（CAPを持つ人）</option></select></label><span class="field-hint">CAP専用板を選ぶ場合は、追加後にこの板のCAPを発行してください。</span></p>
+<button type="submit" {{if not .CreateReady}}disabled{{end}}>この内容で板を追加</button> <a href="{{adminBase}}/boards">板一覧に戻る</a>
+</form>
+{{else if .Metadata}}
+<section class="admin-panel"><h2>板名・キーを変更</h2>
+<p>板キーはURLに使います。変更後も旧キーから同じ板を閲覧・投稿できます。旧キーは他の板では使えません。投稿・スレッド・管理権限は同じ板に残ります。</p>
+{{if not .CreateReady}}<p>保存するには<a href="{{adminBase}}/reauth?return_to={{urlquery .Action}}">管理者の再認証</a>を行ってください。</p>{{end}}
+<form method="post" action="{{adminURL .Action}}">
+<input type="hidden" name="csrf" value="{{.Values.Get "csrf"}}">
+<input type="hidden" name="revision" value="{{.Values.Get "revision"}}">
+<input type="hidden" name="request_id" value="{{.Values.Get "request_id"}}">
+<label>表示名<input name="name" value="{{.Values.Get "name"}}" maxlength="128" required></label>
+<label>板キー<input name="key" value="{{.Values.Get "key"}}" pattern="[a-z][a-z0-9_]{0,31}" maxlength="32" required></label>
+<p>先頭は英小文字、以降は英小文字・数字・下線で32文字以内。「test」「web」「admin」は使用できません。</p>
+<button type="submit" {{if not .CreateReady}}disabled{{end}}>板名・キーを保存</button>
+</form>
+{{if .Aliases}}<h3>保持している旧キー</h3><ul>{{range .Aliases}}<li><code>{{.}}</code></li>{{end}}</ul>{{end}}
+</section>
+{{else if .Editing}}
+{{if adminCan "/board-categories"}}<p><a href="{{adminURL .MetadataAction}}">板名・キーを変更</a></p>{{end}}
 {{if .BoardKey}}<p><a href="{{adminURL (.CapThreadURL .BoardKey)}}">CAP専用スレッドを作成</a>（公開投稿フォームを開きます。作成権限のあるCAPを入力してください。）</p>{{end}}
 {{if and (eq (.Values.Get "create_policy") "cap_only") (eq (.Values.Get "reply_policy") "cap_only")}}<p>この板はCAP専用板です。<a href="{{adminBase}}/caps">キャップ管理</a>で、この板を担当するCAPに「スレッド作成」「返信」の権限を設定してください。</p>{{end}}
 <p><a href="{{adminURL (.ModerationAction)}}">スレッドの削除・公開停止</a></p>
@@ -89,16 +116,7 @@
 {{template "settings-review" .}}<button type="submit">保存</button> <a href="{{adminURL (.Action)}}">最新の設定を読み直す</a>
 </form>
 {{else}}
-{{if .CanCreate}}{{if .CreateReady}}<details class="admin-panel" {{if .Message}}open{{end}}><summary>板を追加</summary><form method="post" action="{{adminBase}}/boards">
-<input type="hidden" name="csrf" value="{{.Values.Get "csrf"}}">
-<label>板キー<input name="key" value="{{.Values.Get "key"}}" pattern="[a-z][a-z0-9_]{0,31}" maxlength="32" required></label>
-<p>URLに使います。先頭は英小文字、以降は英小文字・数字・下線で32文字以内。「test」「web」は使用できません。</p>
-<label>表示名<input name="name" value="{{.Values.Get "name"}}" maxlength="128" required></label>
-<label>板の種類<select name="posting_mode"><option value="anyone" {{if ne (.Values.Get "posting_mode") "cap_only"}}selected{{end}}>通常板</option><option value="cap_only" {{if eq (.Values.Get "posting_mode") "cap_only"}}selected{{end}}>CAP専用板</option></select></label>
-<p>CAP専用板は、スレッド作成・返信の両方をこの板で使用できるCAPに限定します。閲覧は誰でもできます。追加後に<a href="{{adminBase}}/caps">キャップ管理</a>でこの板のCAPを発行してください。</p>
-<p>追加後、板の設定画面で投稿条件を変更できます。</p>
-<button type="submit">板を追加</button>
-</form></details>{{else}}<p>板を追加するには<a href="{{adminBase}}/reauth?return_to=%2Fboards">管理者の再認証</a>を行ってください。</p>{{end}}{{end}}
+{{if .CanCreate}}<p class="action-group"><a class="action-button" href="{{adminBase}}/boards/new">新しい板を追加</a></p>{{end}}
 <ul class="card-list" data-filter-list>{{range .Rows}}
 <li><div class="admin-record-header"><h2><a href="{{adminBase}}/boards/{{.ID}}/settings">{{.Name}}</a></h2><span class="admin-badge">{{.Key}}</span></div><div class="action-group"><a class="tonal-link" href="{{adminBase}}/boards/{{.ID}}/threads">レス削除・投稿者規制</a><a href="{{adminBase}}/boards/{{.ID}}/settings">板設定</a><a href="{{adminBase}}/boards/{{.ID}}/rules">投稿規制</a></div><details class="admin-help"><summary>閲覧権限・表示・CAPの操作</summary><div class="action-group"><a href="{{adminBase}}/boards/{{.ID}}/reading">閲覧権限</a><a href="{{adminBase}}/boards/{{.ID}}/local-rules">ローカルルール</a><a href="{{adminBase}}/boards/{{.ID}}/thread-settings">レス数上限・終了レス</a><a href="{{adminURL ($.CapThreadURL .Key)}}">CAP専用スレッドを作成</a></div></details>
 </li>{{else}}

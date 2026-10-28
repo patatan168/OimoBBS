@@ -32,6 +32,7 @@ type RepositoryPostingResult struct {
 }
 
 type postingBoard struct {
+	liveMetadata              atomic.Pointer[boardMetadata]
 	collection                postingCollection
 	formSettings              *postingFormSettings
 	reservePreparationMemory  func(uint64) (func(), bool)

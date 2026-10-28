@@ -26,7 +26,7 @@ func TestAdminBoardCreateHTMLAndRecovery(t *testing.T) {
 	if c.login(adminTestSecret) != 303 {
 		t.Fatal("login")
 	}
-	res, body := c.request("GET", "/boards", "", nil)
+	res, body := c.request("GET", "/boards/new", "", nil)
 	fields := url.Values{"key": {"newboard"}, "name": {"新しい板"}, "csrf": {pageFields(body).Get("csrf")}}
 	res, body = c.request("POST", "/boards", fields.Encode(), http.Header{"Content-Type": {"application/x-www-form-urlencoded"}})
 	if res.StatusCode != 403 || !strings.Contains(body, "再認証") {
@@ -35,7 +35,7 @@ func TestAdminBoardCreateHTMLAndRecovery(t *testing.T) {
 	if c.reauth(adminTestSecret) != 200 {
 		t.Fatal("reauthentication")
 	}
-	res, body = c.request("GET", "/boards", "", nil)
+	res, body = c.request("GET", "/boards/new", "", nil)
 	if res.StatusCode != 200 || !strings.Contains(body, "板を追加") {
 		t.Fatal("create form", body)
 	}
@@ -240,7 +240,7 @@ func TestAdminBoardCreateDuringPosting(t *testing.T) {
 	if c.login(adminTestSecret) != 303 || c.reauth(adminTestSecret) != 200 {
 		t.Fatal("authentication")
 	}
-	_, page := c.request("GET", "/boards", "", nil)
+	_, page := c.request("GET", "/boards/new", "", nil)
 	csrf := pageFields(page).Get("csrf")
 	form := formServer(t, repo, siteID(repo.site.State()), board.ID)
 	defer form.Close()

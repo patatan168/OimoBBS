@@ -20,7 +20,7 @@ func TestAdminCapBoardCreateAndRecovery(t *testing.T) {
 	if c.login(adminTestSecret) != 303 || c.reauth(adminTestSecret) != 200 {
 		t.Fatal("authentication")
 	}
-	_, page := c.request("GET", "/boards", "", nil)
+	_, page := c.request("GET", "/boards/new", "", nil)
 	if !strings.Contains(page, `name="posting_mode"`) || !strings.Contains(page, "CAP専用板") {
 		t.Fatal("creation picker missing")
 	}

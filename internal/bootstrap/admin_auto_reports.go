@@ -93,7 +93,7 @@ func (h *adminHandler) autoReportRoutes(w http.ResponseWriter, r *http.Request, 
 				return nil, &adminFailure{status: 404, code: "NOT_FOUND"}
 			}
 			rule = entry.rule
-			page = autoReportsPage{Detail: true, Path: path, Name: b.publicName, At: reportReviewTime(rule.Starts), State: reportStopState(rule), Revision: b.adminRules().ETag()}
+			page = autoReportsPage{Detail: true, Path: path, Name: b.boardName(), At: reportReviewTime(rule.Starts), State: reportStopState(rule), Revision: b.adminRules().ETag()}
 			return nil, nil
 		})
 	} else if err == nil {
@@ -222,7 +222,7 @@ func (h *adminHandler) autoReportList(w http.ResponseWriter, r *http.Request, s 
 				for _, entry := range b.denials {
 					rule := entry.rule
 					if automaticStopRule(rule) {
-						rows = append(rows, autoReportStopRow{owner, rule.ID, b.publicName, reportReviewTime(rule.Starts), reportStopState(rule), fmt.Sprintf("/auto-reports/%s/%s", owner, rule.ID)})
+						rows = append(rows, autoReportStopRow{owner, rule.ID, b.boardName(), reportReviewTime(rule.Starts), reportStopState(rule), fmt.Sprintf("/auto-reports/%s/%s", owner, rule.ID)})
 					}
 				}
 				return nil, nil

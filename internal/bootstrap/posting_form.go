@@ -103,12 +103,12 @@ func (r *Repository) submitForm(ctx context.Context, owner domain.ID, body []byt
 	if privateReceipt {
 		var ok bool
 		receiptRef, ok = receiptReference(fields["MESSAGE"], r.cfg.Public.BaseURL)
-		if !ok || b.slug != r.cfg.AutoReports.BoardKey && receiptRef.Board != b.slug {
+		if !ok || !b.matchesKey(r.cfg.AutoReports.BoardKey) && !b.matchesKey(receiptRef.Board) {
 			return fail(errors.Join(postinput.ErrInput, ErrAutoReportInput))
 		}
 		r.mu.Lock()
 		for id, board := range r.posting {
-			if board.slug == receiptRef.Board {
+			if board.matchesKey(receiptRef.Board) {
 				receiptTarget = id
 				break
 			}
@@ -240,7 +240,7 @@ func (r *Repository) submitForm(ctx context.Context, owner domain.ID, body []byt
 		if b.stopped {
 			return fail(ErrPostingUnavailable), nil
 		}
-		if fields["bbs"] != b.slug {
+		if !b.matchesKey(fields["bbs"]) {
 			return fail(postinput.ErrInput), nil
 		}
 		if b.parallelCaptureValidation {

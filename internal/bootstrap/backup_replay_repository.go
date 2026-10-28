@@ -217,7 +217,7 @@ func inspectReplayJobs(ctx context.Context, root string, state store.ControlStat
 			return e
 		}
 		dir := dirs[job.Parameters.BoardID]
-		if job.State != "completed" || dir == nil || dir.JobID != job.ID || dir.Key != job.Parameters.Key || job.Request != boardRequest(key, job.Parameters.Key, job.Parameters.Name) {
+		if job.State != "completed" || dir == nil || dir.JobID != job.ID || !dir.matchesKey(job.Parameters.Key) || job.Request != boardRequest(key, job.Parameters.Key, job.Parameters.Name) {
 			return errors.New("backup provisioning job mismatch")
 		}
 	}

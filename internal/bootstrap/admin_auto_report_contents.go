@@ -68,7 +68,7 @@ func (r *Repository) reviewReportVote(ctx context.Context, s adminauth.Session, 
 			n, _ := fmt.Sscan(v.Ranges, &ref.Target.Post)
 			if n == 1 {
 				ref.Target.Key = uint64(v.Thread)
-				ref.Target.Board = b.slug
+				ref.Target.Board = b.boardKey()
 			}
 		}
 	} else {
@@ -102,15 +102,15 @@ func (r *Repository) reviewReportVote(ctx context.Context, s adminauth.Session, 
 				}
 				c.ReportBody = html.UnescapeString(body)
 				c.At = reportReviewTime(row.Committed)
-				c.Source = "公開通報（" + source.publicName + "）"
+				c.Source = "公開通報（" + source.boardName() + "）"
 				c.Message = ""
 				c.until = row.Expires
 				if ref.Target.Key == 0 {
 					target, ok := parseAutoReport(c.ReportBody, r.cfg.Public.BaseURL)
 					if post, command := parseAutoReportCommand(c.ReportBody); command {
-						target, ok = autoReportReference{source.slug, uint64(row.Thread), post}, true
+						target, ok = autoReportReference{source.boardKey(), uint64(row.Thread), post}, true
 					}
-					if ok && target.Board == b.slug {
+					if ok && b.matchesKey(target.Board) {
 						ref.Target = target
 					}
 				}

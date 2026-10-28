@@ -164,7 +164,7 @@ func (h *adminHandler) writeReadingPage(w http.ResponseWriter, r *http.Request, 
 		h.repo.mu.Lock()
 		if id, err := readingScope(v.Scope); err == nil {
 			if board := h.repo.posting[id]; board != nil {
-				title += "：" + board.publicName + "（" + board.slug + "）"
+				title += "：" + board.boardName() + "（" + board.boardKey() + "）"
 			}
 		}
 		h.repo.mu.Unlock()

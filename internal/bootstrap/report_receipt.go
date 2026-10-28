@@ -152,7 +152,7 @@ func (r *Repository) restorePrivateReportVotes(now domain.Time) error {
 			continue
 		}
 		n, _ := strconv.ParseUint(v.Ranges, 10, 32)
-		message := autoReportMessage{autoReportReference{target.slug, uint64(v.Thread), uint32(n)}, v.ID, app.EvidencePostIdentity{IP: v.SourceIP, Subject: v.Automatic.Reporter}, v.Created}
+		message := autoReportMessage{autoReportReference{target.boardKey(), uint64(v.Thread), uint32(n)}, v.ID, app.EvidencePostIdentity{IP: v.SourceIP, Subject: v.Automatic.Reporter}, v.Created}
 		if err = r.applyAutoReport(message, now); err != nil {
 			return err
 		}

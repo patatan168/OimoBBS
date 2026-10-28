@@ -9,13 +9,24 @@ import (
 	"slices"
 	"strings"
 	"testing"
+	"unicode/utf8"
 )
 
 // referenceGuardSignature は変更前の全文rune変換と3文字ハッシュを比較基準にする。
 func referenceGuardSignature(body string) guardSignature {
 	text := strings.Join(strings.Fields(body), " ")
 	chars := []rune(text)
-	sig := guardSignature{exact: sha256.Sum256([]byte(text)), runes: len(chars)}
+	// 本文例は後から追加された診断項目。旧3文字ハッシュの比較にも現在の保持契約を含める。
+	sample := text
+	if len(chars) > 1024 {
+		end := 0
+		for range 1024 {
+			_, width := utf8.DecodeRuneInString(text[end:])
+			end += width
+		}
+		sample = text[:end] + "…"
+	}
+	sig := guardSignature{sample: sample, exact: sha256.Sum256([]byte(text)), runes: len(chars)}
 	unique := make(map[uint64]struct{})
 	for i := 0; i+2 < len(chars); i++ {
 		sum := sha256.Sum256([]byte(string(chars[i : i+3])))
@@ -54,6 +65,9 @@ func referenceGuardSimilar(a, b guardSignature, minimum, percent int) bool {
 func FuzzGuardSignatureAndSimilarity(f *testing.F) {
 	for _, pair := range [][2]string{{"", ""}, {"はい", "はい！"}, {"広告本文 abcdefghijklmnop", "広告本文 abcdefghijklmnoq"}, {"あ\u3000いう\nえ", "あ いう え"}, {"\xff\xfe日本語", "\xef\xbf\xbd日本語"}, {strings.Repeat("a", 32768), "aaa"}} {
 		f.Add(pair[0], pair[1], uint8(90))
+	}
+	for _, body := range []string{strings.Repeat("あ", 1025), strings.Repeat("a", 1024) + "b", strings.Repeat("a", 1023) + "\xffx"} {
+		f.Add(body, body, uint8(90))
 	}
 	f.Fuzz(func(t *testing.T, left, right string, threshold uint8) {
 		a, b := guardBodySignature(left), guardBodySignature(right)

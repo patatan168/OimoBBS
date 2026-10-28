@@ -20,6 +20,7 @@ func validBoardKey(k string) bool {
 }
 
 type boardDirectory struct {
+	Name       string     `json:"name,omitempty"`
 	Key        string     `json:"key"`
 	Aliases    []string   `json:"aliases"`
 	Status     string     `json:"status"`
@@ -71,7 +72,7 @@ func validateDirectory(key string, old, next json.RawMessage) error {
 	if err := strictjson.Decode(next, &v); err != nil {
 		return err
 	}
-	if !validBoardKey(v.Key) || len(v.Aliases) != 0 || v.CategoryID != nil && *v.CategoryID == (domain.ID{}) || (v.Status != "provisioning" && v.Status != "active") {
+	if v.validateMetadata() != nil || v.CategoryID != nil && *v.CategoryID == (domain.ID{}) || (v.Status != "provisioning" && v.Status != "active") {
 		return errors.New("unsupported board directory")
 	}
 	if len(old) == 0 {
@@ -84,7 +85,7 @@ func validateDirectory(key string, old, next json.RawMessage) error {
 	if err := strictjson.Decode(old, &prior); err != nil {
 		return err
 	}
-	if prior.Key != v.Key || prior.JobID != v.JobID || (prior.Status != "provisioning" && prior.Status != "active") || v.Status != "active" || prior.Status == "provisioning" && v.CategoryID != nil {
+	if validateMetadataTransition(prior, v) != nil || prior.JobID != v.JobID || (prior.Status != "provisioning" && prior.Status != "active") || v.Status != "active" || prior.Status == "provisioning" && (v.CategoryID != nil || v.Name != "" || prior.Key != v.Key || len(v.Aliases) != 0) {
 		return errors.New("invalid board activation")
 	}
 	return nil

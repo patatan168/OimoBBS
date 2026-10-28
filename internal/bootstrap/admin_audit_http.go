@@ -240,7 +240,7 @@ var auditLabels = map[string]string{
 	"abuse_guard_update": "掲示板全体の荒らし対策変更", "operations_update": "運用設定変更", "reading_access_update": "閲覧制限変更", "admin_reading_reset": "管理画面の閲覧制限解除", "site_name_update": "サイト名変更", "posting_consent_update": "利用規約・Cookieの説明変更", "board_settings_update": "板設定変更", "rule_create": "投稿規制を登録", "rule_revoke": "投稿規制を解除",
 	"administrator_create": "管理者登録", "administrator_access_update": "管理権限変更",
 	"administrator_bootstrap": "初回管理者登録", "administrator_password_reset": "管理者パスワード再設定", "admission_enable": "投稿間隔制限の有効化", "posting_resources_enable": "投稿受付をサーバー資源に応じて調整", "anonymous_enable": "匿名Cookieの有効化", "anonymous_revoke": "匿名Cookieを個別に利用停止", "anonymous_revoke_all": "発行済みの匿名Cookieをすべて利用停止",
-	"board_provisioning": "板作成開始", "board_activated": "板の公開開始", "board_settings_enable": "保存形式を更新：板設定の編集", "denial_rules_enable": "保存形式を更新：投稿規制", "other_admin_operation": "詳細未記録の管理操作", "post_evidence_query": "レスの非公開記録照会",
+	"board_metadata_update": "板名・キー変更", "board_provisioning": "板作成開始", "board_activated": "板の公開開始", "board_settings_enable": "保存形式を更新：板設定の編集", "denial_rules_enable": "保存形式を更新：投稿規制", "other_admin_operation": "詳細未記録の管理操作", "post_evidence_query": "レスの非公開記録照会",
 	"cap_command_ban_applied": "CAPによる投稿者規制完了", "cap_command_unban_applied": "CAPによる投稿者規制解除完了", "cap_command_delete_applied": "CAPによるレス削除完了", "cap_command_stop_applied": "CAPによるスレッド停止完了",
 	"cap_commands_enable": "保存形式を更新：CAPコマンド", "cap_command_ban": "CAPによる投稿者規制を開始", "cap_command_unban": "CAPによる投稿者規制解除を開始", "cap_command_delete": "CAPによるレス削除を開始", "cap_command_stop": "CAPによるスレッド停止を開始",
 }

@@ -108,7 +108,7 @@ type AdminRules struct {
 
 func (r AdminRules) ETag() string { return fmt.Sprintf(`"%s:rules:%d"`, r.Board, r.Revision) }
 func (b *postingBoard) adminRules() AdminRules {
-	out := AdminRules{Board: b.owner, Name: b.publicName, Rules: []AdminRule{}}
+	out := AdminRules{Board: b.owner, Name: b.boardName(), Rules: []AdminRule{}}
 	for _, v := range b.sortedDenials() {
 		out.Revision += v.Revision
 		out.Rules = append(out.Rules, ruleDTO(v))
@@ -131,7 +131,7 @@ func (r *Repository) adminRulesView(ctx context.Context, s adminauth.Session, id
 		return AdminRules{}, &adminFailure{status: 404, code: "BOARD_NOT_FOUND"}
 	}
 	if !withRows {
-		return AdminRules{Board: id, Name: b.publicName, Rules: []AdminRule{}}, nil
+		return AdminRules{Board: id, Name: b.boardName(), Rules: []AdminRule{}}, nil
 	}
 	v, e := b.worker.Submit(ctx, func() (any, error) { return b.adminRules(), nil })
 	if e != nil {

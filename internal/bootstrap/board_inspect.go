@@ -93,6 +93,12 @@ func inspectBoardsMode(cfg Config, site store.ControlState, allowPending, allowP
 		if err = inspectBoard(cfg, &entry, allowPending, allowPosting); err != nil {
 			return nil, fmt.Errorf("board %s: %w", id.String(), err)
 		}
+		if d := entry.directory; d != nil && d.Status == "active" {
+			entry.info.Key = d.Key
+			if d.Name != "" {
+				entry.info.Name = d.Name
+			}
+		}
 		if row, ok := entry.control.Rows["board:state"]; ok {
 			var board boardValue
 			var siteValue siteState
@@ -197,6 +203,9 @@ func siteDirectories(state store.ControlState) (map[domain.ID]*boardDirectory, e
 		if err := strictjson.Decode(row.Value, &v); err != nil {
 			return nil, err
 		}
+		if v.validateMetadata() != nil || (v.Name != "" || len(v.Aliases) > 0) && site.MinimumReader < boardMetadataReader {
+			return nil, store.ErrCorrupt
+		}
 		if v.CategoryID != nil && (!categories[*v.CategoryID] || site.MinimumReader < 77) {
 			return nil, store.ErrCorrupt
 		}
@@ -204,6 +213,12 @@ func siteDirectories(state store.ControlState) (map[domain.ID]*boardDirectory, e
 			return nil, errors.New("duplicate board key or owner")
 		}
 		keys[v.Key] = true
+		for _, alias := range v.Aliases {
+			if keys[alias] {
+				return nil, errors.New("duplicate board alias")
+			}
+			keys[alias] = true
+		}
 		dirs[id] = &v
 	}
 	if len(dirs) > maxPersistentBoards {
@@ -264,7 +279,7 @@ func inspectJob(root string, id domain.ID) (provisionJob, error) {
 }
 func inspectBoard(cfg Config, entry *persistedBoard, allowPending, allowPosting bool) error {
 	d, j := entry.directory, entry.job
-	if d != nil && (d.JobID != j.ID || d.Key != j.Parameters.Key || d.CategoryID != nil && (d.Status != "active" || j.State != "completed")) {
+	if d != nil && (d.JobID != j.ID || !d.matchesKey(j.Parameters.Key) || d.CategoryID != nil && (d.Status != "active" || j.State != "completed")) {
 		return errors.New("directory and job differ")
 	}
 	active := d != nil && d.Status == "active"
@@ -302,7 +317,7 @@ func inspectBoard(cfg Config, entry *persistedBoard, allowPending, allowPosting 
 	} else if err := requireEmpty(filepath.Join(dir, "threads")); err != nil {
 		return err
 	}
-	state, err := inspectBoardControl(dir, j)
+	state, err := inspectBoardControl(dir, j, d)
 	if err != nil {
 		return err
 	}
@@ -311,16 +326,16 @@ func inspectBoard(cfg Config, entry *persistedBoard, allowPending, allowPosting 
 	entry.info.Revision = state.Rows["board:state"].Revision
 	return nil
 }
-func inspectBoardControl(dir string, job provisionJob) (store.ControlState, error) {
+func inspectBoardControl(dir string, job provisionJob, directory ...*boardDirectory) (store.ControlState, error) {
 	state, err := inspectRuntimeControl(filepath.Dir(filepath.Dir(dir)), "board", job.Parameters.BoardID)
 	if err != nil {
 		return state, err
 	}
-	return inspectBoardState(state, job)
+	return inspectBoardState(state, job, directory...)
 }
 
 // inspectBoardState は復旧経路によらず、必須行・作成job・receipt・所有者を照合する。
-func inspectBoardState(state store.ControlState, job provisionJob) (store.ControlState, error) {
+func inspectBoardState(state store.ControlState, job provisionJob, directory ...*boardDirectory) (store.ControlState, error) {
 	var v boardValue
 	if err := strictjson.Decode(state.Rows["board:state"].Value, &v); err != nil {
 		return state, err
@@ -398,7 +413,11 @@ func inspectBoardState(state store.ControlState, job provisionJob) (store.Contro
 			if e := strictjson.Decode(row.Value, &receipt); e != nil {
 				return state, e
 			}
-			if receipt.Result.ID != job.Parameters.BoardID || receipt.Result.Key != job.Parameters.Key || receipt.Result.Name != job.Parameters.Name || receipt.Result.Revision > state.Rows["board:state"].Revision || row.Expires != nil {
+			knownKey := receipt.Result.Key == job.Parameters.Key
+			if len(directory) == 1 && directory[0] != nil {
+				knownKey = directory[0].matchesKey(receipt.Result.Key)
+			}
+			if receipt.Result.ID != job.Parameters.BoardID || !knownKey || receipt.Result.Name != job.Parameters.Name || receipt.Result.Revision > state.Rows["board:state"].Revision || row.Expires != nil {
 				return state, store.ErrCorrupt
 			}
 			count++

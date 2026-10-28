@@ -82,7 +82,12 @@ func (repo *Repository) threadPage(w http.ResponseWriter, r *http.Request, owner
 		threadError(w, r, 503, "現在閲覧できません。")
 		return
 	}
-	key, selection, page, e := threadRequest(r, b.slug)
+	requestedKey := strings.Split(strings.TrimPrefix(r.URL.Path, "/test/read.cgi/"), "/")[0]
+	if !b.matchesKey(requestedKey) {
+		threadError(w, r, 404, "板が見つかりません。")
+		return
+	}
+	key, selection, page, e := threadRequest(r, requestedKey)
 	if e != nil {
 		threadError(w, r, 400, "レスの指定を確認してください。")
 		return
@@ -97,14 +102,14 @@ func (repo *Repository) threadPage(w http.ResponseWriter, r *http.Request, owner
 		threadError(w, r, 400, "レスの指定を確認してください。")
 		return
 	}
-	cacheKey := fmt.Sprintf("thread-html:%s:%s:%d:%d:%d:%s:%d", owner, b.slug, key, snapshot.Generation, snapshot.Revision, selection, page)
+	cacheKey := fmt.Sprintf("thread-html:%s:%s:%d:%d:%d:%s:%d", owner, b.boardKey(), key, snapshot.Generation, snapshot.Revision, selection, page)
 	feed, e := repo.feedCompression.RenderFeed(r.Context(), cacheKey, func() ([]byte, error) {
 		rows, e := threadRows(snapshot.DAT, snapshot.PostCount, selected)
 		if e != nil {
 			return nil, e
 		}
-		view := threadPage{Board: b.slug, Title: snapshot.Title, Key: fmt.Sprint(key), Count: snapshot.PostCount, Rows: rows, CanReply: snapshot.CanReply, CapOnly: snapshot.CapOnly, MoveTarget: snapshot.MoveTarget}
-		path := fmt.Sprintf("/test/read.cgi/%s/%d/%s", b.slug, key, selection)
+		view := threadPage{Board: b.boardKey(), Title: snapshot.Title, Key: fmt.Sprint(key), Count: snapshot.PostCount, Rows: rows, CanReply: snapshot.CanReply, CapOnly: snapshot.CapOnly, MoveTarget: snapshot.MoveTarget}
+		path := fmt.Sprintf("/test/read.cgi/%s/%d/%s", b.boardKey(), key, selection)
 		if page > 1 {
 			view.Previous = fmt.Sprintf("%s?page=%d", path, page-1)
 		}

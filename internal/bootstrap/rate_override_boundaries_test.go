@@ -15,7 +15,6 @@ import (
 	"oimobbs/internal/strictjson"
 	"os"
 	"strconv"
-	"strings"
 	"testing"
 	"time"
 )
@@ -31,7 +30,7 @@ func TestRateOverrideHTMLAndCapacity(t *testing.T) {
 	path := "/boards/" + board.String() + "/rules"
 	for i := range 13 {
 		_, body := c.request("GET", path, "", nil)
-		fields := pageFields(strings.Split(body, "</form>")[0])
+		fields := ruleCreateFields(t, body)
 		fields.Set("field", "body")
 		fields.Set("operator", "contains")
 		fields.Set("target", "追加")

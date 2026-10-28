@@ -62,6 +62,9 @@ var auditFieldLabels = map[string]string{
 	"token_revocation":                "匿名Cookieの失効",
 	"anon_policy.generation":          "匿名Cookieの世代",
 	"board_directory":                 "板の登録",
+	"board_directory.name":            "板の表示名",
+	"board_directory.key":             "板の公開キー",
+	"board_directory.aliases":         "板の旧キー",
 	"board_directory.status":          "板の公開状態",
 }
 
@@ -91,6 +94,7 @@ var auditDescriptions = map[string]string{
 	"network_fetch_failed":              "取得の失敗を記録しました。前回成功した分類表は維持します。",
 	"site_name_update":                  "掲示板全体の表示名を保存しました。",
 	"board_settings_update":             "対象の板の設定を保存しました。",
+	"board_metadata_update":             "板の表示名・公開キーと、保持する旧キーを保存しました。",
 	"operations_update":                 "保存整理・通報・配信などの運用設定を保存しました。",
 	"reading_access_update":             "閲覧または管理画面の接続条件を保存しました。",
 	"global_rules_update":               "掲示板全体に適用する投稿規制を追加・解除しました。",

@@ -129,7 +129,7 @@ func (r *Repository) securityPostURL(board string, thread uint64, number uint32,
 					return ""
 				}
 			}
-			return strings.TrimRight(r.cfg.Public.BaseURL, "/") + fmt.Sprintf("/test/read.cgi/%s/%d/%d", b.slug, thread, number)
+			return strings.TrimRight(r.cfg.Public.BaseURL, "/") + fmt.Sprintf("/test/read.cgi/%s/%d/%d", b.boardKey(), thread, number)
 		}
 	}
 	return ""

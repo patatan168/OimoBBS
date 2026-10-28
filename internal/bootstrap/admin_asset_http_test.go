@@ -6,10 +6,28 @@ import (
 	"oimobbs/internal/domain"
 	"oimobbs/internal/webui"
 	"regexp"
+	"slices"
 	"strings"
 	"testing"
 	"time"
 )
+
+// requireAdminPageAssets は件数だけでなく、アイコン・CSS・JSの集合と重複の有無を検査する。
+func requireAdminPageAssets(t *testing.T, body string, want ...string) []string {
+	t.Helper()
+	matches := regexp.MustCompile(`(?:href|src)="(/web/assets/page/[^"]+)"`).FindAllStringSubmatch(body, -1)
+	urls, names := make([]string, 0, len(matches)), make([]string, 0, len(matches))
+	for _, match := range matches {
+		urls = append(urls, match[1])
+		names = append(names, match[1][strings.LastIndexByte(match[1], '/')+1:])
+	}
+	slices.Sort(names)
+	slices.Sort(want)
+	if !slices.Equal(names, want) {
+		t.Fatalf("page assets: got %v, want %v", names, want)
+	}
+	return urls
+}
 
 func TestAdminPageAssetsSameAuthorization(t *testing.T) {
 	cfg, repo := adminFixture(t)
@@ -145,13 +163,10 @@ func TestAdminPageAssetsPreserveAuditSnapshots(t *testing.T) {
 	if res.StatusCode != 200 || before != 1 {
 		t.Fatal("paged audit fixture", res.StatusCode, before)
 	}
-	matches := regexp.MustCompile(`(?:href|src)="(/web/assets/page/[^"]+)"`).FindAllStringSubmatch(body, -1)
-	if len(matches) != 8 {
-		t.Fatal("audit assets", len(matches))
-	}
+	assets := requireAdminPageAssets(t, body, "favicon.svg", "ui.css", "admin.css", "ui.js", "admin.js", "admin-audit.css", "admin-audit.js", "dates.css", "dates.js")
 	for range 3 {
-		for _, asset := range matches {
-			res, _ = c.request("GET", asset[1], "", nil)
+		for _, asset := range assets {
+			res, _ = c.request("GET", asset, "", nil)
 			if res.StatusCode != 200 {
 				t.Fatal("asset exhausted audit pagination", res.StatusCode)
 			}

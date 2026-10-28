@@ -44,7 +44,7 @@ func (r *Repository) boardCategoriesLocked() (boardCategories, error) {
 		if d := dirs[id]; d != nil && d.CategoryID != nil {
 			assigned = d.CategoryID.String()
 		}
-		view.Boards = append(view.Boards, categoryBoard{id, b.slug, b.publicName, assigned})
+		view.Boards = append(view.Boards, categoryBoard{id, b.boardKey(), b.boardName(), assigned})
 	}
 	sortCategoryBoards(view.Boards)
 	return view, nil
@@ -211,7 +211,7 @@ func editBoardCategories(site *siteState, dirs map[domain.ID]*boardDirectory, bo
 	case "assign":
 		var owner domain.ID
 		for id, b := range boards {
-			if b.slug == fields.Get("board") {
+			if b.boardKey() == fields.Get("board") {
 				owner = id
 			}
 		}

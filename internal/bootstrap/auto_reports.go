@@ -202,7 +202,7 @@ func (r *Repository) restoreAutoReports() error {
 		return nil
 	}
 	for id, b := range r.posting {
-		if b.slug == r.cfg.AutoReports.BoardKey {
+		if b.matchesKey(r.cfg.AutoReports.BoardKey) {
 			r.autoReportBoard = id
 			break
 		}
@@ -320,7 +320,7 @@ func (r *Repository) prepareAutoReport(row app.AcceptedEvidence, now domain.Time
 	if !ok && row.Thread != 0 {
 		if post, command := parseAutoReportCommand(body); command {
 			if source := r.posting[row.Board]; source != nil {
-				ref, ok = autoReportReference{source.slug, uint64(row.Thread), post}, true
+				ref, ok = autoReportReference{source.boardKey(), uint64(row.Thread), post}, true
 			}
 		}
 	}
@@ -329,7 +329,7 @@ func (r *Repository) prepareAutoReport(row app.AcceptedEvidence, now domain.Time
 	}
 	known := false
 	for _, b := range r.posting {
-		if b.slug == ref.Board && b.owner != r.autoReportBoard {
+		if b.matchesKey(ref.Board) && b.owner != r.autoReportBoard {
 			settings := b.autoReports.Load()
 			// 復旧時の候補上限を旧票で埋めず、新しい集計期間の票だけを残す。
 			known = boardAutoReportsEnabled(settings) && (settings == nil || row.Committed >= settings.Since)
@@ -362,7 +362,7 @@ func (r *Repository) applyAutoReport(message autoReportMessage, now domain.Time)
 	ref, reporter := message.Reference, message.Reporter
 	var target *postingBoard
 	for _, b := range r.posting {
-		if b.slug == ref.Board {
+		if b.matchesKey(ref.Board) {
 			target = b
 			break
 		}

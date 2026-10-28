@@ -197,7 +197,7 @@ func (b *postingBoard) adminBoardLocked() (AdminBoard, error) {
 	if edit.Anonymous != nil {
 		edit.Anonymous.Wait = b.guardTokenWait(edit.Anonymous.Wait)
 	}
-	return AdminBoard{b.owner, b.slug, v.Name, row.Revision, edit}, nil
+	return b.presentAdminBoard(AdminBoard{b.owner, b.boardKey(), v.Name, row.Revision, edit}), nil
 }
 
 // adminBoardSettings はサイト認可を保持したまま板の確定値をコピーする。workerからサイトmutexは取らない。
@@ -278,7 +278,7 @@ func (r *Repository) updateAdminBoard(ctx context.Context, s adminauth.Session, 
 			return AdminBoard{}, e
 		}
 		if prior != nil {
-			return prior.(AdminBoard), nil
+			return b.presentAdminBoard(prior.(AdminBoard)), nil
 		}
 		if e := r.ensureOnlinePostingPolicies(); e != nil {
 			return AdminBoard{}, e
@@ -479,7 +479,7 @@ func (r *Repository) updateAdminBoard(ctx context.Context, s adminauth.Session, 
 		if policy.At != 0 {
 			resultEdit.Rates = &policy.Rates
 		}
-		result := AdminBoard{id, b.slug, board.Name, seq, resultEdit}
+		result := AdminBoard{id, b.boardKey(), board.Name, seq, resultEdit}
 		receipt := adminBoardReceipt{domain.NewID(), s.Admin, requestKey, request, result, now, now + 86400e9}
 		changes := []store.Mutation{mutation("board", "state", board, nil), mutation("admin_receipt", requestKey.String(), receipt, nil)}
 		if policyChanged {
@@ -511,7 +511,7 @@ func (r *Repository) updateAdminBoard(ctx context.Context, s adminauth.Session, 
 			}
 		}
 		if r.cfg.AutoReports != nil {
-			snapshot, err := receiptSnapshotForBoard(r.cfg.Public.BaseURL, b.slug, r.operations().Reports, board.Settings.Posting.AutoReports)
+			snapshot, err := receiptSnapshotForBoard(r.cfg.Public.BaseURL, b.boardKey(), r.operations().Reports, board.Settings.Posting.AutoReports)
 			if err != nil {
 				b.stopped = true
 				return nil, err
@@ -533,5 +533,5 @@ func (r *Repository) updateAdminBoard(ctx context.Context, s adminauth.Session, 
 	if e != nil {
 		return AdminBoard{}, e
 	}
-	return value.(AdminBoard), nil
+	return b.presentAdminBoard(value.(AdminBoard)), nil
 }

@@ -18,6 +18,9 @@ type adminBoardsPage struct {
 	Rows                  []AdminBoard
 	Next                  string
 	Editing               bool
+	Metadata              bool
+	Creating              bool
+	Aliases               []string
 	CanCreate             bool
 	CreateReady           bool
 	Name, Action, Message string
@@ -87,4 +90,9 @@ func (p adminBoardsPage) ExtendModeAvailable(mode string) bool {
 // ReadingAction は編集中の板の閲覧制限画面への経路を返す。
 func (p adminBoardsPage) ReadingAction() string {
 	return strings.TrimSuffix(p.Action, "/settings") + "/reading"
+}
+
+// MetadataAction は板IDで固定した名前・キー変更画面への経路を返す。
+func (p adminBoardsPage) MetadataAction() string {
+	return strings.TrimSuffix(p.Action, "/settings") + "/metadata"
 }

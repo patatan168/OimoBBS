@@ -73,6 +73,14 @@ func (h *adminHandler) boards(w http.ResponseWriter, r *http.Request, s adminaut
 	return
 }
 func (h *adminHandler) boardSettings(w http.ResponseWriter, r *http.Request, s adminauth.Session) {
+	if r.URL.Path == "/boards/new" {
+		h.newBoard(w, r, s)
+		return
+	}
+	if strings.HasSuffix(r.URL.Path, "/metadata") {
+		h.boardMetadata(w, r, s)
+		return
+	}
 	if _, _, _, ok := adminPostsPath(r.URL.Path); ok {
 		h.adminPosts(w, r, s)
 		return

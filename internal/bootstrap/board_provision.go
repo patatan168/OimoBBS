@@ -18,11 +18,11 @@ import (
 func (r *Repository) boardProvisionLookup(ctx context.Context, key string) (BoardInfo, int, error) {
 	if r.captureValidator != nil {
 		for id, b := range r.posting {
-			if b.slug != key {
+			if !b.matchesKey(key) {
 				continue
 			}
 			value, err := b.worker.Submit(ctx, func() (any, error) {
-				return BoardInfo{ID: id, Key: b.slug, Name: b.publicName, Status: "open", Revision: b.control.State().Rows["board:state"].Revision}, nil
+				return BoardInfo{ID: id, Key: b.boardKey(), Name: b.boardName(), Status: "open", Revision: b.control.State().Rows["board:state"].Revision}, nil
 			})
 			if err != nil {
 				return BoardInfo{}, len(r.posting), err
@@ -36,7 +36,7 @@ func (r *Repository) boardProvisionLookup(ctx context.Context, key string) (Boar
 		return BoardInfo{}, 0, err
 	}
 	for _, entry := range entries {
-		if entry.info.Key == key {
+		if entry.directory.matchesKey(key) {
 			return entry.info, len(entries), nil
 		}
 	}

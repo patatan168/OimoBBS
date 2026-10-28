@@ -110,7 +110,7 @@ func (r *Repository) matchesEvidenceCase(c disclosure.Case, f evidenceListFilter
 		fields = append(fields, strconv.FormatUint(uint64(c.Scope.Thread), 10))
 	}
 	if board := r.posting[c.Scope.Board]; board != nil {
-		fields = append(fields, board.publicName, board.slug)
+		fields = append(fields, board.boardName(), board.boardKey())
 	}
 	return adminThreadMatches(strings.Join(fields, "\n"), f.Query)
 }

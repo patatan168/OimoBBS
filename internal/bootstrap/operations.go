@@ -259,7 +259,7 @@ func (r *Repository) updateOperations(s adminauth.Session, v OperationSettings, 
 		if r.cfg.AutoReports == nil {
 			continue
 		}
-		snapshot, err := receiptSnapshotForBoard(r.cfg.Public.BaseURL, b.slug, v.Reports, b.autoReports.Load())
+		snapshot, err := receiptSnapshotForBoard(r.cfg.Public.BaseURL, b.boardKey(), v.Reports, b.autoReports.Load())
 		if err != nil {
 			r.stopped = true
 			return AdminOperations{}, err

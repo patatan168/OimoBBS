@@ -149,6 +149,16 @@ func (h *adminHandler) reauthenticate(w http.ResponseWriter, r *http.Request, ra
 
 // adminReturnPath は管理GET画面だけを戻り先として許可し、外部URLと更新専用経路を除く。
 func adminReturnPath(path string) string {
+	if path == "/boards/new" {
+		return path
+	}
+	if strings.HasPrefix(path, "/boards/") && strings.HasSuffix(path, "/metadata") {
+		parts := strings.Split(strings.TrimPrefix(path, "/boards/"), "/")
+		var id domain.ID
+		if len(parts) == 2 && id.UnmarshalJSON([]byte(strconv.Quote(parts[0]))) == nil && id != (domain.ID{}) {
+			return path
+		}
+	}
 	if path == "/updates" || strings.HasPrefix(path, "/updates/") {
 		return "/updates"
 	}
@@ -209,6 +219,8 @@ func (p adminPage) ReauthDestination() string {
 		return "提出用ログ"
 	case "/boards":
 		return "板設定"
+	case "/boards/new":
+		return "新しい板の追加"
 	case "/caps":
 		return "キャップ管理"
 	case "/networks":
@@ -217,6 +229,9 @@ func (p adminPage) ReauthDestination() string {
 		return "匿名利用者の管理"
 	case "/audit":
 		return "管理操作の記録"
+	}
+	if strings.HasPrefix(p.BackPath, "/boards/") && strings.HasSuffix(p.BackPath, "/metadata") {
+		return "板名・キーの変更"
 	}
 	if _, _, _, ok := adminPostsPath(p.BackPath); ok {
 		return "レスの管理"

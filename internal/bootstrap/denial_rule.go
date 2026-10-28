@@ -172,7 +172,7 @@ func (b *postingBoard) loadDenials() error {
 			return store.ErrCorrupt
 		}
 		for _, ref := range r.Reports {
-			if ref.Target.Board != b.slug {
+			if !b.matchesKey(ref.Target.Board) {
 				return store.ErrCorrupt
 			}
 		}

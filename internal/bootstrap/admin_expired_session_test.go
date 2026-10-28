@@ -4,7 +4,6 @@ package bootstrap
 import (
 	"net/http"
 	"oimobbs/internal/webui"
-	"regexp"
 	"strings"
 	"testing"
 )
@@ -27,14 +26,11 @@ func TestAdminExpiredSessionLoginAssets(t *testing.T) {
 	if res.StatusCode != 401 || !strings.Contains(body, "ログインの有効期限") || !strings.Contains(body, `data-login-form`) || strings.Contains(body, "data-settings-review") {
 		t.Fatal("expired HTML", res.StatusCode)
 	}
-	assets := regexp.MustCompile(`(?:href|src)="(/web/assets/page/[^\"]+)"`).FindAllStringSubmatch(body, -1)
-	if len(assets) != 6 {
-		t.Fatal("login assets", len(assets))
-	}
+	assets := requireAdminPageAssets(t, body, "favicon.svg", "ui.css", "admin.css", "ui.js", "admin.js", "admin-auth.css", "admin-auth.js")
 	for _, asset := range assets {
-		res, _ = c.request("GET", asset[1], "", nil)
+		res, _ = c.request("GET", asset, "", nil)
 		if res.StatusCode != 200 {
-			t.Fatal("expired login asset denied", asset[1], res.StatusCode)
+			t.Fatal("expired login asset denied", asset, res.StatusCode)
 		}
 	}
 	for _, method := range []string{"GET", "HEAD"} {

@@ -119,6 +119,7 @@ func (repo *Repository) legacyFeed(w http.ResponseWriter, r *http.Request, board
 			prefix, err := localRulesHead(reprintNotice())
 			return append(prefix, custom...), err
 		}
+		state.Name = b.boardName()
 		return legacySettings(state)
 	})
 	if e != nil {
@@ -161,7 +162,12 @@ func (repo *Repository) writeRenderedFeedProfile(w http.ResponseWriter, r *http.
 
 // legacyDAT は期限判定とsnapshotの取得を同じ板ワーカー内で行い、公開版だけをHTTPへ渡す。
 func (repo *Repository) legacyDAT(w http.ResponseWriter, r *http.Request, board publicBoard) {
-	raw := strings.TrimSuffix(strings.TrimPrefix(r.URL.Path, "/"+board.Key+"/dat/"), ".dat")
+	parts := strings.Split(r.URL.Path, "/")
+	if len(parts) != 4 || parts[2] != "dat" {
+		threadError(w, r, 404, "スレッドが見つかりません。")
+		return
+	}
+	raw := strings.TrimSuffix(parts[3], ".dat")
 	key, e := strconv.ParseUint(raw, 10, 64)
 	if e != nil || key == 0 || strconv.FormatUint(key, 10) != raw {
 		threadError(w, r, 404, "スレッドが見つかりません。")

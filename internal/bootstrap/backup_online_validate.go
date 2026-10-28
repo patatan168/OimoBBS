@@ -91,7 +91,7 @@ func (r *Repository) validateOnlineSiteCopy(ctx context.Context, root string, v 
 			return e
 		}
 		dir := dirs[job.Parameters.BoardID]
-		if job.State != "completed" || job.Expires == nil || dir == nil || dir.JobID != job.ID || dir.Key != job.Parameters.Key || *job.Expires != c.Capture.Expires {
+		if job.State != "completed" || job.Expires == nil || dir == nil || dir.JobID != job.ID || !dir.matchesKey(job.Parameters.Key) || *job.Expires != c.Capture.Expires {
 			return store.ErrCorrupt
 		}
 	}

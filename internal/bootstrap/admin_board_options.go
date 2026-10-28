@@ -30,7 +30,7 @@ func (r *Repository) boardOptions(s adminauth.Session, selected []domain.ID) ([]
 		if !scope.allows([]domain.ID{id}) {
 			continue
 		}
-		rows = append(rows, boardOption{id, b.slug, b.publicName, slices.Contains(selected, id)})
+		rows = append(rows, boardOption{id, b.boardKey(), b.boardName(), slices.Contains(selected, id)})
 	}
 	sort.Slice(rows, func(i, j int) bool { return rows[i].Key < rows[j].Key })
 	return rows, nil

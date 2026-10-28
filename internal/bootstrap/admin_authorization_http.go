@@ -46,6 +46,9 @@ func (h *adminHandler) authorizeRoute(s adminauth.Session, r *http.Request) erro
 	if path == "/boards" && r.Method != "GET" {
 		return h.repo.authorizeAccountChange(s)
 	}
+	if path == "/boards/new" {
+		return h.repo.currentAdministrator(s)
+	}
 	if path == "/boards" || path == "/audit" {
 		a, e := h.repo.currentAdminSession(s)
 		if e != nil {
@@ -66,6 +69,9 @@ func (h *adminHandler) authorizeRoute(s adminauth.Session, r *http.Request) erro
 			return h.repo.authorizeAdmin(s, "moderator", owner)
 		}
 		role := "board_admin"
+		if strings.HasSuffix(path, "/metadata") {
+			role = "site_admin"
+		}
 		if strings.HasSuffix(path, "/moderation") || strings.HasSuffix(path, "/moderation/cleanup") || strings.HasSuffix(path, "/actions") {
 			role = "moderator"
 		}

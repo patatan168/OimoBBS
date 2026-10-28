@@ -112,6 +112,7 @@ func (r *Repository) openPostingBoard(id domain.ID) error {
 		return errors.New("missing board directory")
 	}
 	b.slug = dirs[id].Key
+	b.publishMetadata(*dirs[id])
 	if e = b.loadDenials(); e != nil {
 		return e
 	}
@@ -124,6 +125,7 @@ func (r *Repository) openPostingBoard(id domain.ID) error {
 		return err
 	}
 	b.publicName = publicState.Name
+	b.publishMetadata(*dirs[id])
 	b.autoReports.Store(publicState.Settings.Posting.AutoReports)
 	b.noReprint.Store(publicState.Settings.Presentation.reprintDenied())
 	b.hidden.Store(publicState.Settings.Presentation.unlisted())
@@ -203,7 +205,7 @@ func (r *Repository) openPostingBoard(id domain.ID) error {
 	}
 	if r.cfg.AutoReports != nil {
 		var receipt *app.PostingSnapshot
-		receipt, e = receiptSnapshotForBoard(r.cfg.Public.BaseURL, b.slug, r.operations().Reports, b.autoReports.Load())
+		receipt, e = receiptSnapshotForBoard(r.cfg.Public.BaseURL, b.boardKey(), r.operations().Reports, b.autoReports.Load())
 		if e != nil {
 			return e
 		}

@@ -190,6 +190,13 @@ func (repo *Repository) SiteWebHandler(observer *evidence.HTTPObserver) http.Han
 			}
 		}
 		if board == nil {
+			board, e = repo.webBoard(slug)
+			if e != nil {
+				threadError(w, r, 503, "現在閲覧できません。")
+				return
+			}
+		}
+		if board == nil {
 			threadError(w, r, 404, "板が見つかりません。")
 			return
 		}
@@ -218,8 +225,8 @@ func (repo *Repository) webBoard(slug string) (*publicBoard, error) {
 		return nil, err
 	}
 	for id, board := range repo.posting {
-		if board.slug == slug {
-			return &publicBoard{ID: id, Key: board.slug, Name: board.publicName, Hidden: board.hidden.Load()}, nil
+		if board.matchesKey(slug) {
+			return &publicBoard{ID: id, Key: board.boardKey(), Name: board.boardName(), Hidden: board.hidden.Load()}, nil
 		}
 	}
 	return nil, nil
@@ -250,7 +257,7 @@ func (repo *Repository) webBoards() (string, []publicBoard, error) {
 		if len(site.Categories) > 0 {
 			fallback = "未分類"
 		}
-		row := publicBoard{CategoryName: fallback, ID: id, Key: b.slug, Name: b.publicName, Hidden: b.hidden.Load(), CategoryOrder: ^uint32(0)}
+		row := publicBoard{CategoryName: fallback, ID: id, Key: b.boardKey(), Name: b.boardName(), Hidden: b.hidden.Load(), CategoryOrder: ^uint32(0)}
 		if d := dirs[id]; d != nil && d.CategoryID != nil {
 			c := categories[*d.CategoryID]
 			row.CategoryID, row.CategoryName, row.CategoryOrder = c.ID, c.Name, c.Order

@@ -64,7 +64,7 @@ func snapshotSiteValue(collection, key string, old, next json.RawMessage) error 
 	if err := strictjson.Decode(next, &v); err != nil {
 		return err
 	}
-	if !validBoardKey(v.Key) || len(v.Aliases) != 0 || v.CategoryID != nil && (*v.CategoryID == (domain.ID{}) || v.Status != "active") || (v.Status != "provisioning" && v.Status != "active") {
+	if v.validateMetadata() != nil || v.CategoryID != nil && (*v.CategoryID == (domain.ID{}) || v.Status != "active") || (v.Status != "provisioning" && v.Status != "active") {
 		return store.ErrCorrupt
 	}
 	return nil
@@ -183,6 +183,6 @@ func (r *Repository) inspectSnapshotState(owner AuditTransferOwner, state store.
 	if job.Parameters.BoardID != owner.Owner {
 		return store.ErrCorrupt
 	}
-	_, err = inspectBoardState(state, job)
+	_, err = inspectBoardState(state, job, dir)
 	return err
 }

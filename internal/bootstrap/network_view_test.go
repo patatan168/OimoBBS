@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"oimobbs/internal/domain"
 	"oimobbs/internal/identity"
-	"regexp"
 	"testing"
 	"time"
 )
@@ -45,13 +44,10 @@ func TestNetworkLargePageDelivery(t *testing.T) {
 	if res.StatusCode != 200 {
 		t.Fatal("networks HTML", res.StatusCode)
 	}
-	assets := regexp.MustCompile(`(?:href|src)="(/web/assets/page/[^\"]+)"`).FindAllStringSubmatch(body, -1)
-	if len(assets) != 8 {
-		t.Fatal("network assets", len(assets))
-	}
+	assets := requireAdminPageAssets(t, body, "favicon.svg", "ui.css", "admin.css", "ui.js", "admin.js", "admin-networks.css", "list.css", "list.js", "admin-networks.js")
 	start = time.Now()
 	for _, asset := range assets {
-		res, body = c.request("GET", asset[1], "", nil)
+		res, body = c.request("GET", asset, "", nil)
 		if res.StatusCode != 200 || body == "" || res.Header.Get("Cache-Control") != "no-store" {
 			t.Fatal("network asset", res.StatusCode)
 		}

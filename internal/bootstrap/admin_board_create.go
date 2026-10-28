@@ -4,9 +4,27 @@ package bootstrap
 import (
 	"errors"
 	"net/http"
+	"net/url"
+	"time"
 
 	"oimobbs/internal/adminauth"
 )
+
+// newBoard は追加専用画面を表示し、再認証後も同じ画面へ戻す。
+func (h *adminHandler) newBoard(w http.ResponseWriter, r *http.Request, s adminauth.Session) {
+	if r.Method != "GET" {
+		h.fail(w, r, 405, "METHOD_NOT_ALLOWED")
+		return
+	}
+	h.repo.mu.Lock()
+	err := h.repo.currentAdministrator(s)
+	h.repo.mu.Unlock()
+	if err != nil {
+		h.failure(w, r, err)
+		return
+	}
+	writeAdminBoards(w, 200, adminBoardsPage{Creating: true, CanCreate: true, CreateReady: s.Reauthenticated(time.Now()), PublicURL: h.repo.cfg.Public.BaseURL, Values: url.Values{"csrf": {s.CSRF("/boards")}}})
+}
 
 // createBoard はサイト管理者の入力とCSRFを検査し、追加後の設定画面へ移動する。
 func (h *adminHandler) createBoard(w http.ResponseWriter, r *http.Request, s adminauth.Session) {
@@ -28,7 +46,14 @@ func (h *adminHandler) createBoard(w http.ResponseWriter, r *http.Request, s adm
 	}
 	if e == nil && (!validBoardKey(fields.Get("key")) || !validName(fields.Get("name")) || policy != "anyone" && policy != "cap_only") {
 		h.repo.mu.Unlock()
-		writeAdminBoards(w, 400, adminBoardsPage{CanCreate: true, CreateReady: true, Values: fields, Message: "板キー・表示名・板の種類を確認してください。"})
+		message := "投稿できる人を選択してください。"
+		if !validName(fields.Get("name")) {
+			message = "板の名前は、空欄や制御文字を含めず128文字以内で入力してください。"
+		}
+		if !validBoardKey(fields.Get("key")) {
+			message = "板キーは英小文字で始まる英数字・下線で32文字以内です。test・web・adminは使えません。"
+		}
+		writeAdminBoards(w, 400, adminBoardsPage{Creating: true, CanCreate: true, CreateReady: true, PublicURL: h.repo.cfg.Public.BaseURL, Values: fields, Message: message})
 		return
 	}
 	if e == nil {
@@ -40,12 +65,12 @@ func (h *adminHandler) createBoard(w http.ResponseWriter, r *http.Request, s adm
 		if errors.As(e, &f) && f.status == 409 {
 			message := "板の追加上限に達しました。"
 			if f.code == "BOARD_KEY_EXISTS" {
-				message = "この板キーは別の表示名で使用されています。"
+				message = "この板キーは既存の板、または旧URLとして使用されています。別のキーを指定してください。"
 			}
 			if f.code == "BOARD_POLICY_EXISTS" {
 				message = "この板キーは別の投稿条件で使用されています。既存板の設定画面を確認してください。"
 			}
-			writeAdminBoards(w, 409, adminBoardsPage{CanCreate: true, CreateReady: true, Values: fields, Message: message})
+			writeAdminBoards(w, 409, adminBoardsPage{Creating: true, CanCreate: true, CreateReady: true, PublicURL: h.repo.cfg.Public.BaseURL, Values: fields, Message: message})
 			return
 		}
 		h.failure(w, r, e)

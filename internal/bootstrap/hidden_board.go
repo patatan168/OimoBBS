@@ -35,7 +35,7 @@ func (repo *Repository) hiddenBoardWebGate(w http.ResponseWriter, r *http.Reques
 	repo.mu.RLock()
 	hidden := false
 	for _, board := range repo.posting {
-		if board.slug == slug {
+		if board.matchesKey(slug) {
 			hidden = board.hidden.Load()
 			break
 		}

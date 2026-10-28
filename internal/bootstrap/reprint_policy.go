@@ -51,7 +51,8 @@ func (repo *Repository) protectedBoardSlugs() []string {
 	slugs := []string{}
 	for _, b := range repo.posting {
 		if b.noReprint.Load() || b.hidden.Load() {
-			slugs = append(slugs, b.slug)
+			slugs = append(slugs, b.boardKey())
+			slugs = append(slugs, b.metadata().Aliases...)
 		}
 	}
 	return slugs

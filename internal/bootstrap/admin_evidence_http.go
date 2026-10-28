@@ -539,7 +539,7 @@ func (h *adminHandler) renderEvidence(w http.ResponseWriter, r *http.Request, s 
 			row.UntilDate = time.Unix(0, int64(c.Until)).In(domain.JST).Format("2006-01-02")
 			row.BoardName = "保存済みの板"
 			if board := h.repo.posting[c.Scope.Board]; board != nil {
-				row.BoardName, row.BoardKey = board.publicName, board.slug
+				row.BoardName, row.BoardKey = board.boardName(), board.boardKey()
 			}
 			row.From = time.Unix(0, int64(c.Scope.From)).In(domain.JST).Format("2006-01-02 15:04")
 			row.To = time.Unix(0, int64(c.Scope.To)).In(domain.JST).Format("2006-01-02 15:04")

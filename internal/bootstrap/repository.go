@@ -422,7 +422,7 @@ func (r *Repository) createBoardWithPolicyLocked(ctx context.Context, key, name 
 		return info, err
 	}
 	if existing.ID != (domain.ID{}) {
-		if existing.Name != name {
+		if existing.Key != key || existing.Name != name {
 			return info, &adminFailure{status: 409, code: "BOARD_KEY_EXISTS"}
 		}
 		if policy != "" {

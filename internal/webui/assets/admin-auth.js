@@ -50,6 +50,10 @@ async function runPasskey(kind, csrf, input) {
   const credential = kind === "register"
     ? await navigator.credentials.create({ publicKey })
     : await navigator.credentials.get({ publicKey });
+  if (!credential) throw new Error("端末からパスキーの応答が返されませんでした。保存先の設定を確認してやり直してください。");
+  document.querySelector("[data-passkey-status]").textContent = kind === "register"
+    ? "端末から応答を受け取りました。パスキーの登録を確認しています。"
+    : "端末から応答を受け取りました。パスキーを確認しています。";
   const response = { clientDataJSON: passkeyBase64(credential.response.clientDataJSON) };
   if (kind === "register") {
     response.attestationObject = passkeyBase64(credential.response.attestationObject);
@@ -72,7 +76,11 @@ async function passkeyAction(button, action) {
   button.disabled = true;
   status.textContent = "端末でパスキーを確認してください。";
   try { await action(); }
-  catch (error) { status.textContent = error.name === "NotAllowedError" ? "パスキーの操作がキャンセルされたか、時間切れになりました。" : error.message; }
+  catch (error) {
+    status.textContent = error.name === "NotAllowedError" ? "パスキーの操作がキャンセルされたか、時間切れになりました。" : error.message;
+    // スマートフォンでは案内が画面外にあるため、失敗した理由を見える位置へ移す。
+    status.scrollIntoView({ block: "nearest" });
+  }
   finally { button.disabled = false; }
 }
 

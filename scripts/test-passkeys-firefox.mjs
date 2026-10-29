@@ -4,7 +4,7 @@ import { createRequire } from "node:module";
 import { mkdir } from "node:fs/promises";
 const require = createRequire(import.meta.url);
 const { firefox } = require(process.env.OIMO_PLAYWRIGHT);
-const browser = await firefox.launch({ headless: true });
+const browser = await firefox.launch({ headless: true, executablePath: process.env.OIMO_FIREFOX_EXECUTABLE });
 try {
   const page = await browser.newPage();
   const errors = [];
@@ -26,6 +26,12 @@ try {
         verification: publicKey.authenticatorSelection.userVerification,
         residentKey: publicKey.authenticatorSelection.residentKey,
         requireResidentKey: publicKey.authenticatorSelection.requireResidentKey,
+      };
+      if (window.passkeyTestEmptyResponse) return null;
+      if (window.passkeyTestResponse) return {
+        id: "dGVzdA", rawId: new Uint8Array([1]), type: "public-key",
+        getClientExtensionResults: () => ({}),
+        response: { clientDataJSON: new Uint8Array([2]), attestationObject: new Uint8Array([3]) },
       };
       throw new DOMException("test cancellation", "NotAllowedError");
     };
@@ -65,11 +71,46 @@ try {
   assert.equal(await page.locator("[data-passkey-register] button svg").count(), 1);
   assert.equal(await page.locator("[data-passkey-reauth-required]").isVisible(), false);
   await page.locator('input[name="name"]').fill("Firefox試験");
+  await page.setViewportSize({ width: 390, height: 640 });
+  const statusVisible = () => page.locator("[data-passkey-status]").evaluate(element => {
+    const bounds = element.getBoundingClientRect();
+    return bounds.top >= 0 && bounds.bottom <= innerHeight;
+  });
   const begin = page.waitForResponse(response => response.url().endsWith("/passkey/register/begin"));
   await page.locator("[data-passkey-register] button").click();
   assert.equal((await begin).status(), 200);
   await page.waitForFunction(() => document.querySelector("[data-passkey-status]").textContent.includes("キャンセル"));
+  assert.equal(await statusVisible(), true, "mobile registration failure must be visible");
   assert.deepEqual(await page.evaluate(() => window.passkeyTestOptions), { challenge: true, user: true, verification: "required", residentKey: "required", requireResidentKey: true });
+  const finishRequests = [];
+  page.on("request", request => {
+    if (request.url().endsWith("/passkey/register/finish")) finishRequests.push(request);
+  });
+  await page.evaluate(() => { window.passkeyTestEmptyResponse = true; });
+  await page.locator("[data-passkey-register] button").click();
+  await page.waitForFunction(() => document.querySelector("[data-passkey-status]").textContent.includes("端末からパスキーの応答が返されませんでした"));
+  assert.equal(await statusVisible(), true);
+  assert.deepEqual(finishRequests, [], "empty authenticator response must not finish registration");
+  assert.equal(await page.locator("[data-passkey-register] button").isEnabled(), true);
+  await page.evaluate(() => { window.passkeyTestEmptyResponse = false; });
+  // 端末応答の後、サーバーの登録確認に失敗しても案内と再操作が失われない。
+  await page.evaluate(() => { window.passkeyTestResponse = true; });
+  let confirmationShown = false;
+  await page.route("**/passkey/register/finish", async route => {
+    confirmationShown = (await page.locator("[data-passkey-status]").textContent()).includes("パスキーの登録を確認しています");
+    await route.fulfill({ status: 401, contentType: "application/json", body: JSON.stringify({ error: { code: "PASSKEY_AUTHENTICATION_FAILED" } }) });
+  });
+  await page.locator("[data-passkey-register] button").click();
+  await page.waitForFunction(() => document.querySelector("[data-passkey-status]").textContent.includes("パスキーを確認できませんでした"));
+  assert.equal(confirmationShown, true);
+  assert.equal(await statusVisible(), true);
+  assert.equal(await page.locator("[data-passkey-register] button").isEnabled(), true);
+  if (process.env.OIMO_PASSKEY_SCREENSHOTS) {
+    await mkdir(process.env.OIMO_PASSKEY_SCREENSHOTS, { recursive: true });
+    await page.screenshot({ path: `${process.env.OIMO_PASSKEY_SCREENSHOTS}/firefox-registration-failure-390.png` });
+  }
+  await page.unroute("**/passkey/register/finish");
+  await page.evaluate(() => { window.passkeyTestResponse = false; });
   for (const [code, message] of [
     ["ORIGIN_REJECTED", "接続元を確認できません"],
     ["CSRF_REJECTED", "ページを再読み込み"],
@@ -83,7 +124,7 @@ try {
   assert.equal(await guide.isVisible(), true);
   if (process.env.OIMO_PASSKEY_SCREENSHOTS) {
     await mkdir(process.env.OIMO_PASSKEY_SCREENSHOTS, { recursive: true });
-    for (const width of [390, 2400]) {
+    for (const width of [390, 3200]) {
       await page.setViewportSize({ width, height: 900 });
       if (width === 390) await page.locator(".admin-menu summary").click();
       const nav = page.locator(width === 390 ? ".admin-menu" : ".admin-nav-wide");
@@ -94,7 +135,7 @@ try {
     }
   }
   assert.deepEqual(errors, []);
-  console.log("PASS: Firefox reauthentication guide, registration begin, authenticator options, cancellation, error recovery and icons (device authenticator not tested)");
+  console.log("PASS: Firefox reauthentication guide, registration begin, authenticator options, mobile error visibility, empty response, server confirmation failure, recovery and icons (device authenticator not tested)");
 } finally {
   await browser.close();
 }

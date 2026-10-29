@@ -64,12 +64,12 @@ try {
  await page.getByRole("link",{name:"板名・キーを変更",exact:true}).click();
  assert.ok((await page.locator("main").innerText()).includes("browser_board"));
  if(directory)await page.screenshot({path:`${directory}/board-metadata.png`,fullPage:true});
- assert.ok((await page.locator(".site-footer").innerText()).includes("バージョン1.0.2"));
+ assert.ok((await page.locator(".site-footer").innerText()).includes("バージョン1.0.3"));
  // JavaScriptを使わない場合も同じ追加・変更フォームへ到達する。
  const plain=await browser.newContext({javaScriptEnabled:false,storageState:await page.context().storageState()});
  const noJS=await plain.newPage();
  assert.equal((await noJS.goto(base+"/boards/new")).status(),200);
  assert.equal(await noJS.getByLabel("板の名前",{exact:true}).count(),1);
  assert.deepEqual(errors,[]);
- console.log("PASS: board creation, reauthentication return, validation, rename, old/new URLs, unchanged DAT, mobile/desktop and no-JS forms; version 1.0.2");
+ console.log("PASS: board creation, reauthentication return, validation, rename, old/new URLs, unchanged DAT, mobile/desktop and no-JS forms; version 1.0.3");
 } finally {await browser.close();}

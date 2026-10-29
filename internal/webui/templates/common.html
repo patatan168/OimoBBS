@@ -65,7 +65,7 @@
 <a class="skip-link" href="#main">本文へ移動</a>
 <header class="site-header"><div class="header-inner"><a class="brand" href="{{adminBase}}/">{{template "board-icon"}}OimoBBS</a>{{if .Board}}<span class="reader-context">{{.Board}}</span>{{end}}<nav aria-label="掲示板ナビゲーション"><a href="{{adminBase}}/">{{template "board-icon"}}<span>板一覧</span></a>{{if .Board}}<a data-board="{{.Board}}" href="{{adminBase}}/{{.Board}}/subback.html">{{template "list-icon"}}<span>スレッド</span></a>{{end}}<a href="{{adminBase}}/search">{{template "search-icon"}}<span>検索</span></a><a href="{{adminBase}}/reports"><span>削除依頼・照会</span></a><a href="#main">{{template "top-icon"}}<span>先頭へ</span></a></nav></div></header>
 {{end}}
-{{define "footer"}}<footer class="site-footer">OimoBBS{{if adminCan "/passkeys"}} · <span>バージョン1.0.2</span> · <a href="https://github.com/patatan168/OimoBBS" target="_blank" rel="noopener noreferrer" aria-label="GitHub（新しいタブで開く）">GitHub</a> ·{{end}} <a href="/web/terms">利用規約・Cookie</a>
+{{define "footer"}}<footer class="site-footer">OimoBBS{{if adminCan "/passkeys"}} · <span>バージョン1.0.3</span> · <a href="https://github.com/patatan168/OimoBBS" target="_blank" rel="noopener noreferrer" aria-label="GitHub（新しいタブで開く）">GitHub</a> ·{{end}} <a href="/web/terms">利用規約・Cookie</a>
 <details id="record-retention"><summary>掲示板の記録と保存期限</summary>
 <p>受理した投稿内容と、接続元IPアドレス・ポート・日時などの接続記録を、投稿の確定日時から6暦月、非公開の記録として保持します。公開表示を削除した後も、この保存期限は継続します。</p>
 <p>荒らし対策で検出・拒否した投稿の本文例（最大1024文字）は、管理用の検出ログとして7日間保持します。</p>

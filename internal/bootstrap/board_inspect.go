@@ -203,6 +203,9 @@ func siteDirectories(state store.ControlState) (map[domain.ID]*boardDirectory, e
 		if err := strictjson.Decode(row.Value, &v); err != nil {
 			return nil, err
 		}
+		if v.ClosedAt != nil && site.MinimumReader < boardClosureReader {
+			return nil, store.ErrCorrupt
+		}
 		if v.validateMetadata() != nil || (v.Name != "" || len(v.Aliases) > 0) && site.MinimumReader < boardMetadataReader {
 			return nil, store.ErrCorrupt
 		}
@@ -323,6 +326,9 @@ func inspectBoard(cfg Config, entry *persistedBoard, allowPending, allowPosting 
 	}
 	entry.control = state
 	entry.info.Status = "open"
+	if d.ClosedAt != nil {
+		entry.info.Status = "closed"
+	}
 	entry.info.Revision = state.Rows["board:state"].Revision
 	return nil
 }

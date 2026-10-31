@@ -3,13 +3,14 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 test "$(go version | cut -d' ' -f3)" = go1.27.3
-unformatted=$(gofmt -l internal cmd tools/gentables)
+unformatted=$(gofmt -l internal cmd tools/gentables tools/webassets)
 if [ -n "$unformatted" ]; then
   printf '%s\n' "$unformatted"
   exit 1
 fi
 # var内の使い捨て測定コードを含めず、全製品・検証ツールを対象にする。
 package_patterns=(./cmd/... ./internal/... ./tools/...)
+go generate ./internal/webui
 go test -timeout=60m "${package_patterns[@]}"
 # bootstrapは全件の累積時間で上限に達するため、同じraceバイナリから全親試験を分割する。
 race_package_list=$(go list "${package_patterns[@]}")

@@ -111,6 +111,9 @@ func (r *Repository) openPostingBoard(id domain.ID) error {
 	if dirs[id] == nil {
 		return errors.New("missing board directory")
 	}
+	if dirs[id].ClosedAt != nil {
+		b.closedAt.Store(int64(*dirs[id].ClosedAt))
+	}
 	b.slug = dirs[id].Key
 	b.publishMetadata(*dirs[id])
 	if e = b.loadDenials(); e != nil {
@@ -195,11 +198,15 @@ func (r *Repository) openPostingBoard(id domain.ID) error {
 	if e = b.cleanPublicBodies(8); e != nil {
 		return e
 	}
+	if dirs[id].ClosedAt != nil {
+		b.closePublic(*dirs[id].ClosedAt)
+	}
 	b.listingStopped.Store(b.stopped)
 	b.worker = board.NewObservedWorker(func() { b.listingStopped.Store(b.stopped) })
 	b.postBatch = &board.Batch{AcrossKeys: true, CollectWindow: 16 * time.Millisecond, CollectLimit: 2 * board.MaxBatchOperations,
-		CollectBudget: b.collectPostingBudget,
-		CanWait:       func() bool { return b.group != nil && !b.group.rebuild && b.group.hasPrepared() }, RunReady: b.runPostingReadyBatch}
+		CollectionWindow: b.postingCollectionWindow,
+		CollectBudget:    b.collectPostingBudget,
+		CanWait:          func() bool { return b.group != nil && !b.group.rebuild && b.group.hasPrepared() }, RunReady: b.runPostingReadyBatch}
 	if site.MinimumReader >= 16 {
 		b.startExpiry(delay)
 	}

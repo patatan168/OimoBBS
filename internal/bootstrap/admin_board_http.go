@@ -28,7 +28,7 @@ func (h *adminHandler) boards(w http.ResponseWriter, r *http.Request, s adminaut
 	if r.URL.Path == "/boards" && r.URL.RawQuery == "" && renderAdminAssetOnly(w, r, adminBoardsTemplate, adminBoardsPage{}) {
 		return
 	}
-	_, boards, e := h.repo.webBoards()
+	_, boards, e := h.repo.boardViews(true)
 	if e != nil {
 		h.failure(w, r, e)
 		return
@@ -75,6 +75,10 @@ func (h *adminHandler) boards(w http.ResponseWriter, r *http.Request, s adminaut
 func (h *adminHandler) boardSettings(w http.ResponseWriter, r *http.Request, s adminauth.Session) {
 	if r.URL.Path == "/boards/new" {
 		h.newBoard(w, r, s)
+		return
+	}
+	if strings.HasSuffix(r.URL.Path, "/close") {
+		h.boardClosure(w, r, s)
 		return
 	}
 	if strings.HasSuffix(r.URL.Path, "/metadata") {
@@ -144,7 +148,7 @@ func (h *adminHandler) boardSettings(w http.ResponseWriter, r *http.Request, s a
 			fields.Set("revision", b.ETag())
 			fields.Set("request_id", domain.NewID().String())
 			fields.Set("csrf", s.CSRF(route))
-			writeAdminBoards(w, 200, adminBoardsPage{Editing: true, Name: b.Name, Action: action, ThreadAction: "/boards/" + id.String() + "/thread-settings", ModerationAction: "/boards/" + id.String() + "/threads", PublicURL: strings.TrimRight(h.repo.cfg.Public.BaseURL, "/"), BoardKey: b.Key, CountryCodes: h.permissionCountries(fields), Values: fields})
+			writeAdminBoards(w, 200, adminBoardsPage{Editing: true, ClosedAt: b.ClosedAt, Name: b.Name, Action: action, ThreadAction: "/boards/" + id.String() + "/thread-settings", ModerationAction: "/boards/" + id.String() + "/threads", PublicURL: strings.TrimRight(h.repo.cfg.Public.BaseURL, "/"), BoardKey: b.Key, CountryCodes: h.permissionCountries(fields), Values: fields})
 		}
 		return
 	}

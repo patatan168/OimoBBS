@@ -49,7 +49,7 @@ func TestLiveReadsDoNotWaitForPostingWorker(t *testing.T) {
 	for _, path := range []string{fmt.Sprintf("/live/dat/%d.dat", created.Key), fmt.Sprintf("/test/read.cgi/live/%d/", created.Key)} {
 		result := make(chan *httptest.ResponseRecorder, 1)
 		go func() {
-			request := httptest.NewRequest("GET", repo.cfg.Public.BaseURL+path, nil)
+			request := webReadTestRequest("GET", repo.cfg.Public.BaseURL+path, nil)
 			request.RemoteAddr = "127.0.0.1:12345"
 			response := httptest.NewRecorder()
 			handler.ServeHTTP(response, request)

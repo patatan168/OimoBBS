@@ -86,6 +86,7 @@ def main(argv=None):
         run(['mise', 'install', 'go@' + version], work)
         pin_go(work, version)
         go = ['mise', 'exec', '--', 'go']
+        run(go + ['generate', './internal/webui'], work)
         if args.modules != 'none':
             run(go + ['get', '-u=patch' if args.modules == 'patch' else '-u', './cmd/...', './internal/...', './tools/...'], work)
         run(go + ['mod', 'tidy'], work)
@@ -97,6 +98,7 @@ def main(argv=None):
         lock = {row['Path']: row['Version'] for row in module.get('Require', [])}
         (work / 'scripts/go-dependencies.json').write_text(json.dumps(lock, indent=2, sort_keys=True) + '\n')
         run(['mise', 'exec', '--', 'python3', '-B', 'scripts/collect-go-licenses.py'], work)
+        run(go + ['generate', './internal/webui'], work)
         after = {name: (work / name).read_bytes() for name in OUTPUT_FILES}
         changed = [name for name in OUTPUT_FILES if before[name] != after[name]]
         if not changed and not args.full_checks:

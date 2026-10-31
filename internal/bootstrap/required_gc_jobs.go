@@ -17,7 +17,7 @@ func (r *Repository) EnableRequiredOriginalReclamation(ctx context.Context) erro
 	if e := r.EnablePublicBodyReclamation(ctx); e != nil {
 		return e
 	}
-	if _, e := r.enableStorageReader(ctx, 48, "required_original_gc_enable"); e != nil {
+	if e := r.ensureRuntimeStorageReader(ctx, 48, "required_original_gc_enable"); e != nil {
 		return e
 	}
 	r.optionalHoldLifecycleMu.Lock()
@@ -109,6 +109,9 @@ func (r *Repository) sweepRequiredOriginalsLocked(ctx context.Context) (int, err
 		return n, e
 	}
 	for range 2 {
+		if n, e := r.sweepClosedBoardOriginalsLocked(ctx, time.Now()); e != nil || n != 0 {
+			return n, e
+		}
 		n, changed, e := r.stepRequiredGCJobLocked(ctx)
 		if e != nil || n != 0 || !changed {
 			return n, e

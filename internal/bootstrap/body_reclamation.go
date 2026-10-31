@@ -31,7 +31,7 @@ func validateBodyReclamation(key string, old, next json.RawMessage) error {
 		if v.After.State != "hidden" {
 			return store.ErrCorrupt
 		}
-	} else if v.Kind != "pressure" && (v.Kind != "expire" || v.At < v.Expires) {
+	} else if v.Kind != "pressure" && v.Kind != "closure" && (v.Kind != "expire" || v.At < v.Expires) {
 		return store.ErrCorrupt
 	}
 	signature, e := base64.RawStdEncoding.Strict().DecodeString(v.Signature)
@@ -58,6 +58,13 @@ func readBodyReclamation(state store.ControlState, owner domain.ID, key uint64, 
 	}
 	if v.Owner != owner || uint64(v.Key) != key || v.Verify(public) != nil {
 		return nil, store.ErrCorrupt
+	}
+	if row, ok := state.Rows["reclamation:closed_pressure"]; ok {
+		var permission app.ClosedBoardPressure
+		if strictjson.Decode(row.Value, &permission) != nil || permission.Verify(v, public) != nil {
+			return nil, store.ErrCorrupt
+		}
+		v.ClosedPressure = &permission
 	}
 	var deletion DeletionRecord
 	if strictjson.Decode(state.Rows["deletion:"+v.Deletion.String()].Value, &deletion) != nil || deletion.Board != owner || uint64(deletion.Thread) != key || deletion.Kind != v.Kind || deletion.Expires != v.Expires || deletion.Created > v.At || deletion.Phase != "applied" && deletion.Phase != "cleaning" {
@@ -148,6 +155,12 @@ func (b *postingBoard) bodyReclamations() (map[uint64]app.BodyReclamation, error
 			return nil, e
 		}
 		if v != nil {
+			if v.ClosedPressure != nil && v.ClosedPressure.ClosedAt != domain.Time(b.closedAt.Load()) {
+				return nil, store.ErrCorrupt
+			}
+			if v.Kind == "closure" && (b.closedAt.Load() == 0 || v.At < boardClosureDeadline(domain.Time(b.closedAt.Load()))) {
+				return nil, store.ErrCorrupt
+			}
 			if v.After.BumpValue > water.Last {
 				return nil, store.ErrCorrupt
 			}
@@ -172,7 +185,7 @@ func verifyBodyTask(state store.ControlState, task DeletionCopyTask, p *app.Post
 // EnablePublicBodyReclamation はreader27を先行Syncし、公開本体を毎分有界回収する。
 // 非公開証拠・媒体・既存backupの回収や全体completeを表す機能ではない。
 func (r *Repository) EnablePublicBodyReclamation(ctx context.Context) error {
-	if _, e := r.enableStorageReader(ctx, 27, "thread_body_reclaim_enable"); e != nil {
+	if e := r.ensureRuntimeStorageReader(ctx, 27, "thread_body_reclaim_enable"); e != nil {
 		return e
 	}
 	if e := r.EnableThreadRetention(ctx); e != nil {
@@ -239,7 +252,7 @@ func (b *postingBoard) cleanPublicBodies(limit int) error {
 			if e := strictjson.Decode(row.Value, &v); e != nil {
 				return e
 			}
-			if v.Kind != "hide" && v.Kind != "expire" && v.Kind != "pressure" || v.Phase != "applied" && v.Phase != "cleaning" {
+			if v.Kind != "hide" && v.Kind != "expire" && v.Kind != "pressure" && v.Kind != "closure" || v.Phase != "applied" && v.Phase != "cleaning" {
 				continue
 			}
 			if p := b.threads[uint64(v.Thread)]; p != nil && !p.Reclaimed() {
@@ -274,7 +287,7 @@ func (b *postingBoard) reclaimPublicBody(v DeletionRecord) error {
 		return app.ErrEvidenceGap
 	}
 	seq, expires, _, ok := p.RetentionState()
-	if !ok || expires != v.Expires || ((v.Kind == "expire" || v.Kind == "pressure") && seq != v.Expected) {
+	if !ok || expires != v.Expires || ((v.Kind == "expire" || v.Kind == "pressure" || v.Kind == "closure") && seq != v.Expected) {
 		return app.ErrEvidenceGap
 	}
 	proof, e := p.PrepareBodyReclamation(context.Background(), v.ID, v.Kind, max(domain.Time(b.clock().UnixNano()), v.Created), b.key)

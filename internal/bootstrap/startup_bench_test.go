@@ -38,6 +38,7 @@ func benchmarkPostingStartup(b *testing.B, probeHTTP bool) {
 		b.StopTimer()
 		// プロセス内の前回起動の復号結果を借りず、起動ごとに最初の表を完全検査する。
 		decodedNetworkRows = networkRowsCache{}
+		validatedNetworkValues = networkValidationCache{}
 		b.StartTimer()
 		repo, err := OpenPostingRepository(cfg, postcapture.Validate)
 		if err != nil {

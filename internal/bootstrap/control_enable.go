@@ -19,6 +19,36 @@ func (r *Repository) EnableControlSnapshots(ctx context.Context) (ControlEnableR
 	return r.enableStorageReader(ctx, 12, "control_snapshot_enable")
 }
 
+// ensureRuntimeStorageReader は有効済みの形式を再走査せず、稼働時の保守機能を再開する。
+// 版を上げる場合は従来の監査移管・完全照合を必須とする。snapshot作成の許可には使わない。
+func (r *Repository) ensureRuntimeStorageReader(ctx context.Context, version uint32, reason string) error {
+	r.mu.Lock()
+	err := r.available()
+	if err == nil {
+		err = ctx.Err()
+	}
+	var site siteState
+	if err == nil {
+		err = strictjson.Decode(r.site.State().Rows["site:state"].Value, &site)
+	}
+	if err == nil {
+		var admins []administrator
+		admins, err = r.administrators()
+		if err == nil && len(admins) == 0 {
+			err = errors.New("an administrator is required before enabling storage formats")
+		}
+	}
+	r.mu.Unlock()
+	if err != nil {
+		return err
+	}
+	if site.MinimumReader >= version {
+		return nil
+	}
+	_, err = r.enableStorageReader(ctx, version, reason)
+	return err
+}
+
 // enableStorageReader は認証管理者のある保存先の最低readerを単調に進める。
 func (r *Repository) enableStorageReader(ctx context.Context, version uint32, reason string) (ControlEnableReport, error) {
 	r.mu.Lock()

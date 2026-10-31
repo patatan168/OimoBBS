@@ -139,12 +139,12 @@ func TestThreadActionsHTTPRecovery(t *testing.T) {
 						t.Fatal(snapshot)
 					}
 				case "archive":
-					rows, err := repo.threadListing(httptest.NewRequest("GET", "http://localhost/news/", nil), board.ID)
+					rows, err := repo.threadListing(webReadTestRequest("GET", "http://localhost/news/", nil), board.ID)
 					if err != nil || len(rows) != 0 || snapshot.CanReply {
 						t.Fatal("archive listed", rows, err)
 					}
 					recorder := httptest.NewRecorder()
-					repo.SiteWebHandler(nil).ServeHTTP(recorder, httptest.NewRequest("GET", cfg.Public.BaseURL+"/news/", nil))
+					repo.SiteWebHandler(nil).ServeHTTP(recorder, webReadTestRequest("GET", cfg.Public.BaseURL+"/news/", nil))
 					if recorder.Code != 200 || !strings.Contains(recorder.Body.String(), "現役スレッドはありません") || !strings.Contains(recorder.Body.String(), "state=archived") {
 						t.Fatal("archive empty page", recorder.Code, recorder.Body.String())
 					}
@@ -153,7 +153,7 @@ func TestThreadActionsHTTPRecovery(t *testing.T) {
 						t.Fatal(snapshot)
 					}
 					recorder := httptest.NewRecorder()
-					req := httptest.NewRequest("GET", cfg.Public.BaseURL+fmt.Sprintf("/test/read.cgi/news/%d/", created.Key), nil)
+					req := webReadTestRequest("GET", cfg.Public.BaseURL+fmt.Sprintf("/test/read.cgi/news/%d/", created.Key), nil)
 					repo.threadPage(recorder, req, board.ID)
 					if recorder.Code != 200 || !strings.Contains(recorder.Body.String(), "移転先のスレッド") || !strings.Contains(recorder.Body.String(), "x=1&amp;y=2") {
 						t.Fatal("move page", recorder.Code, recorder.Body.String())

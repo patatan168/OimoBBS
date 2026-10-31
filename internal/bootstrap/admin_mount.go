@@ -16,6 +16,7 @@ type adminMountResponse struct {
 	menu   map[string]bool
 	page   string
 	status int
+	board  *adminBoardNavigation
 }
 
 // Unwrap はdeadline・flushを実接続へ渡す。
@@ -40,6 +41,7 @@ func executeAdminTemplate(w http.ResponseWriter, destination io.Writer, original
 	status := 0
 	var asset *adminAssetPageResponse
 	var menu map[string]bool
+	var board *adminBoardNavigation
 	for current := w; current != nil; {
 		if guarded, ok := current.(*adminCheckedWriter); ok {
 			current = guarded.ResponseWriter
@@ -49,6 +51,9 @@ func executeAdminTemplate(w http.ResponseWriter, destination io.Writer, original
 			asset = probe
 		}
 		if mounted, ok := current.(*adminMountResponse); ok {
+			if board == nil {
+				board = mounted.board
+			}
 			if page == "" {
 				page = mounted.page
 			}
@@ -78,9 +83,11 @@ func executeAdminTemplate(w http.ResponseWriter, destination io.Writer, original
 	// 通常のエラー表示はログイン用の共通資産だけを使う。入力エラーの専用画面は元ページの認可を維持する。
 	if page == "" || status >= 400 && original.Name() == "admin.html" {
 		page = "/login"
+		board = nil
 	}
 	referenced := false
 	t.Funcs(template.FuncMap{
+		"boardNavigation": func() *adminBoardNavigation { return board },
 		"assetPath": func(name string) (string, error) {
 			if asset != nil && asset.name == name {
 				referenced = true

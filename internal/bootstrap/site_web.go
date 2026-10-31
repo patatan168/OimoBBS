@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"oimobbs/internal/app"
+	"oimobbs/internal/compat"
 	"oimobbs/internal/domain"
 	"oimobbs/internal/evidence"
 	"oimobbs/internal/strictjson"
@@ -65,6 +66,9 @@ func (repo *Repository) SiteWebHandler(observer *evidence.HTTPObserver) http.Han
 			threadError(w, r, 400, "URLを確認してください。")
 			return
 		}
+		if !legacyUncompressedPath(r.URL.Path) && !compat.RequireCompressedRead(w, r) {
+			return
+		}
 		if webui.ServePublicAsset(w, r) {
 			return
 		}
@@ -85,7 +89,7 @@ func (repo *Repository) SiteWebHandler(observer *evidence.HTTPObserver) http.Han
 		if denied {
 			return
 		}
-		if repo.hiddenBoardWebGate(w, r) {
+		if repo.closedBoardWebGate(w, r) || repo.hiddenBoardWebGate(w, r) {
 			return
 		}
 		if r.URL.Path == "/web/terms" {
@@ -234,6 +238,11 @@ func (repo *Repository) webBoard(slug string) (*publicBoard, error) {
 
 // webBoards はサイト所有mutexの下で確定済みメタデータだけをコピーする。毎要求ディスク走査しない。
 func (repo *Repository) webBoards() (string, []publicBoard, error) {
+	return repo.boardViews(false)
+}
+
+// boardViews は管理一覧に限って閉鎖済みの板も含める。
+func (repo *Repository) boardViews(includeClosed bool) (string, []publicBoard, error) {
 	repo.mu.RLock()
 	defer repo.mu.RUnlock()
 	if e := repo.available(); e != nil {
@@ -253,6 +262,9 @@ func (repo *Repository) webBoards() (string, []publicBoard, error) {
 	}
 	rows := make([]publicBoard, 0, len(repo.posting))
 	for id, b := range repo.posting {
+		if b.closedAt.Load() != 0 && !includeClosed {
+			continue
+		}
 		fallback := site.Name
 		if len(site.Categories) > 0 {
 			fallback = "未分類"
@@ -356,7 +368,7 @@ func (repo *Repository) threadListings(r *http.Request, owner domain.ID) ([]publ
 	if err := r.Context().Err(); err != nil {
 		return nil, nil, err
 	}
-	if b.listingStopped.Load() {
+	if b.listingStopped.Load() || b.closedAt.Load() != 0 {
 		return nil, nil, ErrPostingUnavailable
 	}
 	select {
@@ -384,7 +396,7 @@ func (repo *Repository) threadListings(r *http.Request, owner domain.ID) ([]publ
 	if receipt := b.receipt.Load(); receipt != nil {
 		rows = append(rows, publicThread{Key: reportReceiptKey, Title: reportReceiptTitle, Count: 1, BumpKind: "receipt", publication: receipt})
 	}
-	if b.listingStopped.Load() {
+	if b.listingStopped.Load() || b.closedAt.Load() != 0 {
 		return nil, nil, ErrPostingUnavailable
 	}
 	sort.Slice(rows, func(i, j int) bool {

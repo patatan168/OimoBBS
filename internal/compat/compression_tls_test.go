@@ -6,12 +6,11 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
-	"oimobbs/internal/testutil"
 	"testing"
 )
 
 func TestCompressionTLSRepresentationUpgrade(t *testing.T) {
-	raw := testutil.DATFixture("mixed")
+	raw := bytes.Repeat([]byte("圧縮表現とETagの更新を検証します。abcdef0123456789\n"), 64)
 	cache := NewCompressionCache(1<<20, 2)
 	tag := `"fixture` + ZstdETagSuffix + `"`
 	server := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -23,7 +22,7 @@ func TestCompressionTLSRepresentationUpgrade(t *testing.T) {
 		name, condition, span string
 		status                int
 	}{
-		{"old representation", `"fixture-zstd-v7"`, "", http.StatusOK},
+		{"old representation", `"fixture-zstd-v12"`, "", http.StatusOK},
 		{"same representation", tag, "", http.StatusNotModified},
 		{"DAT delta", "", "bytes=100-", http.StatusPartialContent},
 	} {

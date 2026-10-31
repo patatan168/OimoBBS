@@ -74,7 +74,20 @@ try {
  }
  await save();
  await visit("/operations");
+ await field("content_ip_seconds").fill("90");
+ await field("content_ip_posts").fill("25");
+ await field("content_cookie_seconds").fill("120");
+ await field("content_cookie_posts").fill("2");
+ await edited("同じIP");
+ await field("content_cookie_posts").fill("0");
+ assert.equal(await field("content_cookie_posts").evaluate(el=>el.validity.rangeUnderflow),true);
+ await field("content_cookie_posts").fill("2");
  await field("egress_mbps").fill("81");await edited("81");await save();
+ for(const [name,value] of Object.entries({content_ip_seconds:"90",content_ip_posts:"25",content_cookie_seconds:"120",content_cookie_posts:"2"})) assert.equal(await field(name).inputValue(),value,name);
+ if(process.env.OIMO_LAYOUT_SCREENSHOTS) {
+  await mkdir(process.env.OIMO_LAYOUT_SCREENSHOTS,{recursive:true});
+  await page.locator("#same-content").screenshot({path:`${process.env.OIMO_LAYOUT_SCREENSHOTS}/same-content-settings.png`});
+ }
  assert.equal(await field("egress_mbps").inputValue(),"81");
  await visit("/waf");
  const wafState=async expected=>assert.deepEqual(await page.locator("[data-waf-result]").allTextContents(),expected);

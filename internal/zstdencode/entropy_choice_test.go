@@ -63,3 +63,36 @@ func TestArchiveCandidateParallelDeterminism(t *testing.T) {
 		}
 	}
 }
+
+// TestRetainedEntropyTableOwnership は後続候補の生成で採用済みの表が上書きされないことを確認する。
+func TestRetainedEntropyTableOwnership(t *testing.T) {
+	var trial, keep entropyWork
+	counts := []int{2, 20, 1, 800, 0, 13, 7}
+	source := entropyTableWithWork(counts, 7, &trial)
+	retained := retainEntropyTable(source, &keep)
+	type step struct {
+		symbol      int
+		state, next uint16
+		value       uint32
+		width       uint
+	}
+	var steps []step
+	for symbol, count := range counts {
+		if count == 0 {
+			continue
+		}
+		for state := range 1 << 7 {
+			next, value, width := source.advance(symbol, uint16(state))
+			steps = append(steps, step{symbol, uint16(state), next, value, width})
+		}
+	}
+	for _, log := range []uint{5, 6, 8, 9} {
+		entropyTableWithWork([]int{100, 1, 90, 30, 4, 99, 12, 71}, log, &trial)
+	}
+	for _, want := range steps {
+		next, value, width := retained.advance(want.symbol, want.state)
+		if next != want.next || value != want.value || width != want.width {
+			t.Fatal("retained entropy table changed")
+		}
+	}
+}

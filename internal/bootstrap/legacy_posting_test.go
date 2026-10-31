@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/url"
 	"oimobbs/internal/textcodec"
+	"strconv"
 	"strings"
 	"testing"
 )
@@ -24,14 +25,15 @@ func checkLegacyPosting(t *testing.T, request feedRequest, key string) {
 	if r.StatusCode != 200 || !strings.Contains(decode(page), "書きこみが終わりました。") || strings.Contains(decode(page), "<!-- 2ch_X:cookie -->") {
 		t.Fatal("shared consent", r.StatusCode, decode(page))
 	}
-	for range 2 {
+	for number := 3; number <= 4; number++ {
 		r, page = request("POST", path, fields)
-		if r.StatusCode != 200 || !strings.Contains(decode(page), "書きこみが終わりました。") || !strings.Contains(decode(page), "/beta/"+key+"/2") {
-			t.Fatal("post/retry", r.StatusCode, decode(page))
+		// 匿名Cookieなしの旧内部fixtureではIP側の20件枠だけが働く。
+		if r.StatusCode != 200 || !strings.Contains(decode(page), "/beta/"+key+"/"+strconv.Itoa(number)) {
+			t.Fatal("same IP within quota", r.StatusCode, decode(page))
 		}
 	}
 	_, dat := request("GET", "/beta/dat/"+key+".dat", nil)
-	if strings.Count(dat, "\n") != 2 || !strings.Contains(decode(dat), "専ブラ返信&#128512;") {
+	if strings.Count(dat, "\n") != 4 || !strings.Contains(decode(dat), "専ブラ返信&#128512;") {
 		t.Fatal("wrong DAT", decode(dat))
 	}
 	r, _ = request("GET", "/test/bbs.cgi", nil)

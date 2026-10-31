@@ -1,0 +1,866 @@
+{
+  "date": "2026-10-31",
+  "baseline_revision": "5d18ad8",
+  "gomaxprocs": 2,
+  "cpu": "AMD Ryzen 5 5500U",
+  "go_version": "go1.27.3",
+  "scope": "Same captured public HTTP bytes and three synthetic DAT corpora. Sequential reused encoder; no compression cache. Local compression wall time and allocations, not live HTTP or WAN latency.",
+  "sample_duration": "100ms",
+  "samples_per_version": 6,
+  "order": [
+    "before x3",
+    "after x3",
+    "after x3",
+    "before x3"
+  ],
+  "rows": [
+    {
+      "benchmark": "BenchmarkEncode/entropy-2",
+      "before_bytes": 177198,
+      "after_bytes": 177198,
+      "size_change_percent": 0.0,
+      "before_median_us": 2052.309,
+      "after_median_us": 1802.427,
+      "time_change_percent": -12.176,
+      "before_samples_ns": [
+        1826479.0,
+        1877386.0,
+        1896734.0,
+        2368257.0,
+        2207885.0,
+        2315475.0
+      ],
+      "before_allocated_bytes_per_op": 180560,
+      "before_allocations_per_op": 19,
+      "after_samples_ns": [
+        1788792.0,
+        1810496.0,
+        1794357.0,
+        1830192.0,
+        1813137.0,
+        1782667.0
+      ],
+      "after_allocated_bytes_per_op": 180560,
+      "after_allocations_per_op": 19
+    },
+    {
+      "benchmark": "BenchmarkEncode/text-2",
+      "before_bytes": 12191,
+      "after_bytes": 12189,
+      "size_change_percent": -0.016,
+      "before_median_us": 616.522,
+      "after_median_us": 602.798,
+      "time_change_percent": -2.226,
+      "before_samples_ns": [
+        649237.0,
+        609511.0,
+        604122.0,
+        615845.0,
+        685518.0,
+        617199.0
+      ],
+      "before_allocated_bytes_per_op": 12528,
+      "before_allocations_per_op": 11,
+      "after_samples_ns": [
+        597607.0,
+        602285.0,
+        601624.0,
+        603312.0,
+        603533.0,
+        604700.0
+      ],
+      "after_allocated_bytes_per_op": 12528,
+      "after_allocations_per_op": 11
+    },
+    {
+      "benchmark": "BenchmarkEncode/mixed-2",
+      "before_bytes": 31016,
+      "after_bytes": 31015,
+      "size_change_percent": -0.003,
+      "before_median_us": 844.585,
+      "after_median_us": 835.633,
+      "time_change_percent": -1.06,
+      "before_samples_ns": [
+        841158.0,
+        842103.0,
+        841059.0,
+        847066.0,
+        965371.0,
+        892969.0
+      ],
+      "before_allocated_bytes_per_op": 33016,
+      "before_allocations_per_op": 11,
+      "after_samples_ns": [
+        835137.0,
+        835462.0,
+        835803.0,
+        834832.0,
+        846342.0,
+        840234.0
+      ],
+      "after_allocated_bytes_per_op": 33016,
+      "after_allocations_per_op": 11
+    },
+    {
+      "benchmark": "BenchmarkHTTPCorpus/top-2",
+      "before_bytes": 1943,
+      "after_bytes": 1942,
+      "size_change_percent": -0.051,
+      "before_median_us": 97.315,
+      "after_median_us": 94.098,
+      "time_change_percent": -3.306,
+      "label": "top",
+      "raw_bytes": 4305,
+      "raw_sha256": "fa7b6a1a1b339aac04fe9951770b13f2d45fa3af1382bf1a38600e1ab4513979",
+      "http_would_compress": true,
+      "before_samples_ns": [
+        97723.0,
+        96172.0,
+        95573.0,
+        102936.0,
+        97220.0,
+        97410.0
+      ],
+      "before_allocated_bytes_per_op": 2512,
+      "before_allocations_per_op": 9,
+      "after_samples_ns": [
+        94221.0,
+        92721.0,
+        94839.0,
+        94897.0,
+        91522.0,
+        93975.0
+      ],
+      "after_allocated_bytes_per_op": 2512,
+      "after_allocations_per_op": 9
+    },
+    {
+      "benchmark": "BenchmarkHTTPCorpus/board-2",
+      "before_bytes": 2153,
+      "after_bytes": 2152,
+      "size_change_percent": -0.046,
+      "before_median_us": 104.617,
+      "after_median_us": 100.426,
+      "time_change_percent": -4.006,
+      "label": "board",
+      "raw_bytes": 4457,
+      "raw_sha256": "9be90d1ce9e3eaa31ac6f75ba7cf7f2741297266c1c1b4f2f55d316894df72a1",
+      "http_would_compress": true,
+      "before_samples_ns": [
+        106141.0,
+        104334.0,
+        104142.0,
+        104986.0,
+        104262.0,
+        104900.0
+      ],
+      "before_allocated_bytes_per_op": 2784,
+      "before_allocations_per_op": 9,
+      "after_samples_ns": [
+        99983.0,
+        100250.0,
+        100602.0,
+        101074.0,
+        101032.0,
+        98885.0
+      ],
+      "after_allocated_bytes_per_op": 2784,
+      "after_allocations_per_op": 9
+    },
+    {
+      "benchmark": "BenchmarkHTTPCorpus/thread-2",
+      "before_bytes": 4110,
+      "after_bytes": 4109,
+      "size_change_percent": -0.024,
+      "before_median_us": 178.441,
+      "after_median_us": 170.37,
+      "time_change_percent": -4.523,
+      "label": "thread",
+      "raw_bytes": 24664,
+      "raw_sha256": "a0794f226ea69ec8f96665b8bf0d1502ac01073a0d9b5e732eae938967a46d65",
+      "http_would_compress": true,
+      "before_samples_ns": [
+        178395.0,
+        176876.0,
+        178821.0,
+        178488.0,
+        177813.0,
+        178824.0
+      ],
+      "before_allocated_bytes_per_op": 5344,
+      "before_allocations_per_op": 9,
+      "after_samples_ns": [
+        169717.0,
+        169849.0,
+        170434.0,
+        170983.0,
+        177199.0,
+        170306.0
+      ],
+      "after_allocated_bytes_per_op": 5344,
+      "after_allocations_per_op": 9
+    },
+    {
+      "benchmark": "BenchmarkHTTPCorpus/thread-last50-2",
+      "before_bytes": 4110,
+      "after_bytes": 4109,
+      "size_change_percent": -0.024,
+      "before_median_us": 179.046,
+      "after_median_us": 173.51,
+      "time_change_percent": -3.092,
+      "label": "thread-last50",
+      "raw_bytes": 24664,
+      "raw_sha256": "a0794f226ea69ec8f96665b8bf0d1502ac01073a0d9b5e732eae938967a46d65",
+      "http_would_compress": true,
+      "before_samples_ns": [
+        178880.0,
+        179211.0,
+        177511.0,
+        178444.0,
+        186825.0,
+        185152.0
+      ],
+      "before_allocated_bytes_per_op": 5344,
+      "before_allocations_per_op": 9,
+      "after_samples_ns": [
+        168750.0,
+        170568.0,
+        168931.0,
+        176452.0,
+        180997.0,
+        181493.0
+      ],
+      "after_allocated_bytes_per_op": 5344,
+      "after_allocations_per_op": 9
+    },
+    {
+      "benchmark": "BenchmarkHTTPCorpus/menu-2",
+      "before_bytes": 232,
+      "after_bytes": 223,
+      "size_change_percent": -3.879,
+      "before_median_us": 25.896,
+      "after_median_us": 24.648,
+      "time_change_percent": -4.819,
+      "label": "menu",
+      "raw_bytes": 299,
+      "raw_sha256": "11b21c447d19dbbdd96925685a1f382e94463d78476758b0c5d5be69c3d54f0f",
+      "http_would_compress": true,
+      "before_samples_ns": [
+        25703.0,
+        25622.0,
+        25758.0,
+        26035.0,
+        27653.0,
+        28688.0
+      ],
+      "before_allocated_bytes_per_op": 416,
+      "before_allocations_per_op": 7,
+      "after_samples_ns": [
+        25161.0,
+        26943.0,
+        25680.0,
+        24136.0,
+        23994.0,
+        23945.0
+      ],
+      "after_allocated_bytes_per_op": 400,
+      "after_allocations_per_op": 7
+    },
+    {
+      "benchmark": "BenchmarkHTTPCorpus/subject-2",
+      "before_bytes": 91,
+      "after_bytes": 91,
+      "size_change_percent": 0.0,
+      "before_median_us": 4.761,
+      "after_median_us": 4.465,
+      "time_change_percent": -6.228,
+      "label": "subject",
+      "raw_bytes": 82,
+      "raw_sha256": "7315a4bfcde9bf1bcf403b4501e3333237f4d7f54568c21addda00a2c19f36ef",
+      "http_would_compress": false,
+      "before_samples_ns": [
+        4653.0,
+        5484.0,
+        6717.0,
+        4740.0,
+        4721.0,
+        4782.0
+      ],
+      "before_allocated_bytes_per_op": 96,
+      "before_allocations_per_op": 1,
+      "after_samples_ns": [
+        4747.0,
+        4711.0,
+        4996.0,
+        4218.0,
+        4122.0,
+        4174.0
+      ],
+      "after_allocated_bytes_per_op": 96,
+      "after_allocations_per_op": 1
+    },
+    {
+      "benchmark": "BenchmarkHTTPCorpus/settings-2",
+      "before_bytes": 303,
+      "after_bytes": 294,
+      "size_change_percent": -2.97,
+      "before_median_us": 32.943,
+      "after_median_us": 31.479,
+      "time_change_percent": -4.443,
+      "label": "settings",
+      "raw_bytes": 571,
+      "raw_sha256": "309023164947fe7613916af1bfe480f0d24e3a6b8b4ba10e35e62290495e3387",
+      "http_would_compress": true,
+      "before_samples_ns": [
+        32958.0,
+        32927.0,
+        32559.0,
+        32382.0,
+        33069.0,
+        32974.0
+      ],
+      "before_allocated_bytes_per_op": 496,
+      "before_allocations_per_op": 7,
+      "after_samples_ns": [
+        31037.0,
+        32528.0,
+        32440.0,
+        31519.0,
+        31038.0,
+        31439.0
+      ],
+      "after_allocated_bytes_per_op": 496,
+      "after_allocations_per_op": 7
+    },
+    {
+      "benchmark": "BenchmarkHTTPCorpus/dat-2",
+      "before_bytes": 1169,
+      "after_bytes": 1159,
+      "size_change_percent": -0.855,
+      "before_median_us": 69.865,
+      "after_median_us": 63.487,
+      "time_change_percent": -9.129,
+      "label": "dat",
+      "raw_bytes": 3624,
+      "raw_sha256": "f15ca8e22f27b76ed7e0ee691e48e202f5539454bc81905392aa43d8093bee6f",
+      "http_would_compress": true,
+      "before_samples_ns": [
+        65892.0,
+        77674.0,
+        71993.0,
+        68038.0,
+        71692.0,
+        65314.0
+      ],
+      "before_allocated_bytes_per_op": 1760,
+      "before_allocations_per_op": 9,
+      "after_samples_ns": [
+        61418.0,
+        68122.0,
+        62574.0,
+        62490.0,
+        64400.0,
+        66397.0
+      ],
+      "after_allocated_bytes_per_op": 1760,
+      "after_allocations_per_op": 9
+    },
+    {
+      "benchmark": "BenchmarkHTTPCorpus/senbura-dat-2",
+      "before_bytes": 425,
+      "after_bytes": 416,
+      "size_change_percent": -2.118,
+      "before_median_us": 31.306,
+      "after_median_us": 29.771,
+      "time_change_percent": -4.903,
+      "label": "senbura-dat",
+      "raw_bytes": 452,
+      "raw_sha256": "c571e73f72730d5703bae4efa2b6f79e0d7e26988a6120062dcd2226e8ef9514",
+      "http_would_compress": true,
+      "before_samples_ns": [
+        33513.0,
+        31005.0,
+        30850.0,
+        32742.0,
+        30545.0,
+        31608.0
+      ],
+      "before_allocated_bytes_per_op": 656,
+      "before_allocations_per_op": 7,
+      "after_samples_ns": [
+        31479.0,
+        28888.0,
+        30191.0,
+        29352.0,
+        28756.0,
+        30329.0
+      ],
+      "after_allocated_bytes_per_op": 624,
+      "after_allocations_per_op": 7
+    },
+    {
+      "benchmark": "BenchmarkHTTPCorpus/asset-thread.css-2",
+      "before_bytes": 580,
+      "after_bytes": 570,
+      "size_change_percent": -1.724,
+      "before_median_us": 44.154,
+      "after_median_us": 41.361,
+      "time_change_percent": -6.326,
+      "label": "asset-thread.css",
+      "raw_bytes": 1454,
+      "raw_sha256": "0921aeec578e174fd79eb00a2cd1b1a9504542d95d014879afaf02db1e761705",
+      "http_would_compress": true,
+      "before_samples_ns": [
+        44309.0,
+        43361.0,
+        43998.0,
+        46422.0,
+        43065.0,
+        45994.0
+      ],
+      "before_allocated_bytes_per_op": 752,
+      "before_allocations_per_op": 6,
+      "after_samples_ns": [
+        41328.0,
+        43252.0,
+        41858.0,
+        40440.0,
+        40963.0,
+        41393.0
+      ],
+      "after_allocated_bytes_per_op": 688,
+      "after_allocations_per_op": 6
+    },
+    {
+      "benchmark": "BenchmarkHTTPCorpus/asset-public.css-2",
+      "before_bytes": 1146,
+      "after_bytes": 1136,
+      "size_change_percent": -0.873,
+      "before_median_us": 74.527,
+      "after_median_us": 70.085,
+      "time_change_percent": -5.96,
+      "label": "asset-public.css",
+      "raw_bytes": 2920,
+      "raw_sha256": "3ad7f9255fce7c657c5ed9024020535b098d52a8474d7a0c086415e37b83f699",
+      "http_would_compress": true,
+      "before_samples_ns": [
+        72104.0,
+        83450.0,
+        71853.0,
+        71982.0,
+        80059.0,
+        76950.0
+      ],
+      "before_allocated_bytes_per_op": 1328,
+      "before_allocations_per_op": 7,
+      "after_samples_ns": [
+        71967.0,
+        79060.0,
+        75413.0,
+        68203.0,
+        67842.0,
+        68161.0
+      ],
+      "after_allocated_bytes_per_op": 1328,
+      "after_allocations_per_op": 7
+    },
+    {
+      "benchmark": "BenchmarkHTTPCorpus/asset-list.css-2",
+      "before_bytes": 559,
+      "after_bytes": 549,
+      "size_change_percent": -1.789,
+      "before_median_us": 41.464,
+      "after_median_us": 39.283,
+      "time_change_percent": -5.26,
+      "label": "asset-list.css",
+      "raw_bytes": 1199,
+      "raw_sha256": "3b85c078bcda88fb60cfaa56fa0a43b02cce336ba66d16467ebe247cf1928efa",
+      "http_would_compress": true,
+      "before_samples_ns": [
+        40951.0,
+        40602.0,
+        40855.0,
+        42449.0,
+        43587.0,
+        41977.0
+      ],
+      "before_allocated_bytes_per_op": 688,
+      "before_allocations_per_op": 6,
+      "after_samples_ns": [
+        38690.0,
+        39243.0,
+        39133.0,
+        39325.0,
+        42476.0,
+        39323.0
+      ],
+      "after_allocated_bytes_per_op": 688,
+      "after_allocations_per_op": 6
+    },
+    {
+      "benchmark": "BenchmarkHTTPCorpus/asset-ui.js-2",
+      "before_bytes": 329,
+      "after_bytes": 319,
+      "size_change_percent": -3.04,
+      "before_median_us": 30.289,
+      "after_median_us": 28.257,
+      "time_change_percent": -6.709,
+      "label": "asset-ui.js",
+      "raw_bytes": 523,
+      "raw_sha256": "3cfaae79044c623d9678583844be497956742e969ddeeef05d1caee8b9f956e0",
+      "http_would_compress": true,
+      "before_samples_ns": [
+        30136.0,
+        30428.0,
+        30061.0,
+        31419.0,
+        30150.0,
+        32074.0
+      ],
+      "before_allocated_bytes_per_op": 464,
+      "before_allocations_per_op": 6,
+      "after_samples_ns": [
+        27654.0,
+        29696.0,
+        29403.0,
+        28323.0,
+        28191.0,
+        27492.0
+      ],
+      "after_allocated_bytes_per_op": 432,
+      "after_allocations_per_op": 6
+    },
+    {
+      "benchmark": "BenchmarkHTTPCorpus/asset-list.js-2",
+      "before_bytes": 1707,
+      "after_bytes": 1706,
+      "size_change_percent": -0.059,
+      "before_median_us": 88.376,
+      "after_median_us": 86.972,
+      "time_change_percent": -1.588,
+      "label": "asset-list.js",
+      "raw_bytes": 3714,
+      "raw_sha256": "8c6245e1219108889343f2e38bc0398fbcda9b0f613f571d9eafc506bfb4e1dc",
+      "http_would_compress": true,
+      "before_samples_ns": [
+        89339.0,
+        87737.0,
+        87522.0,
+        89014.0,
+        99998.0,
+        86974.0
+      ],
+      "before_allocated_bytes_per_op": 2272,
+      "before_allocations_per_op": 9,
+      "after_samples_ns": [
+        84982.0,
+        90072.0,
+        83142.0,
+        86951.0,
+        86993.0,
+        88138.0
+      ],
+      "after_allocated_bytes_per_op": 2272,
+      "after_allocations_per_op": 9
+    },
+    {
+      "benchmark": "BenchmarkHTTPCorpus/asset-thread.js-2",
+      "before_bytes": 949,
+      "after_bytes": 939,
+      "size_change_percent": -1.054,
+      "before_median_us": 53.7,
+      "after_median_us": 50.773,
+      "time_change_percent": -5.452,
+      "label": "asset-thread.js",
+      "raw_bytes": 1637,
+      "raw_sha256": "b3128ec45e2c48e0dda1c52073ce0b48f3fa4ec4fa9bb899db521693ed8fc84f",
+      "http_would_compress": true,
+      "before_samples_ns": [
+        54761.0,
+        53281.0,
+        53428.0,
+        67705.0,
+        53972.0,
+        53019.0
+      ],
+      "before_allocated_bytes_per_op": 1232,
+      "before_allocations_per_op": 7,
+      "after_samples_ns": [
+        53664.0,
+        51245.0,
+        50928.0,
+        50617.0,
+        50545.0,
+        50002.0
+      ],
+      "after_allocated_bytes_per_op": 1232,
+      "after_allocations_per_op": 7
+    },
+    {
+      "benchmark": "BenchmarkHTTPCorpus/asset-favicon.svg-2",
+      "before_bytes": 385,
+      "after_bytes": 375,
+      "size_change_percent": -2.597,
+      "before_median_us": 30.825,
+      "after_median_us": 28.189,
+      "time_change_percent": -8.548,
+      "label": "asset-favicon.svg",
+      "raw_bytes": 463,
+      "raw_sha256": "c18c82c6bbca171dd8df013a1600e21b569d78b51c50ceb5e25bf696d5dbaf5d",
+      "http_would_compress": true,
+      "before_samples_ns": [
+        29870.0,
+        30281.0,
+        32144.0,
+        30143.0,
+        31368.0,
+        32715.0
+      ],
+      "before_allocated_bytes_per_op": 608,
+      "before_allocations_per_op": 7,
+      "after_samples_ns": [
+        28190.0,
+        28905.0,
+        28828.0,
+        28189.0,
+        27968.0,
+        27981.0
+      ],
+      "after_allocated_bytes_per_op": 576,
+      "after_allocations_per_op": 7
+    },
+    {
+      "benchmark": "BenchmarkHTTPCorpus/asset-ui.css-2",
+      "before_bytes": 2498,
+      "after_bytes": 2497,
+      "size_change_percent": -0.04,
+      "before_median_us": 147.953,
+      "after_median_us": 143.06,
+      "time_change_percent": -3.308,
+      "label": "asset-ui.css",
+      "raw_bytes": 7315,
+      "raw_sha256": "d681ca34c09600874fee8f40b79117187de02142ca2da2ebb5e13ea4bcf797df",
+      "http_would_compress": true,
+      "before_samples_ns": [
+        150125.0,
+        148564.0,
+        147898.0,
+        147673.0,
+        148009.0,
+        147378.0
+      ],
+      "before_allocated_bytes_per_op": 2864,
+      "before_allocations_per_op": 7,
+      "after_samples_ns": [
+        146352.0,
+        143294.0,
+        142825.0,
+        143610.0,
+        142514.0,
+        142069.0
+      ],
+      "after_allocated_bytes_per_op": 2864,
+      "after_allocations_per_op": 7
+    }
+  ],
+  "source_sha256": {
+    "internal/zstdencode/encoder.go": "b42b603c8af23c5990ca752211b870fdddbbf64a56620834f1e698ed657221c8",
+    "internal/zstdencode/entropy.go": "098398b2e03f16a7e016a0dade16f1925a03f691c225f0de505a252aeae86618",
+    "internal/zstdencode/entropy_choice.go": "0382cf4a33ba275fa442243a4c1c66aa7cc9fb010a8304013db052ca5db5a85c",
+    "internal/zstdencode/huffman.go": "6fde24498b25037e3d9c170eaf352d770a41731a38548768dc6de89be51c2ff8",
+    "internal/zstddecode/literal_header.go": "d6c3015a47a634106bcf22ae9e0eb9973716a098d922da02661cda9d26e33069",
+    "internal/zstddecode/literals.go": "d42ac9057672e54ad4f756a86676d719f78a77cd08aa2fcdc0793ca5c738656f",
+    "internal/compat/compression_cache.go": "0141105a438c4d3e1666dcc14a81f555ca91cd427c07146e963c9f4c281c5a18"
+  },
+  "corpus_verification": [
+    {
+      "after_bytes": 1942,
+      "archive_profiles_unchanged": 4,
+      "before_bytes": 1943,
+      "label": "top",
+      "raw_sha256": "fa7b6a1a1b339aac04fe9951770b13f2d45fa3af1382bf1a38600e1ab4513979",
+      "libzstd_matches": true
+    },
+    {
+      "after_bytes": 2152,
+      "archive_profiles_unchanged": 4,
+      "before_bytes": 2153,
+      "label": "board",
+      "raw_sha256": "9be90d1ce9e3eaa31ac6f75ba7cf7f2741297266c1c1b4f2f55d316894df72a1",
+      "libzstd_matches": true
+    },
+    {
+      "after_bytes": 4109,
+      "archive_profiles_unchanged": 4,
+      "before_bytes": 4110,
+      "label": "thread",
+      "raw_sha256": "a0794f226ea69ec8f96665b8bf0d1502ac01073a0d9b5e732eae938967a46d65",
+      "libzstd_matches": true
+    },
+    {
+      "after_bytes": 4109,
+      "archive_profiles_unchanged": 4,
+      "before_bytes": 4110,
+      "label": "thread-last50",
+      "raw_sha256": "a0794f226ea69ec8f96665b8bf0d1502ac01073a0d9b5e732eae938967a46d65",
+      "libzstd_matches": true
+    },
+    {
+      "after_bytes": 223,
+      "archive_profiles_unchanged": 4,
+      "before_bytes": 232,
+      "label": "menu",
+      "raw_sha256": "11b21c447d19dbbdd96925685a1f382e94463d78476758b0c5d5be69c3d54f0f",
+      "libzstd_matches": true
+    },
+    {
+      "after_bytes": 91,
+      "archive_profiles_unchanged": 4,
+      "before_bytes": 91,
+      "label": "subject",
+      "raw_sha256": "7315a4bfcde9bf1bcf403b4501e3333237f4d7f54568c21addda00a2c19f36ef",
+      "libzstd_matches": true
+    },
+    {
+      "after_bytes": 294,
+      "archive_profiles_unchanged": 4,
+      "before_bytes": 303,
+      "label": "settings",
+      "raw_sha256": "309023164947fe7613916af1bfe480f0d24e3a6b8b4ba10e35e62290495e3387",
+      "libzstd_matches": true
+    },
+    {
+      "after_bytes": 1159,
+      "archive_profiles_unchanged": 4,
+      "before_bytes": 1169,
+      "label": "dat",
+      "raw_sha256": "f15ca8e22f27b76ed7e0ee691e48e202f5539454bc81905392aa43d8093bee6f",
+      "libzstd_matches": true
+    },
+    {
+      "after_bytes": 416,
+      "archive_profiles_unchanged": 4,
+      "before_bytes": 425,
+      "label": "senbura-dat",
+      "raw_sha256": "c571e73f72730d5703bae4efa2b6f79e0d7e26988a6120062dcd2226e8ef9514",
+      "libzstd_matches": true
+    },
+    {
+      "after_bytes": 570,
+      "archive_profiles_unchanged": 4,
+      "before_bytes": 580,
+      "label": "asset-thread.css",
+      "raw_sha256": "0921aeec578e174fd79eb00a2cd1b1a9504542d95d014879afaf02db1e761705",
+      "libzstd_matches": true
+    },
+    {
+      "after_bytes": 1136,
+      "archive_profiles_unchanged": 4,
+      "before_bytes": 1146,
+      "label": "asset-public.css",
+      "raw_sha256": "3ad7f9255fce7c657c5ed9024020535b098d52a8474d7a0c086415e37b83f699",
+      "libzstd_matches": true
+    },
+    {
+      "after_bytes": 549,
+      "archive_profiles_unchanged": 4,
+      "before_bytes": 559,
+      "label": "asset-list.css",
+      "raw_sha256": "3b85c078bcda88fb60cfaa56fa0a43b02cce336ba66d16467ebe247cf1928efa",
+      "libzstd_matches": true
+    },
+    {
+      "after_bytes": 319,
+      "archive_profiles_unchanged": 4,
+      "before_bytes": 329,
+      "label": "asset-ui.js",
+      "raw_sha256": "3cfaae79044c623d9678583844be497956742e969ddeeef05d1caee8b9f956e0",
+      "libzstd_matches": true
+    },
+    {
+      "after_bytes": 1706,
+      "archive_profiles_unchanged": 4,
+      "before_bytes": 1707,
+      "label": "asset-list.js",
+      "raw_sha256": "8c6245e1219108889343f2e38bc0398fbcda9b0f613f571d9eafc506bfb4e1dc",
+      "libzstd_matches": true
+    },
+    {
+      "after_bytes": 939,
+      "archive_profiles_unchanged": 4,
+      "before_bytes": 949,
+      "label": "asset-thread.js",
+      "raw_sha256": "b3128ec45e2c48e0dda1c52073ce0b48f3fa4ec4fa9bb899db521693ed8fc84f",
+      "libzstd_matches": true
+    },
+    {
+      "after_bytes": 375,
+      "archive_profiles_unchanged": 4,
+      "before_bytes": 385,
+      "label": "asset-favicon.svg",
+      "raw_sha256": "c18c82c6bbca171dd8df013a1600e21b569d78b51c50ceb5e25bf696d5dbaf5d",
+      "libzstd_matches": true
+    },
+    {
+      "after_bytes": 2497,
+      "archive_profiles_unchanged": 4,
+      "before_bytes": 2498,
+      "label": "asset-ui.css",
+      "raw_sha256": "d681ca34c09600874fee8f40b79117187de02142ca2da2ebb5e13ea4bcf797df",
+      "libzstd_matches": true
+    }
+  ],
+  "validation": {
+    "independent_go_decoder": "17 captured HTTP bodies match",
+    "libzstd": "17 captured HTTP bodies match",
+    "archive": "68 representations byte-identical to baseline",
+    "related_tests": "zstdencode/zstddecode/compat/store passed",
+    "race": "zstdencode/zstddecode/compat/tools-webassets/webui passed",
+    "bootstrap_targeted": "public asset boundaries, compact feed and subject cache updates/restart passed",
+    "tls": "v9 conditional request gives 200; v10 gives 304; DAT delta gives uncompressed 206",
+    "fuzz": {
+      "FuzzIndependentFrames": {
+        "executions": 113406,
+        "passed": true,
+        "requested_seconds": 20
+      },
+      "FuzzArchiveRoundTrip": {
+        "executions": 1196,
+        "passed": true,
+        "requested_seconds": 20
+      },
+      "FuzzDecode": {
+        "executions": 3614,
+        "passed": true,
+        "requested_seconds": 20
+      }
+    },
+    "vet": "all cmd/internal/tools packages passed",
+    "cgo_disabled_build": "all cmd/internal/tools packages passed",
+    "go_lookahead_guard": "28-byte regression reproduced in v9; libzstd accepts both old/new; Go independent decoder accepts new output",
+    "not_run": [
+      "whole bootstrap suite",
+      "changed binary at public origin",
+      "live deployment",
+      "WAN and physical client performance"
+    ]
+  },
+  "rejected_trials": [
+    {
+      "name": "recording match-tail short prefixes",
+      "reason": "some CSS outputs grew"
+    },
+    {
+      "name": "one-byte repeat preference and literal-price comparison",
+      "reason": "some HTML or larger DAT outputs grew"
+    },
+    {
+      "name": "additional Huffman weight precision comparison",
+      "reason": "typically one extra byte saved, with higher compression time"
+    },
+    {
+      "name": "retaining FSE tables for all input sizes",
+      "reason": "large mixed DAT median rose about 11%; new retention restricted to HTTP inputs no larger than 32 KiB"
+    }
+  ]
+}

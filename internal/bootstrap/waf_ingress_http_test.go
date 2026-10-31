@@ -49,7 +49,7 @@ func TestWAFIngressRawHTTP(t *testing.T) {
 			server.Start()
 			defer server.Close()
 			origin, _ := url.Parse(tc.origin)
-			base := "GET " + tc.path + " HTTP/1.1\r\nHost: " + origin.Host + "\r\nConnection: close\r\n"
+			base := "GET " + tc.path + " HTTP/1.1\r\nHost: " + origin.Host + "\r\nConnection: close\r\nAccept-Encoding: gzip;q=0.1\r\n"
 			tests := []struct {
 				name, raw string
 				status    int
@@ -83,11 +83,11 @@ func TestWAFIngressRawHTTP(t *testing.T) {
 					}
 				})
 			}
-			// HTTPのヘッダ行数には、通常のConnection一行も含める。
-			for _, n := range []int{127, 128} {
+			// HTTPのヘッダ行数にはConnectionとAccept-Encodingの二行も含める。
+			for _, n := range []int{126, 127} {
 				response := wafRawResponse(t, server.Listener.Addr().String(), base+strings.Repeat("X-Empty:\r\n", n)+"\r\n")
 				want := 200
-				if n == 128 {
+				if n == 127 {
 					want = 403
 				}
 				if response.StatusCode != want {

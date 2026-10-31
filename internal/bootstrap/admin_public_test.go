@@ -121,7 +121,7 @@ func TestPublicAdminHTTPS(t *testing.T) {
 		host   string
 		status int
 	}{{true, "localhost:9444", 200}, {false, "localhost:9444", 403}, {true, "other.invalid:9444", 403}} {
-		req := httptest.NewRequest("GET", "https://"+tc.host+"/login", nil)
+		req := webReadTestRequest("GET", "https://"+tc.host+"/login", nil)
 		req.RemoteAddr = "198.51.100.8:12345"
 		if !tc.tls {
 			req.TLS = nil

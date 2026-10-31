@@ -8,6 +8,9 @@ import (
 
 // publicSnapshot は確定済みDATを取得する。公開リースの検査は送信側へ残す。
 func (b *postingBoard) publicSnapshot(key uint64, now domain.Time) (*app.PostingSnapshot, int) {
+	if b.closedAt.Load() != 0 {
+		return nil, 410
+	}
 	if key == reportReceiptKey && b.receipt.Load() != nil {
 		return b.receipt.Load(), 200
 	}

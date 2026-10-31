@@ -56,6 +56,17 @@ func TestAdminHTTPPrivilegeBoundaries(t *testing.T) {
 				t.Fatal(err)
 			}
 			before := repo.site.State().Seq
+			if role != "site_admin" {
+				for _, id := range []domain.ID{board.ID, other.ID, domain.NewID()} {
+					for _, method := range []string{"GET", "POST"} {
+						path := "/boards/" + id.String() + "/close"
+						res, _ := c.request(method, path, "", nil)
+						if res.StatusCode != 403 {
+							t.Fatal("closure requires site administrator", role, method, res.StatusCode)
+						}
+					}
+				}
+			}
 			for _, prefix := range []string{"", "/api/v1"} {
 				if role != "site_admin" {
 					for _, path := range []string{"/", "/site", "/board-categories", "/admin-access", "/administrators", "/administrators/" + account.ID.String(), "/operations", "/anonymous", "/abuse-guard", "/maintenance", "/maintenance/emergency-reserve", "/reading", "/networks"} {
@@ -229,7 +240,7 @@ func TestPrivateReportSendRechecksSession(t *testing.T) {
 		t.Fatal(err)
 	}
 	cookie := c.cookies["oimo_admin"]
-	req := httptest.NewRequest("GET", c.origin+"/api/v1/reports", nil)
+	req := webReadTestRequest("GET", c.origin+"/api/v1/reports", nil)
 	req.RemoteAddr = "127.0.0.1:12345"
 	req.AddCookie(cookie)
 	recorder := httptest.NewRecorder()

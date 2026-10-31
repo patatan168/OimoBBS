@@ -30,6 +30,10 @@ func (r *Repository) runRequiredGCJobLocked(ctx context.Context, site siteState,
 		return v, 0, store.ErrIncomplete
 	}
 	value, e := b.worker.Submit(ctx, func() (any, error) {
+		prepared, ready, err := r.prepareClosedGCBodyOwned(ctx, b, v, guard)
+		if err != nil || !ready {
+			return requiredGCStepResult{prepared, 0}, err
+		}
 		next, removed, e := r.stepRequiredGCJobOwned(ctx, b, v, guard)
 		return requiredGCStepResult{next, removed}, e
 	})

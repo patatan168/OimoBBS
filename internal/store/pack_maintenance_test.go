@@ -22,7 +22,7 @@ func TestPackMaintenancePolicy(t *testing.T) {
 		{"idle", day, 0, 0, 1, ""}, {"bytes", 0, 4 << 20, 1, 1, "bytes"}, {"below bytes", 0, (4 << 20) - 1, 1, 1, ""},
 		{"operations", 0, 1, 1024, 1, "operations"}, {"below operations", 0, 1, 1023, 1, ""},
 		{"seven days", 7 * day, 0, 0, 1, "level"}, {"before seven", 7*day - 1, 0, 0, 1, ""},
-		{"thirty days", 30 * day, 0, 0, 6, "level"}, {"before thirty", 30*day - 1, 0, 0, 6, ""},
+		{"thirty days", 30 * day, 0, 0, 6, ""}, {"before thirty", 30*day - 1, 0, 0, 6, ""},
 		{"expired", 180 * day, 4 << 20, 1024, 1, "expired"}, {"backwards", -day, 1, 1, 6, ""},
 		{"strong level", day, 1, 1, 9, "elapsed"},
 	}

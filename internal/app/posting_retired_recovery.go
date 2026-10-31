@@ -290,10 +290,7 @@ func (p *PostingLog) retiredRateRecord(record store.ThreadRecord, rate RateCarry
 		return RateRecord{}, ErrEvidenceGap
 	}
 	v := RateRecord{Schema: RetiredRateSchema, TokenStatus: "unavailable", ID: record.ID, PostNumber: rate.Number, At: rate.At, Create: record.Type == "create", Keys: append([]domain.RateKey{}, rate.Keys...)}
-	pressureAt := domain.Time(0)
-	if p.reclaimed.proof.Kind == "pressure" {
-		pressureAt = p.reclaimed.proof.At
-	}
+	pressureAt := p.reclaimed.proof.pressureTime()
 	v.Retirement = &RateRetirementProof{pressureAt: pressureAt, owner: p.owner, key: p.key, until: postRetention(i.Committed), floor: p.retiredFloor, digest: rateRetirementDigest(v)}
 	return v, nil
 }
@@ -302,7 +299,8 @@ func (p *PostingLog) retiredRateRecord(record store.ThreadRecord, rate RateCarry
 func retirementTimeValid(v retiredPostingOriginals, proof BodyReclamation, now domain.Time) bool {
 	pressure := v.proposal != nil && v.proposal.Pressure || v.decision != nil && v.decision.Pressure
 	if pressure {
-		return v.identity.Outcome == "accepted" && proof.Kind == "pressure" && proof.At <= now && v.identity.Committed <= proof.At
+		at := proof.pressureTime()
+		return v.identity.Outcome == "accepted" && at > 0 && at <= now && v.identity.Committed <= at
 	}
 	return evidence.RequiredOriginalDeadline(v.identity, postRetention(v.identity.Committed)) <= now
 }

@@ -101,9 +101,11 @@ func TestReadingHTTPPersistenceAndBoardFiltering(t *testing.T) {
 		t.Fatal("settings link", res.StatusCode)
 	}
 	request := func(method, path, ip string, header http.Header) *httptest.ResponseRecorder {
-		req := httptest.NewRequest(method, cfg.Public.BaseURL+path, nil)
+		req := webReadTestRequest(method, cfg.Public.BaseURL+path, nil)
 		req.RemoteAddr = ip + ":12345"
-		req.Header = header.Clone()
+		for key, values := range header {
+			req.Header[key] = append([]string(nil), values...)
+		}
 		w := httptest.NewRecorder()
 		repo.SiteWebHandler(nil).ServeHTTP(w, req)
 		return w
@@ -128,7 +130,7 @@ func TestReadingHTTPPersistenceAndBoardFiltering(t *testing.T) {
 	if w := request("GET", "/restricted/subject.txt", "198.51.100.1", nil); w.Code != 200 {
 		t.Fatal("allowed", w.Code, w.Body.String())
 	}
-	req := httptest.NewRequest("GET", cfg.Public.BaseURL+"/test/read.cgi/restricted/123/", nil)
+	req := webReadTestRequest("GET", cfg.Public.BaseURL+"/test/read.cgi/restricted/123/", nil)
 	req.RemoteAddr = "192.0.2.1:12345"
 	w := httptest.NewRecorder()
 	repo.BoardWebHandler(board.ID, nil).ServeHTTP(w, req)
@@ -390,7 +392,7 @@ func TestReadingDenialAlsoDeniesPostingAndReplay(t *testing.T) {
 	if response.StatusCode != 403 {
 		t.Fatal("real CGI bypass", response.StatusCode)
 	}
-	req := httptest.NewRequest("POST", repo.cfg.Public.BaseURL+"/web/post?bbs=readingpost", strings.NewReader(fields.Encode()))
+	req := webReadTestRequest("POST", repo.cfg.Public.BaseURL+"/web/post?bbs=readingpost", strings.NewReader(fields.Encode()))
 	req.RemoteAddr = "127.0.0.1:12345"
 	w := httptest.NewRecorder()
 	repo.WebPostingHandler(board.ID, nil).ServeHTTP(w, req)
@@ -427,7 +429,7 @@ func TestReadingPostingRestrictionDoesNotDenyReads(t *testing.T) {
 func TestReadingStreamingAndLeaseCheckBoundary(t *testing.T) {
 	_, repo := adminFixture(t)
 	defer repo.Close()
-	req := httptest.NewRequest("GET", repo.cfg.Public.BaseURL+"/", nil)
+	req := webReadTestRequest("GET", repo.cfg.Public.BaseURL+"/", nil)
 	req.RemoteAddr = "192.0.2.1:12345"
 	base := httptest.NewRecorder()
 	writer, denied := repo.readingGate(base, req, "site")

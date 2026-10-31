@@ -94,6 +94,11 @@ func (c *adminClient) request(method, path, body string, headers http.Header) (*
 			req.Header[name] = append([]string{}, values...)
 		}
 	}
+	if method == "GET" || method == "HEAD" {
+		if _, present := req.Header["Accept-Encoding"]; !present {
+			req.Header.Set("Accept-Encoding", "gzip;q=0.1")
+		}
+	}
 	for _, cookie := range c.cookies {
 		req.AddCookie(cookie)
 	}
@@ -219,14 +224,14 @@ func TestAdminHTTPPersistenceAndIsolation(t *testing.T) {
 	}
 	for _, path := range []string{"/api/v1/site", "/login"} {
 		w := httptest.NewRecorder()
-		req := httptest.NewRequest("GET", cfg.Public.BaseURL+path, nil)
+		req := webReadTestRequest("GET", cfg.Public.BaseURL+path, nil)
 		public.Handler.ServeHTTP(w, req)
 		if w.Code != 404 {
 			t.Fatal("public admin route", path, w.Code)
 		}
 	}
 	w := httptest.NewRecorder()
-	public.Handler.ServeHTTP(w, httptest.NewRequest("GET", cfg.Public.BaseURL+"/", nil))
+	public.Handler.ServeHTTP(w, webReadTestRequest("GET", cfg.Public.BaseURL+"/", nil))
 	if !strings.Contains(w.Body.String(), "管理済み&lt;script&gt;") {
 		t.Fatal("public setting not reflected")
 	}
@@ -388,7 +393,7 @@ func TestAdminLoginBoundaryAndSaveFailure(t *testing.T) {
 		t.Fatal(e)
 	}
 	for _, external := range []bool{false, true} {
-		req := httptest.NewRequest("GET", client.origin+"/", nil)
+		req := webReadTestRequest("GET", client.origin+"/", nil)
 		req.RemoteAddr = "127.0.0.1:12345"
 		if external {
 			req.RemoteAddr = "192.0.2.1:12345"

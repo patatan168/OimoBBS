@@ -21,7 +21,11 @@ type Encoder struct {
 	archiveMask     uint64
 	archiveLog      uint
 	optimizeEntropy bool
+	shortMatches    bool
+	smallHTTP       bool
 	long            [1 << 15]uint64
+	short           [1 << 12]uint64
+	shortPrevious   [1 << 12]uint64
 	literals        []byte
 	coded           []sequenceCode
 	counts          [3][53]int
@@ -32,11 +36,20 @@ type Encoder struct {
 	trialWork       entropyWork
 	weightWork      entropyWork
 	archivePeer     *Encoder
+	// blockごとに初期化する短い参照の費用（1/256bit単位）と探索間隔。
+	referenceCost  int
+	repeatCost     int
+	literalSkipMax int
+	literalShift   uint
 }
 
-// Encode は列ごとにFSE精度を選び、辞書なし・1MiB window・内容長付きframeを返す。
+// Encode は配信本文ごとに符号表を選び、辞書なし・1MiB window・内容長付きframeを返す。
 // 返却配列は次回呼出から独立する。
 func (e *Encoder) Encode(body []byte) []byte {
+	// 小さいHTTP本文の通常経路は維持し、大きい一様な本文だけ探索を省く。
+	if len(body) >= 32<<10 && uniformBody(body) {
+		return bytes.Clone(e.uniformFrame(body))
+	}
 	e.optimizeEntropy = true
 	defer func() { e.optimizeEntropy = false }()
 	return bytes.Clone(e.encode(body))
@@ -45,6 +58,13 @@ func (e *Encoder) Encode(body []byte) []byte {
 // encode はworker内だけで使う一時出力を返す。外部へ渡す前に専有コピーを作る。
 func (e *Encoder) encode(body []byte) []byte {
 	clear(e.long[:])
+	// 小さい配信本文だけ3byte一致の直近2候補を調べる。追加領域は32KiBに制限する。
+	e.smallHTTP = e.archiveLog == 0 && len(body) <= 32<<10
+	e.shortMatches = e.smallHTTP && len(body) >= 512
+	if e.shortMatches {
+		clear(e.short[:])
+		clear(e.shortPrevious[:])
+	}
 	// 本文長に合う内容長幅を使い、復号の履歴は最大1MiBに制限する。
 	result := frameHeader(e.frameBuffer[:0], uint64(len(body)))
 	if len(body) == 0 {
@@ -56,17 +76,24 @@ func (e *Encoder) encode(body []byte) []byte {
 	for begin := 0; begin < len(body); begin += blockLimit {
 		end := min(begin+blockLimit, len(body))
 		e.parse(body, begin, end, repeats)
-		compressed, nextRepeats := e.block(repeats)
-		e.blockBuffer = compressed
-		kind := uint32(2)
-		payload := compressed
-		if len(compressed) >= end-begin {
-			kind = 0
-			payload = body[begin:end]
-		} else {
-			repeats = nextRepeats
+		// raw/RLE blockはrepeat履歴を進めない。
+		kind, payload := uint32(1), body[begin:begin+1]
+		if !e.isRLEBlock(body[begin:end]) {
+			compressed, nextRepeats := e.block(repeats)
+			e.blockBuffer = compressed
+			kind, payload = 2, compressed
+			if len(compressed) >= end-begin {
+				kind, payload = 0, body[begin:end]
+			} else {
+				repeats = nextRepeats
+			}
 		}
-		header := uint32(len(payload))<<3 | kind<<1
+		size := len(payload)
+		if kind == 1 {
+			// RLEのblock長はpayload長ではなく展開長。
+			size = end - begin
+		}
+		header := uint32(size)<<3 | kind<<1
 		if end == len(body) {
 			header |= 1
 		}
@@ -107,6 +134,10 @@ func (e *Encoder) EncodeBestArchive(body []byte, options []ArchiveOptions) ([]by
 			return nil, errors.New("invalid archive compression input")
 		}
 	}
+	if uniformBody(body) {
+		return bytes.Clone(e.uniformFrame(body)), nil
+	}
+	options = uniqueArchiveOptions(body, options)
 	if len(body) < 32<<10 || len(options) < 2 || runtime.GOMAXPROCS(0) < 2 {
 		return e.encodeArchiveCandidates(body, options), nil
 	}
@@ -303,7 +334,12 @@ func offsetValue(offset, literal int, repeats *[3]int) int {
 
 // block はliteralと3種類の参照情報を独立した頻度表で符号化する。
 func (e *Encoder) block(repeats [3]int) ([]byte, [3]int) {
-	out := encodeLiterals(e.literals, e.blockBuffer, &e.weightWork)
+	var out []byte
+	if e.archiveLog == 0 {
+		out = encodeHTTPLiterals(e.literals, e.blockBuffer, &e.weightWork)
+	} else {
+		out = encodeLiterals(e.literals, e.blockBuffer, &e.weightWork)
+	}
 	n := len(e.coded)
 	if n == 0 {
 		return append(out, 0), repeats
@@ -328,16 +364,25 @@ func (e *Encoder) block(repeats [3]int) ([]byte, [3]int) {
 		if i == 1 {
 			log = min(log, 8)
 		} // offset表の形式上限は8bit。
-		if e.optimizeEntropy {
-			log = e.bestEntropyLog(counts[i], i)
+		if e.optimizeEntropy && e.smallHTTP {
+			tables[i] = e.bestEntropyTable(counts[i], i)
+		} else {
+			if e.optimizeEntropy {
+				log = e.bestEntropyLog(counts[i], i)
+			}
+			tables[i] = entropyTableWithWork(counts[i], log, &e.fseWork[i])
 		}
-		tables[i] = entropyTableWithWork(counts[i], log, &e.fseWork[i])
 		m := byte(2)
+		// headerが空の表は標準の定義済み表。
+		if len(tables[i].header) == 0 {
+			m = 0
+		}
 		if tables[i].single >= 0 {
 			m = 1
 		}
 		mode |= m << uint(6-2*i)
 	}
+	e.ensureSequenceLookahead(&tables, counts[2])
 	out = append(out, mode)
 	for _, t := range tables {
 		out = append(out, t.header...)
@@ -366,4 +411,27 @@ func (e *Encoder) block(repeats [3]int) ([]byte, [3]int) {
 		w.put(uint32(states[j]), tables[j].log)
 	}
 	return w.finish(), repeats
+}
+
+// ensureSequenceLookahead は末尾の動的ML表に続くbit列を最低2byteにする。
+// Goの独立復号器は表の最終値にも16bitを先読みするため、1byteだけでは拒否される。
+func (e *Encoder) ensureSequenceLookahead(tables *[3]entropyTable, counts []int) {
+	if tables[0].single < 0 || tables[1].single < 0 || tables[2].single >= 0 || tables[2].log >= 8 || len(tables[2].header) == 0 {
+		return
+	}
+	table := &tables[2]
+	bits := int(table.log)
+	state := table.start(int(e.coded[len(e.coded)-1].symbol[2]))
+	for i := len(e.coded) - 1; i >= 0; i-- {
+		bits += int(e.coded[i].width)
+		if i < len(e.coded)-1 {
+			var width uint
+			state, width = table.transition(int(e.coded[i].symbol[2]), state)
+			bits += int(width)
+		}
+		if bits >= 8 {
+			return
+		}
+	}
+	tables[2] = entropyTableWithWork(counts, 8, &e.fseWork[2])
 }

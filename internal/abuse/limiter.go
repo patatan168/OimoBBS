@@ -50,11 +50,18 @@ type rateBucket struct {
 
 // RateTicket は所有制限器以外から完了できない一回限りの予約。
 type RateTicket struct {
-	owner   *Limiter
-	charges []RateCharge
-	debits  []uint64
-	at      time.Time
-	state   uint8
+	owner  *Limiter
+	debits []rateDebit
+	at     time.Time
+	state  uint8
+	local  [4]rateDebit
+}
+
+// rateDebit は保留中に回収・再設定されないbucketと、実際に消費した量だけを保持する。
+type rateDebit struct {
+	bucket *rateBucket
+	amount uint64
+	cost   uint32
 }
 
 // Limiter はサイト全体で共有する。mutex中にI/Oやワーカーの呼戻しを行わない。
@@ -122,8 +129,19 @@ func (b *rateBucket) wait(now time.Time, cost uint32) (uint64, error) {
 		return 0, ErrRateUncertain
 	}
 	minute := now.Unix() / 60
+	count := b.count(minute)
 	for offset := int64(0); offset <= 61; offset++ {
-		if b.count(minute+offset)+uint64(cost) <= uint64(b.spec.WindowLimit) {
+		if offset > 0 && b.minutes != nil {
+			// 61分の合計を毎回全走査せず、窓から出る分・入る分だけ更新する。
+			leaving, entering := minute+offset-61, minute+offset
+			if v := b.minutes[(leaving%61+61)%61]; v.minute == leaving {
+				count -= v.count
+			}
+			if v := b.minutes[entering%61]; v.minute == entering {
+				count += v.count
+			}
+		}
+		if count+uint64(cost) <= uint64(b.spec.WindowLimit) {
 			if offset > 0 {
 				seconds := uint64((minute+offset)*60 - now.Unix())
 				wait = max(wait, seconds)
@@ -141,13 +159,16 @@ func (l *Limiter) Reserve(now time.Time, charges []RateCharge) (*RateTicket, err
 	if len(charges) == 0 || len(charges) > 16 || now.Unix() < 0 {
 		return nil, ErrRateSpec
 	}
-	seen := map[string]bool{}
 	newCount := 0
-	for _, c := range charges {
-		if c.Key == "" || len(c.Key) > 256 || seen[c.Key] || !c.Spec.valid() || c.Cost == 0 || c.Cost > c.Spec.Burst || c.Spec.WindowLimit > 0 && c.Cost > c.Spec.WindowLimit {
+	for i, c := range charges {
+		if c.Key == "" || len(c.Key) > 256 || !c.Spec.valid() || c.Cost == 0 || c.Cost > c.Spec.Burst || c.Spec.WindowLimit > 0 && c.Cost > c.Spec.WindowLimit {
 			return nil, ErrRateSpec
 		}
-		seen[c.Key] = true
+		for _, previous := range charges[:i] {
+			if previous.Key == c.Key {
+				return nil, ErrRateSpec
+			}
+		}
 		if b := l.keys[c.Key]; b != nil {
 			if b.spec != c.Spec {
 				return nil, ErrRateSpec
@@ -172,7 +193,7 @@ func (l *Limiter) Reserve(now time.Time, charges []RateCharge) (*RateTicket, err
 			return nil, ErrRateCapacity
 		}
 	}
-	candidates := make([]*rateBucket, len(charges))
+	var candidates [16]*rateBucket
 	wait := uint64(0)
 	for i, c := range charges {
 		b := l.keys[c.Key]
@@ -199,15 +220,21 @@ func (l *Limiter) Reserve(now time.Time, charges []RateCharge) (*RateTicket, err
 	if wait > 0 {
 		return nil, &RateLimited{RetryAfter: wait}
 	}
-	debits := make([]uint64, len(charges))
+	ticket := &RateTicket{owner: l, at: now}
+	if len(charges) <= len(ticket.local) {
+		ticket.debits = ticket.local[:len(charges):len(charges)]
+	} else {
+		ticket.debits = make([]rateDebit, len(charges))
+	}
 	for i, c := range charges {
 		b := candidates[i]
-		debits[i] = min(b.credit, uint64(c.Cost)*uint64(c.Spec.Every))
-		b.credit -= debits[i]
+		debit := min(b.credit, uint64(c.Cost)*uint64(c.Spec.Every))
+		ticket.debits[i] = rateDebit{bucket: b, amount: debit, cost: c.Cost}
+		b.credit -= debit
 		b.pending += uint64(c.Cost)
 		l.keys[c.Key] = b
 	}
-	return &RateTicket{owner: l, charges: append([]RateCharge(nil), charges...), debits: debits, at: now}, nil
+	return ticket, nil
 }
 
 // Commit は永続受理後に保留件数を確定履歴へ移す。
@@ -225,14 +252,15 @@ func (l *Limiter) finish(t *RateTicket, state uint8) error {
 		return ErrRateTicket
 	}
 	t.state = state
+	defer func() { clear(t.debits) }()
 	if state == 3 {
 		return nil
 	}
-	for i, c := range t.charges {
-		b := l.keys[c.Key]
-		b.pending -= uint64(c.Cost)
+	for _, debit := range t.debits {
+		b := debit.bucket
+		b.pending -= uint64(debit.cost)
 		if state == 2 {
-			b.credit = min(b.capacity(), b.credit+t.debits[i])
+			b.credit = min(b.capacity(), b.credit+debit.amount)
 			continue
 		}
 		if b.spec.WindowLimit > 0 || b.spec.TrackWindow {
@@ -244,7 +272,7 @@ func (l *Limiter) finish(t *RateTicket, state uint8) error {
 			if v.minute != minute {
 				*v = rateMinute{minute: minute}
 			}
-			v.count += uint64(c.Cost)
+			v.count += uint64(debit.cost)
 		}
 	}
 	return nil

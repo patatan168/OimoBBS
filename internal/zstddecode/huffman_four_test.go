@@ -124,6 +124,11 @@ func TestHuffmanFourLongVariableWidths(t *testing.T) {
 }
 
 func compareHuffmanFour(t *testing.T, data [4][]byte, sizes [4]int, table []huffmanCell, depth int) {
+	compareHuffmanFourDecoder(t, data, sizes, table, depth, decodeHuffmanFour)
+	compareHuffmanFourDecoder(t, data, sizes, table, depth, decodeHuffmanPairsFour)
+}
+
+func compareHuffmanFourDecoder(t *testing.T, data [4][]byte, sizes [4]int, table []huffmanCell, depth int, decode func([4][]byte, [4][]byte, []huffmanCell, int) error) {
 	t.Helper()
 	var want, got [4][]byte
 	wantOK := true
@@ -139,7 +144,7 @@ func compareHuffmanFour(t *testing.T, data [4][]byte, sizes [4]int, table []huff
 	for i := range out {
 		out[i] = got[i][:sizes[i]]
 	}
-	err := decodeHuffmanFour(data, out, table, depth)
+	err := decode(data, out, table, depth)
 	if (err == nil) != wantOK {
 		t.Fatalf("depth=%d sizes=%v: reference=%v got=%v", depth, sizes, wantOK, err)
 	}

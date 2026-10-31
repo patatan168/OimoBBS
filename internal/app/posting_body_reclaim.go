@@ -14,26 +14,73 @@ import (
 
 	"oimobbs/internal/domain"
 	"oimobbs/internal/store"
+	"oimobbs/internal/strictjson"
 )
 
 // BodyReclamation は公開用コピーだけの回収証明。本文・タイトル・元IPを含まない。
 type BodyReclamation struct {
-	Schema     uint32                 `json:"schema"`
-	Deletion   domain.ID              `json:"deletion_id"`
-	Owner      domain.ID              `json:"board_id"`
-	Key        domain.U64             `json:"thread_key"`
-	Kind       string                 `json:"kind"`
-	At         domain.Time            `json:"created_at_ns"`
-	Floor      domain.Time            `json:"dedup_floor_ns"`
-	Sequence   domain.U64             `json:"source_seq"`
-	Expires    domain.Time            `json:"thread_expires_at_ns"`
-	Policy     domain.Policy          `json:"policy"`
-	After      domain.After           `json:"after"`
-	RecordsSHA domain.Hash            `json:"records_sha256"`
-	DedupSHA   domain.Hash            `json:"dedup_sha256"`
-	RateSHA    domain.Hash            `json:"rate_sha256"`
-	Files      []store.BodySourceFile `json:"files"`
-	Signature  string                 `json:"signature"`
+	// ClosedPressure は別行で先行保存する許可。元の署名・digestには含めない。
+	ClosedPressure *ClosedBoardPressure   `json:"-"`
+	Schema         uint32                 `json:"schema"`
+	Deletion       domain.ID              `json:"deletion_id"`
+	Owner          domain.ID              `json:"board_id"`
+	Key            domain.U64             `json:"thread_key"`
+	Kind           string                 `json:"kind"`
+	At             domain.Time            `json:"created_at_ns"`
+	Floor          domain.Time            `json:"dedup_floor_ns"`
+	Sequence       domain.U64             `json:"source_seq"`
+	Expires        domain.Time            `json:"thread_expires_at_ns"`
+	Policy         domain.Policy          `json:"policy"`
+	After          domain.After           `json:"after"`
+	RecordsSHA     domain.Hash            `json:"records_sha256"`
+	DedupSHA       domain.Hash            `json:"dedup_sha256"`
+	RateSHA        domain.Hash            `json:"rate_sha256"`
+	Files          []store.BodySourceFile `json:"files"`
+	Signature      string                 `json:"signature"`
+}
+
+// UnmarshalJSON は実行中の追加許可を受け付けず、元の署名対象フィールドだけを完全検査する。
+func (v *BodyReclamation) UnmarshalJSON(raw []byte) error {
+	var stored struct {
+		Schema     uint32                 `json:"schema"`
+		Deletion   domain.ID              `json:"deletion_id"`
+		Owner      domain.ID              `json:"board_id"`
+		Key        domain.U64             `json:"thread_key"`
+		Kind       string                 `json:"kind"`
+		At         domain.Time            `json:"created_at_ns"`
+		Floor      domain.Time            `json:"dedup_floor_ns"`
+		Sequence   domain.U64             `json:"source_seq"`
+		Expires    domain.Time            `json:"thread_expires_at_ns"`
+		Policy     domain.Policy          `json:"policy"`
+		After      domain.After           `json:"after"`
+		RecordsSHA domain.Hash            `json:"records_sha256"`
+		DedupSHA   domain.Hash            `json:"dedup_sha256"`
+		RateSHA    domain.Hash            `json:"rate_sha256"`
+		Files      []store.BodySourceFile `json:"files"`
+		Signature  string                 `json:"signature"`
+	}
+	if err := strictjson.Decode(raw, &stored); err != nil {
+		return err
+	}
+	*v = BodyReclamation{
+		Schema:     stored.Schema,
+		Deletion:   stored.Deletion,
+		Owner:      stored.Owner,
+		Key:        stored.Key,
+		Kind:       stored.Kind,
+		At:         stored.At,
+		Floor:      stored.Floor,
+		Sequence:   stored.Sequence,
+		Expires:    stored.Expires,
+		Policy:     stored.Policy,
+		After:      stored.After,
+		RecordsSHA: stored.RecordsSHA,
+		DedupSHA:   stored.DedupSHA,
+		RateSHA:    stored.RateSHA,
+		Files:      stored.Files,
+		Signature:  stored.Signature,
+	}
+	return nil
 }
 
 // CarryAt は時計逆行に備えて全受理枠を引き継ぐ境界を返す。
@@ -47,6 +94,11 @@ type reclaimedBody struct {
 
 // Verify は所有単位・固定境界・canonical署名を検証する。元受理記録の照合は復旧時に別途行う。
 func (v BodyReclamation) Verify(key ed25519.PublicKey) error {
+	if v.ClosedPressure != nil {
+		if err := v.ClosedPressure.Verify(v, key); err != nil {
+			return err
+		}
+	}
 	if v.Schema != 2 || v.Deletion == (domain.ID{}) || v.Owner == (domain.ID{}) || v.Key == 0 || v.Sequence == 0 || v.Sequence > store.MaxPackEntries || v.At <= 0 || v.Floor < 0 || v.Expires <= 0 || v.Policy.Validate() != nil || v.After.BumpValue == 0 || v.RecordsSHA == (domain.Hash{}) || v.DedupSHA == (domain.Hash{}) || v.RateSHA == (domain.Hash{}) || store.ValidateBodySourceFiles(v.Files) != nil {
 		return store.ErrCorrupt
 	}
@@ -54,7 +106,7 @@ func (v BodyReclamation) Verify(key ed25519.PublicKey) error {
 		if v.After.State != "hidden" {
 			return store.ErrCorrupt
 		}
-	} else if v.Kind != "pressure" && (v.Kind != "expire" || v.At < v.Expires) {
+	} else if v.Kind != "pressure" && v.Kind != "closure" && (v.Kind != "expire" || v.At < v.Expires) {
 		return store.ErrCorrupt
 	}
 	signature, e := base64.RawStdEncoding.Strict().DecodeString(v.Signature)

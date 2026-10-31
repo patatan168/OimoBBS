@@ -87,8 +87,13 @@ func (r *Repository) submitCapCommandForm(ctx context.Context, b *postingBoard, 
 
 // executeCapCommand は確認・Cookie・CAP認証を通過した操作だけを既存の管理台帳へ確定する。
 // 管理frameは既存形式のadmin actorを使い、CAP由来の理由とIDを監査表示で識別する。
-func (r *Repository) executeCapCommand(b *postingBoard, key uint64, c capCommand, cap capValue, d domain.Dedup, site siteState) LegacyFormResult {
+func (r *Repository) executeCapCommand(b *postingBoard, key uint64, c capCommand, cap capValue, d domain.Dedup) LegacyFormResult {
 	fail := legacyFailure
+	// 規約表示用のsnapshotは保存形式の変更を反映しないため、所有中の最新値で判定する。
+	var site siteState
+	if err := strictjson.Decode(r.site.State().Rows["site:state"].Value, &site); err != nil {
+		return fail(err)
+	}
 	p := b.threads[key]
 	if p == nil || key == reportReceiptKey {
 		return fail(ErrCapCommand)

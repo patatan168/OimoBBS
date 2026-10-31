@@ -1,0 +1,5754 @@
+{
+  "baseline": {
+    "revision": "fd85f15850a3e7c77accfb7b5613fee4d996283e"
+  },
+  "conditions": {
+    "implementation": "independent Go encoder and decoder, no added dependency",
+    "cpu_affinity": [
+      10,
+      11
+    ],
+    "GOMAXPROCS": 2,
+    "order": [
+      "before",
+      "after",
+      "after",
+      "before"
+    ],
+    "samples_per_version": 4,
+    "benchtime": "200ms",
+    "shared_host": true,
+    "cache_and_input_io_excluded": true,
+    "owned_output_allocations_included": true,
+    "store_encode_includes_crc": true,
+    "decode_is_codec_only": true,
+    "huffman_pair_scratch_bytes": 16384,
+    "huffman_pair_literal_threshold_bytes": 32768,
+    "source_frames_except_retired_level9_are_identical": true,
+    "huffman_pair_max_mean_prefix_width": 5,
+    "product_dependencies_unchanged": true
+  },
+  "resources": {
+    "after-run1": {
+      "elapsed_seconds": 26.522255239950027,
+      "peak_rss_kib": 24336,
+      "user_cpu_seconds": 27.207494,
+      "system_cpu_seconds": 0.451136,
+      "exit_code": 0
+    },
+    "after-run2": {
+      "elapsed_seconds": 26.454032149980776,
+      "peak_rss_kib": 29236,
+      "user_cpu_seconds": 27.105614,
+      "system_cpu_seconds": 0.493193,
+      "exit_code": 0
+    },
+    "before-run0": {
+      "elapsed_seconds": 26.589861783955712,
+      "peak_rss_kib": 24752,
+      "user_cpu_seconds": 28.471585,
+      "system_cpu_seconds": 0.45186699999999996,
+      "exit_code": 0
+    },
+    "before-run3": {
+      "elapsed_seconds": 26.510469753993675,
+      "peak_rss_kib": 27992,
+      "user_cpu_seconds": 28.199908,
+      "system_cpu_seconds": 0.510272,
+      "exit_code": 0
+    }
+  },
+  "rows": [
+    {
+      "version": "after",
+      "codec": "store1",
+      "encoded_bytes": 2521,
+      "frame_sha256": "600cfca217fa43e596a023160295394461ed689a862a33b2cc3b7fa69c9f68af",
+      "label": "asset-ui.css",
+      "raw_bytes": 7315,
+      "raw_sha256": "d681ca34c09600874fee8f40b79117187de02142ca2da2ebb5e13ea4bcf797df",
+      "encode": {
+        "median": {
+          "ns/op": 90184.0,
+          "MB/s": 81.11500000000001,
+          "cpu-ns/op": 90869.5,
+          "encoded-bytes": 2521.0,
+          "B/op": 2888.0,
+          "allocs/op": 8.0
+        },
+        "samples": [
+          {
+            "ns/op": 91028.0,
+            "MB/s": 80.36,
+            "cpu-ns/op": 91940.0,
+            "encoded-bytes": 2521.0,
+            "B/op": 2888.0,
+            "allocs/op": 8.0
+          },
+          {
+            "ns/op": 89747.0,
+            "MB/s": 81.51,
+            "cpu-ns/op": 90435.0,
+            "encoded-bytes": 2521.0,
+            "B/op": 2888.0,
+            "allocs/op": 8.0
+          },
+          {
+            "ns/op": 90621.0,
+            "MB/s": 80.72,
+            "cpu-ns/op": 91304.0,
+            "encoded-bytes": 2521.0,
+            "B/op": 2888.0,
+            "allocs/op": 8.0
+          },
+          {
+            "ns/op": 89300.0,
+            "MB/s": 81.92,
+            "cpu-ns/op": 89990.0,
+            "encoded-bytes": 2521.0,
+            "B/op": 2888.0,
+            "allocs/op": 8.0
+          }
+        ]
+      },
+      "decode": {
+        "median": {
+          "ns/op": 24346.0,
+          "MB/s": 300.495,
+          "cpu-ns/op": 25558.0,
+          "encoded-bytes": 2521.0,
+          "B/op": 8192.0,
+          "allocs/op": 1.0
+        },
+        "samples": [
+          {
+            "ns/op": 24795.0,
+            "MB/s": 295.02,
+            "cpu-ns/op": 26070.0,
+            "encoded-bytes": 2521.0,
+            "B/op": 8192.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 24597.0,
+            "MB/s": 297.39,
+            "cpu-ns/op": 25836.0,
+            "encoded-bytes": 2521.0,
+            "B/op": 8192.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 24095.0,
+            "MB/s": 303.6,
+            "cpu-ns/op": 25280.0,
+            "encoded-bytes": 2521.0,
+            "B/op": 8192.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 23993.0,
+            "MB/s": 304.88,
+            "cpu-ns/op": 25152.0,
+            "encoded-bytes": 2521.0,
+            "B/op": 8192.0,
+            "allocs/op": 1.0
+          }
+        ]
+      },
+      "independent_libzstd_roundtrip": true
+    },
+    {
+      "version": "after",
+      "codec": "store6",
+      "encoded_bytes": 2520,
+      "frame_sha256": "64351fd8294a53b58a66e0b5bb61102928226c9eb8f405d96d3a59329341f720",
+      "label": "asset-ui.css",
+      "raw_bytes": 7315,
+      "raw_sha256": "d681ca34c09600874fee8f40b79117187de02142ca2da2ebb5e13ea4bcf797df",
+      "encode": {
+        "median": {
+          "ns/op": 94059.5,
+          "MB/s": 77.77000000000001,
+          "cpu-ns/op": 94827.5,
+          "encoded-bytes": 2520.0,
+          "B/op": 2888.0,
+          "allocs/op": 8.0
+        },
+        "samples": [
+          {
+            "ns/op": 96347.0,
+            "MB/s": 75.92,
+            "cpu-ns/op": 97248.0,
+            "encoded-bytes": 2520.0,
+            "B/op": 2888.0,
+            "allocs/op": 8.0
+          },
+          {
+            "ns/op": 93764.0,
+            "MB/s": 78.01,
+            "cpu-ns/op": 94574.0,
+            "encoded-bytes": 2520.0,
+            "B/op": 2888.0,
+            "allocs/op": 8.0
+          },
+          {
+            "ns/op": 94355.0,
+            "MB/s": 77.53,
+            "cpu-ns/op": 95081.0,
+            "encoded-bytes": 2520.0,
+            "B/op": 2888.0,
+            "allocs/op": 8.0
+          },
+          {
+            "ns/op": 92783.0,
+            "MB/s": 78.84,
+            "cpu-ns/op": 93464.0,
+            "encoded-bytes": 2520.0,
+            "B/op": 2888.0,
+            "allocs/op": 8.0
+          }
+        ]
+      },
+      "decode": {
+        "median": {
+          "ns/op": 25466.5,
+          "MB/s": 287.245,
+          "cpu-ns/op": 26695.5,
+          "encoded-bytes": 2520.0,
+          "B/op": 8192.0,
+          "allocs/op": 1.0
+        },
+        "samples": [
+          {
+            "ns/op": 25556.0,
+            "MB/s": 286.24,
+            "cpu-ns/op": 26806.0,
+            "encoded-bytes": 2520.0,
+            "B/op": 8192.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 25360.0,
+            "MB/s": 288.45,
+            "cpu-ns/op": 26601.0,
+            "encoded-bytes": 2520.0,
+            "B/op": 8192.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 25559.0,
+            "MB/s": 286.2,
+            "cpu-ns/op": 26790.0,
+            "encoded-bytes": 2520.0,
+            "B/op": 8192.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 25377.0,
+            "MB/s": 288.25,
+            "cpu-ns/op": 26545.0,
+            "encoded-bytes": 2520.0,
+            "B/op": 8192.0,
+            "allocs/op": 1.0
+          }
+        ]
+      },
+      "independent_libzstd_roundtrip": true
+    },
+    {
+      "version": "after",
+      "codec": "store9",
+      "encoded_bytes": 2479,
+      "frame_sha256": "6b4fae0ec355e99f5af6e9d3d00dfb090bec068b6b7cdea2a97d1fa00c6176c8",
+      "label": "asset-ui.css",
+      "raw_bytes": 7315,
+      "raw_sha256": "d681ca34c09600874fee8f40b79117187de02142ca2da2ebb5e13ea4bcf797df",
+      "encode": {
+        "median": {
+          "ns/op": 165348.0,
+          "MB/s": 44.239999999999995,
+          "cpu-ns/op": 166403.0,
+          "encoded-bytes": 2479.0,
+          "B/op": 2864.0,
+          "allocs/op": 7.0
+        },
+        "samples": [
+          {
+            "ns/op": 165322.0,
+            "MB/s": 44.25,
+            "cpu-ns/op": 166345.0,
+            "encoded-bytes": 2479.0,
+            "B/op": 2864.0,
+            "allocs/op": 7.0
+          },
+          {
+            "ns/op": 165793.0,
+            "MB/s": 44.12,
+            "cpu-ns/op": 166840.0,
+            "encoded-bytes": 2479.0,
+            "B/op": 2864.0,
+            "allocs/op": 7.0
+          },
+          {
+            "ns/op": 165374.0,
+            "MB/s": 44.23,
+            "cpu-ns/op": 166461.0,
+            "encoded-bytes": 2479.0,
+            "B/op": 2864.0,
+            "allocs/op": 7.0
+          },
+          {
+            "ns/op": 164351.0,
+            "MB/s": 44.51,
+            "cpu-ns/op": 165310.0,
+            "encoded-bytes": 2479.0,
+            "B/op": 2864.0,
+            "allocs/op": 7.0
+          }
+        ]
+      },
+      "decode": {
+        "median": {
+          "ns/op": 25341.0,
+          "MB/s": 288.665,
+          "cpu-ns/op": 26541.0,
+          "encoded-bytes": 2479.0,
+          "B/op": 8192.0,
+          "allocs/op": 1.0
+        },
+        "samples": [
+          {
+            "ns/op": 25823.0,
+            "MB/s": 283.27,
+            "cpu-ns/op": 27048.0,
+            "encoded-bytes": 2479.0,
+            "B/op": 8192.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 25298.0,
+            "MB/s": 289.16,
+            "cpu-ns/op": 26527.0,
+            "encoded-bytes": 2479.0,
+            "B/op": 8192.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 25384.0,
+            "MB/s": 288.17,
+            "cpu-ns/op": 26555.0,
+            "encoded-bytes": 2479.0,
+            "B/op": 8192.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 25243.0,
+            "MB/s": 289.79,
+            "cpu-ns/op": 26401.0,
+            "encoded-bytes": 2479.0,
+            "B/op": 8192.0,
+            "allocs/op": 1.0
+          }
+        ]
+      },
+      "independent_libzstd_roundtrip": true
+    },
+    {
+      "version": "after",
+      "codec": "zstd-http",
+      "encoded_bytes": 2479,
+      "frame_sha256": "6b4fae0ec355e99f5af6e9d3d00dfb090bec068b6b7cdea2a97d1fa00c6176c8",
+      "label": "asset-ui.css",
+      "raw_bytes": 7315,
+      "raw_sha256": "d681ca34c09600874fee8f40b79117187de02142ca2da2ebb5e13ea4bcf797df",
+      "encode": {
+        "median": {
+          "ns/op": 165133.5,
+          "MB/s": 44.295,
+          "cpu-ns/op": 166224.5,
+          "encoded-bytes": 2479.0,
+          "B/op": 2864.0,
+          "allocs/op": 7.0
+        },
+        "samples": [
+          {
+            "ns/op": 165048.0,
+            "MB/s": 44.32,
+            "cpu-ns/op": 166207.0,
+            "encoded-bytes": 2479.0,
+            "B/op": 2864.0,
+            "allocs/op": 7.0
+          },
+          {
+            "ns/op": 186163.0,
+            "MB/s": 39.29,
+            "cpu-ns/op": 187306.0,
+            "encoded-bytes": 2479.0,
+            "B/op": 2864.0,
+            "allocs/op": 7.0
+          },
+          {
+            "ns/op": 165219.0,
+            "MB/s": 44.27,
+            "cpu-ns/op": 166242.0,
+            "encoded-bytes": 2479.0,
+            "B/op": 2864.0,
+            "allocs/op": 7.0
+          },
+          {
+            "ns/op": 162836.0,
+            "MB/s": 44.92,
+            "cpu-ns/op": 163866.0,
+            "encoded-bytes": 2479.0,
+            "B/op": 2864.0,
+            "allocs/op": 7.0
+          }
+        ]
+      },
+      "decode": {
+        "median": {
+          "ns/op": 25346.0,
+          "MB/s": 288.615,
+          "cpu-ns/op": 26505.0,
+          "encoded-bytes": 2479.0,
+          "B/op": 8192.0,
+          "allocs/op": 1.0
+        },
+        "samples": [
+          {
+            "ns/op": 25482.0,
+            "MB/s": 287.07,
+            "cpu-ns/op": 26600.0,
+            "encoded-bytes": 2479.0,
+            "B/op": 8192.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 25436.0,
+            "MB/s": 287.59,
+            "cpu-ns/op": 26720.0,
+            "encoded-bytes": 2479.0,
+            "B/op": 8192.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 25232.0,
+            "MB/s": 289.91,
+            "cpu-ns/op": 26370.0,
+            "encoded-bytes": 2479.0,
+            "B/op": 8192.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 25256.0,
+            "MB/s": 289.64,
+            "cpu-ns/op": 26410.0,
+            "encoded-bytes": 2479.0,
+            "B/op": 8192.0,
+            "allocs/op": 1.0
+          }
+        ]
+      },
+      "independent_libzstd_roundtrip": true
+    },
+    {
+      "version": "after",
+      "codec": "store1",
+      "encoded_bytes": 369885,
+      "frame_sha256": "0d7fadcc0b8f48de10f0d2ab1ca3dfa8dcf21c5604e37108dc6e80f66c66d211",
+      "label": "dat-base64",
+      "raw_bytes": 524191,
+      "raw_sha256": "f4f2241fb9038326ff7705db05407ca329ad7e19bc319b484041df8222b342f1",
+      "encode": {
+        "median": {
+          "ns/op": 3474227.5,
+          "MB/s": 150.88,
+          "cpu-ns/op": 3537154.0,
+          "encoded-bytes": 369885.0,
+          "B/op": 377240.0,
+          "allocs/op": 22.0
+        },
+        "samples": [
+          {
+            "ns/op": 3464562.0,
+            "MB/s": 151.3,
+            "cpu-ns/op": 3523529.0,
+            "encoded-bytes": 369885.0,
+            "B/op": 377240.0,
+            "allocs/op": 22.0
+          },
+          {
+            "ns/op": 3443705.0,
+            "MB/s": 152.22,
+            "cpu-ns/op": 3501910.0,
+            "encoded-bytes": 369885.0,
+            "B/op": 377240.0,
+            "allocs/op": 22.0
+          },
+          {
+            "ns/op": 3557262.0,
+            "MB/s": 147.36,
+            "cpu-ns/op": 3626721.0,
+            "encoded-bytes": 369885.0,
+            "B/op": 377240.0,
+            "allocs/op": 22.0
+          },
+          {
+            "ns/op": 3483893.0,
+            "MB/s": 150.46,
+            "cpu-ns/op": 3550779.0,
+            "encoded-bytes": 369885.0,
+            "B/op": 377240.0,
+            "allocs/op": 22.0
+          }
+        ]
+      },
+      "decode": {
+        "median": {
+          "ns/op": 1293052.0,
+          "MB/s": 405.39,
+          "cpu-ns/op": 1360630.5,
+          "encoded-bytes": 369885.0,
+          "B/op": 524288.0,
+          "allocs/op": 1.0
+        },
+        "samples": [
+          {
+            "ns/op": 1291117.0,
+            "MB/s": 406.0,
+            "cpu-ns/op": 1358587.0,
+            "encoded-bytes": 369885.0,
+            "B/op": 524288.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 1285852.0,
+            "MB/s": 407.66,
+            "cpu-ns/op": 1351081.0,
+            "encoded-bytes": 369885.0,
+            "B/op": 524288.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 1294987.0,
+            "MB/s": 404.78,
+            "cpu-ns/op": 1362674.0,
+            "encoded-bytes": 369885.0,
+            "B/op": 524288.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 1299055.0,
+            "MB/s": 403.52,
+            "cpu-ns/op": 1365582.0,
+            "encoded-bytes": 369885.0,
+            "B/op": 524288.0,
+            "allocs/op": 1.0
+          }
+        ]
+      },
+      "independent_libzstd_roundtrip": true
+    },
+    {
+      "version": "after",
+      "codec": "store6",
+      "encoded_bytes": 369890,
+      "frame_sha256": "dfed128ef148671fc707a1acd45f0d577c1fdc22ada5e465c486ccfb7eaf888a",
+      "label": "dat-base64",
+      "raw_bytes": 524191,
+      "raw_sha256": "f4f2241fb9038326ff7705db05407ca329ad7e19bc319b484041df8222b342f1",
+      "encode": {
+        "median": {
+          "ns/op": 3503433.5,
+          "MB/s": 149.625,
+          "cpu-ns/op": 3572120.5,
+          "encoded-bytes": 369890.0,
+          "B/op": 377240.0,
+          "allocs/op": 22.0
+        },
+        "samples": [
+          {
+            "ns/op": 3484392.0,
+            "MB/s": 150.44,
+            "cpu-ns/op": 3540275.0,
+            "encoded-bytes": 369890.0,
+            "B/op": 377240.0,
+            "allocs/op": 22.0
+          },
+          {
+            "ns/op": 3530205.0,
+            "MB/s": 148.49,
+            "cpu-ns/op": 3597359.0,
+            "encoded-bytes": 369890.0,
+            "B/op": 377240.0,
+            "allocs/op": 22.0
+          },
+          {
+            "ns/op": 3508431.0,
+            "MB/s": 149.41,
+            "cpu-ns/op": 3581100.0,
+            "encoded-bytes": 369890.0,
+            "B/op": 377240.0,
+            "allocs/op": 22.0
+          },
+          {
+            "ns/op": 3498436.0,
+            "MB/s": 149.84,
+            "cpu-ns/op": 3563141.0,
+            "encoded-bytes": 369890.0,
+            "B/op": 377240.0,
+            "allocs/op": 22.0
+          }
+        ]
+      },
+      "decode": {
+        "median": {
+          "ns/op": 1312187.5,
+          "MB/s": 399.495,
+          "cpu-ns/op": 1379371.0,
+          "encoded-bytes": 369890.0,
+          "B/op": 524288.0,
+          "allocs/op": 1.0
+        },
+        "samples": [
+          {
+            "ns/op": 1320216.0,
+            "MB/s": 397.05,
+            "cpu-ns/op": 1386873.0,
+            "encoded-bytes": 369890.0,
+            "B/op": 524288.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 1357655.0,
+            "MB/s": 386.1,
+            "cpu-ns/op": 1427603.0,
+            "encoded-bytes": 369890.0,
+            "B/op": 524288.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 1300220.0,
+            "MB/s": 403.16,
+            "cpu-ns/op": 1367721.0,
+            "encoded-bytes": 369890.0,
+            "B/op": 524288.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 1304159.0,
+            "MB/s": 401.94,
+            "cpu-ns/op": 1371869.0,
+            "encoded-bytes": 369890.0,
+            "B/op": 524288.0,
+            "allocs/op": 1.0
+          }
+        ]
+      },
+      "independent_libzstd_roundtrip": true
+    },
+    {
+      "version": "after",
+      "codec": "store9",
+      "encoded_bytes": 369880,
+      "frame_sha256": "03916103b28d563be12ce4de6b7dd9b1acb8b5b7651b5f35c0aa997d6b824e5f",
+      "label": "dat-base64",
+      "raw_bytes": 524191,
+      "raw_sha256": "f4f2241fb9038326ff7705db05407ca329ad7e19bc319b484041df8222b342f1",
+      "encode": {
+        "median": {
+          "ns/op": 3676684.0,
+          "MB/s": 142.57,
+          "cpu-ns/op": 3744043.0,
+          "encoded-bytes": 369880.0,
+          "B/op": 377216.0,
+          "allocs/op": 21.0
+        },
+        "samples": [
+          {
+            "ns/op": 3659242.0,
+            "MB/s": 143.25,
+            "cpu-ns/op": 3731217.0,
+            "encoded-bytes": 369880.0,
+            "B/op": 377216.0,
+            "allocs/op": 21.0
+          },
+          {
+            "ns/op": 3731597.0,
+            "MB/s": 140.47,
+            "cpu-ns/op": 3803288.0,
+            "encoded-bytes": 369880.0,
+            "B/op": 377216.0,
+            "allocs/op": 21.0
+          },
+          {
+            "ns/op": 3676119.0,
+            "MB/s": 142.59,
+            "cpu-ns/op": 3737571.0,
+            "encoded-bytes": 369880.0,
+            "B/op": 377216.0,
+            "allocs/op": 21.0
+          },
+          {
+            "ns/op": 3677249.0,
+            "MB/s": 142.55,
+            "cpu-ns/op": 3750515.0,
+            "encoded-bytes": 369880.0,
+            "B/op": 377216.0,
+            "allocs/op": 21.0
+          }
+        ]
+      },
+      "decode": {
+        "median": {
+          "ns/op": 1299684.5,
+          "MB/s": 403.32,
+          "cpu-ns/op": 1366560.5,
+          "encoded-bytes": 369880.0,
+          "B/op": 524288.0,
+          "allocs/op": 1.0
+        },
+        "samples": [
+          {
+            "ns/op": 1295931.0,
+            "MB/s": 404.49,
+            "cpu-ns/op": 1362984.0,
+            "encoded-bytes": 369880.0,
+            "B/op": 524288.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 1300304.0,
+            "MB/s": 403.13,
+            "cpu-ns/op": 1368137.0,
+            "encoded-bytes": 369880.0,
+            "B/op": 524288.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 1299065.0,
+            "MB/s": 403.51,
+            "cpu-ns/op": 1364984.0,
+            "encoded-bytes": 369880.0,
+            "B/op": 524288.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 1305018.0,
+            "MB/s": 401.67,
+            "cpu-ns/op": 1369208.0,
+            "encoded-bytes": 369880.0,
+            "B/op": 524288.0,
+            "allocs/op": 1.0
+          }
+        ]
+      },
+      "independent_libzstd_roundtrip": true
+    },
+    {
+      "version": "after",
+      "codec": "zstd-http",
+      "encoded_bytes": 369880,
+      "frame_sha256": "03916103b28d563be12ce4de6b7dd9b1acb8b5b7651b5f35c0aa997d6b824e5f",
+      "label": "dat-base64",
+      "raw_bytes": 524191,
+      "raw_sha256": "f4f2241fb9038326ff7705db05407ca329ad7e19bc319b484041df8222b342f1",
+      "encode": {
+        "median": {
+          "ns/op": 3582526.0,
+          "MB/s": 146.32,
+          "cpu-ns/op": 3642920.5,
+          "encoded-bytes": 369880.0,
+          "B/op": 377216.0,
+          "allocs/op": 21.0
+        },
+        "samples": [
+          {
+            "ns/op": 3579647.0,
+            "MB/s": 146.44,
+            "cpu-ns/op": 3639444.0,
+            "encoded-bytes": 369880.0,
+            "B/op": 377216.0,
+            "allocs/op": 21.0
+          },
+          {
+            "ns/op": 3585405.0,
+            "MB/s": 146.2,
+            "cpu-ns/op": 3646397.0,
+            "encoded-bytes": 369880.0,
+            "B/op": 377216.0,
+            "allocs/op": 21.0
+          },
+          {
+            "ns/op": 3610190.0,
+            "MB/s": 145.2,
+            "cpu-ns/op": 3669733.0,
+            "encoded-bytes": 369880.0,
+            "B/op": 377216.0,
+            "allocs/op": 21.0
+          },
+          {
+            "ns/op": 3572384.0,
+            "MB/s": 146.73,
+            "cpu-ns/op": 3628730.0,
+            "encoded-bytes": 369880.0,
+            "B/op": 377216.0,
+            "allocs/op": 21.0
+          }
+        ]
+      },
+      "decode": {
+        "median": {
+          "ns/op": 1291082.5,
+          "MB/s": 406.01,
+          "cpu-ns/op": 1349981.0,
+          "encoded-bytes": 369880.0,
+          "B/op": 524288.0,
+          "allocs/op": 1.0
+        },
+        "samples": [
+          {
+            "ns/op": 1284708.0,
+            "MB/s": 408.02,
+            "cpu-ns/op": 1343704.0,
+            "encoded-bytes": 369880.0,
+            "B/op": 524288.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 1290545.0,
+            "MB/s": 406.18,
+            "cpu-ns/op": 1349413.0,
+            "encoded-bytes": 369880.0,
+            "B/op": 524288.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 1293286.0,
+            "MB/s": 405.32,
+            "cpu-ns/op": 1354995.0,
+            "encoded-bytes": 369880.0,
+            "B/op": 524288.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 1291620.0,
+            "MB/s": 405.84,
+            "cpu-ns/op": 1350549.0,
+            "encoded-bytes": 369880.0,
+            "B/op": 524288.0,
+            "allocs/op": 1.0
+          }
+        ]
+      },
+      "independent_libzstd_roundtrip": true
+    },
+    {
+      "version": "after",
+      "codec": "store1",
+      "encoded_bytes": 177230,
+      "frame_sha256": "f30e57acce874c5649c58e74ef9ecc663cd1ee7e91f8881bd556dfacaf8ea074",
+      "label": "dat-entropy",
+      "raw_bytes": 435955,
+      "raw_sha256": "1e8bcac3601026ab44818a11540c617bb900431a554055cbe73c735ed073488c",
+      "encode": {
+        "median": {
+          "ns/op": 1503939.5,
+          "MB/s": 289.885,
+          "cpu-ns/op": 1535884.0,
+          "encoded-bytes": 177230.0,
+          "B/op": 180584.0,
+          "allocs/op": 20.0
+        },
+        "samples": [
+          {
+            "ns/op": 1494051.0,
+            "MB/s": 291.79,
+            "cpu-ns/op": 1525704.0,
+            "encoded-bytes": 177230.0,
+            "B/op": 180584.0,
+            "allocs/op": 20.0
+          },
+          {
+            "ns/op": 1489900.0,
+            "MB/s": 292.61,
+            "cpu-ns/op": 1517962.0,
+            "encoded-bytes": 177230.0,
+            "B/op": 180584.0,
+            "allocs/op": 20.0
+          },
+          {
+            "ns/op": 1513828.0,
+            "MB/s": 287.98,
+            "cpu-ns/op": 1546064.0,
+            "encoded-bytes": 177230.0,
+            "B/op": 180584.0,
+            "allocs/op": 20.0
+          },
+          {
+            "ns/op": 1517373.0,
+            "MB/s": 287.31,
+            "cpu-ns/op": 1551096.0,
+            "encoded-bytes": 177230.0,
+            "B/op": 180584.0,
+            "allocs/op": 20.0
+          }
+        ]
+      },
+      "decode": {
+        "median": {
+          "ns/op": 839737.0,
+          "MB/s": 519.175,
+          "cpu-ns/op": 901016.5,
+          "encoded-bytes": 177230.0,
+          "B/op": 442368.0,
+          "allocs/op": 1.0
+        },
+        "samples": [
+          {
+            "ns/op": 834312.0,
+            "MB/s": 522.53,
+            "cpu-ns/op": 890056.0,
+            "encoded-bytes": 177230.0,
+            "B/op": 442368.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 835171.0,
+            "MB/s": 522.0,
+            "cpu-ns/op": 891349.0,
+            "encoded-bytes": 177230.0,
+            "B/op": 442368.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 844698.0,
+            "MB/s": 516.11,
+            "cpu-ns/op": 911330.0,
+            "encoded-bytes": 177230.0,
+            "B/op": 442368.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 844303.0,
+            "MB/s": 516.35,
+            "cpu-ns/op": 910684.0,
+            "encoded-bytes": 177230.0,
+            "B/op": 442368.0,
+            "allocs/op": 1.0
+          }
+        ]
+      },
+      "independent_libzstd_roundtrip": true
+    },
+    {
+      "version": "after",
+      "codec": "store6",
+      "encoded_bytes": 177206,
+      "frame_sha256": "60c911c2d06ee3b6187c3a3cd7fbc7d2c8209cfdc872cf781f769a99cf431730",
+      "label": "dat-entropy",
+      "raw_bytes": 435955,
+      "raw_sha256": "1e8bcac3601026ab44818a11540c617bb900431a554055cbe73c735ed073488c",
+      "encode": {
+        "median": {
+          "ns/op": 1514852.5,
+          "MB/s": 287.78999999999996,
+          "cpu-ns/op": 1549424.0,
+          "encoded-bytes": 177206.0,
+          "B/op": 180584.0,
+          "allocs/op": 20.0
+        },
+        "samples": [
+          {
+            "ns/op": 1537438.0,
+            "MB/s": 283.56,
+            "cpu-ns/op": 1571412.0,
+            "encoded-bytes": 177206.0,
+            "B/op": 180584.0,
+            "allocs/op": 20.0
+          },
+          {
+            "ns/op": 1506646.0,
+            "MB/s": 289.35,
+            "cpu-ns/op": 1538551.0,
+            "encoded-bytes": 177206.0,
+            "B/op": 180584.0,
+            "allocs/op": 20.0
+          },
+          {
+            "ns/op": 1511426.0,
+            "MB/s": 288.44,
+            "cpu-ns/op": 1543633.0,
+            "encoded-bytes": 177206.0,
+            "B/op": 180584.0,
+            "allocs/op": 20.0
+          },
+          {
+            "ns/op": 1518279.0,
+            "MB/s": 287.14,
+            "cpu-ns/op": 1555215.0,
+            "encoded-bytes": 177206.0,
+            "B/op": 180584.0,
+            "allocs/op": 20.0
+          }
+        ]
+      },
+      "decode": {
+        "median": {
+          "ns/op": 847790.5,
+          "MB/s": 514.225,
+          "cpu-ns/op": 909666.0,
+          "encoded-bytes": 177206.0,
+          "B/op": 442368.0,
+          "allocs/op": 1.0
+        },
+        "samples": [
+          {
+            "ns/op": 849808.0,
+            "MB/s": 513.0,
+            "cpu-ns/op": 907921.0,
+            "encoded-bytes": 177206.0,
+            "B/op": 442368.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 848049.0,
+            "MB/s": 514.07,
+            "cpu-ns/op": 906874.0,
+            "encoded-bytes": 177206.0,
+            "B/op": 442368.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 846726.0,
+            "MB/s": 514.87,
+            "cpu-ns/op": 912429.0,
+            "encoded-bytes": 177206.0,
+            "B/op": 442368.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 847532.0,
+            "MB/s": 514.38,
+            "cpu-ns/op": 911411.0,
+            "encoded-bytes": 177206.0,
+            "B/op": 442368.0,
+            "allocs/op": 1.0
+          }
+        ]
+      },
+      "independent_libzstd_roundtrip": true
+    },
+    {
+      "version": "after",
+      "codec": "store9",
+      "encoded_bytes": 177198,
+      "frame_sha256": "8e818d7230e11d5b0f6456f5c0385a8905017551e28473aa3cbeea651d2f133a",
+      "label": "dat-entropy",
+      "raw_bytes": 435955,
+      "raw_sha256": "1e8bcac3601026ab44818a11540c617bb900431a554055cbe73c735ed073488c",
+      "encode": {
+        "median": {
+          "ns/op": 1793166.0,
+          "MB/s": 243.12,
+          "cpu-ns/op": 1827090.5,
+          "encoded-bytes": 177198.0,
+          "B/op": 180560.0,
+          "allocs/op": 19.0
+        },
+        "samples": [
+          {
+            "ns/op": 1802767.0,
+            "MB/s": 241.83,
+            "cpu-ns/op": 1840970.0,
+            "encoded-bytes": 177198.0,
+            "B/op": 180560.0,
+            "allocs/op": 19.0
+          },
+          {
+            "ns/op": 1799298.0,
+            "MB/s": 242.29,
+            "cpu-ns/op": 1832820.0,
+            "encoded-bytes": 177198.0,
+            "B/op": 180560.0,
+            "allocs/op": 19.0
+          },
+          {
+            "ns/op": 1787034.0,
+            "MB/s": 243.95,
+            "cpu-ns/op": 1821361.0,
+            "encoded-bytes": 177198.0,
+            "B/op": 180560.0,
+            "allocs/op": 19.0
+          },
+          {
+            "ns/op": 1783765.0,
+            "MB/s": 244.4,
+            "cpu-ns/op": 1815466.0,
+            "encoded-bytes": 177198.0,
+            "B/op": 180560.0,
+            "allocs/op": 19.0
+          }
+        ]
+      },
+      "decode": {
+        "median": {
+          "ns/op": 843119.5,
+          "MB/s": 517.0699999999999,
+          "cpu-ns/op": 899660.5,
+          "encoded-bytes": 177198.0,
+          "B/op": 442368.0,
+          "allocs/op": 1.0
+        },
+        "samples": [
+          {
+            "ns/op": 843265.0,
+            "MB/s": 516.98,
+            "cpu-ns/op": 899954.0,
+            "encoded-bytes": 177198.0,
+            "B/op": 442368.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 845064.0,
+            "MB/s": 515.88,
+            "cpu-ns/op": 904025.0,
+            "encoded-bytes": 177198.0,
+            "B/op": 442368.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 842974.0,
+            "MB/s": 517.16,
+            "cpu-ns/op": 899367.0,
+            "encoded-bytes": 177198.0,
+            "B/op": 442368.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 838730.0,
+            "MB/s": 519.78,
+            "cpu-ns/op": 894120.0,
+            "encoded-bytes": 177198.0,
+            "B/op": 442368.0,
+            "allocs/op": 1.0
+          }
+        ]
+      },
+      "independent_libzstd_roundtrip": true
+    },
+    {
+      "version": "after",
+      "codec": "zstd-http",
+      "encoded_bytes": 177198,
+      "frame_sha256": "8e818d7230e11d5b0f6456f5c0385a8905017551e28473aa3cbeea651d2f133a",
+      "label": "dat-entropy",
+      "raw_bytes": 435955,
+      "raw_sha256": "1e8bcac3601026ab44818a11540c617bb900431a554055cbe73c735ed073488c",
+      "encode": {
+        "median": {
+          "ns/op": 1773799.0,
+          "MB/s": 245.77499999999998,
+          "cpu-ns/op": 1802242.5,
+          "encoded-bytes": 177198.0,
+          "B/op": 180560.0,
+          "allocs/op": 19.0
+        },
+        "samples": [
+          {
+            "ns/op": 1776867.0,
+            "MB/s": 245.35,
+            "cpu-ns/op": 1803351.0,
+            "encoded-bytes": 177198.0,
+            "B/op": 180560.0,
+            "allocs/op": 19.0
+          },
+          {
+            "ns/op": 1786149.0,
+            "MB/s": 244.08,
+            "cpu-ns/op": 1815195.0,
+            "encoded-bytes": 177198.0,
+            "B/op": 180560.0,
+            "allocs/op": 19.0
+          },
+          {
+            "ns/op": 1770731.0,
+            "MB/s": 246.2,
+            "cpu-ns/op": 1801134.0,
+            "encoded-bytes": 177198.0,
+            "B/op": 180560.0,
+            "allocs/op": 19.0
+          },
+          {
+            "ns/op": 1766296.0,
+            "MB/s": 246.82,
+            "cpu-ns/op": 1798985.0,
+            "encoded-bytes": 177198.0,
+            "B/op": 180560.0,
+            "allocs/op": 19.0
+          }
+        ]
+      },
+      "decode": {
+        "median": {
+          "ns/op": 838131.0,
+          "MB/s": 520.1600000000001,
+          "cpu-ns/op": 891440.0,
+          "encoded-bytes": 177198.0,
+          "B/op": 442368.0,
+          "allocs/op": 1.0
+        },
+        "samples": [
+          {
+            "ns/op": 835007.0,
+            "MB/s": 522.1,
+            "cpu-ns/op": 884070.0,
+            "encoded-bytes": 177198.0,
+            "B/op": 442368.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 834233.0,
+            "MB/s": 522.58,
+            "cpu-ns/op": 883797.0,
+            "encoded-bytes": 177198.0,
+            "B/op": 442368.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 841255.0,
+            "MB/s": 518.22,
+            "cpu-ns/op": 898810.0,
+            "encoded-bytes": 177198.0,
+            "B/op": 442368.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 845244.0,
+            "MB/s": 515.77,
+            "cpu-ns/op": 905057.0,
+            "encoded-bytes": 177198.0,
+            "B/op": 442368.0,
+            "allocs/op": 1.0
+          }
+        ]
+      },
+      "independent_libzstd_roundtrip": true
+    },
+    {
+      "version": "after",
+      "codec": "store1",
+      "encoded_bytes": 31077,
+      "frame_sha256": "57ba027bfe54707203826e140f1c83b2eb304539b38c12bd32c9362dedf8f14f",
+      "label": "dat-mixed",
+      "raw_bytes": 204125,
+      "raw_sha256": "f7103a9c16cb5ca09f5105fc4c9d8154e0dae4af7fe2d0abbbf42abcd1f36986",
+      "encode": {
+        "median": {
+          "ns/op": 569746.0,
+          "MB/s": 358.28,
+          "cpu-ns/op": 577193.0,
+          "encoded-bytes": 31077.0,
+          "B/op": 33040.0,
+          "allocs/op": 12.0
+        },
+        "samples": [
+          {
+            "ns/op": 568202.0,
+            "MB/s": 359.25,
+            "cpu-ns/op": 575434.0,
+            "encoded-bytes": 31077.0,
+            "B/op": 33040.0,
+            "allocs/op": 12.0
+          },
+          {
+            "ns/op": 567840.0,
+            "MB/s": 359.48,
+            "cpu-ns/op": 574256.0,
+            "encoded-bytes": 31077.0,
+            "B/op": 33040.0,
+            "allocs/op": 12.0
+          },
+          {
+            "ns/op": 571290.0,
+            "MB/s": 357.31,
+            "cpu-ns/op": 578952.0,
+            "encoded-bytes": 31077.0,
+            "B/op": 33040.0,
+            "allocs/op": 12.0
+          },
+          {
+            "ns/op": 571678.0,
+            "MB/s": 357.06,
+            "cpu-ns/op": 579017.0,
+            "encoded-bytes": 31077.0,
+            "B/op": 33040.0,
+            "allocs/op": 12.0
+          }
+        ]
+      },
+      "decode": {
+        "median": {
+          "ns/op": 321585.5,
+          "MB/s": 634.76,
+          "cpu-ns/op": 352290.0,
+          "encoded-bytes": 31077.0,
+          "B/op": 204800.0,
+          "allocs/op": 1.0
+        },
+        "samples": [
+          {
+            "ns/op": 319409.0,
+            "MB/s": 639.07,
+            "cpu-ns/op": 347351.0,
+            "encoded-bytes": 31077.0,
+            "B/op": 204800.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 319883.0,
+            "MB/s": 638.12,
+            "cpu-ns/op": 348273.0,
+            "encoded-bytes": 31077.0,
+            "B/op": 204800.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 323288.0,
+            "MB/s": 631.4,
+            "cpu-ns/op": 356307.0,
+            "encoded-bytes": 31077.0,
+            "B/op": 204800.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 326546.0,
+            "MB/s": 625.1,
+            "cpu-ns/op": 359050.0,
+            "encoded-bytes": 31077.0,
+            "B/op": 204800.0,
+            "allocs/op": 1.0
+          }
+        ]
+      },
+      "independent_libzstd_roundtrip": true
+    },
+    {
+      "version": "after",
+      "codec": "store6",
+      "encoded_bytes": 31026,
+      "frame_sha256": "27ee3c2d8f3073268d787739c64fb64d63a53ebda4b446a848e2e1c77134df4e",
+      "label": "dat-mixed",
+      "raw_bytes": 204125,
+      "raw_sha256": "f7103a9c16cb5ca09f5105fc4c9d8154e0dae4af7fe2d0abbbf42abcd1f36986",
+      "encode": {
+        "median": {
+          "ns/op": 572753.5,
+          "MB/s": 356.395,
+          "cpu-ns/op": 579505.0,
+          "encoded-bytes": 31026.0,
+          "B/op": 33040.0,
+          "allocs/op": 12.0
+        },
+        "samples": [
+          {
+            "ns/op": 572709.0,
+            "MB/s": 356.42,
+            "cpu-ns/op": 579835.0,
+            "encoded-bytes": 31026.0,
+            "B/op": 33040.0,
+            "allocs/op": 12.0
+          },
+          {
+            "ns/op": 570948.0,
+            "MB/s": 357.52,
+            "cpu-ns/op": 577533.0,
+            "encoded-bytes": 31026.0,
+            "B/op": 33040.0,
+            "allocs/op": 12.0
+          },
+          {
+            "ns/op": 573869.0,
+            "MB/s": 355.7,
+            "cpu-ns/op": 579614.0,
+            "encoded-bytes": 31026.0,
+            "B/op": 33040.0,
+            "allocs/op": 12.0
+          },
+          {
+            "ns/op": 572798.0,
+            "MB/s": 356.37,
+            "cpu-ns/op": 579396.0,
+            "encoded-bytes": 31026.0,
+            "B/op": 33040.0,
+            "allocs/op": 12.0
+          }
+        ]
+      },
+      "decode": {
+        "median": {
+          "ns/op": 321989.5,
+          "MB/s": 633.95,
+          "cpu-ns/op": 350103.5,
+          "encoded-bytes": 31026.0,
+          "B/op": 204800.0,
+          "allocs/op": 1.0
+        },
+        "samples": [
+          {
+            "ns/op": 322108.0,
+            "MB/s": 633.72,
+            "cpu-ns/op": 349696.0,
+            "encoded-bytes": 31026.0,
+            "B/op": 204800.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 324125.0,
+            "MB/s": 629.77,
+            "cpu-ns/op": 354625.0,
+            "encoded-bytes": 31026.0,
+            "B/op": 204800.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 321592.0,
+            "MB/s": 634.73,
+            "cpu-ns/op": 350246.0,
+            "encoded-bytes": 31026.0,
+            "B/op": 204800.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 321871.0,
+            "MB/s": 634.18,
+            "cpu-ns/op": 349961.0,
+            "encoded-bytes": 31026.0,
+            "B/op": 204800.0,
+            "allocs/op": 1.0
+          }
+        ]
+      },
+      "independent_libzstd_roundtrip": true
+    },
+    {
+      "version": "after",
+      "codec": "store9",
+      "encoded_bytes": 31015,
+      "frame_sha256": "7ea0352ac15429bec2b185a886770de0adbe54cddf958860b33d7e136042c2da",
+      "label": "dat-mixed",
+      "raw_bytes": 204125,
+      "raw_sha256": "f7103a9c16cb5ca09f5105fc4c9d8154e0dae4af7fe2d0abbbf42abcd1f36986",
+      "encode": {
+        "median": {
+          "ns/op": 870590.0,
+          "MB/s": 234.465,
+          "cpu-ns/op": 879662.5,
+          "encoded-bytes": 31015.0,
+          "B/op": 33016.0,
+          "allocs/op": 11.0
+        },
+        "samples": [
+          {
+            "ns/op": 872960.0,
+            "MB/s": 233.83,
+            "cpu-ns/op": 883191.0,
+            "encoded-bytes": 31015.0,
+            "B/op": 33016.0,
+            "allocs/op": 11.0
+          },
+          {
+            "ns/op": 872203.0,
+            "MB/s": 234.03,
+            "cpu-ns/op": 880504.0,
+            "encoded-bytes": 31015.0,
+            "B/op": 33016.0,
+            "allocs/op": 11.0
+          },
+          {
+            "ns/op": 868977.0,
+            "MB/s": 234.9,
+            "cpu-ns/op": 878821.0,
+            "encoded-bytes": 31015.0,
+            "B/op": 33016.0,
+            "allocs/op": 11.0
+          },
+          {
+            "ns/op": 866010.0,
+            "MB/s": 235.71,
+            "cpu-ns/op": 874518.0,
+            "encoded-bytes": 31015.0,
+            "B/op": 33016.0,
+            "allocs/op": 11.0
+          }
+        ]
+      },
+      "decode": {
+        "median": {
+          "ns/op": 324966.5,
+          "MB/s": 628.155,
+          "cpu-ns/op": 354687.0,
+          "encoded-bytes": 31015.0,
+          "B/op": 204800.0,
+          "allocs/op": 1.0
+        },
+        "samples": [
+          {
+            "ns/op": 326852.0,
+            "MB/s": 624.52,
+            "cpu-ns/op": 357194.0,
+            "encoded-bytes": 31015.0,
+            "B/op": 204800.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 326388.0,
+            "MB/s": 625.41,
+            "cpu-ns/op": 357001.0,
+            "encoded-bytes": 31015.0,
+            "B/op": 204800.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 323545.0,
+            "MB/s": 630.9,
+            "cpu-ns/op": 352373.0,
+            "encoded-bytes": 31015.0,
+            "B/op": 204800.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 323318.0,
+            "MB/s": 631.34,
+            "cpu-ns/op": 351711.0,
+            "encoded-bytes": 31015.0,
+            "B/op": 204800.0,
+            "allocs/op": 1.0
+          }
+        ]
+      },
+      "independent_libzstd_roundtrip": true
+    },
+    {
+      "version": "after",
+      "codec": "zstd-http",
+      "encoded_bytes": 31015,
+      "frame_sha256": "7ea0352ac15429bec2b185a886770de0adbe54cddf958860b33d7e136042c2da",
+      "label": "dat-mixed",
+      "raw_bytes": 204125,
+      "raw_sha256": "f7103a9c16cb5ca09f5105fc4c9d8154e0dae4af7fe2d0abbbf42abcd1f36986",
+      "encode": {
+        "median": {
+          "ns/op": 857153.5,
+          "MB/s": 238.15,
+          "cpu-ns/op": 865555.5,
+          "encoded-bytes": 31015.0,
+          "B/op": 33016.0,
+          "allocs/op": 11.0
+        },
+        "samples": [
+          {
+            "ns/op": 853008.0,
+            "MB/s": 239.3,
+            "cpu-ns/op": 860888.0,
+            "encoded-bytes": 31015.0,
+            "B/op": 33016.0,
+            "allocs/op": 11.0
+          },
+          {
+            "ns/op": 851795.0,
+            "MB/s": 239.64,
+            "cpu-ns/op": 858602.0,
+            "encoded-bytes": 31015.0,
+            "B/op": 33016.0,
+            "allocs/op": 11.0
+          },
+          {
+            "ns/op": 907936.0,
+            "MB/s": 224.82,
+            "cpu-ns/op": 915201.0,
+            "encoded-bytes": 31015.0,
+            "B/op": 33016.0,
+            "allocs/op": 11.0
+          },
+          {
+            "ns/op": 861299.0,
+            "MB/s": 237.0,
+            "cpu-ns/op": 870223.0,
+            "encoded-bytes": 31015.0,
+            "B/op": 33016.0,
+            "allocs/op": 11.0
+          }
+        ]
+      },
+      "decode": {
+        "median": {
+          "ns/op": 324531.5,
+          "MB/s": 628.99,
+          "cpu-ns/op": 348978.5,
+          "encoded-bytes": 31015.0,
+          "B/op": 204800.0,
+          "allocs/op": 1.0
+        },
+        "samples": [
+          {
+            "ns/op": 323835.0,
+            "MB/s": 630.34,
+            "cpu-ns/op": 348779.0,
+            "encoded-bytes": 31015.0,
+            "B/op": 204800.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 326141.0,
+            "MB/s": 625.88,
+            "cpu-ns/op": 351824.0,
+            "encoded-bytes": 31015.0,
+            "B/op": 204800.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 325228.0,
+            "MB/s": 627.64,
+            "cpu-ns/op": 349178.0,
+            "encoded-bytes": 31015.0,
+            "B/op": 204800.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 322427.0,
+            "MB/s": 633.09,
+            "cpu-ns/op": 345274.0,
+            "encoded-bytes": 31015.0,
+            "B/op": 204801.0,
+            "allocs/op": 1.0
+          }
+        ]
+      },
+      "independent_libzstd_roundtrip": true
+    },
+    {
+      "version": "after",
+      "codec": "store1",
+      "encoded_bytes": 12277,
+      "frame_sha256": "6950bfddb649b3fc9e43040b1c668d4cf6ff3a3821697040950671b422be8427",
+      "label": "dat-text",
+      "raw_bytes": 193755,
+      "raw_sha256": "042e474becb52a5f94b1d211cb01d26e2def6d1569f451e11eb3d6e2d7a3851a",
+      "encode": {
+        "median": {
+          "ns/op": 363243.0,
+          "MB/s": 533.405,
+          "cpu-ns/op": 366469.0,
+          "encoded-bytes": 12277.0,
+          "B/op": 12552.0,
+          "allocs/op": 12.0
+        },
+        "samples": [
+          {
+            "ns/op": 367355.0,
+            "MB/s": 527.43,
+            "cpu-ns/op": 370333.0,
+            "encoded-bytes": 12277.0,
+            "B/op": 12552.0,
+            "allocs/op": 12.0
+          },
+          {
+            "ns/op": 362061.0,
+            "MB/s": 535.14,
+            "cpu-ns/op": 364852.0,
+            "encoded-bytes": 12277.0,
+            "B/op": 12552.0,
+            "allocs/op": 12.0
+          },
+          {
+            "ns/op": 363566.0,
+            "MB/s": 532.93,
+            "cpu-ns/op": 366807.0,
+            "encoded-bytes": 12277.0,
+            "B/op": 12552.0,
+            "allocs/op": 12.0
+          },
+          {
+            "ns/op": 362920.0,
+            "MB/s": 533.88,
+            "cpu-ns/op": 366131.0,
+            "encoded-bytes": 12277.0,
+            "B/op": 12552.0,
+            "allocs/op": 12.0
+          }
+        ]
+      },
+      "decode": {
+        "median": {
+          "ns/op": 213592.0,
+          "MB/s": 907.135,
+          "cpu-ns/op": 242946.0,
+          "encoded-bytes": 12277.0,
+          "B/op": 196608.0,
+          "allocs/op": 1.0
+        },
+        "samples": [
+          {
+            "ns/op": 214285.0,
+            "MB/s": 904.19,
+            "cpu-ns/op": 243871.0,
+            "encoded-bytes": 12277.0,
+            "B/op": 196608.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 212899.0,
+            "MB/s": 910.08,
+            "cpu-ns/op": 241891.0,
+            "encoded-bytes": 12277.0,
+            "B/op": 196608.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 210805.0,
+            "MB/s": 919.12,
+            "cpu-ns/op": 242021.0,
+            "encoded-bytes": 12277.0,
+            "B/op": 196608.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 220095.0,
+            "MB/s": 880.33,
+            "cpu-ns/op": 250556.0,
+            "encoded-bytes": 12277.0,
+            "B/op": 196608.0,
+            "allocs/op": 1.0
+          }
+        ]
+      },
+      "independent_libzstd_roundtrip": true
+    },
+    {
+      "version": "after",
+      "codec": "store6",
+      "encoded_bytes": 12211,
+      "frame_sha256": "e8b1091e92d565052f8ae67d8bdd0faea511e664ea6a484d1e0057eeea606b0f",
+      "label": "dat-text",
+      "raw_bytes": 193755,
+      "raw_sha256": "042e474becb52a5f94b1d211cb01d26e2def6d1569f451e11eb3d6e2d7a3851a",
+      "encode": {
+        "median": {
+          "ns/op": 365814.0,
+          "MB/s": 529.655,
+          "cpu-ns/op": 368881.0,
+          "encoded-bytes": 12211.0,
+          "B/op": 12552.0,
+          "allocs/op": 12.0
+        },
+        "samples": [
+          {
+            "ns/op": 365498.0,
+            "MB/s": 530.11,
+            "cpu-ns/op": 368422.0,
+            "encoded-bytes": 12211.0,
+            "B/op": 12552.0,
+            "allocs/op": 12.0
+          },
+          {
+            "ns/op": 364454.0,
+            "MB/s": 531.63,
+            "cpu-ns/op": 367436.0,
+            "encoded-bytes": 12211.0,
+            "B/op": 12552.0,
+            "allocs/op": 12.0
+          },
+          {
+            "ns/op": 367223.0,
+            "MB/s": 527.62,
+            "cpu-ns/op": 370144.0,
+            "encoded-bytes": 12211.0,
+            "B/op": 12552.0,
+            "allocs/op": 12.0
+          },
+          {
+            "ns/op": 366130.0,
+            "MB/s": 529.2,
+            "cpu-ns/op": 369340.0,
+            "encoded-bytes": 12211.0,
+            "B/op": 12552.0,
+            "allocs/op": 12.0
+          }
+        ]
+      },
+      "decode": {
+        "median": {
+          "ns/op": 213612.0,
+          "MB/s": 907.0550000000001,
+          "cpu-ns/op": 240333.5,
+          "encoded-bytes": 12211.0,
+          "B/op": 196608.0,
+          "allocs/op": 1.0
+        },
+        "samples": [
+          {
+            "ns/op": 214398.0,
+            "MB/s": 903.72,
+            "cpu-ns/op": 241093.0,
+            "encoded-bytes": 12211.0,
+            "B/op": 196613.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 215367.0,
+            "MB/s": 899.65,
+            "cpu-ns/op": 242938.0,
+            "encoded-bytes": 12211.0,
+            "B/op": 196608.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 212826.0,
+            "MB/s": 910.39,
+            "cpu-ns/op": 239574.0,
+            "encoded-bytes": 12211.0,
+            "B/op": 196608.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 212439.0,
+            "MB/s": 912.05,
+            "cpu-ns/op": 239281.0,
+            "encoded-bytes": 12211.0,
+            "B/op": 196608.0,
+            "allocs/op": 1.0
+          }
+        ]
+      },
+      "independent_libzstd_roundtrip": true
+    },
+    {
+      "version": "after",
+      "codec": "store9",
+      "encoded_bytes": 12147,
+      "frame_sha256": "4e6aa0c84977764c566093451fc9cdc70e0db3be144b675ba5ee008ec4bc4196",
+      "label": "dat-text",
+      "raw_bytes": 193755,
+      "raw_sha256": "042e474becb52a5f94b1d211cb01d26e2def6d1569f451e11eb3d6e2d7a3851a",
+      "encode": {
+        "median": {
+          "ns/op": 631874.5,
+          "MB/s": 306.635,
+          "cpu-ns/op": 636070.0,
+          "encoded-bytes": 12147.0,
+          "B/op": 12528.0,
+          "allocs/op": 11.0
+        },
+        "samples": [
+          {
+            "ns/op": 631445.0,
+            "MB/s": 306.84,
+            "cpu-ns/op": 636008.0,
+            "encoded-bytes": 12147.0,
+            "B/op": 12528.0,
+            "allocs/op": 11.0
+          },
+          {
+            "ns/op": 631001.0,
+            "MB/s": 307.06,
+            "cpu-ns/op": 635319.0,
+            "encoded-bytes": 12147.0,
+            "B/op": 12528.0,
+            "allocs/op": 11.0
+          },
+          {
+            "ns/op": 632304.0,
+            "MB/s": 306.43,
+            "cpu-ns/op": 636132.0,
+            "encoded-bytes": 12147.0,
+            "B/op": 12528.0,
+            "allocs/op": 11.0
+          },
+          {
+            "ns/op": 633443.0,
+            "MB/s": 305.88,
+            "cpu-ns/op": 637725.0,
+            "encoded-bytes": 12147.0,
+            "B/op": 12528.0,
+            "allocs/op": 11.0
+          }
+        ]
+      },
+      "decode": {
+        "median": {
+          "ns/op": 217463.0,
+          "MB/s": 890.98,
+          "cpu-ns/op": 244817.0,
+          "encoded-bytes": 12147.0,
+          "B/op": 196608.0,
+          "allocs/op": 1.0
+        },
+        "samples": [
+          {
+            "ns/op": 217063.0,
+            "MB/s": 892.62,
+            "cpu-ns/op": 243703.0,
+            "encoded-bytes": 12147.0,
+            "B/op": 196608.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 215100.0,
+            "MB/s": 900.77,
+            "cpu-ns/op": 240331.0,
+            "encoded-bytes": 12147.0,
+            "B/op": 196608.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 217863.0,
+            "MB/s": 889.34,
+            "cpu-ns/op": 245931.0,
+            "encoded-bytes": 12147.0,
+            "B/op": 196608.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 218264.0,
+            "MB/s": 887.71,
+            "cpu-ns/op": 246333.0,
+            "encoded-bytes": 12147.0,
+            "B/op": 196608.0,
+            "allocs/op": 1.0
+          }
+        ]
+      },
+      "independent_libzstd_roundtrip": true
+    },
+    {
+      "version": "after",
+      "codec": "zstd-http",
+      "encoded_bytes": 12147,
+      "frame_sha256": "4e6aa0c84977764c566093451fc9cdc70e0db3be144b675ba5ee008ec4bc4196",
+      "label": "dat-text",
+      "raw_bytes": 193755,
+      "raw_sha256": "042e474becb52a5f94b1d211cb01d26e2def6d1569f451e11eb3d6e2d7a3851a",
+      "encode": {
+        "median": {
+          "ns/op": 624014.0,
+          "MB/s": 310.5,
+          "cpu-ns/op": 628305.5,
+          "encoded-bytes": 12147.0,
+          "B/op": 12528.0,
+          "allocs/op": 11.0
+        },
+        "samples": [
+          {
+            "ns/op": 624733.0,
+            "MB/s": 310.14,
+            "cpu-ns/op": 628871.0,
+            "encoded-bytes": 12147.0,
+            "B/op": 12528.0,
+            "allocs/op": 11.0
+          },
+          {
+            "ns/op": 623295.0,
+            "MB/s": 310.86,
+            "cpu-ns/op": 627740.0,
+            "encoded-bytes": 12147.0,
+            "B/op": 12528.0,
+            "allocs/op": 11.0
+          },
+          {
+            "ns/op": 624964.0,
+            "MB/s": 310.03,
+            "cpu-ns/op": 629266.0,
+            "encoded-bytes": 12147.0,
+            "B/op": 12528.0,
+            "allocs/op": 11.0
+          },
+          {
+            "ns/op": 623118.0,
+            "MB/s": 310.94,
+            "cpu-ns/op": 627328.0,
+            "encoded-bytes": 12147.0,
+            "B/op": 12528.0,
+            "allocs/op": 11.0
+          }
+        ]
+      },
+      "decode": {
+        "median": {
+          "ns/op": 215998.0,
+          "MB/s": 897.0250000000001,
+          "cpu-ns/op": 241514.0,
+          "encoded-bytes": 12147.0,
+          "B/op": 196608.0,
+          "allocs/op": 1.0
+        },
+        "samples": [
+          {
+            "ns/op": 216129.0,
+            "MB/s": 896.48,
+            "cpu-ns/op": 242639.0,
+            "encoded-bytes": 12147.0,
+            "B/op": 196608.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 217294.0,
+            "MB/s": 891.67,
+            "cpu-ns/op": 243517.0,
+            "encoded-bytes": 12147.0,
+            "B/op": 196608.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 215490.0,
+            "MB/s": 899.14,
+            "cpu-ns/op": 239928.0,
+            "encoded-bytes": 12147.0,
+            "B/op": 196613.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 215867.0,
+            "MB/s": 897.57,
+            "cpu-ns/op": 240389.0,
+            "encoded-bytes": 12147.0,
+            "B/op": 196608.0,
+            "allocs/op": 1.0
+          }
+        ]
+      },
+      "independent_libzstd_roundtrip": true
+    },
+    {
+      "version": "after",
+      "codec": "store1",
+      "encoded_bytes": 4187,
+      "frame_sha256": "c06d019a587c464de7ca00916b86cab96c2ca1c4259529e6d7463c755d9310ea",
+      "label": "thread",
+      "raw_bytes": 24664,
+      "raw_sha256": "a0794f226ea69ec8f96665b8bf0d1502ac01073a0d9b5e732eae938967a46d65",
+      "encode": {
+        "median": {
+          "ns/op": 109292.0,
+          "MB/s": 225.675,
+          "cpu-ns/op": 110408.0,
+          "encoded-bytes": 4187.0,
+          "B/op": 5368.0,
+          "allocs/op": 10.0
+        },
+        "samples": [
+          {
+            "ns/op": 109644.0,
+            "MB/s": 224.95,
+            "cpu-ns/op": 110695.0,
+            "encoded-bytes": 4187.0,
+            "B/op": 5368.0,
+            "allocs/op": 10.0
+          },
+          {
+            "ns/op": 108738.0,
+            "MB/s": 226.82,
+            "cpu-ns/op": 109833.0,
+            "encoded-bytes": 4187.0,
+            "B/op": 5368.0,
+            "allocs/op": 10.0
+          },
+          {
+            "ns/op": 109732.0,
+            "MB/s": 224.77,
+            "cpu-ns/op": 110818.0,
+            "encoded-bytes": 4187.0,
+            "B/op": 5368.0,
+            "allocs/op": 10.0
+          },
+          {
+            "ns/op": 108940.0,
+            "MB/s": 226.4,
+            "cpu-ns/op": 110121.0,
+            "encoded-bytes": 4187.0,
+            "B/op": 5368.0,
+            "allocs/op": 10.0
+          }
+        ]
+      },
+      "decode": {
+        "median": {
+          "ns/op": 34262.0,
+          "MB/s": 719.87,
+          "cpu-ns/op": 37182.0,
+          "encoded-bytes": 4187.0,
+          "B/op": 27264.0,
+          "allocs/op": 1.0
+        },
+        "samples": [
+          {
+            "ns/op": 34363.0,
+            "MB/s": 717.75,
+            "cpu-ns/op": 37239.0,
+            "encoded-bytes": 4187.0,
+            "B/op": 27264.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 34209.0,
+            "MB/s": 720.97,
+            "cpu-ns/op": 37174.0,
+            "encoded-bytes": 4187.0,
+            "B/op": 27264.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 34272.0,
+            "MB/s": 719.66,
+            "cpu-ns/op": 37190.0,
+            "encoded-bytes": 4187.0,
+            "B/op": 27264.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 34252.0,
+            "MB/s": 720.08,
+            "cpu-ns/op": 37079.0,
+            "encoded-bytes": 4187.0,
+            "B/op": 27264.0,
+            "allocs/op": 1.0
+          }
+        ]
+      },
+      "independent_libzstd_roundtrip": true
+    },
+    {
+      "version": "after",
+      "codec": "store6",
+      "encoded_bytes": 4190,
+      "frame_sha256": "265bbfba66b920c994e119df59f92f4f4089b6b9e1888b080c1678b3c7b5c771",
+      "label": "thread",
+      "raw_bytes": 24664,
+      "raw_sha256": "a0794f226ea69ec8f96665b8bf0d1502ac01073a0d9b5e732eae938967a46d65",
+      "encode": {
+        "median": {
+          "ns/op": 111393.0,
+          "MB/s": 221.41500000000002,
+          "cpu-ns/op": 112471.5,
+          "encoded-bytes": 4190.0,
+          "B/op": 5368.0,
+          "allocs/op": 10.0
+        },
+        "samples": [
+          {
+            "ns/op": 111716.0,
+            "MB/s": 220.77,
+            "cpu-ns/op": 112722.0,
+            "encoded-bytes": 4190.0,
+            "B/op": 5368.0,
+            "allocs/op": 10.0
+          },
+          {
+            "ns/op": 111070.0,
+            "MB/s": 222.06,
+            "cpu-ns/op": 112221.0,
+            "encoded-bytes": 4190.0,
+            "B/op": 5368.0,
+            "allocs/op": 10.0
+          },
+          {
+            "ns/op": 112716.0,
+            "MB/s": 218.82,
+            "cpu-ns/op": 113711.0,
+            "encoded-bytes": 4190.0,
+            "B/op": 5368.0,
+            "allocs/op": 10.0
+          },
+          {
+            "ns/op": 111028.0,
+            "MB/s": 222.14,
+            "cpu-ns/op": 112152.0,
+            "encoded-bytes": 4190.0,
+            "B/op": 5368.0,
+            "allocs/op": 10.0
+          }
+        ]
+      },
+      "decode": {
+        "median": {
+          "ns/op": 35665.0,
+          "MB/s": 691.55,
+          "cpu-ns/op": 38655.0,
+          "encoded-bytes": 4190.0,
+          "B/op": 27264.0,
+          "allocs/op": 1.0
+        },
+        "samples": [
+          {
+            "ns/op": 35622.0,
+            "MB/s": 692.39,
+            "cpu-ns/op": 38595.0,
+            "encoded-bytes": 4190.0,
+            "B/op": 27264.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 35708.0,
+            "MB/s": 690.71,
+            "cpu-ns/op": 38715.0,
+            "encoded-bytes": 4190.0,
+            "B/op": 27264.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 35538.0,
+            "MB/s": 694.01,
+            "cpu-ns/op": 38406.0,
+            "encoded-bytes": 4190.0,
+            "B/op": 27264.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 35970.0,
+            "MB/s": 685.69,
+            "cpu-ns/op": 38962.0,
+            "encoded-bytes": 4190.0,
+            "B/op": 27264.0,
+            "allocs/op": 1.0
+          }
+        ]
+      },
+      "independent_libzstd_roundtrip": true
+    },
+    {
+      "version": "after",
+      "codec": "store9",
+      "encoded_bytes": 4101,
+      "frame_sha256": "a50f65f7a1eb3bf36045cfc8d15f23441b58c7df14c2c410da1ae313e4b15b7d",
+      "label": "thread",
+      "raw_bytes": 24664,
+      "raw_sha256": "a0794f226ea69ec8f96665b8bf0d1502ac01073a0d9b5e732eae938967a46d65",
+      "encode": {
+        "median": {
+          "ns/op": 196377.0,
+          "MB/s": 125.595,
+          "cpu-ns/op": 197882.0,
+          "encoded-bytes": 4101.0,
+          "B/op": 5344.0,
+          "allocs/op": 9.0
+        },
+        "samples": [
+          {
+            "ns/op": 197101.0,
+            "MB/s": 125.13,
+            "cpu-ns/op": 198669.0,
+            "encoded-bytes": 4101.0,
+            "B/op": 5344.0,
+            "allocs/op": 9.0
+          },
+          {
+            "ns/op": 194785.0,
+            "MB/s": 126.62,
+            "cpu-ns/op": 196339.0,
+            "encoded-bytes": 4101.0,
+            "B/op": 5344.0,
+            "allocs/op": 9.0
+          },
+          {
+            "ns/op": 197142.0,
+            "MB/s": 125.11,
+            "cpu-ns/op": 198694.0,
+            "encoded-bytes": 4101.0,
+            "B/op": 5344.0,
+            "allocs/op": 9.0
+          },
+          {
+            "ns/op": 195653.0,
+            "MB/s": 126.06,
+            "cpu-ns/op": 197095.0,
+            "encoded-bytes": 4101.0,
+            "B/op": 5344.0,
+            "allocs/op": 9.0
+          }
+        ]
+      },
+      "decode": {
+        "median": {
+          "ns/op": 36649.0,
+          "MB/s": 672.98,
+          "cpu-ns/op": 39598.0,
+          "encoded-bytes": 4101.0,
+          "B/op": 27264.0,
+          "allocs/op": 1.0
+        },
+        "samples": [
+          {
+            "ns/op": 36758.0,
+            "MB/s": 670.98,
+            "cpu-ns/op": 39795.0,
+            "encoded-bytes": 4101.0,
+            "B/op": 27264.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 36789.0,
+            "MB/s": 670.41,
+            "cpu-ns/op": 39888.0,
+            "encoded-bytes": 4101.0,
+            "B/op": 27264.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 36365.0,
+            "MB/s": 678.23,
+            "cpu-ns/op": 39177.0,
+            "encoded-bytes": 4101.0,
+            "B/op": 27264.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 36540.0,
+            "MB/s": 674.98,
+            "cpu-ns/op": 39401.0,
+            "encoded-bytes": 4101.0,
+            "B/op": 27264.0,
+            "allocs/op": 1.0
+          }
+        ]
+      },
+      "independent_libzstd_roundtrip": true
+    },
+    {
+      "version": "after",
+      "codec": "zstd-http",
+      "encoded_bytes": 4101,
+      "frame_sha256": "a50f65f7a1eb3bf36045cfc8d15f23441b58c7df14c2c410da1ae313e4b15b7d",
+      "label": "thread",
+      "raw_bytes": 24664,
+      "raw_sha256": "a0794f226ea69ec8f96665b8bf0d1502ac01073a0d9b5e732eae938967a46d65",
+      "encode": {
+        "median": {
+          "ns/op": 195498.0,
+          "MB/s": 126.16,
+          "cpu-ns/op": 196968.5,
+          "encoded-bytes": 4101.0,
+          "B/op": 5344.0,
+          "allocs/op": 9.0
+        },
+        "samples": [
+          {
+            "ns/op": 198491.0,
+            "MB/s": 124.26,
+            "cpu-ns/op": 200066.0,
+            "encoded-bytes": 4101.0,
+            "B/op": 5344.0,
+            "allocs/op": 9.0
+          },
+          {
+            "ns/op": 194137.0,
+            "MB/s": 127.04,
+            "cpu-ns/op": 195996.0,
+            "encoded-bytes": 4101.0,
+            "B/op": 5344.0,
+            "allocs/op": 9.0
+          },
+          {
+            "ns/op": 196261.0,
+            "MB/s": 125.67,
+            "cpu-ns/op": 197644.0,
+            "encoded-bytes": 4101.0,
+            "B/op": 5344.0,
+            "allocs/op": 9.0
+          },
+          {
+            "ns/op": 194735.0,
+            "MB/s": 126.65,
+            "cpu-ns/op": 196293.0,
+            "encoded-bytes": 4101.0,
+            "B/op": 5344.0,
+            "allocs/op": 9.0
+          }
+        ]
+      },
+      "decode": {
+        "median": {
+          "ns/op": 36463.0,
+          "MB/s": 676.415,
+          "cpu-ns/op": 39240.0,
+          "encoded-bytes": 4101.0,
+          "B/op": 27264.0,
+          "allocs/op": 1.0
+        },
+        "samples": [
+          {
+            "ns/op": 36459.0,
+            "MB/s": 676.49,
+            "cpu-ns/op": 39200.0,
+            "encoded-bytes": 4101.0,
+            "B/op": 27264.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 36343.0,
+            "MB/s": 678.65,
+            "cpu-ns/op": 39025.0,
+            "encoded-bytes": 4101.0,
+            "B/op": 27264.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 36811.0,
+            "MB/s": 670.03,
+            "cpu-ns/op": 39909.0,
+            "encoded-bytes": 4101.0,
+            "B/op": 27264.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 36467.0,
+            "MB/s": 676.34,
+            "cpu-ns/op": 39280.0,
+            "encoded-bytes": 4101.0,
+            "B/op": 27264.0,
+            "allocs/op": 1.0
+          }
+        ]
+      },
+      "independent_libzstd_roundtrip": true
+    },
+    {
+      "version": "after",
+      "codec": "store1",
+      "encoded_bytes": 1998,
+      "frame_sha256": "120f3bb3f553159656ddb73c124527454a6ba8d435f897d31dc30da94a23e4cc",
+      "label": "top",
+      "raw_bytes": 4305,
+      "raw_sha256": "fa7b6a1a1b339aac04fe9951770b13f2d45fa3af1382bf1a38600e1ab4513979",
+      "encode": {
+        "median": {
+          "ns/op": 52095.5,
+          "MB/s": 82.64,
+          "cpu-ns/op": 52675.0,
+          "encoded-bytes": 1998.0,
+          "B/op": 2536.0,
+          "allocs/op": 10.0
+        },
+        "samples": [
+          {
+            "ns/op": 52310.0,
+            "MB/s": 82.3,
+            "cpu-ns/op": 52876.0,
+            "encoded-bytes": 1998.0,
+            "B/op": 2536.0,
+            "allocs/op": 10.0
+          },
+          {
+            "ns/op": 51864.0,
+            "MB/s": 83.01,
+            "cpu-ns/op": 52474.0,
+            "encoded-bytes": 1998.0,
+            "B/op": 2536.0,
+            "allocs/op": 10.0
+          },
+          {
+            "ns/op": 53111.0,
+            "MB/s": 81.06,
+            "cpu-ns/op": 53678.0,
+            "encoded-bytes": 1998.0,
+            "B/op": 2536.0,
+            "allocs/op": 10.0
+          },
+          {
+            "ns/op": 51881.0,
+            "MB/s": 82.98,
+            "cpu-ns/op": 52473.0,
+            "encoded-bytes": 1998.0,
+            "B/op": 2536.0,
+            "allocs/op": 10.0
+          }
+        ]
+      },
+      "decode": {
+        "median": {
+          "ns/op": 16254.0,
+          "MB/s": 264.86,
+          "cpu-ns/op": 16876.0,
+          "encoded-bytes": 1998.0,
+          "B/op": 4864.0,
+          "allocs/op": 1.0
+        },
+        "samples": [
+          {
+            "ns/op": 16219.0,
+            "MB/s": 265.43,
+            "cpu-ns/op": 16834.0,
+            "encoded-bytes": 1998.0,
+            "B/op": 4864.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 16204.0,
+            "MB/s": 265.67,
+            "cpu-ns/op": 16809.0,
+            "encoded-bytes": 1998.0,
+            "B/op": 4864.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 16289.0,
+            "MB/s": 264.29,
+            "cpu-ns/op": 16918.0,
+            "encoded-bytes": 1998.0,
+            "B/op": 4864.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 16588.0,
+            "MB/s": 259.52,
+            "cpu-ns/op": 17209.0,
+            "encoded-bytes": 1998.0,
+            "B/op": 4864.0,
+            "allocs/op": 1.0
+          }
+        ]
+      },
+      "independent_libzstd_roundtrip": true
+    },
+    {
+      "version": "after",
+      "codec": "store6",
+      "encoded_bytes": 2007,
+      "frame_sha256": "b24ee504cc5d662d3208312258f76ba2d0d6d02f8847aa641cfc2bf33dd6e41e",
+      "label": "top",
+      "raw_bytes": 4305,
+      "raw_sha256": "fa7b6a1a1b339aac04fe9951770b13f2d45fa3af1382bf1a38600e1ab4513979",
+      "encode": {
+        "median": {
+          "ns/op": 54364.5,
+          "MB/s": 79.185,
+          "cpu-ns/op": 54898.0,
+          "encoded-bytes": 2007.0,
+          "B/op": 2536.0,
+          "allocs/op": 10.0
+        },
+        "samples": [
+          {
+            "ns/op": 54485.0,
+            "MB/s": 79.01,
+            "cpu-ns/op": 54999.0,
+            "encoded-bytes": 2007.0,
+            "B/op": 2536.0,
+            "allocs/op": 10.0
+          },
+          {
+            "ns/op": 53799.0,
+            "MB/s": 80.02,
+            "cpu-ns/op": 54304.0,
+            "encoded-bytes": 2007.0,
+            "B/op": 2536.0,
+            "allocs/op": 10.0
+          },
+          {
+            "ns/op": 54962.0,
+            "MB/s": 78.33,
+            "cpu-ns/op": 55518.0,
+            "encoded-bytes": 2007.0,
+            "B/op": 2536.0,
+            "allocs/op": 10.0
+          },
+          {
+            "ns/op": 54244.0,
+            "MB/s": 79.36,
+            "cpu-ns/op": 54797.0,
+            "encoded-bytes": 2007.0,
+            "B/op": 2536.0,
+            "allocs/op": 10.0
+          }
+        ]
+      },
+      "decode": {
+        "median": {
+          "ns/op": 17539.0,
+          "MB/s": 245.46,
+          "cpu-ns/op": 18170.0,
+          "encoded-bytes": 2007.0,
+          "B/op": 4864.0,
+          "allocs/op": 1.0
+        },
+        "samples": [
+          {
+            "ns/op": 17396.0,
+            "MB/s": 247.47,
+            "cpu-ns/op": 17966.0,
+            "encoded-bytes": 2007.0,
+            "B/op": 4864.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 17515.0,
+            "MB/s": 245.8,
+            "cpu-ns/op": 18154.0,
+            "encoded-bytes": 2007.0,
+            "B/op": 4864.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 17599.0,
+            "MB/s": 244.62,
+            "cpu-ns/op": 18250.0,
+            "encoded-bytes": 2007.0,
+            "B/op": 4864.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 17563.0,
+            "MB/s": 245.12,
+            "cpu-ns/op": 18186.0,
+            "encoded-bytes": 2007.0,
+            "B/op": 4864.0,
+            "allocs/op": 1.0
+          }
+        ]
+      },
+      "independent_libzstd_roundtrip": true
+    },
+    {
+      "version": "after",
+      "codec": "store9",
+      "encoded_bytes": 1930,
+      "frame_sha256": "70325da52ed2f62c0001be427172d987067eb4389c34ccaf1f14aef50905fe41",
+      "label": "top",
+      "raw_bytes": 4305,
+      "raw_sha256": "fa7b6a1a1b339aac04fe9951770b13f2d45fa3af1382bf1a38600e1ab4513979",
+      "encode": {
+        "median": {
+          "ns/op": 95497.0,
+          "MB/s": 45.08,
+          "cpu-ns/op": 96326.0,
+          "encoded-bytes": 1930.0,
+          "B/op": 2512.0,
+          "allocs/op": 9.0
+        },
+        "samples": [
+          {
+            "ns/op": 95841.0,
+            "MB/s": 44.92,
+            "cpu-ns/op": 96671.0,
+            "encoded-bytes": 1930.0,
+            "B/op": 2512.0,
+            "allocs/op": 9.0
+          },
+          {
+            "ns/op": 95206.0,
+            "MB/s": 45.22,
+            "cpu-ns/op": 95985.0,
+            "encoded-bytes": 1930.0,
+            "B/op": 2512.0,
+            "allocs/op": 9.0
+          },
+          {
+            "ns/op": 95788.0,
+            "MB/s": 44.94,
+            "cpu-ns/op": 96667.0,
+            "encoded-bytes": 1930.0,
+            "B/op": 2512.0,
+            "allocs/op": 9.0
+          },
+          {
+            "ns/op": 95025.0,
+            "MB/s": 45.3,
+            "cpu-ns/op": 95786.0,
+            "encoded-bytes": 1930.0,
+            "B/op": 2512.0,
+            "allocs/op": 9.0
+          }
+        ]
+      },
+      "decode": {
+        "median": {
+          "ns/op": 16069.0,
+          "MB/s": 267.905,
+          "cpu-ns/op": 16676.5,
+          "encoded-bytes": 1930.0,
+          "B/op": 4864.0,
+          "allocs/op": 1.0
+        },
+        "samples": [
+          {
+            "ns/op": 16090.0,
+            "MB/s": 267.56,
+            "cpu-ns/op": 16692.0,
+            "encoded-bytes": 1930.0,
+            "B/op": 4864.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 16061.0,
+            "MB/s": 268.03,
+            "cpu-ns/op": 16679.0,
+            "encoded-bytes": 1930.0,
+            "B/op": 4864.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 16036.0,
+            "MB/s": 268.45,
+            "cpu-ns/op": 16633.0,
+            "encoded-bytes": 1930.0,
+            "B/op": 4864.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 16077.0,
+            "MB/s": 267.78,
+            "cpu-ns/op": 16674.0,
+            "encoded-bytes": 1930.0,
+            "B/op": 4864.0,
+            "allocs/op": 1.0
+          }
+        ]
+      },
+      "independent_libzstd_roundtrip": true
+    },
+    {
+      "version": "after",
+      "codec": "zstd-http",
+      "encoded_bytes": 1930,
+      "frame_sha256": "70325da52ed2f62c0001be427172d987067eb4389c34ccaf1f14aef50905fe41",
+      "label": "top",
+      "raw_bytes": 4305,
+      "raw_sha256": "fa7b6a1a1b339aac04fe9951770b13f2d45fa3af1382bf1a38600e1ab4513979",
+      "encode": {
+        "median": {
+          "ns/op": 94184.0,
+          "MB/s": 45.705,
+          "cpu-ns/op": 94930.0,
+          "encoded-bytes": 1930.0,
+          "B/op": 2512.0,
+          "allocs/op": 9.0
+        },
+        "samples": [
+          {
+            "ns/op": 94195.0,
+            "MB/s": 45.7,
+            "cpu-ns/op": 94822.0,
+            "encoded-bytes": 1930.0,
+            "B/op": 2512.0,
+            "allocs/op": 9.0
+          },
+          {
+            "ns/op": 94173.0,
+            "MB/s": 45.71,
+            "cpu-ns/op": 95038.0,
+            "encoded-bytes": 1930.0,
+            "B/op": 2512.0,
+            "allocs/op": 9.0
+          },
+          {
+            "ns/op": 96418.0,
+            "MB/s": 44.65,
+            "cpu-ns/op": 97030.0,
+            "encoded-bytes": 1930.0,
+            "B/op": 2512.0,
+            "allocs/op": 9.0
+          },
+          {
+            "ns/op": 94132.0,
+            "MB/s": 45.73,
+            "cpu-ns/op": 94765.0,
+            "encoded-bytes": 1930.0,
+            "B/op": 2512.0,
+            "allocs/op": 9.0
+          }
+        ]
+      },
+      "decode": {
+        "median": {
+          "ns/op": 16039.0,
+          "MB/s": 268.405,
+          "cpu-ns/op": 16598.5,
+          "encoded-bytes": 1930.0,
+          "B/op": 4864.0,
+          "allocs/op": 1.0
+        },
+        "samples": [
+          {
+            "ns/op": 16083.0,
+            "MB/s": 267.67,
+            "cpu-ns/op": 16653.0,
+            "encoded-bytes": 1930.0,
+            "B/op": 4864.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 16021.0,
+            "MB/s": 268.71,
+            "cpu-ns/op": 16577.0,
+            "encoded-bytes": 1930.0,
+            "B/op": 4864.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 16028.0,
+            "MB/s": 268.59,
+            "cpu-ns/op": 16581.0,
+            "encoded-bytes": 1930.0,
+            "B/op": 4864.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 16050.0,
+            "MB/s": 268.22,
+            "cpu-ns/op": 16616.0,
+            "encoded-bytes": 1930.0,
+            "B/op": 4864.0,
+            "allocs/op": 1.0
+          }
+        ]
+      },
+      "independent_libzstd_roundtrip": true
+    },
+    {
+      "version": "before",
+      "codec": "store1",
+      "encoded_bytes": 2521,
+      "frame_sha256": "600cfca217fa43e596a023160295394461ed689a862a33b2cc3b7fa69c9f68af",
+      "label": "asset-ui.css",
+      "raw_bytes": 7315,
+      "raw_sha256": "d681ca34c09600874fee8f40b79117187de02142ca2da2ebb5e13ea4bcf797df",
+      "encode": {
+        "median": {
+          "ns/op": 92464.0,
+          "MB/s": 79.115,
+          "cpu-ns/op": 93168.0,
+          "encoded-bytes": 2521.0,
+          "B/op": 2888.0,
+          "allocs/op": 8.0
+        },
+        "samples": [
+          {
+            "ns/op": 92809.0,
+            "MB/s": 78.82,
+            "cpu-ns/op": 93579.0,
+            "encoded-bytes": 2521.0,
+            "B/op": 2888.0,
+            "allocs/op": 8.0
+          },
+          {
+            "ns/op": 92156.0,
+            "MB/s": 79.38,
+            "cpu-ns/op": 92873.0,
+            "encoded-bytes": 2521.0,
+            "B/op": 2888.0,
+            "allocs/op": 8.0
+          },
+          {
+            "ns/op": 92772.0,
+            "MB/s": 78.85,
+            "cpu-ns/op": 93463.0,
+            "encoded-bytes": 2521.0,
+            "B/op": 2888.0,
+            "allocs/op": 8.0
+          },
+          {
+            "ns/op": 91983.0,
+            "MB/s": 79.53,
+            "cpu-ns/op": 92705.0,
+            "encoded-bytes": 2521.0,
+            "B/op": 2888.0,
+            "allocs/op": 8.0
+          }
+        ]
+      },
+      "decode": {
+        "median": {
+          "ns/op": 24264.0,
+          "MB/s": 301.48,
+          "cpu-ns/op": 25335.0,
+          "encoded-bytes": 2521.0,
+          "B/op": 8192.0,
+          "allocs/op": 1.0
+        },
+        "samples": [
+          {
+            "ns/op": 24357.0,
+            "MB/s": 300.32,
+            "cpu-ns/op": 25435.0,
+            "encoded-bytes": 2521.0,
+            "B/op": 8192.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 24325.0,
+            "MB/s": 300.72,
+            "cpu-ns/op": 25373.0,
+            "encoded-bytes": 2521.0,
+            "B/op": 8192.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 24111.0,
+            "MB/s": 303.39,
+            "cpu-ns/op": 25122.0,
+            "encoded-bytes": 2521.0,
+            "B/op": 8192.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 24203.0,
+            "MB/s": 302.24,
+            "cpu-ns/op": 25297.0,
+            "encoded-bytes": 2521.0,
+            "B/op": 8192.0,
+            "allocs/op": 1.0
+          }
+        ]
+      },
+      "independent_libzstd_roundtrip": true
+    },
+    {
+      "version": "before",
+      "codec": "store6",
+      "encoded_bytes": 2520,
+      "frame_sha256": "64351fd8294a53b58a66e0b5bb61102928226c9eb8f405d96d3a59329341f720",
+      "label": "asset-ui.css",
+      "raw_bytes": 7315,
+      "raw_sha256": "d681ca34c09600874fee8f40b79117187de02142ca2da2ebb5e13ea4bcf797df",
+      "encode": {
+        "median": {
+          "ns/op": 94644.0,
+          "MB/s": 77.28999999999999,
+          "cpu-ns/op": 95341.0,
+          "encoded-bytes": 2520.0,
+          "B/op": 2888.0,
+          "allocs/op": 8.0
+        },
+        "samples": [
+          {
+            "ns/op": 94617.0,
+            "MB/s": 77.31,
+            "cpu-ns/op": 95324.0,
+            "encoded-bytes": 2520.0,
+            "B/op": 2888.0,
+            "allocs/op": 8.0
+          },
+          {
+            "ns/op": 94671.0,
+            "MB/s": 77.27,
+            "cpu-ns/op": 95358.0,
+            "encoded-bytes": 2520.0,
+            "B/op": 2888.0,
+            "allocs/op": 8.0
+          },
+          {
+            "ns/op": 95580.0,
+            "MB/s": 76.53,
+            "cpu-ns/op": 96312.0,
+            "encoded-bytes": 2520.0,
+            "B/op": 2888.0,
+            "allocs/op": 8.0
+          },
+          {
+            "ns/op": 94521.0,
+            "MB/s": 77.39,
+            "cpu-ns/op": 95149.0,
+            "encoded-bytes": 2520.0,
+            "B/op": 2888.0,
+            "allocs/op": 8.0
+          }
+        ]
+      },
+      "decode": {
+        "median": {
+          "ns/op": 25555.5,
+          "MB/s": 286.24,
+          "cpu-ns/op": 26632.0,
+          "encoded-bytes": 2520.0,
+          "B/op": 8192.0,
+          "allocs/op": 1.0
+        },
+        "samples": [
+          {
+            "ns/op": 25542.0,
+            "MB/s": 286.39,
+            "cpu-ns/op": 26621.0,
+            "encoded-bytes": 2520.0,
+            "B/op": 8192.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 25569.0,
+            "MB/s": 286.09,
+            "cpu-ns/op": 26706.0,
+            "encoded-bytes": 2520.0,
+            "B/op": 8192.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 25620.0,
+            "MB/s": 285.51,
+            "cpu-ns/op": 26643.0,
+            "encoded-bytes": 2520.0,
+            "B/op": 8192.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 25540.0,
+            "MB/s": 286.42,
+            "cpu-ns/op": 26609.0,
+            "encoded-bytes": 2520.0,
+            "B/op": 8192.0,
+            "allocs/op": 1.0
+          }
+        ]
+      },
+      "independent_libzstd_roundtrip": true
+    },
+    {
+      "version": "before",
+      "codec": "store9",
+      "encoded_bytes": 2520,
+      "frame_sha256": "64351fd8294a53b58a66e0b5bb61102928226c9eb8f405d96d3a59329341f720",
+      "label": "asset-ui.css",
+      "raw_bytes": 7315,
+      "raw_sha256": "d681ca34c09600874fee8f40b79117187de02142ca2da2ebb5e13ea4bcf797df",
+      "encode": {
+        "median": {
+          "ns/op": 401897.5,
+          "MB/s": 18.2,
+          "cpu-ns/op": 403648.0,
+          "encoded-bytes": 2520.0,
+          "B/op": 3488.0,
+          "allocs/op": 26.0
+        },
+        "samples": [
+          {
+            "ns/op": 408878.0,
+            "MB/s": 17.89,
+            "cpu-ns/op": 410777.0,
+            "encoded-bytes": 2520.0,
+            "B/op": 3488.0,
+            "allocs/op": 26.0
+          },
+          {
+            "ns/op": 400575.0,
+            "MB/s": 18.26,
+            "cpu-ns/op": 402007.0,
+            "encoded-bytes": 2520.0,
+            "B/op": 3488.0,
+            "allocs/op": 26.0
+          },
+          {
+            "ns/op": 402722.0,
+            "MB/s": 18.16,
+            "cpu-ns/op": 404835.0,
+            "encoded-bytes": 2520.0,
+            "B/op": 3488.0,
+            "allocs/op": 26.0
+          },
+          {
+            "ns/op": 401073.0,
+            "MB/s": 18.24,
+            "cpu-ns/op": 402461.0,
+            "encoded-bytes": 2520.0,
+            "B/op": 3488.0,
+            "allocs/op": 26.0
+          }
+        ]
+      },
+      "decode": {
+        "median": {
+          "ns/op": 25546.0,
+          "MB/s": 286.345,
+          "cpu-ns/op": 26593.5,
+          "encoded-bytes": 2520.0,
+          "B/op": 8192.0,
+          "allocs/op": 1.0
+        },
+        "samples": [
+          {
+            "ns/op": 25565.0,
+            "MB/s": 286.13,
+            "cpu-ns/op": 26577.0,
+            "encoded-bytes": 2520.0,
+            "B/op": 8192.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 25527.0,
+            "MB/s": 286.56,
+            "cpu-ns/op": 26610.0,
+            "encoded-bytes": 2520.0,
+            "B/op": 8192.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 25506.0,
+            "MB/s": 286.8,
+            "cpu-ns/op": 26472.0,
+            "encoded-bytes": 2520.0,
+            "B/op": 8192.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 25699.0,
+            "MB/s": 284.65,
+            "cpu-ns/op": 26765.0,
+            "encoded-bytes": 2520.0,
+            "B/op": 8192.0,
+            "allocs/op": 1.0
+          }
+        ]
+      },
+      "independent_libzstd_roundtrip": true
+    },
+    {
+      "version": "before",
+      "codec": "zstd-http",
+      "encoded_bytes": 2479,
+      "frame_sha256": "6b4fae0ec355e99f5af6e9d3d00dfb090bec068b6b7cdea2a97d1fa00c6176c8",
+      "label": "asset-ui.css",
+      "raw_bytes": 7315,
+      "raw_sha256": "d681ca34c09600874fee8f40b79117187de02142ca2da2ebb5e13ea4bcf797df",
+      "encode": {
+        "median": {
+          "ns/op": 165133.5,
+          "MB/s": 44.3,
+          "cpu-ns/op": 165980.5,
+          "encoded-bytes": 2479.0,
+          "B/op": 2864.0,
+          "allocs/op": 7.0
+        },
+        "samples": [
+          {
+            "ns/op": 164918.0,
+            "MB/s": 44.36,
+            "cpu-ns/op": 165633.0,
+            "encoded-bytes": 2479.0,
+            "B/op": 2864.0,
+            "allocs/op": 7.0
+          },
+          {
+            "ns/op": 164490.0,
+            "MB/s": 44.47,
+            "cpu-ns/op": 165283.0,
+            "encoded-bytes": 2479.0,
+            "B/op": 2864.0,
+            "allocs/op": 7.0
+          },
+          {
+            "ns/op": 165439.0,
+            "MB/s": 44.22,
+            "cpu-ns/op": 166328.0,
+            "encoded-bytes": 2479.0,
+            "B/op": 2864.0,
+            "allocs/op": 7.0
+          },
+          {
+            "ns/op": 165349.0,
+            "MB/s": 44.24,
+            "cpu-ns/op": 166367.0,
+            "encoded-bytes": 2479.0,
+            "B/op": 2864.0,
+            "allocs/op": 7.0
+          }
+        ]
+      },
+      "decode": {
+        "median": {
+          "ns/op": 25204.0,
+          "MB/s": 290.235,
+          "cpu-ns/op": 26235.0,
+          "encoded-bytes": 2479.0,
+          "B/op": 8192.0,
+          "allocs/op": 1.0
+        },
+        "samples": [
+          {
+            "ns/op": 25239.0,
+            "MB/s": 289.83,
+            "cpu-ns/op": 26275.0,
+            "encoded-bytes": 2479.0,
+            "B/op": 8192.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 25144.0,
+            "MB/s": 290.93,
+            "cpu-ns/op": 26153.0,
+            "encoded-bytes": 2479.0,
+            "B/op": 8192.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 25482.0,
+            "MB/s": 287.06,
+            "cpu-ns/op": 26516.0,
+            "encoded-bytes": 2479.0,
+            "B/op": 8192.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 25169.0,
+            "MB/s": 290.64,
+            "cpu-ns/op": 26195.0,
+            "encoded-bytes": 2479.0,
+            "B/op": 8192.0,
+            "allocs/op": 1.0
+          }
+        ]
+      },
+      "independent_libzstd_roundtrip": true
+    },
+    {
+      "version": "before",
+      "codec": "store1",
+      "encoded_bytes": 369885,
+      "frame_sha256": "0d7fadcc0b8f48de10f0d2ab1ca3dfa8dcf21c5604e37108dc6e80f66c66d211",
+      "label": "dat-base64",
+      "raw_bytes": 524191,
+      "raw_sha256": "f4f2241fb9038326ff7705db05407ca329ad7e19bc319b484041df8222b342f1",
+      "encode": {
+        "median": {
+          "ns/op": 3563363.5,
+          "MB/s": 147.11,
+          "cpu-ns/op": 3613901.0,
+          "encoded-bytes": 369885.0,
+          "B/op": 377240.0,
+          "allocs/op": 22.0
+        },
+        "samples": [
+          {
+            "ns/op": 3502582.0,
+            "MB/s": 149.66,
+            "cpu-ns/op": 3553779.0,
+            "encoded-bytes": 369885.0,
+            "B/op": 377240.0,
+            "allocs/op": 22.0
+          },
+          {
+            "ns/op": 3545140.0,
+            "MB/s": 147.86,
+            "cpu-ns/op": 3605258.0,
+            "encoded-bytes": 369885.0,
+            "B/op": 377240.0,
+            "allocs/op": 22.0
+          },
+          {
+            "ns/op": 3581587.0,
+            "MB/s": 146.36,
+            "cpu-ns/op": 3622544.0,
+            "encoded-bytes": 369885.0,
+            "B/op": 377240.0,
+            "allocs/op": 22.0
+          },
+          {
+            "ns/op": 3595400.0,
+            "MB/s": 145.79,
+            "cpu-ns/op": 3643968.0,
+            "encoded-bytes": 369885.0,
+            "B/op": 377240.0,
+            "allocs/op": 22.0
+          }
+        ]
+      },
+      "decode": {
+        "median": {
+          "ns/op": 1291752.5,
+          "MB/s": 405.8,
+          "cpu-ns/op": 1348831.5,
+          "encoded-bytes": 369885.0,
+          "B/op": 524288.0,
+          "allocs/op": 1.0
+        },
+        "samples": [
+          {
+            "ns/op": 1289821.0,
+            "MB/s": 406.41,
+            "cpu-ns/op": 1353505.0,
+            "encoded-bytes": 369885.0,
+            "B/op": 524288.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 1293684.0,
+            "MB/s": 405.19,
+            "cpu-ns/op": 1354516.0,
+            "encoded-bytes": 369885.0,
+            "B/op": 524288.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 1288415.0,
+            "MB/s": 406.85,
+            "cpu-ns/op": 1331587.0,
+            "encoded-bytes": 369885.0,
+            "B/op": 524288.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 1299045.0,
+            "MB/s": 403.52,
+            "cpu-ns/op": 1344158.0,
+            "encoded-bytes": 369885.0,
+            "B/op": 524288.0,
+            "allocs/op": 1.0
+          }
+        ]
+      },
+      "independent_libzstd_roundtrip": true
+    },
+    {
+      "version": "before",
+      "codec": "store6",
+      "encoded_bytes": 369890,
+      "frame_sha256": "dfed128ef148671fc707a1acd45f0d577c1fdc22ada5e465c486ccfb7eaf888a",
+      "label": "dat-base64",
+      "raw_bytes": 524191,
+      "raw_sha256": "f4f2241fb9038326ff7705db05407ca329ad7e19bc319b484041df8222b342f1",
+      "encode": {
+        "median": {
+          "ns/op": 3518446.0,
+          "MB/s": 148.985,
+          "cpu-ns/op": 3566261.5,
+          "encoded-bytes": 369890.0,
+          "B/op": 377240.0,
+          "allocs/op": 22.0
+        },
+        "samples": [
+          {
+            "ns/op": 3506120.0,
+            "MB/s": 149.51,
+            "cpu-ns/op": 3561758.0,
+            "encoded-bytes": 369890.0,
+            "B/op": 377240.0,
+            "allocs/op": 22.0
+          },
+          {
+            "ns/op": 3479759.0,
+            "MB/s": 150.64,
+            "cpu-ns/op": 3524529.0,
+            "encoded-bytes": 369890.0,
+            "B/op": 377240.0,
+            "allocs/op": 22.0
+          },
+          {
+            "ns/op": 3530772.0,
+            "MB/s": 148.46,
+            "cpu-ns/op": 3570765.0,
+            "encoded-bytes": 369890.0,
+            "B/op": 377240.0,
+            "allocs/op": 22.0
+          },
+          {
+            "ns/op": 3571814.0,
+            "MB/s": 146.76,
+            "cpu-ns/op": 3620903.0,
+            "encoded-bytes": 369890.0,
+            "B/op": 377240.0,
+            "allocs/op": 22.0
+          }
+        ]
+      },
+      "decode": {
+        "median": {
+          "ns/op": 1289983.5,
+          "MB/s": 406.355,
+          "cpu-ns/op": 1337261.0,
+          "encoded-bytes": 369890.0,
+          "B/op": 524288.0,
+          "allocs/op": 1.0
+        },
+        "samples": [
+          {
+            "ns/op": 1292404.0,
+            "MB/s": 405.59,
+            "cpu-ns/op": 1340437.0,
+            "encoded-bytes": 369890.0,
+            "B/op": 524288.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 1289340.0,
+            "MB/s": 406.56,
+            "cpu-ns/op": 1339207.0,
+            "encoded-bytes": 369890.0,
+            "B/op": 524288.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 1290627.0,
+            "MB/s": 406.15,
+            "cpu-ns/op": 1334880.0,
+            "encoded-bytes": 369890.0,
+            "B/op": 524288.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 1288923.0,
+            "MB/s": 406.69,
+            "cpu-ns/op": 1335315.0,
+            "encoded-bytes": 369890.0,
+            "B/op": 524288.0,
+            "allocs/op": 1.0
+          }
+        ]
+      },
+      "independent_libzstd_roundtrip": true
+    },
+    {
+      "version": "before",
+      "codec": "store9",
+      "encoded_bytes": 369870,
+      "frame_sha256": "ec091349526f6a8bc8ad7080ef67e2150c858b8c4da8b8c15c301b5e1f7532a8",
+      "label": "dat-base64",
+      "raw_bytes": 524191,
+      "raw_sha256": "f4f2241fb9038326ff7705db05407ca329ad7e19bc319b484041df8222b342f1",
+      "encode": {
+        "median": {
+          "ns/op": 10712972.0,
+          "MB/s": 48.93,
+          "cpu-ns/op": 17791857.0,
+          "encoded-bytes": 369870.0,
+          "B/op": 755136.0,
+          "allocs/op": 68.0
+        },
+        "samples": [
+          {
+            "ns/op": 10765916.0,
+            "MB/s": 48.69,
+            "cpu-ns/op": 18024190.0,
+            "encoded-bytes": 369870.0,
+            "B/op": 755136.0,
+            "allocs/op": 68.0
+          },
+          {
+            "ns/op": 10688402.0,
+            "MB/s": 49.04,
+            "cpu-ns/op": 17820714.0,
+            "encoded-bytes": 369870.0,
+            "B/op": 755136.0,
+            "allocs/op": 68.0
+          },
+          {
+            "ns/op": 10737542.0,
+            "MB/s": 48.82,
+            "cpu-ns/op": 17763000.0,
+            "encoded-bytes": 369870.0,
+            "B/op": 755136.0,
+            "allocs/op": 68.0
+          },
+          {
+            "ns/op": 10649507.0,
+            "MB/s": 49.22,
+            "cpu-ns/op": 17586571.0,
+            "encoded-bytes": 369870.0,
+            "B/op": 755136.0,
+            "allocs/op": 68.0
+          }
+        ]
+      },
+      "decode": {
+        "median": {
+          "ns/op": 1267908.5,
+          "MB/s": 413.43,
+          "cpu-ns/op": 1316575.5,
+          "encoded-bytes": 369870.0,
+          "B/op": 524288.0,
+          "allocs/op": 1.0
+        },
+        "samples": [
+          {
+            "ns/op": 1267522.0,
+            "MB/s": 413.56,
+            "cpu-ns/op": 1321686.0,
+            "encoded-bytes": 369870.0,
+            "B/op": 524288.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 1268295.0,
+            "MB/s": 413.3,
+            "cpu-ns/op": 1315914.0,
+            "encoded-bytes": 369870.0,
+            "B/op": 524288.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 1270804.0,
+            "MB/s": 412.49,
+            "cpu-ns/op": 1317237.0,
+            "encoded-bytes": 369870.0,
+            "B/op": 524288.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 1264321.0,
+            "MB/s": 414.6,
+            "cpu-ns/op": 1308484.0,
+            "encoded-bytes": 369870.0,
+            "B/op": 524288.0,
+            "allocs/op": 1.0
+          }
+        ]
+      },
+      "independent_libzstd_roundtrip": true
+    },
+    {
+      "version": "before",
+      "codec": "zstd-http",
+      "encoded_bytes": 369880,
+      "frame_sha256": "03916103b28d563be12ce4de6b7dd9b1acb8b5b7651b5f35c0aa997d6b824e5f",
+      "label": "dat-base64",
+      "raw_bytes": 524191,
+      "raw_sha256": "f4f2241fb9038326ff7705db05407ca329ad7e19bc319b484041df8222b342f1",
+      "encode": {
+        "median": {
+          "ns/op": 3681587.5,
+          "MB/s": 142.425,
+          "cpu-ns/op": 3731822.5,
+          "encoded-bytes": 369880.0,
+          "B/op": 377216.0,
+          "allocs/op": 21.0
+        },
+        "samples": [
+          {
+            "ns/op": 3746629.0,
+            "MB/s": 139.91,
+            "cpu-ns/op": 3801379.0,
+            "encoded-bytes": 369880.0,
+            "B/op": 377216.0,
+            "allocs/op": 21.0
+          },
+          {
+            "ns/op": 3745102.0,
+            "MB/s": 139.97,
+            "cpu-ns/op": 3800197.0,
+            "encoded-bytes": 369880.0,
+            "B/op": 377216.0,
+            "allocs/op": 21.0
+          },
+          {
+            "ns/op": 3618073.0,
+            "MB/s": 144.88,
+            "cpu-ns/op": 3663448.0,
+            "encoded-bytes": 369880.0,
+            "B/op": 377216.0,
+            "allocs/op": 21.0
+          },
+          {
+            "ns/op": 3599442.0,
+            "MB/s": 145.63,
+            "cpu-ns/op": 3645015.0,
+            "encoded-bytes": 369880.0,
+            "B/op": 377216.0,
+            "allocs/op": 21.0
+          }
+        ]
+      },
+      "decode": {
+        "median": {
+          "ns/op": 1290852.0,
+          "MB/s": 406.08500000000004,
+          "cpu-ns/op": 1340504.0,
+          "encoded-bytes": 369880.0,
+          "B/op": 524288.0,
+          "allocs/op": 1.0
+        },
+        "samples": [
+          {
+            "ns/op": 1310504.0,
+            "MB/s": 399.99,
+            "cpu-ns/op": 1366331.0,
+            "encoded-bytes": 369880.0,
+            "B/op": 524288.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 1288744.0,
+            "MB/s": 406.75,
+            "cpu-ns/op": 1345467.0,
+            "encoded-bytes": 369880.0,
+            "B/op": 524288.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 1292960.0,
+            "MB/s": 405.42,
+            "cpu-ns/op": 1335541.0,
+            "encoded-bytes": 369880.0,
+            "B/op": 524288.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 1283369.0,
+            "MB/s": 408.45,
+            "cpu-ns/op": 1324022.0,
+            "encoded-bytes": 369880.0,
+            "B/op": 524288.0,
+            "allocs/op": 1.0
+          }
+        ]
+      },
+      "independent_libzstd_roundtrip": true
+    },
+    {
+      "version": "before",
+      "codec": "store1",
+      "encoded_bytes": 177230,
+      "frame_sha256": "f30e57acce874c5649c58e74ef9ecc663cd1ee7e91f8881bd556dfacaf8ea074",
+      "label": "dat-entropy",
+      "raw_bytes": 435955,
+      "raw_sha256": "1e8bcac3601026ab44818a11540c617bb900431a554055cbe73c735ed073488c",
+      "encode": {
+        "median": {
+          "ns/op": 1522991.5,
+          "MB/s": 286.25,
+          "cpu-ns/op": 1548716.5,
+          "encoded-bytes": 177230.0,
+          "B/op": 180584.0,
+          "allocs/op": 20.0
+        },
+        "samples": [
+          {
+            "ns/op": 1521910.0,
+            "MB/s": 286.45,
+            "cpu-ns/op": 1551255.0,
+            "encoded-bytes": 177230.0,
+            "B/op": 180584.0,
+            "allocs/op": 20.0
+          },
+          {
+            "ns/op": 1514287.0,
+            "MB/s": 287.89,
+            "cpu-ns/op": 1543936.0,
+            "encoded-bytes": 177230.0,
+            "B/op": 180584.0,
+            "allocs/op": 20.0
+          },
+          {
+            "ns/op": 1524073.0,
+            "MB/s": 286.05,
+            "cpu-ns/op": 1546178.0,
+            "encoded-bytes": 177230.0,
+            "B/op": 180584.0,
+            "allocs/op": 20.0
+          },
+          {
+            "ns/op": 1533283.0,
+            "MB/s": 284.33,
+            "cpu-ns/op": 1557609.0,
+            "encoded-bytes": 177230.0,
+            "B/op": 180584.0,
+            "allocs/op": 20.0
+          }
+        ]
+      },
+      "decode": {
+        "median": {
+          "ns/op": 947033.5,
+          "MB/s": 460.34000000000003,
+          "cpu-ns/op": 995808.5,
+          "encoded-bytes": 177230.0,
+          "B/op": 442368.0,
+          "allocs/op": 1.0
+        },
+        "samples": [
+          {
+            "ns/op": 950121.0,
+            "MB/s": 458.84,
+            "cpu-ns/op": 1006129.0,
+            "encoded-bytes": 177230.0,
+            "B/op": 442368.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 946771.0,
+            "MB/s": 460.47,
+            "cpu-ns/op": 999897.0,
+            "encoded-bytes": 177230.0,
+            "B/op": 442368.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 945609.0,
+            "MB/s": 461.03,
+            "cpu-ns/op": 990816.0,
+            "encoded-bytes": 177230.0,
+            "B/op": 442368.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 947296.0,
+            "MB/s": 460.21,
+            "cpu-ns/op": 991720.0,
+            "encoded-bytes": 177230.0,
+            "B/op": 442368.0,
+            "allocs/op": 1.0
+          }
+        ]
+      },
+      "independent_libzstd_roundtrip": true
+    },
+    {
+      "version": "before",
+      "codec": "store6",
+      "encoded_bytes": 177206,
+      "frame_sha256": "60c911c2d06ee3b6187c3a3cd7fbc7d2c8209cfdc872cf781f769a99cf431730",
+      "label": "dat-entropy",
+      "raw_bytes": 435955,
+      "raw_sha256": "1e8bcac3601026ab44818a11540c617bb900431a554055cbe73c735ed073488c",
+      "encode": {
+        "median": {
+          "ns/op": 1644679.0,
+          "MB/s": 266.47,
+          "cpu-ns/op": 1672958.0,
+          "encoded-bytes": 177206.0,
+          "B/op": 180584.0,
+          "allocs/op": 20.0
+        },
+        "samples": [
+          {
+            "ns/op": 1776028.0,
+            "MB/s": 245.47,
+            "cpu-ns/op": 1810985.0,
+            "encoded-bytes": 177206.0,
+            "B/op": 180584.0,
+            "allocs/op": 20.0
+          },
+          {
+            "ns/op": 1763998.0,
+            "MB/s": 247.14,
+            "cpu-ns/op": 1797254.0,
+            "encoded-bytes": 177206.0,
+            "B/op": 180584.0,
+            "allocs/op": 20.0
+          },
+          {
+            "ns/op": 1525360.0,
+            "MB/s": 285.8,
+            "cpu-ns/op": 1548662.0,
+            "encoded-bytes": 177206.0,
+            "B/op": 180584.0,
+            "allocs/op": 20.0
+          },
+          {
+            "ns/op": 1523032.0,
+            "MB/s": 286.24,
+            "cpu-ns/op": 1546280.0,
+            "encoded-bytes": 177206.0,
+            "B/op": 180584.0,
+            "allocs/op": 20.0
+          }
+        ]
+      },
+      "decode": {
+        "median": {
+          "ns/op": 955025.5,
+          "MB/s": 456.49,
+          "cpu-ns/op": 1006337.5,
+          "encoded-bytes": 177206.0,
+          "B/op": 442368.0,
+          "allocs/op": 1.0
+        },
+        "samples": [
+          {
+            "ns/op": 958475.0,
+            "MB/s": 454.84,
+            "cpu-ns/op": 1017728.0,
+            "encoded-bytes": 177206.0,
+            "B/op": 442368.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 969771.0,
+            "MB/s": 449.54,
+            "cpu-ns/op": 1029801.0,
+            "encoded-bytes": 177206.0,
+            "B/op": 442368.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 951576.0,
+            "MB/s": 458.14,
+            "cpu-ns/op": 994947.0,
+            "encoded-bytes": 177206.0,
+            "B/op": 442368.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 946185.0,
+            "MB/s": 460.75,
+            "cpu-ns/op": 990500.0,
+            "encoded-bytes": 177206.0,
+            "B/op": 442368.0,
+            "allocs/op": 1.0
+          }
+        ]
+      },
+      "independent_libzstd_roundtrip": true
+    },
+    {
+      "version": "before",
+      "codec": "store9",
+      "encoded_bytes": 176493,
+      "frame_sha256": "be21cc2df5b2305ee42538dc49ab7a99c9e24714564e835a766822073e54beb4",
+      "label": "dat-entropy",
+      "raw_bytes": 435955,
+      "raw_sha256": "1e8bcac3601026ab44818a11540c617bb900431a554055cbe73c735ed073488c",
+      "encode": {
+        "median": {
+          "ns/op": 3289060.5,
+          "MB/s": 132.575,
+          "cpu-ns/op": 6175942.0,
+          "encoded-bytes": 176493.0,
+          "B/op": 361488.0,
+          "allocs/op": 45.0
+        },
+        "samples": [
+          {
+            "ns/op": 3427361.0,
+            "MB/s": 127.2,
+            "cpu-ns/op": 6401435.0,
+            "encoded-bytes": 176493.0,
+            "B/op": 361488.0,
+            "allocs/op": 45.0
+          },
+          {
+            "ns/op": 3336779.0,
+            "MB/s": 130.65,
+            "cpu-ns/op": 6275284.0,
+            "encoded-bytes": 176493.0,
+            "B/op": 361488.0,
+            "allocs/op": 45.0
+          },
+          {
+            "ns/op": 3226867.0,
+            "MB/s": 135.1,
+            "cpu-ns/op": 6059353.0,
+            "encoded-bytes": 176493.0,
+            "B/op": 361488.0,
+            "allocs/op": 45.0
+          },
+          {
+            "ns/op": 3241342.0,
+            "MB/s": 134.5,
+            "cpu-ns/op": 6076600.0,
+            "encoded-bytes": 176493.0,
+            "B/op": 361488.0,
+            "allocs/op": 45.0
+          }
+        ]
+      },
+      "decode": {
+        "median": {
+          "ns/op": 966914.0,
+          "MB/s": 450.885,
+          "cpu-ns/op": 1019121.0,
+          "encoded-bytes": 176493.0,
+          "B/op": 442368.0,
+          "allocs/op": 1.0
+        },
+        "samples": [
+          {
+            "ns/op": 988876.0,
+            "MB/s": 440.86,
+            "cpu-ns/op": 1051729.0,
+            "encoded-bytes": 176493.0,
+            "B/op": 442368.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 971637.0,
+            "MB/s": 448.68,
+            "cpu-ns/op": 1032671.0,
+            "encoded-bytes": 176493.0,
+            "B/op": 442368.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 961224.0,
+            "MB/s": 453.54,
+            "cpu-ns/op": 1005571.0,
+            "encoded-bytes": 176493.0,
+            "B/op": 442368.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 962191.0,
+            "MB/s": 453.09,
+            "cpu-ns/op": 1004375.0,
+            "encoded-bytes": 176493.0,
+            "B/op": 442368.0,
+            "allocs/op": 1.0
+          }
+        ]
+      },
+      "independent_libzstd_roundtrip": true
+    },
+    {
+      "version": "before",
+      "codec": "zstd-http",
+      "encoded_bytes": 177198,
+      "frame_sha256": "8e818d7230e11d5b0f6456f5c0385a8905017551e28473aa3cbeea651d2f133a",
+      "label": "dat-entropy",
+      "raw_bytes": 435955,
+      "raw_sha256": "1e8bcac3601026ab44818a11540c617bb900431a554055cbe73c735ed073488c",
+      "encode": {
+        "median": {
+          "ns/op": 1772732.0,
+          "MB/s": 245.92000000000002,
+          "cpu-ns/op": 1797537.5,
+          "encoded-bytes": 177198.0,
+          "B/op": 180560.0,
+          "allocs/op": 19.0
+        },
+        "samples": [
+          {
+            "ns/op": 1772376.0,
+            "MB/s": 245.97,
+            "cpu-ns/op": 1798709.0,
+            "encoded-bytes": 177198.0,
+            "B/op": 180560.0,
+            "allocs/op": 19.0
+          },
+          {
+            "ns/op": 1759448.0,
+            "MB/s": 247.78,
+            "cpu-ns/op": 1783378.0,
+            "encoded-bytes": 177198.0,
+            "B/op": 180560.0,
+            "allocs/op": 19.0
+          },
+          {
+            "ns/op": 1773088.0,
+            "MB/s": 245.87,
+            "cpu-ns/op": 1796366.0,
+            "encoded-bytes": 177198.0,
+            "B/op": 180560.0,
+            "allocs/op": 19.0
+          },
+          {
+            "ns/op": 1777687.0,
+            "MB/s": 245.24,
+            "cpu-ns/op": 1802470.0,
+            "encoded-bytes": 177198.0,
+            "B/op": 180560.0,
+            "allocs/op": 19.0
+          }
+        ]
+      },
+      "decode": {
+        "median": {
+          "ns/op": 951258.0,
+          "MB/s": 458.29499999999996,
+          "cpu-ns/op": 994611.0,
+          "encoded-bytes": 177198.0,
+          "B/op": 442368.0,
+          "allocs/op": 1.0
+        },
+        "samples": [
+          {
+            "ns/op": 950913.0,
+            "MB/s": 458.46,
+            "cpu-ns/op": 996690.0,
+            "encoded-bytes": 177198.0,
+            "B/op": 442368.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 953390.0,
+            "MB/s": 457.27,
+            "cpu-ns/op": 996488.0,
+            "encoded-bytes": 177198.0,
+            "B/op": 442368.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 951603.0,
+            "MB/s": 458.13,
+            "cpu-ns/op": 992734.0,
+            "encoded-bytes": 177198.0,
+            "B/op": 442368.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 948460.0,
+            "MB/s": 459.65,
+            "cpu-ns/op": 988112.0,
+            "encoded-bytes": 177198.0,
+            "B/op": 442368.0,
+            "allocs/op": 1.0
+          }
+        ]
+      },
+      "independent_libzstd_roundtrip": true
+    },
+    {
+      "version": "before",
+      "codec": "store1",
+      "encoded_bytes": 31077,
+      "frame_sha256": "57ba027bfe54707203826e140f1c83b2eb304539b38c12bd32c9362dedf8f14f",
+      "label": "dat-mixed",
+      "raw_bytes": 204125,
+      "raw_sha256": "f7103a9c16cb5ca09f5105fc4c9d8154e0dae4af7fe2d0abbbf42abcd1f36986",
+      "encode": {
+        "median": {
+          "ns/op": 579241.5,
+          "MB/s": 352.405,
+          "cpu-ns/op": 585793.0,
+          "encoded-bytes": 31077.0,
+          "B/op": 33040.0,
+          "allocs/op": 12.0
+        },
+        "samples": [
+          {
+            "ns/op": 578460.0,
+            "MB/s": 352.88,
+            "cpu-ns/op": 585623.0,
+            "encoded-bytes": 31077.0,
+            "B/op": 33040.0,
+            "allocs/op": 12.0
+          },
+          {
+            "ns/op": 575327.0,
+            "MB/s": 354.8,
+            "cpu-ns/op": 582112.0,
+            "encoded-bytes": 31077.0,
+            "B/op": 33040.0,
+            "allocs/op": 12.0
+          },
+          {
+            "ns/op": 580023.0,
+            "MB/s": 351.93,
+            "cpu-ns/op": 585963.0,
+            "encoded-bytes": 31077.0,
+            "B/op": 33040.0,
+            "allocs/op": 12.0
+          },
+          {
+            "ns/op": 581129.0,
+            "MB/s": 351.26,
+            "cpu-ns/op": 586822.0,
+            "encoded-bytes": 31077.0,
+            "B/op": 33040.0,
+            "allocs/op": 12.0
+          }
+        ]
+      },
+      "decode": {
+        "median": {
+          "ns/op": 318896.0,
+          "MB/s": 640.0999999999999,
+          "cpu-ns/op": 345931.0,
+          "encoded-bytes": 31077.0,
+          "B/op": 204800.0,
+          "allocs/op": 1.0
+        },
+        "samples": [
+          {
+            "ns/op": 318483.0,
+            "MB/s": 640.93,
+            "cpu-ns/op": 345368.0,
+            "encoded-bytes": 31077.0,
+            "B/op": 204800.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 319309.0,
+            "MB/s": 639.27,
+            "cpu-ns/op": 346494.0,
+            "encoded-bytes": 31077.0,
+            "B/op": 204800.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 314940.0,
+            "MB/s": 648.14,
+            "cpu-ns/op": 339602.0,
+            "encoded-bytes": 31077.0,
+            "B/op": 204800.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 320272.0,
+            "MB/s": 637.35,
+            "cpu-ns/op": 346512.0,
+            "encoded-bytes": 31077.0,
+            "B/op": 204800.0,
+            "allocs/op": 1.0
+          }
+        ]
+      },
+      "independent_libzstd_roundtrip": true
+    },
+    {
+      "version": "before",
+      "codec": "store6",
+      "encoded_bytes": 31026,
+      "frame_sha256": "27ee3c2d8f3073268d787739c64fb64d63a53ebda4b446a848e2e1c77134df4e",
+      "label": "dat-mixed",
+      "raw_bytes": 204125,
+      "raw_sha256": "f7103a9c16cb5ca09f5105fc4c9d8154e0dae4af7fe2d0abbbf42abcd1f36986",
+      "encode": {
+        "median": {
+          "ns/op": 596639.0,
+          "MB/s": 342.4,
+          "cpu-ns/op": 603183.0,
+          "encoded-bytes": 31026.0,
+          "B/op": 33040.0,
+          "allocs/op": 12.0
+        },
+        "samples": [
+          {
+            "ns/op": 579708.0,
+            "MB/s": 352.12,
+            "cpu-ns/op": 586457.0,
+            "encoded-bytes": 31026.0,
+            "B/op": 33040.0,
+            "allocs/op": 12.0
+          },
+          {
+            "ns/op": 577412.0,
+            "MB/s": 353.52,
+            "cpu-ns/op": 583754.0,
+            "encoded-bytes": 31026.0,
+            "B/op": 33040.0,
+            "allocs/op": 12.0
+          },
+          {
+            "ns/op": 613570.0,
+            "MB/s": 332.68,
+            "cpu-ns/op": 619909.0,
+            "encoded-bytes": 31026.0,
+            "B/op": 33040.0,
+            "allocs/op": 12.0
+          },
+          {
+            "ns/op": 614181.0,
+            "MB/s": 332.35,
+            "cpu-ns/op": 620370.0,
+            "encoded-bytes": 31026.0,
+            "B/op": 33040.0,
+            "allocs/op": 12.0
+          }
+        ]
+      },
+      "decode": {
+        "median": {
+          "ns/op": 320024.0,
+          "MB/s": 637.8499999999999,
+          "cpu-ns/op": 345749.0,
+          "encoded-bytes": 31026.0,
+          "B/op": 204800.0,
+          "allocs/op": 1.0
+        },
+        "samples": [
+          {
+            "ns/op": 321057.0,
+            "MB/s": 635.79,
+            "cpu-ns/op": 348188.0,
+            "encoded-bytes": 31026.0,
+            "B/op": 204800.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 323216.0,
+            "MB/s": 631.54,
+            "cpu-ns/op": 351203.0,
+            "encoded-bytes": 31026.0,
+            "B/op": 204800.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 318991.0,
+            "MB/s": 639.91,
+            "cpu-ns/op": 343310.0,
+            "encoded-bytes": 31026.0,
+            "B/op": 204800.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 318270.0,
+            "MB/s": 641.36,
+            "cpu-ns/op": 342258.0,
+            "encoded-bytes": 31026.0,
+            "B/op": 204800.0,
+            "allocs/op": 1.0
+          }
+        ]
+      },
+      "independent_libzstd_roundtrip": true
+    },
+    {
+      "version": "before",
+      "codec": "store9",
+      "encoded_bytes": 30969,
+      "frame_sha256": "f8a698354de3624f3471ded9661e5b1a7e6c3bae87cf95bf9935949c3a5e7db1",
+      "label": "dat-mixed",
+      "raw_bytes": 204125,
+      "raw_sha256": "f7103a9c16cb5ca09f5105fc4c9d8154e0dae4af7fe2d0abbbf42abcd1f36986",
+      "encode": {
+        "median": {
+          "ns/op": 2181402.0,
+          "MB/s": 93.575,
+          "cpu-ns/op": 3525115.0,
+          "encoded-bytes": 30969.0,
+          "B/op": 66600.0,
+          "allocs/op": 38.0
+        },
+        "samples": [
+          {
+            "ns/op": 2200995.0,
+            "MB/s": 92.74,
+            "cpu-ns/op": 3557180.0,
+            "encoded-bytes": 30969.0,
+            "B/op": 66600.0,
+            "allocs/op": 38.0
+          },
+          {
+            "ns/op": 2192726.0,
+            "MB/s": 93.09,
+            "cpu-ns/op": 3567020.0,
+            "encoded-bytes": 30969.0,
+            "B/op": 66600.0,
+            "allocs/op": 38.0
+          },
+          {
+            "ns/op": 2169804.0,
+            "MB/s": 94.08,
+            "cpu-ns/op": 3488570.0,
+            "encoded-bytes": 30969.0,
+            "B/op": 66600.0,
+            "allocs/op": 38.0
+          },
+          {
+            "ns/op": 2170078.0,
+            "MB/s": 94.06,
+            "cpu-ns/op": 3493050.0,
+            "encoded-bytes": 30969.0,
+            "B/op": 66602.0,
+            "allocs/op": 38.0
+          }
+        ]
+      },
+      "decode": {
+        "median": {
+          "ns/op": 323549.0,
+          "MB/s": 630.9200000000001,
+          "cpu-ns/op": 349403.5,
+          "encoded-bytes": 30969.0,
+          "B/op": 204800.0,
+          "allocs/op": 1.0
+        },
+        "samples": [
+          {
+            "ns/op": 328751.0,
+            "MB/s": 620.91,
+            "cpu-ns/op": 354551.0,
+            "encoded-bytes": 30969.0,
+            "B/op": 204800.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 325558.0,
+            "MB/s": 627.0,
+            "cpu-ns/op": 351651.0,
+            "encoded-bytes": 30969.0,
+            "B/op": 204800.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 321540.0,
+            "MB/s": 634.84,
+            "cpu-ns/op": 347156.0,
+            "encoded-bytes": 30969.0,
+            "B/op": 204800.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 320737.0,
+            "MB/s": 636.42,
+            "cpu-ns/op": 344402.0,
+            "encoded-bytes": 30969.0,
+            "B/op": 204800.0,
+            "allocs/op": 1.0
+          }
+        ]
+      },
+      "independent_libzstd_roundtrip": true
+    },
+    {
+      "version": "before",
+      "codec": "zstd-http",
+      "encoded_bytes": 31015,
+      "frame_sha256": "7ea0352ac15429bec2b185a886770de0adbe54cddf958860b33d7e136042c2da",
+      "label": "dat-mixed",
+      "raw_bytes": 204125,
+      "raw_sha256": "f7103a9c16cb5ca09f5105fc4c9d8154e0dae4af7fe2d0abbbf42abcd1f36986",
+      "encode": {
+        "median": {
+          "ns/op": 860444.5,
+          "MB/s": 237.23000000000002,
+          "cpu-ns/op": 867482.5,
+          "encoded-bytes": 31015.0,
+          "B/op": 33016.0,
+          "allocs/op": 11.0
+        },
+        "samples": [
+          {
+            "ns/op": 869448.0,
+            "MB/s": 234.78,
+            "cpu-ns/op": 876619.0,
+            "encoded-bytes": 31015.0,
+            "B/op": 33016.0,
+            "allocs/op": 11.0
+          },
+          {
+            "ns/op": 860374.0,
+            "MB/s": 237.25,
+            "cpu-ns/op": 867701.0,
+            "encoded-bytes": 31015.0,
+            "B/op": 33016.0,
+            "allocs/op": 11.0
+          },
+          {
+            "ns/op": 860515.0,
+            "MB/s": 237.21,
+            "cpu-ns/op": 867264.0,
+            "encoded-bytes": 31015.0,
+            "B/op": 33016.0,
+            "allocs/op": 11.0
+          },
+          {
+            "ns/op": 857310.0,
+            "MB/s": 238.1,
+            "cpu-ns/op": 863859.0,
+            "encoded-bytes": 31015.0,
+            "B/op": 33016.0,
+            "allocs/op": 11.0
+          }
+        ]
+      },
+      "decode": {
+        "median": {
+          "ns/op": 319105.5,
+          "MB/s": 639.68,
+          "cpu-ns/op": 342030.5,
+          "encoded-bytes": 31015.0,
+          "B/op": 204800.0,
+          "allocs/op": 1.0
+        },
+        "samples": [
+          {
+            "ns/op": 318796.0,
+            "MB/s": 640.3,
+            "cpu-ns/op": 342620.0,
+            "encoded-bytes": 31015.0,
+            "B/op": 204800.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 324165.0,
+            "MB/s": 629.7,
+            "cpu-ns/op": 348409.0,
+            "encoded-bytes": 31015.0,
+            "B/op": 204800.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 318332.0,
+            "MB/s": 641.23,
+            "cpu-ns/op": 341184.0,
+            "encoded-bytes": 31015.0,
+            "B/op": 204800.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 319415.0,
+            "MB/s": 639.06,
+            "cpu-ns/op": 341441.0,
+            "encoded-bytes": 31015.0,
+            "B/op": 204800.0,
+            "allocs/op": 1.0
+          }
+        ]
+      },
+      "independent_libzstd_roundtrip": true
+    },
+    {
+      "version": "before",
+      "codec": "store1",
+      "encoded_bytes": 12277,
+      "frame_sha256": "6950bfddb649b3fc9e43040b1c668d4cf6ff3a3821697040950671b422be8427",
+      "label": "dat-text",
+      "raw_bytes": 193755,
+      "raw_sha256": "042e474becb52a5f94b1d211cb01d26e2def6d1569f451e11eb3d6e2d7a3851a",
+      "encode": {
+        "median": {
+          "ns/op": 368230.5,
+          "MB/s": 526.18,
+          "cpu-ns/op": 371315.0,
+          "encoded-bytes": 12277.0,
+          "B/op": 12552.0,
+          "allocs/op": 12.0
+        },
+        "samples": [
+          {
+            "ns/op": 367098.0,
+            "MB/s": 527.8,
+            "cpu-ns/op": 370345.0,
+            "encoded-bytes": 12277.0,
+            "B/op": 12552.0,
+            "allocs/op": 12.0
+          },
+          {
+            "ns/op": 365211.0,
+            "MB/s": 530.53,
+            "cpu-ns/op": 368063.0,
+            "encoded-bytes": 12277.0,
+            "B/op": 12552.0,
+            "allocs/op": 12.0
+          },
+          {
+            "ns/op": 371593.0,
+            "MB/s": 521.42,
+            "cpu-ns/op": 375183.0,
+            "encoded-bytes": 12277.0,
+            "B/op": 12552.0,
+            "allocs/op": 12.0
+          },
+          {
+            "ns/op": 369363.0,
+            "MB/s": 524.56,
+            "cpu-ns/op": 372285.0,
+            "encoded-bytes": 12277.0,
+            "B/op": 12552.0,
+            "allocs/op": 12.0
+          }
+        ]
+      },
+      "decode": {
+        "median": {
+          "ns/op": 206803.5,
+          "MB/s": 936.9100000000001,
+          "cpu-ns/op": 231624.5,
+          "encoded-bytes": 12277.0,
+          "B/op": 196608.0,
+          "allocs/op": 1.0
+        },
+        "samples": [
+          {
+            "ns/op": 205069.0,
+            "MB/s": 944.83,
+            "cpu-ns/op": 231639.0,
+            "encoded-bytes": 12277.0,
+            "B/op": 196608.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 206371.0,
+            "MB/s": 938.87,
+            "cpu-ns/op": 233740.0,
+            "encoded-bytes": 12277.0,
+            "B/op": 196608.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 207396.0,
+            "MB/s": 934.23,
+            "cpu-ns/op": 231610.0,
+            "encoded-bytes": 12277.0,
+            "B/op": 196608.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 207236.0,
+            "MB/s": 934.95,
+            "cpu-ns/op": 231533.0,
+            "encoded-bytes": 12277.0,
+            "B/op": 196608.0,
+            "allocs/op": 1.0
+          }
+        ]
+      },
+      "independent_libzstd_roundtrip": true
+    },
+    {
+      "version": "before",
+      "codec": "store6",
+      "encoded_bytes": 12211,
+      "frame_sha256": "e8b1091e92d565052f8ae67d8bdd0faea511e664ea6a484d1e0057eeea606b0f",
+      "label": "dat-text",
+      "raw_bytes": 193755,
+      "raw_sha256": "042e474becb52a5f94b1d211cb01d26e2def6d1569f451e11eb3d6e2d7a3851a",
+      "encode": {
+        "median": {
+          "ns/op": 371831.5,
+          "MB/s": 521.085,
+          "cpu-ns/op": 374834.0,
+          "encoded-bytes": 12211.0,
+          "B/op": 12552.0,
+          "allocs/op": 12.0
+        },
+        "samples": [
+          {
+            "ns/op": 371344.0,
+            "MB/s": 521.77,
+            "cpu-ns/op": 374250.0,
+            "encoded-bytes": 12211.0,
+            "B/op": 12552.0,
+            "allocs/op": 12.0
+          },
+          {
+            "ns/op": 368526.0,
+            "MB/s": 525.76,
+            "cpu-ns/op": 371382.0,
+            "encoded-bytes": 12211.0,
+            "B/op": 12552.0,
+            "allocs/op": 12.0
+          },
+          {
+            "ns/op": 373049.0,
+            "MB/s": 519.38,
+            "cpu-ns/op": 376188.0,
+            "encoded-bytes": 12211.0,
+            "B/op": 12552.0,
+            "allocs/op": 12.0
+          },
+          {
+            "ns/op": 372319.0,
+            "MB/s": 520.4,
+            "cpu-ns/op": 375418.0,
+            "encoded-bytes": 12211.0,
+            "B/op": 12552.0,
+            "allocs/op": 12.0
+          }
+        ]
+      },
+      "decode": {
+        "median": {
+          "ns/op": 209475.5,
+          "MB/s": 924.985,
+          "cpu-ns/op": 235049.5,
+          "encoded-bytes": 12211.0,
+          "B/op": 196608.0,
+          "allocs/op": 1.0
+        },
+        "samples": [
+          {
+            "ns/op": 207615.0,
+            "MB/s": 933.24,
+            "cpu-ns/op": 234112.0,
+            "encoded-bytes": 12211.0,
+            "B/op": 196608.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 208333.0,
+            "MB/s": 930.03,
+            "cpu-ns/op": 235541.0,
+            "encoded-bytes": 12211.0,
+            "B/op": 196608.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 210618.0,
+            "MB/s": 919.94,
+            "cpu-ns/op": 234558.0,
+            "encoded-bytes": 12211.0,
+            "B/op": 196608.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 212246.0,
+            "MB/s": 912.88,
+            "cpu-ns/op": 237185.0,
+            "encoded-bytes": 12211.0,
+            "B/op": 196608.0,
+            "allocs/op": 1.0
+          }
+        ]
+      },
+      "independent_libzstd_roundtrip": true
+    },
+    {
+      "version": "before",
+      "codec": "store9",
+      "encoded_bytes": 12191,
+      "frame_sha256": "e3488e4981dc10e77755e8a8244ad9a4f44271e98cda8ad07dd9cc724568faee",
+      "label": "dat-text",
+      "raw_bytes": 193755,
+      "raw_sha256": "042e474becb52a5f94b1d211cb01d26e2def6d1569f451e11eb3d6e2d7a3851a",
+      "encode": {
+        "median": {
+          "ns/op": 1525395.0,
+          "MB/s": 127.02000000000001,
+          "cpu-ns/op": 2436863.0,
+          "encoded-bytes": 12191.0,
+          "B/op": 25715.0,
+          "allocs/op": 38.0
+        },
+        "samples": [
+          {
+            "ns/op": 1526543.0,
+            "MB/s": 126.92,
+            "cpu-ns/op": 2444102.0,
+            "encoded-bytes": 12191.0,
+            "B/op": 25814.0,
+            "allocs/op": 38.0
+          },
+          {
+            "ns/op": 1528886.0,
+            "MB/s": 126.73,
+            "cpu-ns/op": 2447815.0,
+            "encoded-bytes": 12191.0,
+            "B/op": 25616.0,
+            "allocs/op": 38.0
+          },
+          {
+            "ns/op": 1524247.0,
+            "MB/s": 127.12,
+            "cpu-ns/op": 2429624.0,
+            "encoded-bytes": 12191.0,
+            "B/op": 25814.0,
+            "allocs/op": 38.0
+          },
+          {
+            "ns/op": 1521311.0,
+            "MB/s": 127.36,
+            "cpu-ns/op": 2424000.0,
+            "encoded-bytes": 12191.0,
+            "B/op": 25616.0,
+            "allocs/op": 38.0
+          }
+        ]
+      },
+      "decode": {
+        "median": {
+          "ns/op": 212679.5,
+          "MB/s": 911.095,
+          "cpu-ns/op": 237606.0,
+          "encoded-bytes": 12191.0,
+          "B/op": 196610.5,
+          "allocs/op": 1.0
+        },
+        "samples": [
+          {
+            "ns/op": 215334.0,
+            "MB/s": 899.79,
+            "cpu-ns/op": 240777.0,
+            "encoded-bytes": 12191.0,
+            "B/op": 196613.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 214641.0,
+            "MB/s": 902.69,
+            "cpu-ns/op": 239061.0,
+            "encoded-bytes": 12191.0,
+            "B/op": 196608.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 209973.0,
+            "MB/s": 922.76,
+            "cpu-ns/op": 236151.0,
+            "encoded-bytes": 12191.0,
+            "B/op": 196613.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 210718.0,
+            "MB/s": 919.5,
+            "cpu-ns/op": 235328.0,
+            "encoded-bytes": 12191.0,
+            "B/op": 196608.0,
+            "allocs/op": 1.0
+          }
+        ]
+      },
+      "independent_libzstd_roundtrip": true
+    },
+    {
+      "version": "before",
+      "codec": "zstd-http",
+      "encoded_bytes": 12147,
+      "frame_sha256": "4e6aa0c84977764c566093451fc9cdc70e0db3be144b675ba5ee008ec4bc4196",
+      "label": "dat-text",
+      "raw_bytes": 193755,
+      "raw_sha256": "042e474becb52a5f94b1d211cb01d26e2def6d1569f451e11eb3d6e2d7a3851a",
+      "encode": {
+        "median": {
+          "ns/op": 625834.0,
+          "MB/s": 309.595,
+          "cpu-ns/op": 629197.0,
+          "encoded-bytes": 12147.0,
+          "B/op": 12528.0,
+          "allocs/op": 11.0
+        },
+        "samples": [
+          {
+            "ns/op": 625298.0,
+            "MB/s": 309.86,
+            "cpu-ns/op": 628480.0,
+            "encoded-bytes": 12147.0,
+            "B/op": 12528.0,
+            "allocs/op": 11.0
+          },
+          {
+            "ns/op": 623358.0,
+            "MB/s": 310.82,
+            "cpu-ns/op": 627294.0,
+            "encoded-bytes": 12147.0,
+            "B/op": 12528.0,
+            "allocs/op": 11.0
+          },
+          {
+            "ns/op": 628548.0,
+            "MB/s": 308.26,
+            "cpu-ns/op": 632187.0,
+            "encoded-bytes": 12147.0,
+            "B/op": 12528.0,
+            "allocs/op": 11.0
+          },
+          {
+            "ns/op": 626370.0,
+            "MB/s": 309.33,
+            "cpu-ns/op": 629914.0,
+            "encoded-bytes": 12147.0,
+            "B/op": 12528.0,
+            "allocs/op": 11.0
+          }
+        ]
+      },
+      "decode": {
+        "median": {
+          "ns/op": 211704.5,
+          "MB/s": 915.23,
+          "cpu-ns/op": 235338.0,
+          "encoded-bytes": 12147.0,
+          "B/op": 196608.0,
+          "allocs/op": 1.0
+        },
+        "samples": [
+          {
+            "ns/op": 213620.0,
+            "MB/s": 907.01,
+            "cpu-ns/op": 242373.0,
+            "encoded-bytes": 12147.0,
+            "B/op": 196608.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 210847.0,
+            "MB/s": 918.94,
+            "cpu-ns/op": 235876.0,
+            "encoded-bytes": 12147.0,
+            "B/op": 196608.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 209575.0,
+            "MB/s": 924.51,
+            "cpu-ns/op": 232006.0,
+            "encoded-bytes": 12147.0,
+            "B/op": 196608.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 212562.0,
+            "MB/s": 911.52,
+            "cpu-ns/op": 234800.0,
+            "encoded-bytes": 12147.0,
+            "B/op": 196608.0,
+            "allocs/op": 1.0
+          }
+        ]
+      },
+      "independent_libzstd_roundtrip": true
+    },
+    {
+      "version": "before",
+      "codec": "store1",
+      "encoded_bytes": 4187,
+      "frame_sha256": "c06d019a587c464de7ca00916b86cab96c2ca1c4259529e6d7463c755d9310ea",
+      "label": "thread",
+      "raw_bytes": 24664,
+      "raw_sha256": "a0794f226ea69ec8f96665b8bf0d1502ac01073a0d9b5e732eae938967a46d65",
+      "encode": {
+        "median": {
+          "ns/op": 111498.5,
+          "MB/s": 221.22,
+          "cpu-ns/op": 112532.5,
+          "encoded-bytes": 4187.0,
+          "B/op": 5368.0,
+          "allocs/op": 10.0
+        },
+        "samples": [
+          {
+            "ns/op": 110620.0,
+            "MB/s": 222.96,
+            "cpu-ns/op": 111613.0,
+            "encoded-bytes": 4187.0,
+            "B/op": 5368.0,
+            "allocs/op": 10.0
+          },
+          {
+            "ns/op": 110024.0,
+            "MB/s": 224.17,
+            "cpu-ns/op": 110982.0,
+            "encoded-bytes": 4187.0,
+            "B/op": 5368.0,
+            "allocs/op": 10.0
+          },
+          {
+            "ns/op": 112669.0,
+            "MB/s": 218.91,
+            "cpu-ns/op": 113585.0,
+            "encoded-bytes": 4187.0,
+            "B/op": 5368.0,
+            "allocs/op": 10.0
+          },
+          {
+            "ns/op": 112377.0,
+            "MB/s": 219.48,
+            "cpu-ns/op": 113452.0,
+            "encoded-bytes": 4187.0,
+            "B/op": 5368.0,
+            "allocs/op": 10.0
+          }
+        ]
+      },
+      "decode": {
+        "median": {
+          "ns/op": 34126.5,
+          "MB/s": 722.735,
+          "cpu-ns/op": 36551.5,
+          "encoded-bytes": 4187.0,
+          "B/op": 27264.0,
+          "allocs/op": 1.0
+        },
+        "samples": [
+          {
+            "ns/op": 33860.0,
+            "MB/s": 728.42,
+            "cpu-ns/op": 36216.0,
+            "encoded-bytes": 4187.0,
+            "B/op": 27264.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 34007.0,
+            "MB/s": 725.26,
+            "cpu-ns/op": 36367.0,
+            "encoded-bytes": 4187.0,
+            "B/op": 27264.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 34246.0,
+            "MB/s": 720.21,
+            "cpu-ns/op": 36736.0,
+            "encoded-bytes": 4187.0,
+            "B/op": 27264.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 35214.0,
+            "MB/s": 700.4,
+            "cpu-ns/op": 37692.0,
+            "encoded-bytes": 4187.0,
+            "B/op": 27264.0,
+            "allocs/op": 1.0
+          }
+        ]
+      },
+      "independent_libzstd_roundtrip": true
+    },
+    {
+      "version": "before",
+      "codec": "store6",
+      "encoded_bytes": 4190,
+      "frame_sha256": "265bbfba66b920c994e119df59f92f4f4089b6b9e1888b080c1678b3c7b5c771",
+      "label": "thread",
+      "raw_bytes": 24664,
+      "raw_sha256": "a0794f226ea69ec8f96665b8bf0d1502ac01073a0d9b5e732eae938967a46d65",
+      "encode": {
+        "median": {
+          "ns/op": 114814.5,
+          "MB/s": 214.82999999999998,
+          "cpu-ns/op": 115782.0,
+          "encoded-bytes": 4190.0,
+          "B/op": 5368.0,
+          "allocs/op": 10.0
+        },
+        "samples": [
+          {
+            "ns/op": 116795.0,
+            "MB/s": 211.17,
+            "cpu-ns/op": 117781.0,
+            "encoded-bytes": 4190.0,
+            "B/op": 5368.0,
+            "allocs/op": 10.0
+          },
+          {
+            "ns/op": 112328.0,
+            "MB/s": 219.57,
+            "cpu-ns/op": 113286.0,
+            "encoded-bytes": 4190.0,
+            "B/op": 5368.0,
+            "allocs/op": 10.0
+          },
+          {
+            "ns/op": 115692.0,
+            "MB/s": 213.19,
+            "cpu-ns/op": 116584.0,
+            "encoded-bytes": 4190.0,
+            "B/op": 5368.0,
+            "allocs/op": 10.0
+          },
+          {
+            "ns/op": 113937.0,
+            "MB/s": 216.47,
+            "cpu-ns/op": 114980.0,
+            "encoded-bytes": 4190.0,
+            "B/op": 5368.0,
+            "allocs/op": 10.0
+          }
+        ]
+      },
+      "decode": {
+        "median": {
+          "ns/op": 35178.0,
+          "MB/s": 701.12,
+          "cpu-ns/op": 37522.5,
+          "encoded-bytes": 4190.0,
+          "B/op": 27264.0,
+          "allocs/op": 1.0
+        },
+        "samples": [
+          {
+            "ns/op": 35098.0,
+            "MB/s": 702.72,
+            "cpu-ns/op": 37338.0,
+            "encoded-bytes": 4190.0,
+            "B/op": 27264.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 35247.0,
+            "MB/s": 699.74,
+            "cpu-ns/op": 37624.0,
+            "encoded-bytes": 4190.0,
+            "B/op": 27264.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 35109.0,
+            "MB/s": 702.5,
+            "cpu-ns/op": 37421.0,
+            "encoded-bytes": 4190.0,
+            "B/op": 27264.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 35403.0,
+            "MB/s": 696.66,
+            "cpu-ns/op": 37792.0,
+            "encoded-bytes": 4190.0,
+            "B/op": 27264.0,
+            "allocs/op": 1.0
+          }
+        ]
+      },
+      "independent_libzstd_roundtrip": true
+    },
+    {
+      "version": "before",
+      "codec": "store9",
+      "encoded_bytes": 4159,
+      "frame_sha256": "c551ad53226014091edfa163a24a58e065a321d4a15b849ce7db5cb89225356c",
+      "label": "thread",
+      "raw_bytes": 24664,
+      "raw_sha256": "a0794f226ea69ec8f96665b8bf0d1502ac01073a0d9b5e732eae938967a46d65",
+      "encode": {
+        "median": {
+          "ns/op": 481122.5,
+          "MB/s": 51.265,
+          "cpu-ns/op": 483462.0,
+          "encoded-bytes": 4159.0,
+          "B/op": 6480.0,
+          "allocs/op": 27.0
+        },
+        "samples": [
+          {
+            "ns/op": 479918.0,
+            "MB/s": 51.39,
+            "cpu-ns/op": 482351.0,
+            "encoded-bytes": 4159.0,
+            "B/op": 6480.0,
+            "allocs/op": 27.0
+          },
+          {
+            "ns/op": 476555.0,
+            "MB/s": 51.75,
+            "cpu-ns/op": 478637.0,
+            "encoded-bytes": 4159.0,
+            "B/op": 6480.0,
+            "allocs/op": 27.0
+          },
+          {
+            "ns/op": 483014.0,
+            "MB/s": 51.06,
+            "cpu-ns/op": 484798.0,
+            "encoded-bytes": 4159.0,
+            "B/op": 6480.0,
+            "allocs/op": 27.0
+          },
+          {
+            "ns/op": 482327.0,
+            "MB/s": 51.14,
+            "cpu-ns/op": 484573.0,
+            "encoded-bytes": 4159.0,
+            "B/op": 6480.0,
+            "allocs/op": 27.0
+          }
+        ]
+      },
+      "decode": {
+        "median": {
+          "ns/op": 35773.0,
+          "MB/s": 689.4649999999999,
+          "cpu-ns/op": 38149.5,
+          "encoded-bytes": 4159.0,
+          "B/op": 27264.0,
+          "allocs/op": 1.0
+        },
+        "samples": [
+          {
+            "ns/op": 35738.0,
+            "MB/s": 690.14,
+            "cpu-ns/op": 38094.0,
+            "encoded-bytes": 4159.0,
+            "B/op": 27264.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 35794.0,
+            "MB/s": 689.06,
+            "cpu-ns/op": 38155.0,
+            "encoded-bytes": 4159.0,
+            "B/op": 27264.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 35865.0,
+            "MB/s": 687.69,
+            "cpu-ns/op": 38262.0,
+            "encoded-bytes": 4159.0,
+            "B/op": 27264.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 35752.0,
+            "MB/s": 689.87,
+            "cpu-ns/op": 38144.0,
+            "encoded-bytes": 4159.0,
+            "B/op": 27264.0,
+            "allocs/op": 1.0
+          }
+        ]
+      },
+      "independent_libzstd_roundtrip": true
+    },
+    {
+      "version": "before",
+      "codec": "zstd-http",
+      "encoded_bytes": 4101,
+      "frame_sha256": "a50f65f7a1eb3bf36045cfc8d15f23441b58c7df14c2c410da1ae313e4b15b7d",
+      "label": "thread",
+      "raw_bytes": 24664,
+      "raw_sha256": "a0794f226ea69ec8f96665b8bf0d1502ac01073a0d9b5e732eae938967a46d65",
+      "encode": {
+        "median": {
+          "ns/op": 197168.0,
+          "MB/s": 125.1,
+          "cpu-ns/op": 198584.0,
+          "encoded-bytes": 4101.0,
+          "B/op": 5344.0,
+          "allocs/op": 9.0
+        },
+        "samples": [
+          {
+            "ns/op": 195555.0,
+            "MB/s": 126.12,
+            "cpu-ns/op": 197009.0,
+            "encoded-bytes": 4101.0,
+            "B/op": 5344.0,
+            "allocs/op": 9.0
+          },
+          {
+            "ns/op": 194621.0,
+            "MB/s": 126.73,
+            "cpu-ns/op": 196001.0,
+            "encoded-bytes": 4101.0,
+            "B/op": 5344.0,
+            "allocs/op": 9.0
+          },
+          {
+            "ns/op": 199066.0,
+            "MB/s": 123.9,
+            "cpu-ns/op": 200668.0,
+            "encoded-bytes": 4101.0,
+            "B/op": 5344.0,
+            "allocs/op": 9.0
+          },
+          {
+            "ns/op": 198781.0,
+            "MB/s": 124.08,
+            "cpu-ns/op": 200159.0,
+            "encoded-bytes": 4101.0,
+            "B/op": 5344.0,
+            "allocs/op": 9.0
+          }
+        ]
+      },
+      "decode": {
+        "median": {
+          "ns/op": 35917.0,
+          "MB/s": 686.7,
+          "cpu-ns/op": 38190.0,
+          "encoded-bytes": 4101.0,
+          "B/op": 27264.0,
+          "allocs/op": 1.0
+        },
+        "samples": [
+          {
+            "ns/op": 35958.0,
+            "MB/s": 685.91,
+            "cpu-ns/op": 38271.0,
+            "encoded-bytes": 4101.0,
+            "B/op": 27264.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 35794.0,
+            "MB/s": 689.06,
+            "cpu-ns/op": 38109.0,
+            "encoded-bytes": 4101.0,
+            "B/op": 27264.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 36058.0,
+            "MB/s": 684.01,
+            "cpu-ns/op": 38300.0,
+            "encoded-bytes": 4101.0,
+            "B/op": 27264.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 35876.0,
+            "MB/s": 687.49,
+            "cpu-ns/op": 38102.0,
+            "encoded-bytes": 4101.0,
+            "B/op": 27264.0,
+            "allocs/op": 1.0
+          }
+        ]
+      },
+      "independent_libzstd_roundtrip": true
+    },
+    {
+      "version": "before",
+      "codec": "store1",
+      "encoded_bytes": 1998,
+      "frame_sha256": "120f3bb3f553159656ddb73c124527454a6ba8d435f897d31dc30da94a23e4cc",
+      "label": "top",
+      "raw_bytes": 4305,
+      "raw_sha256": "fa7b6a1a1b339aac04fe9951770b13f2d45fa3af1382bf1a38600e1ab4513979",
+      "encode": {
+        "median": {
+          "ns/op": 53183.0,
+          "MB/s": 80.95,
+          "cpu-ns/op": 53719.0,
+          "encoded-bytes": 1998.0,
+          "B/op": 2536.0,
+          "allocs/op": 10.0
+        },
+        "samples": [
+          {
+            "ns/op": 52967.0,
+            "MB/s": 81.28,
+            "cpu-ns/op": 53484.0,
+            "encoded-bytes": 1998.0,
+            "B/op": 2536.0,
+            "allocs/op": 10.0
+          },
+          {
+            "ns/op": 52866.0,
+            "MB/s": 81.43,
+            "cpu-ns/op": 53364.0,
+            "encoded-bytes": 1998.0,
+            "B/op": 2536.0,
+            "allocs/op": 10.0
+          },
+          {
+            "ns/op": 53795.0,
+            "MB/s": 80.03,
+            "cpu-ns/op": 54292.0,
+            "encoded-bytes": 1998.0,
+            "B/op": 2536.0,
+            "allocs/op": 10.0
+          },
+          {
+            "ns/op": 53399.0,
+            "MB/s": 80.62,
+            "cpu-ns/op": 53954.0,
+            "encoded-bytes": 1998.0,
+            "B/op": 2536.0,
+            "allocs/op": 10.0
+          }
+        ]
+      },
+      "decode": {
+        "median": {
+          "ns/op": 16183.0,
+          "MB/s": 266.015,
+          "cpu-ns/op": 16724.0,
+          "encoded-bytes": 1998.0,
+          "B/op": 4864.0,
+          "allocs/op": 1.0
+        },
+        "samples": [
+          {
+            "ns/op": 16078.0,
+            "MB/s": 267.76,
+            "cpu-ns/op": 16590.0,
+            "encoded-bytes": 1998.0,
+            "B/op": 4864.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 16199.0,
+            "MB/s": 265.76,
+            "cpu-ns/op": 16740.0,
+            "encoded-bytes": 1998.0,
+            "B/op": 4864.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 16191.0,
+            "MB/s": 265.88,
+            "cpu-ns/op": 16721.0,
+            "encoded-bytes": 1998.0,
+            "B/op": 4864.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 16175.0,
+            "MB/s": 266.15,
+            "cpu-ns/op": 16727.0,
+            "encoded-bytes": 1998.0,
+            "B/op": 4864.0,
+            "allocs/op": 1.0
+          }
+        ]
+      },
+      "independent_libzstd_roundtrip": true
+    },
+    {
+      "version": "before",
+      "codec": "store6",
+      "encoded_bytes": 2007,
+      "frame_sha256": "b24ee504cc5d662d3208312258f76ba2d0d6d02f8847aa641cfc2bf33dd6e41e",
+      "label": "top",
+      "raw_bytes": 4305,
+      "raw_sha256": "fa7b6a1a1b339aac04fe9951770b13f2d45fa3af1382bf1a38600e1ab4513979",
+      "encode": {
+        "median": {
+          "ns/op": 55665.0,
+          "MB/s": 77.34,
+          "cpu-ns/op": 56204.5,
+          "encoded-bytes": 2007.0,
+          "B/op": 2536.0,
+          "allocs/op": 10.0
+        },
+        "samples": [
+          {
+            "ns/op": 55738.0,
+            "MB/s": 77.24,
+            "cpu-ns/op": 56275.0,
+            "encoded-bytes": 2007.0,
+            "B/op": 2536.0,
+            "allocs/op": 10.0
+          },
+          {
+            "ns/op": 55592.0,
+            "MB/s": 77.44,
+            "cpu-ns/op": 56134.0,
+            "encoded-bytes": 2007.0,
+            "B/op": 2536.0,
+            "allocs/op": 10.0
+          },
+          {
+            "ns/op": 56368.0,
+            "MB/s": 76.37,
+            "cpu-ns/op": 56911.0,
+            "encoded-bytes": 2007.0,
+            "B/op": 2536.0,
+            "allocs/op": 10.0
+          },
+          {
+            "ns/op": 55538.0,
+            "MB/s": 77.51,
+            "cpu-ns/op": 56084.0,
+            "encoded-bytes": 2007.0,
+            "B/op": 2536.0,
+            "allocs/op": 10.0
+          }
+        ]
+      },
+      "decode": {
+        "median": {
+          "ns/op": 17457.0,
+          "MB/s": 246.60500000000002,
+          "cpu-ns/op": 17995.5,
+          "encoded-bytes": 2007.0,
+          "B/op": 4864.0,
+          "allocs/op": 1.0
+        },
+        "samples": [
+          {
+            "ns/op": 17483.0,
+            "MB/s": 246.24,
+            "cpu-ns/op": 18026.0,
+            "encoded-bytes": 2007.0,
+            "B/op": 4864.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 17431.0,
+            "MB/s": 246.97,
+            "cpu-ns/op": 17959.0,
+            "encoded-bytes": 2007.0,
+            "B/op": 4864.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 17413.0,
+            "MB/s": 247.23,
+            "cpu-ns/op": 17965.0,
+            "encoded-bytes": 2007.0,
+            "B/op": 4864.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 17505.0,
+            "MB/s": 245.92,
+            "cpu-ns/op": 18052.0,
+            "encoded-bytes": 2007.0,
+            "B/op": 4864.0,
+            "allocs/op": 1.0
+          }
+        ]
+      },
+      "independent_libzstd_roundtrip": true
+    },
+    {
+      "version": "before",
+      "codec": "store9",
+      "encoded_bytes": 1976,
+      "frame_sha256": "82ee915ab5e27cf5cb475216a4631d5c7262c5dc91f92e8e0b415d0776a77681",
+      "label": "top",
+      "raw_bytes": 4305,
+      "raw_sha256": "fa7b6a1a1b339aac04fe9951770b13f2d45fa3af1382bf1a38600e1ab4513979",
+      "encode": {
+        "median": {
+          "ns/op": 243366.5,
+          "MB/s": 17.69,
+          "cpu-ns/op": 244823.5,
+          "encoded-bytes": 1976.0,
+          "B/op": 4000.0,
+          "allocs/op": 34.0
+        },
+        "samples": [
+          {
+            "ns/op": 243394.0,
+            "MB/s": 17.69,
+            "cpu-ns/op": 244547.0,
+            "encoded-bytes": 1976.0,
+            "B/op": 4000.0,
+            "allocs/op": 34.0
+          },
+          {
+            "ns/op": 243339.0,
+            "MB/s": 17.69,
+            "cpu-ns/op": 244649.0,
+            "encoded-bytes": 1976.0,
+            "B/op": 4000.0,
+            "allocs/op": 34.0
+          },
+          {
+            "ns/op": 244259.0,
+            "MB/s": 17.62,
+            "cpu-ns/op": 245854.0,
+            "encoded-bytes": 1976.0,
+            "B/op": 4000.0,
+            "allocs/op": 34.0
+          },
+          {
+            "ns/op": 243178.0,
+            "MB/s": 17.7,
+            "cpu-ns/op": 244998.0,
+            "encoded-bytes": 1976.0,
+            "B/op": 4000.0,
+            "allocs/op": 34.0
+          }
+        ]
+      },
+      "decode": {
+        "median": {
+          "ns/op": 19907.0,
+          "MB/s": 216.26,
+          "cpu-ns/op": 20458.0,
+          "encoded-bytes": 1976.0,
+          "B/op": 4864.0,
+          "allocs/op": 1.0
+        },
+        "samples": [
+          {
+            "ns/op": 19894.0,
+            "MB/s": 216.4,
+            "cpu-ns/op": 20438.0,
+            "encoded-bytes": 1976.0,
+            "B/op": 4864.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 19874.0,
+            "MB/s": 216.61,
+            "cpu-ns/op": 20404.0,
+            "encoded-bytes": 1976.0,
+            "B/op": 4864.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 20020.0,
+            "MB/s": 215.03,
+            "cpu-ns/op": 20602.0,
+            "encoded-bytes": 1976.0,
+            "B/op": 4864.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 19920.0,
+            "MB/s": 216.12,
+            "cpu-ns/op": 20478.0,
+            "encoded-bytes": 1976.0,
+            "B/op": 4864.0,
+            "allocs/op": 1.0
+          }
+        ]
+      },
+      "independent_libzstd_roundtrip": true
+    },
+    {
+      "version": "before",
+      "codec": "zstd-http",
+      "encoded_bytes": 1930,
+      "frame_sha256": "70325da52ed2f62c0001be427172d987067eb4389c34ccaf1f14aef50905fe41",
+      "label": "top",
+      "raw_bytes": 4305,
+      "raw_sha256": "fa7b6a1a1b339aac04fe9951770b13f2d45fa3af1382bf1a38600e1ab4513979",
+      "encode": {
+        "median": {
+          "ns/op": 96046.5,
+          "MB/s": 44.82,
+          "cpu-ns/op": 96766.5,
+          "encoded-bytes": 1930.0,
+          "B/op": 2512.0,
+          "allocs/op": 9.0
+        },
+        "samples": [
+          {
+            "ns/op": 96799.0,
+            "MB/s": 44.47,
+            "cpu-ns/op": 97593.0,
+            "encoded-bytes": 1930.0,
+            "B/op": 2512.0,
+            "allocs/op": 9.0
+          },
+          {
+            "ns/op": 95437.0,
+            "MB/s": 45.11,
+            "cpu-ns/op": 96095.0,
+            "encoded-bytes": 1930.0,
+            "B/op": 2512.0,
+            "allocs/op": 9.0
+          },
+          {
+            "ns/op": 96517.0,
+            "MB/s": 44.6,
+            "cpu-ns/op": 97269.0,
+            "encoded-bytes": 1930.0,
+            "B/op": 2512.0,
+            "allocs/op": 9.0
+          },
+          {
+            "ns/op": 95576.0,
+            "MB/s": 45.04,
+            "cpu-ns/op": 96264.0,
+            "encoded-bytes": 1930.0,
+            "B/op": 2512.0,
+            "allocs/op": 9.0
+          }
+        ]
+      },
+      "decode": {
+        "median": {
+          "ns/op": 16011.5,
+          "MB/s": 268.87,
+          "cpu-ns/op": 16542.0,
+          "encoded-bytes": 1930.0,
+          "B/op": 4864.0,
+          "allocs/op": 1.0
+        },
+        "samples": [
+          {
+            "ns/op": 16034.0,
+            "MB/s": 268.49,
+            "cpu-ns/op": 16565.0,
+            "encoded-bytes": 1930.0,
+            "B/op": 4864.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 15957.0,
+            "MB/s": 269.78,
+            "cpu-ns/op": 16468.0,
+            "encoded-bytes": 1930.0,
+            "B/op": 4864.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 16068.0,
+            "MB/s": 267.92,
+            "cpu-ns/op": 16620.0,
+            "encoded-bytes": 1930.0,
+            "B/op": 4864.0,
+            "allocs/op": 1.0
+          },
+          {
+            "ns/op": 15989.0,
+            "MB/s": 269.25,
+            "cpu-ns/op": 16519.0,
+            "encoded-bytes": 1930.0,
+            "B/op": 4864.0,
+            "allocs/op": 1.0
+          }
+        ]
+      },
+      "independent_libzstd_roundtrip": true
+    }
+  ],
+  "frozen_decoder_same_process": {
+    "conditions": "same immutable HTTP frames, both implementations in each process, forward/reverse, GOMAXPROCS=2, CPUs 10,11, 200ms x 4 samples",
+    "rows": [
+      {
+        "label": "dat-text",
+        "before_ns": 231514.0,
+        "after_ns": 212206.5,
+        "change_percent": -8.339668443377079,
+        "before_samples": [
+          230881.0,
+          230678.0,
+          233983.0,
+          232147.0
+        ],
+        "after_samples": [
+          211282.0,
+          210679.0,
+          214031.0,
+          213131.0
+        ]
+      },
+      {
+        "label": "dat-mixed",
+        "before_ns": 334857.5,
+        "after_ns": 320328.5,
+        "change_percent": -4.338860560088998,
+        "before_samples": [
+          334594.0,
+          334003.0,
+          335121.0,
+          336383.0
+        ],
+        "after_samples": [
+          320330.0,
+          319753.0,
+          329054.0,
+          320327.0
+        ]
+      },
+      {
+        "label": "dat-entropy",
+        "before_ns": 960791.5,
+        "after_ns": 840065.5,
+        "change_percent": -12.565265200618448,
+        "before_samples": [
+          979395.0,
+          961772.0,
+          957262.0,
+          959811.0
+        ],
+        "after_samples": [
+          838646.0,
+          836620.0,
+          841485.0,
+          850064.0
+        ]
+      },
+      {
+        "label": "dat-base64",
+        "before_ns": 1296555.5,
+        "after_ns": 1300074.5,
+        "change_percent": 0.27141144362889946,
+        "before_samples": [
+          1294659.0,
+          1294536.0,
+          1298958.0,
+          1298452.0
+        ],
+        "after_samples": [
+          1299692.0,
+          1295721.0,
+          1300457.0,
+          1300466.0
+        ]
+      },
+      {
+        "label": "top",
+        "before_ns": 16154.5,
+        "after_ns": 16085.5,
+        "change_percent": -0.4271255687269826,
+        "before_samples": [
+          16167.0,
+          16134.0,
+          16189.0,
+          16142.0
+        ],
+        "after_samples": [
+          16083.0,
+          16088.0,
+          16046.0,
+          16102.0
+        ]
+      },
+      {
+        "label": "thread",
+        "before_ns": 37323.5,
+        "after_ns": 35911.5,
+        "change_percent": -3.783139309014427,
+        "before_samples": [
+          37219.0,
+          37345.0,
+          37302.0,
+          37346.0
+        ],
+        "after_samples": [
+          36168.0,
+          36013.0,
+          35789.0,
+          35810.0
+        ]
+      },
+      {
+        "label": "asset-ui.css",
+        "before_ns": 25366.0,
+        "after_ns": 25170.0,
+        "change_percent": -0.7726878498777845,
+        "before_samples": [
+          25477.0,
+          25376.0,
+          25356.0,
+          25316.0
+        ],
+        "after_samples": [
+          25133.0,
+          25254.0,
+          25207.0,
+          25003.0
+        ]
+      }
+    ]
+  },
+  "validation": {
+    "normal": {
+      "status": "passed",
+      "output": "ok  \toimobbs/internal/zstdencode\t1.351s\nok  \toimobbs/internal/zstddecode\t1.189s\nok  \toimobbs/internal/store\t7.204s\nok  \toimobbs/internal/compat\t0.154s"
+    },
+    "cli": {
+      "status": "passed",
+      "output": "ok  \toimobbs/cmd/oimobbs\t1.221s"
+    },
+    "bootstrap_pack_compression_snapshot": {
+      "status": "passed",
+      "output": "ok  \toimobbs/internal/bootstrap\t16.860s"
+    },
+    "race": {
+      "status": "passed",
+      "output": "ok  \toimobbs/internal/zstdencode\t17.791s\nok  \toimobbs/internal/zstddecode\t11.855s\nok  \toimobbs/internal/store\t42.705s\nok  \toimobbs/internal/compat\t3.493s"
+    },
+    "vet": {
+      "status": "passed",
+      "output": ""
+    },
+    "dependencies": {
+      "status": "passed",
+      "output": "all modules verified\nPASS: 430 packages, standard library/own module/reviewed pinned dependencies only"
+    },
+    "build": {
+      "status": "passed",
+      "output": "webassets: 159 generated files verified"
+    },
+    "security_source_and_binary": {
+      "status": "passed",
+      "output": "=== Symbol Results ===\n\nNo vulnerabilities found.\n\nYour code is affected by 0 vulnerabilities.\nThis scan also found 0 vulnerabilities in packages you import and 1\nvulnerability in modules you require, but your code doesn't appear to call these\nvulnerabilities.\nUse '-show verbose' for more details.\n=== Symbol Results ===\n\nNo vulnerabilities found.\n\nYour code is affected by 0 vulnerabilities.\nThis scan also found 0 vulnerabilities in packages you import and 1\nvulnerability in modules you require, but your code doesn't appear to call these\nvulnerabilities.\nUse '-show verbose' for more details."
+    },
+    "docs": {
+      "status": "passed",
+      "output": "PASS: 92 Markdown files, 97 JSON files, current documents, 783 local links including headings, fences and strict JSON\nPASS: standard Go CRC32C, header/frame offsets, dedup section, create DAT lengths and sample expiry\nPASS: pack offsets/CRC/SHA, raw+gzip blocks, compressed audit, 5 DAT ranges, current/prefix stability through seq=4, 4 invalid gzip samples\nPASS: control frame/snapshot/current bytes, CRC/SHA, JSON equality, 4 invalid control examples\nPASS: 26 HTTP decision examples (not a live HTTP server)\nPASS: independent HMAC ID/token vector, token tamper, 3 six-calendar-month boundaries\nPASS: design checks only; application, crash, device and load tests NOT RUN"
+    },
+    "doclinks": {
+      "status": "passed",
+      "output": "......\n----------------------------------------------------------------------\nRan 6 tests in 0.004s\n\nOK"
+    },
+    "old_reader": {
+      "status": "passed",
+      "output": "=== RUN   TestReplayFrozenFrames\n--- PASS: TestReplayFrozenFrames (0.04s)\nPASS"
+    },
+    "fuzz_huffman_pairs": {
+      "status": "passed",
+      "specified_seconds": 20,
+      "executions": 60059,
+      "output": "fuzz: elapsed: 0s, gathering baseline coverage: 0/162 completed\nfuzz: elapsed: 0s, gathering baseline coverage: 162/162 completed, now fuzzing with 2 workers\nfuzz: elapsed: 3s, execs: 19593 (6525/sec), new interesting: 11 (total: 173)\nfuzz: elapsed: 6s, execs: 37031 (5818/sec), new interesting: 21 (total: 183)\nfuzz: elapsed: 9s, execs: 47666 (3545/sec), new interesting: 22 (total: 184)\nfuzz: elapsed: 12s, execs: 60059 (4128/sec), new interesting: 24 (total: 186)\nfuzz: elapsed: 15s, execs: 60059 (0/sec), new interesting: 24 (total: 186)\nfuzz: elapsed: 18s, execs: 60059 (0/sec), new interesting: 24 (total: 186)\nfuzz: elapsed: 21s, execs: 60059 (0/sec), new interesting: 24 (total: 186)\nfuzz: elapsed: 21s, execs: 60059 (0/sec), new interesting: 24 (total: 186)\nPASS\nok  \toimobbs/internal/zstddecode\t21.042s"
+    },
+    "fuzz_decode": {
+      "status": "passed",
+      "specified_seconds": 20,
+      "executions": 3602,
+      "output": "fuzz: elapsed: 0s, gathering baseline coverage: 0/106 completed\nfuzz: elapsed: 0s, gathering baseline coverage: 106/106 completed, now fuzzing with 2 workers\nfuzz: elapsed: 3s, execs: 3602 (1200/sec), new interesting: 0 (total: 106)\nfuzz: elapsed: 6s, execs: 3602 (0/sec), new interesting: 0 (total: 106)\nfuzz: elapsed: 9s, execs: 3602 (0/sec), new interesting: 0 (total: 106)\nfuzz: elapsed: 12s, execs: 3602 (0/sec), new interesting: 0 (total: 106)\nfuzz: elapsed: 15s, execs: 3602 (0/sec), new interesting: 0 (total: 106)\nfuzz: elapsed: 18s, execs: 3602 (0/sec), new interesting: 0 (total: 106)\nfuzz: elapsed: 21s, execs: 3602 (0/sec), new interesting: 0 (total: 106)\nfuzz: elapsed: 21s, execs: 3602 (0/sec), new interesting: 0 (total: 106)\nPASS\nok  \toimobbs/internal/zstddecode\t21.075s"
+    },
+    "fuzz_independent_encode": {
+      "status": "passed",
+      "specified_seconds": 20,
+      "executions": 56291,
+      "output": "fuzz: elapsed: 0s, gathering baseline coverage: 0/139 completed\nfuzz: elapsed: 0s, gathering baseline coverage: 139/139 completed, now fuzzing with 2 workers\nfuzz: elapsed: 3s, execs: 3940 (1313/sec), new interesting: 1 (total: 140)\nfuzz: elapsed: 6s, execs: 3940 (0/sec), new interesting: 1 (total: 140)\nfuzz: elapsed: 9s, execs: 56291 (17455/sec), new interesting: 4 (total: 143)\nfuzz: elapsed: 12s, execs: 56291 (0/sec), new interesting: 4 (total: 143)\nfuzz: elapsed: 15s, execs: 56291 (0/sec), new interesting: 4 (total: 143)\nfuzz: elapsed: 18s, execs: 56291 (0/sec), new interesting: 4 (total: 143)\nfuzz: elapsed: 21s, execs: 56291 (0/sec), new interesting: 4 (total: 143)\nfuzz: elapsed: 21s, execs: 56291 (0/sec), new interesting: 4 (total: 143)\nPASS\nok  \toimobbs/internal/zstdencode\t21.041s"
+    }
+  },
+  "source_sha256": {
+    "internal/zstdencode/huffman.go": "55a883f7c2ba5ce3e2ed2890691460d65fb5f28248ba9b788f4435dde9cbba3e",
+    "internal/zstdencode/entropy_choice.go": "6f4ab0dfc23e115ec60b72e3262570578a4d0354df6e72acb3bcf04f16e9ef95",
+    "internal/zstddecode/huffman_pairs.go": "244f63bbde33a9f8de60cd2362e6dff472ed95d8dc3bae18c271c6079d6390b0",
+    "internal/zstddecode/huffman_dispatch.go": "4cd4205de57a26713c8ccecd87079b012ebd135bdb79da2cae5f0cfc0421dc38",
+    "internal/store/archive_codec.go": "022b5b9fa8618ea6163d9235e69dc2b008059e2eee4a1e92297d55f2e4f9c52c",
+    "internal/store/pack_maintenance.go": "175780db53052b0017777b6b28d39b094dc4c19a006d565c84d7259e8415cac8"
+  }
+}

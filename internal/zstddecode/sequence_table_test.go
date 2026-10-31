@@ -56,7 +56,7 @@ func TestSequenceRLEStateAndSymbol(t *testing.T) {
 	if _, err := (fseTable{}).cell(0); err == nil {
 		t.Fatal("empty table accepted")
 	}
-	for _, mode := range []int{0, 1, 3} {
+	for _, mode := range []int{1, 3} {
 		if _, _, err := sequenceTable(nil, mode, 53); err == nil {
 			t.Fatal("missing table accepted", mode)
 		}

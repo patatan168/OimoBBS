@@ -195,7 +195,7 @@ func unprotectedOriginalCandidates(candidates []evidence.RequiredPostingIdentity
 	return result, nil
 }
 
-// pressureReclaimed は元期限を短縮せず、先行署名された容量回収だけに早期回収を許す。
+// pressureReclaimed は元期限を短縮せず、先行署名された容量回収・閉鎖期限だけに早期回収を許す。
 func (p *PostingLog) pressureReclaimed(now domain.Time) bool {
-	return p.reclaimed != nil && p.reclaimed.proof.Kind == "pressure" && p.reclaimed.proof.At <= now
+	return p.reclaimed != nil && p.reclaimed.proof.pressureTime() > 0 && p.reclaimed.proof.pressureTime() <= now
 }

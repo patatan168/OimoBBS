@@ -152,7 +152,7 @@ func adminReturnPath(path string) string {
 	if path == "/boards/new" {
 		return path
 	}
-	if strings.HasPrefix(path, "/boards/") && strings.HasSuffix(path, "/metadata") {
+	if strings.HasPrefix(path, "/boards/") && (strings.HasSuffix(path, "/metadata") || strings.HasSuffix(path, "/close")) {
 		parts := strings.Split(strings.TrimPrefix(path, "/boards/"), "/")
 		var id domain.ID
 		if len(parts) == 2 && id.UnmarshalJSON([]byte(strconv.Quote(parts[0]))) == nil && id != (domain.ID{}) {
@@ -229,6 +229,9 @@ func (p adminPage) ReauthDestination() string {
 		return "匿名利用者の管理"
 	case "/audit":
 		return "管理操作の記録"
+	}
+	if strings.HasPrefix(p.BackPath, "/boards/") && strings.HasSuffix(p.BackPath, "/close") {
+		return "板の閉鎖"
 	}
 	if strings.HasPrefix(p.BackPath, "/boards/") && strings.HasSuffix(p.BackPath, "/metadata") {
 		return "板名・キーの変更"

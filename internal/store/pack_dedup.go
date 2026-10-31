@@ -6,6 +6,7 @@ import (
 	"math"
 	"oimobbs/internal/domain"
 	"sort"
+	"strings"
 	"time"
 )
 
@@ -23,10 +24,7 @@ func comparePackDedup(a, b PackDedup) int {
 		return 1
 	}
 	if a.Value.Mode != b.Value.Mode {
-		if a.Value.Mode == "explicit" {
-			return -1
-		}
-		return 1
+		return strings.Compare(a.Value.Mode, b.Value.Mode)
 	}
 	if n := bytes.Compare(a.Value.Subject[:], b.Value.Subject[:]); n != 0 {
 		return n
@@ -42,7 +40,7 @@ func validatePackDedup(d PackDedup, s PackSnapshot) error {
 		if v.RequestID == nil {
 			return ErrCorrupt
 		}
-	} else if v.Mode != "implicit" || v.RequestID != nil {
+	} else if (v.Mode != "implicit" && v.Mode != "independent") || v.RequestID != nil {
 		return ErrCorrupt
 	}
 	if d.ID == (domain.ID{}) || d.Seq == 0 || d.Seq > s.State.Revision || v.KeyID == 0 || v.PostNumber == 0 || v.PostNumber > s.State.After.PostCount || int64(d.Committed) > math.MaxInt64-duration || v.Expires != d.Committed+domain.Time(duration) || v.Expires <= s.At {
@@ -114,6 +112,9 @@ func encodeDedupEntry(d PackDedup, result byte) []byte {
 	x := make([]byte, 160)
 	v := d.Value
 	x[0], x[1] = 2, result
+	if v.Mode == "independent" {
+		x[0] = 3
+	}
 	if v.Mode == "explicit" {
 		x[0] = 1
 		copy(x[40:72], v.RequestID[:])
@@ -132,13 +133,16 @@ func encodeDedupEntry(d PackDedup, result byte) []byte {
 
 // decodeDedupEntry は用途別resultと予約領域を照合する。期限等は呼出元が検証する。
 func decodeDedupEntry(x []byte, result byte) (PackDedup, error) {
-	if len(x) != 160 || (x[0] != 1 && x[0] != 2) || x[1] != result || le.Uint16(x[2:4]) != 0 || le.Uint32(x[132:136]) != 0 || le.Uint32(x[152:156]) != 0 || le.Uint32(x[156:160]) != checksum(x[:156]) {
+	if len(x) != 160 || (x[0] != 1 && x[0] != 2 && x[0] != 3) || x[1] != result || le.Uint16(x[2:4]) != 0 || le.Uint32(x[132:136]) != 0 || le.Uint32(x[152:156]) != 0 || le.Uint32(x[156:160]) != checksum(x[:156]) {
 		return PackDedup{}, ErrCorrupt
 	}
 	d := PackDedup{Seq: domain.U64(le.Uint64(x[120:128])), Committed: domain.Time(le.Uint64(x[136:144]))}
 	copy(d.ID[:], x[104:120])
 	v := &d.Value
 	v.Mode, v.KeyID = "implicit", le.Uint32(x[4:8])
+	if x[0] == 3 {
+		v.Mode = "independent"
+	}
 	copy(v.Subject[:], x[8:40])
 	copy(v.Request[:], x[72:104])
 	v.PostNumber, v.Expires = le.Uint32(x[128:132]), domain.Time(le.Uint64(x[144:152]))

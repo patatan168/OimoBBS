@@ -148,8 +148,16 @@ func runAdminLayoutBrowser(t *testing.T, scriptName string) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	var closureBoard domain.ID
+	if scriptName == "test-board-closure-browser.mjs" {
+		info, err := repo.CreateBoard(t.Context(), "browser_closure", "閉鎖の動作確認板")
+		if err != nil {
+			t.Fatal(err)
+		}
+		closureBoard = info.ID
+	}
 	command := exec.CommandContext(t.Context(), node, script)
-	command.Env = append(os.Environ(), "OIMO_LAYOUT_URL="+origin+"/admin", "OIMO_TEST_PASSWORD="+adminTestSecret, "OIMO_LAYOUT_REPORT="+reportID.String(), "OIMO_LAYOUT_BOARD="+owner.String(), "OIMO_ASSETS_PUBLIC_URL="+origin, "OIMO_ASSETS_THREAD="+thread)
+	command.Env = append(os.Environ(), "OIMO_LAYOUT_URL="+origin+"/admin", "OIMO_TEST_PASSWORD="+adminTestSecret, "OIMO_LAYOUT_REPORT="+reportID.String(), "OIMO_LAYOUT_BOARD="+owner.String(), "OIMO_ASSETS_PUBLIC_URL="+origin, "OIMO_ASSETS_THREAD="+thread, "OIMO_CLOSURE_BOARD="+closureBoard.String())
 	if scriptName == "test-admin-reauth-expiry-browser.mjs" {
 		session, lookupErr := repo.adminAuth.Lookup(c.cookies["oimo_admin"].Value, time.Now())
 		if lookupErr != nil {

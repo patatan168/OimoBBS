@@ -127,7 +127,7 @@ func TestArchiveSharedWorker(t *testing.T) {
 	workers.Wait()
 }
 
-// TestArchiveStoredFixture は既存Zstandard fixtureの原本・保存byte不変を独立復号で検査する。
+// TestArchiveStoredFixture は旧level 9の読取りと、新経路で再保存した原本の一致を検査する。
 func TestArchiveStoredFixture(t *testing.T) {
 	file, err := os.ReadFile("../../docs/design/fixtures/pack-zstd-layout.json")
 	if err != nil {
@@ -148,8 +148,20 @@ func TestArchiveStoredFixture(t *testing.T) {
 		t.Fatal(err)
 	}
 	encoded, err := EncodePack(current, 9)
-	if err != nil || !bytes.Equal(encoded, raw) || packCompressionCodec(raw) != 2 {
-		t.Fatal("stored fixture byte changed", err)
+	if err != nil || packCompressionCodec(raw) != 2 {
+		t.Fatal("stored fixture re-encode", err)
+	}
+	restored, err := DecodePack(encoded)
+	if err != nil {
+		t.Fatal("new stored fixture decode", err)
+	}
+	want, err := EncodePack(current, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, err := EncodePack(restored, 0)
+	if err != nil || !bytes.Equal(got, want) {
+		t.Fatal("stored fixture original changed", err)
 	}
 
 	_, _, blocks, err := parsePack(raw)

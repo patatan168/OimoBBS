@@ -27,6 +27,28 @@
 
 公開配信はidentity（圧縮なし）、gzip、Zstandardに対応します。Brotli配信は提供しません。DATのRangeは圧縮していないDATのバイト位置を使い、有効な単一範囲をGETし、identityを許可している場合に差分を返します。保存用packやgzip・Zstandardの圧縮後バイト位置ではありません。
 
+#### Webの取得条件
+
+Web・管理画面のGET/HEADは、`Accept-Encoding` でgzipまたはzstdを正のq値で受け入れることを必須とします。トップ・板・検索・Webスレッド・投稿フォーム・robots・静的資産と、直接接続・公開パス配下の管理画面が対象です。
+
+| 圧縮の受け入れ宣言 | 受付 |
+| --- | --- |
+| gzipまたはzstdのq値が正（q省略時は1） | 通常の認証・閲覧条件に従って処理 |
+| ヘッダー省略・空値、identityのみ、Brotliのみ、両形式ともq=0 | 本文なしの406、`Cache-Control: no-store` |
+| q値などの構文不正 | 本文なしの400、`Cache-Control: no-store` |
+
+拒否は本文生成やログインnonce発行より先に行います。対象のGET/HEADには `Vary: Accept-Encoding` を付けます。これは圧縮対応の宣言を求める受付条件で、応答形式は引き続きq値や本文サイズに従います。identityを優先する要求や小さい本文にはidentityを返す場合があります。
+
+専ブラ用の次のURLは例外です。
+
+- `/bbsmenu.html`、`/bbsmenu.json`
+- `/{board}/subject.txt`、`/{board}/SETTING.TXT`、`/{board}/head.txt`
+- `/{board}/dat/{key}.dat`、`/test/bbs.cgi`
+
+UA・Range・条件付き取得の指定だけではWeb経路を例外にしません。POSTなどGET/HEAD以外にはこの条件を加えません。組込みの `healthcheck` はgzip対応を宣言して取得し、edge自身の `/_edge/health` も利用できます。Webの手動確認には `curl --compressed` などを使います。
+
+#### DATの差分とETag
+
 DATの差分応答（206）は常にidentityで返し、`Content-Encoding` を付けません。クライアントがidentityを禁止した場合は圧縮した206へ置き換えません。保存側のZstandard圧縮から復元した、元のDATバイト列に対してRangeを適用します。
 
 ETagは取得する表現に対応した値を使います。同じ本文でもidentity・gzip・ZstandardのETagを混同しません。保存の圧縮・整理だけでは、対応する表現の本文やETagを変更しません。

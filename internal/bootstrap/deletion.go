@@ -52,6 +52,9 @@ type DeletionRecord struct {
 }
 
 func validateDeletion(collection, key string, old, next json.RawMessage) error {
+	if collection == "reclamation" && key == "closed_pressure" {
+		return validateClosedBoardPressure(old, next)
+	}
 	if collection == "reclamation" && key == "carry_retirement" {
 		return validateCarryErasure(key, old, next)
 	}
@@ -80,8 +83,12 @@ func validateDeletion(collection, key string, old, next json.RawMessage) error {
 	if key != v.ID.String() || v.Board == (domain.ID{}) || v.Thread == 0 || v.Expected == 0 || v.TargetOperation == (domain.ID{}) || v.Format != 1 || v.Actor.Validate() != nil || v.Versions.Site == 0 || v.Versions.Board == 0 || v.Versions.Thread == 0 || v.Created <= 0 || v.Expires <= 0 || v.Audit != "pending" && v.Audit != "complete" || v.Carry != nil || v.LastError != nil {
 		return store.ErrCorrupt
 	}
-	if v.Kind == "pressure" {
-		if v.Actor.Kind != "system" || v.Actor.Reason != "storage_pressure" || v.CleanupDue != v.Created || v.TargetSeq != nil {
+	if v.Kind == "pressure" || v.Kind == "closure" {
+		reason := "storage_pressure"
+		if v.Kind == "closure" {
+			reason = "board_close_expiry"
+		}
+		if v.Actor.Kind != "system" || v.Actor.Reason != reason || v.CleanupDue != v.Created || v.TargetSeq != nil {
 			return store.ErrCorrupt
 		}
 	} else if v.Kind == "expire" {
@@ -124,7 +131,7 @@ func validateDeletion(collection, key string, old, next json.RawMessage) error {
 	if e := strictjson.Decode(old, &prior); e != nil {
 		return e
 	}
-	if prior.Phase == v.Phase && prior.Audit == "pending" && v.Audit == "complete" && (v.Kind == "hide" || v.Kind == "expire" || v.Kind == "pressure") && phase >= 2 {
+	if prior.Phase == v.Phase && prior.Audit == "pending" && v.Audit == "complete" && (v.Kind == "hide" || v.Kind == "expire" || v.Kind == "pressure" || v.Kind == "closure") && phase >= 2 {
 		prior.Audit = v.Audit
 		if !reflect.DeepEqual(prior, v) {
 			return store.ErrCorrupt
@@ -330,7 +337,7 @@ func (b *postingBoard) resumeDeletion(v DeletionRecord) (DeletionRecord, error) 
 	if p == nil {
 		return v, app.ErrEvidenceGap
 	}
-	if v.Kind == "expire" || v.Kind == "pressure" {
+	if v.Kind == "expire" || v.Kind == "pressure" || v.Kind == "closure" {
 		return b.resumeExpiry(v, p)
 	}
 	if v.Phase == "applied" || v.Phase == "cleaning" {
@@ -436,7 +443,7 @@ func (b *postingBoard) loadDeletions() error {
 			if e = strictjson.Decode(row.Value, &v); e != nil {
 				return e
 			}
-			if v.Board != b.owner || uint64(v.Thread) != key || (v.Kind == "expire" || v.Kind == "pressure") && !b.retentionEnabled {
+			if v.Board != b.owner || uint64(v.Thread) != key || (v.Kind == "expire" || v.Kind == "pressure" || v.Kind == "closure") && !b.retentionEnabled {
 				return store.ErrCorrupt
 			}
 		}
@@ -521,7 +528,7 @@ func (b *postingBoard) recoverDeletions() error {
 	}
 	// 古い削除行の反映で、後のexpire台帳の失効を解除しない。
 	for _, v := range records {
-		if v.Kind == "expire" || v.Kind == "pressure" {
+		if v.Kind == "expire" || v.Kind == "pressure" || v.Kind == "closure" {
 			b.threads[uint64(v.Thread)].RestoreExpired()
 		}
 	}
@@ -631,6 +638,8 @@ func inspectDeletionOwners(cfg Config, site siteState, boards []persistedBoard, 
 				clear(seed)
 				if proof, err := readBodyReclamation(state, id, key, public); err != nil {
 					return err
+				} else if proof.ClosedPressure != nil && (site.MinimumReader < boardClosureReader || b.directory.ClosedAt == nil || *b.directory.ClosedAt != proof.ClosedPressure.ClosedAt) {
+					return store.ErrCorrupt
 				} else if proof.Schema == 2 && site.MinimumReader < 27 {
 					return store.ErrCorrupt
 				}
@@ -658,7 +667,7 @@ func inspectDeletionOwners(cfg Config, site siteState, boards []persistedBoard, 
 				if e = strictjson.Decode(row.Value, &v); e != nil {
 					return e
 				}
-				if v.Board != id || uint64(v.Thread) != key || (v.Kind == "expire" && site.MinimumReader < 16 || v.Kind == "pressure" && site.MinimumReader < 99) {
+				if v.Board != id || uint64(v.Thread) != key || (v.Kind == "expire" && site.MinimumReader < 16 || v.Kind == "pressure" && site.MinimumReader < 99 || v.Kind == "closure" && (site.MinimumReader < boardClosureReader || b.directory.ClosedAt == nil || v.Created < boardClosureDeadline(*b.directory.ClosedAt))) {
 					return store.ErrCorrupt
 				}
 			}

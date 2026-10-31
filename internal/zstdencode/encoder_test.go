@@ -15,7 +15,7 @@ func TestIndependentFrames(t *testing.T) {
 	encoder := &Encoder{}
 	bodies := [][]byte{nil, []byte("a"), bytes.Repeat([]byte{1}, 300000), []byte(strings.Repeat("名前<>sage<>日本語の文章と返信 0123456789\n", 9000))}
 	random := rand.New(rand.NewPCG(9, 23))
-	for _, size := range []int{31, 255, 256, 1023, 4095, 65791, 65792, 131071, 131072, 131073, 1048576, 1048583} {
+	for _, size := range []int{31, 255, 256, 511, 512, 513, 1023, 4095, 32767, 32768, 32769, 65791, 65792, 131071, 131072, 131073, 1048576, 1048583} {
 		b := make([]byte, size)
 		for i := range b {
 			b[i] = byte(random.Uint32())
@@ -43,7 +43,7 @@ func TestIndependentFrames(t *testing.T) {
 
 // FuzzIndependentFrames は任意byte・繰り返し・偏ったalphabetを独立decoderで検証する。
 func FuzzIndependentFrames(f *testing.F) {
-	for _, seed := range [][]byte{nil, []byte("aaaaaa"), []byte("日本語と0123456789abcdef"), bytes.Repeat([]byte{0, 1, 2, 128, 255}, 123)} {
+	for _, seed := range [][]byte{nil, []byte("aaaaaa"), bytes.Repeat([]byte{0}, blockLimit+9), []byte("日本語と0123456789abcdef"), bytes.Repeat([]byte{0, 1, 2, 128, 255}, 123)} {
 		f.Add(seed)
 	}
 	f.Fuzz(func(t *testing.T, body []byte) {
@@ -167,5 +167,20 @@ func TestUnvisitedRepeatCandidate(t *testing.T) {
 				t.Fatalf("unvisited long repeat lost: sequences=%d literals=%d repeats=%v", len(e.coded), len(e.literals), e.nextRepeats)
 			}
 		})
+	}
+}
+
+// TestFullRepeatKeepsPriority は末尾までのrepeatが同長の短いoffsetより優先されることを確認する。
+func TestFullRepeatKeepsPriority(t *testing.T) {
+	body := make([]byte, 160)
+	pattern := []byte("abcdefgh")
+	copy(body[112:], bytes.Repeat(pattern, 2))
+	copy(body[128:], bytes.Repeat(pattern, 4))
+	var e Encoder
+	hash := longHash(binary.LittleEndian.Uint64(body[120:]), 0xffffffffffffff)
+	e.long[(hash>>16)&((1<<15)-1)] = uint64(hash)<<32 | 121
+	e.parse(body, 128, len(body), [3]int{4, 16, 64})
+	if len(e.coded) != 1 || len(e.literals) != 0 || e.nextRepeats[0] != 16 {
+		t.Fatal("full repeat priority changed", e.coded, e.nextRepeats)
 	}
 }

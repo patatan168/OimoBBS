@@ -23,7 +23,7 @@ type PackMaintenanceDecision struct {
 }
 
 // Decision は4MiB・1024操作・未整理deltaの24時間経過と年齢別levelを判定する。
-// 無変更の同level packを毎日再生成せず、既存の強い圧縮levelも下げない。
+// 無変更packを再生成せず、廃止したlevel 9へ年齢だけで再圧縮しない。
 func (s PackMaintenanceInfo) Decision(now domain.Time) PackMaintenanceDecision {
 	d := PackMaintenanceDecision{Level: s.Level}
 	if now >= s.Expires {
@@ -32,9 +32,7 @@ func (s PackMaintenanceInfo) Decision(now domain.Time) PackMaintenanceDecision {
 	}
 	age := time.Unix(0, int64(now)).Sub(time.Unix(0, int64(s.Created)))
 	target := uint8(1)
-	if age >= 30*24*time.Hour {
-		target = 9
-	} else if age >= 7*24*time.Hour {
+	if age >= 7*24*time.Hour {
 		target = 6
 	}
 	d.Level = max(target, s.Level)

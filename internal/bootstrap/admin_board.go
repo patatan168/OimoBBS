@@ -34,11 +34,40 @@ type AdminBoardEdit struct {
 
 // AdminBoard は秘密を含まない板設定画面/API用の公開DTO。
 type AdminBoard struct {
+	ClosedAt *domain.Time   `json:"closed_at_ns,omitempty"`
 	ID       domain.ID      `json:"id"`
 	Key      string         `json:"key"`
 	Name     string         `json:"name"`
 	Revision domain.U64     `json:"revision"`
 	Settings AdminBoardEdit `json:"settings"`
+}
+
+// DisabledSettingLabels は閉鎖板の一覧にも残す、利用できなくなった操作名を返す。
+func (b AdminBoard) DisabledSettingLabels() []string {
+	return []string{"閲覧権限", "ローカルルール", "レス数上限・終了レス", "CAP専用スレッドを作成"}
+}
+
+// UnmarshalJSON は旧receiptの5項目を受け入れ、閉鎖状態のある応答も完全検査する。
+func (b *AdminBoard) UnmarshalJSON(raw []byte) error {
+	var fields map[string]json.RawMessage
+	if err := strictjson.Decode(raw, &fields); err != nil {
+		return err
+	}
+	if _, ok := fields["closed_at_ns"]; !ok {
+		fields["closed_at_ns"] = json.RawMessage("null")
+		var err error
+		raw, err = json.Marshal(fields)
+		if err != nil {
+			return err
+		}
+	}
+	type wire AdminBoard
+	var value wire
+	if err := strictjson.Decode(raw, &value); err != nil {
+		return err
+	}
+	*b = AdminBoard(value)
+	return nil
 }
 
 func (b AdminBoard) ETag() string { return fmt.Sprintf(`"%s:%d"`, b.ID, b.Revision) }
@@ -197,7 +226,7 @@ func (b *postingBoard) adminBoardLocked() (AdminBoard, error) {
 	if edit.Anonymous != nil {
 		edit.Anonymous.Wait = b.guardTokenWait(edit.Anonymous.Wait)
 	}
-	return b.presentAdminBoard(AdminBoard{b.owner, b.boardKey(), v.Name, row.Revision, edit}), nil
+	return b.presentAdminBoard(AdminBoard{ID: b.owner, Key: b.boardKey(), Name: v.Name, Revision: row.Revision, Settings: edit}), nil
 }
 
 // adminBoardSettings はサイト認可を保持したまま板の確定値をコピーする。workerからサイトmutexは取らない。
@@ -479,7 +508,7 @@ func (r *Repository) updateAdminBoard(ctx context.Context, s adminauth.Session, 
 		if policy.At != 0 {
 			resultEdit.Rates = &policy.Rates
 		}
-		result := AdminBoard{id, b.boardKey(), board.Name, seq, resultEdit}
+		result := AdminBoard{ID: id, Key: b.boardKey(), Name: board.Name, Revision: seq, Settings: resultEdit}
 		receipt := adminBoardReceipt{domain.NewID(), s.Admin, requestKey, request, result, now, now + 86400e9}
 		changes := []store.Mutation{mutation("board", "state", board, nil), mutation("admin_receipt", requestKey.String(), receipt, nil)}
 		if policyChanged {

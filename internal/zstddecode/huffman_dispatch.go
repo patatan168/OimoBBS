@@ -5,6 +5,9 @@ package zstddecode
 
 // decodeHuffmanFour は検証済みの深さと表長から、定数shiftの実装を一度だけ選ぶ。
 func decodeHuffmanFour(data, out [4][]byte, table []huffmanCell, depth int) error {
+	if len(out[0])+len(out[1])+len(out[2])+len(out[3]) >= 32<<10 && shortHuffmanCodes(table) {
+		return decodeHuffmanPairsFour(data, out, table, depth)
+	}
 	switch depth {
 	case 6:
 		return decodeHuffmanFourDepth6(data, out, (*[64]huffmanCell)(table))
@@ -21,4 +24,14 @@ func decodeHuffmanFour(data, out [4][]byte, table []huffmanCell, depth int) erro
 	default:
 		return decodeHuffmanFourGeneric(data, out, table, depth)
 	}
+}
+
+// shortHuffmanCodes はprefix全体で平均5bit以下の表だけを2文字処理に渡す。
+// 広い文字種で1文字処理へ戻る頻度と、作業表を構築する費用を抑える。
+func shortHuffmanCodes(table []huffmanCell) bool {
+	total := 0
+	for _, cell := range table {
+		total += int(cell.width)
+	}
+	return total <= 5*len(table)
 }

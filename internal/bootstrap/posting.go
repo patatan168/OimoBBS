@@ -32,6 +32,7 @@ type RepositoryPostingResult struct {
 }
 
 type postingBoard struct {
+	closedAt                  atomic.Int64
 	liveMetadata              atomic.Pointer[boardMetadata]
 	collection                postingCollection
 	formSettings              *postingFormSettings
@@ -150,6 +151,9 @@ func (r *Repository) Thread(ctx context.Context, owner domain.ID, key uint64) (*
 	}
 	value, e := b.worker.Submit(ctx, func() (any, error) {
 		var snapshot *app.PostingSnapshot
+		if b.closedAt.Load() != 0 {
+			return snapshot, nil
+		}
 		if p := b.threads[key]; p != nil {
 			snapshot = p.Snapshot(domain.Time(b.clock().UnixNano()))
 		}
@@ -213,8 +217,8 @@ func (b *postingBoard) postAdmittedCandidate(key uint64, prepared, capture []byt
 	fail := func(e error) RepositoryPostingResult {
 		return RepositoryPostingResult{PostingResult: app.PostingResult{CommitResult: store.CommitResult{Status: store.NotWritten, Err: e}}, ThreadKey: key}
 	}
-	if b.stopped {
-		return fail(errors.New("board writer stopped; reopen for recovery"))
+	if b.stopped || b.closedAt.Load() != 0 {
+		return fail(errors.New("board closed or writer stopped"))
 	}
 	if b.controlExpiryFloor != nil && b.clock().UnixNano() < b.controlExpiryFloor.Load() {
 		return fail(ErrControlExpiryClock)

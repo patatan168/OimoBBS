@@ -37,7 +37,7 @@ func TestCachedDATRespectsHide(t *testing.T) {
 	}
 	handler := repo.SiteWebHandler(observer)
 	get := func(coding, tag string) *httptest.ResponseRecorder {
-		request := httptest.NewRequest("GET", fmt.Sprintf("%s/cached/dat/%d.dat", repo.cfg.Public.BaseURL, created.Key), nil)
+		request := webReadTestRequest("GET", fmt.Sprintf("%s/cached/dat/%d.dat", repo.cfg.Public.BaseURL, created.Key), nil)
 		request.RemoteAddr = "127.0.0.1:12345"
 		request.Header.Set("Accept-Encoding", coding+", identity;q=0")
 		if tag != "" {
@@ -99,7 +99,7 @@ func TestCachedHTMLCurrentVersion(t *testing.T) {
 	}
 	handler := repo.SiteWebHandler(observer)
 	get := func(method, tag string) *httptest.ResponseRecorder {
-		r := httptest.NewRequest(method, fmt.Sprintf("%s/test/read.cgi/htmlcache/%d/", repo.cfg.Public.BaseURL, created.Key), nil)
+		r := webReadTestRequest(method, fmt.Sprintf("%s/test/read.cgi/htmlcache/%d/", repo.cfg.Public.BaseURL, created.Key), nil)
 		r.RemoteAddr = "127.0.0.1:12345"
 		if tag != "" {
 			r.Header.Set("If-None-Match", tag)
@@ -127,7 +127,7 @@ func TestCachedHTMLCurrentVersion(t *testing.T) {
 		t.Fatal(replied, err)
 	}
 	getGzip := func(tag string) *httptest.ResponseRecorder {
-		r := httptest.NewRequest("GET", fmt.Sprintf("%s/test/read.cgi/htmlcache/%d/", repo.cfg.Public.BaseURL, created.Key), nil)
+		r := webReadTestRequest("GET", fmt.Sprintf("%s/test/read.cgi/htmlcache/%d/", repo.cfg.Public.BaseURL, created.Key), nil)
 		r.RemoteAddr = "127.0.0.1:12345"
 		r.Header.Set("Accept-Encoding", "gzip,identity;q=0")
 		r.Header.Set("If-None-Match", tag)

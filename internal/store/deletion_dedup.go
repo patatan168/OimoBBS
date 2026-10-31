@@ -35,7 +35,7 @@ func validateRejectedDedup(d PackDedup, sourceSeq domain.U64, now domain.Time) e
 	duration := int64(30 * time.Second)
 	if v.Mode == "explicit" && v.RequestID != nil {
 		duration = int64(24 * time.Hour)
-	} else if v.Mode != "implicit" || v.RequestID != nil {
+	} else if (v.Mode != "implicit" && v.Mode != "independent") || v.RequestID != nil {
 		return ErrCorrupt
 	}
 	if d.ID == (domain.ID{}) || d.Seq == 0 || d.Seq > sourceSeq || d.Committed <= 0 || int64(d.Committed) > math.MaxInt64-duration || v.KeyID == 0 || v.PostNumber == 0 || v.Expires != d.Committed+domain.Time(duration) || v.Expires <= now {

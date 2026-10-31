@@ -69,10 +69,10 @@ func TestLegacyVerifiedCookieSkipsContentConfirmation(t *testing.T) {
 		t.Fatal("Web post not saved", snapshot, err)
 	}
 	_, dat = request("GET", fmt.Sprintf("/news/dat/%d.dat", key), nil)
-	// 専ブラの受理済み再送は一件のまま返る。
+	// 要求IDを省略した同一本文は、確認画面を挟まず連投上限で拒否する。
 	res, body = request("POST", "/test/bbs.cgi", fields, headers)
-	if res.StatusCode != 200 || !posted(body) {
-		t.Fatal("retry", res.StatusCode, body)
+	if res.StatusCode != 429 || res.Header.Get("Retry-After") == "" {
+		t.Fatal("same-content limit", res.StatusCode, body)
 	}
 	_, retriedDAT := request("GET", fmt.Sprintf("/news/dat/%d.dat", key), nil)
 	if dat != retriedDAT {

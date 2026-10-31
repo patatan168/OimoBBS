@@ -13,6 +13,7 @@ import (
 // RateRecord は規制復元専用の非公開データ。HTTP DTOや一般ログへ渡さない。
 type RateRecord struct {
 	Schema, TokenStatus string
+	Content             domain.Hash
 	Token               *postcapture.TokenEvidence
 	ID                  domain.ID
 	PostNumber          uint32
@@ -57,7 +58,7 @@ func parsedFrameRateRecord(f store.Frame, op domain.Operation) (RateRecord, erro
 		return RateRecord{}, store.ErrCorrupt
 	}
 	p := posts[0].Private
-	return RateRecord{ID: f.Records[0].ID, PostNumber: posts[0].Number, At: op.Committed, Create: op.Type == "create", IP: p.SourceIP, Keys: append([]domain.RateKey{}, p.RateKeys...)}, nil
+	return RateRecord{Content: op.Dedup.Request, ID: f.Records[0].ID, PostNumber: posts[0].Number, At: op.Committed, Create: op.Type == "create", IP: p.SourceIP, Keys: append([]domain.RateKey{}, p.RateKeys...)}, nil
 }
 
 // RateHistory は公開期限に依存せず、受理裁定済みの履歴を返す。復旧完了後の所有者専用。

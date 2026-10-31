@@ -238,6 +238,11 @@ func binaryFor(o options, path string) (string, error) {
 	temporary.Close()
 	defer os.Remove(temporary.Name())
 	fmt.Println("バイナリをビルドしています。")
+	generate := exec.Command("go", "generate", "./internal/webui")
+	generate.Dir, generate.Stdout, generate.Stderr = o.source, os.Stdout, os.Stderr
+	if err = generate.Run(); err != nil {
+		return "", err
+	}
 	command := exec.Command("go", "build", "-trimpath", "-o", temporary.Name(), "./cmd/oimobbs")
 	command.Dir = o.source
 	command.Env = append(os.Environ(), "CGO_ENABLED=0")

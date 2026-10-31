@@ -1,0 +1,2165 @@
+{
+  "date": "2026-10-31",
+  "baseline_revision": "9f49679",
+  "go_version": "go1.27.3",
+  "cpu": "AMD Ryzen 5 5500U",
+  "gomaxprocs": 1,
+  "cpu_affinity": [
+    10
+  ],
+  "exclusive_cpu": false,
+  "samples_per_version_per_input": 4,
+  "sample_duration": "500ms",
+  "order_per_input": [
+    "before x2",
+    "after x2",
+    "after x2",
+    "before x2"
+  ],
+  "scope": "Local OimoBBS decoder only; fixed frames and fresh owned output, one core and no extra workers/cache. No browser/WAN/full HTTP/posting/deployment claim.",
+  "rows": [
+    {
+      "benchmark": "BenchmarkArchiveDecode/entropy",
+      "before_median_us": 971.795,
+      "after_median_us": 987.169,
+      "wall_change_percent": 1.582,
+      "before_cpu_us": 971.616,
+      "after_cpu_us": 986.922,
+      "cpu_change_percent": 1.575,
+      "before_bytes_per_op": 442368,
+      "after_bytes_per_op": 442368,
+      "before_allocations_per_op": 1,
+      "after_allocations_per_op": 1,
+      "before_samples_ns": [
+        977721.0,
+        977448.0,
+        966143.0,
+        958452.0
+      ],
+      "after_samples_ns": [
+        993908.0,
+        989904.0,
+        983940.0,
+        984435.0
+      ],
+      "before_cpu_samples_ns": [
+        977526.0,
+        977287.0,
+        965945.0,
+        958240.0
+      ],
+      "after_cpu_samples_ns": [
+        993656.0,
+        989652.0,
+        983731.0,
+        984191.0
+      ]
+    },
+    {
+      "benchmark": "BenchmarkArchiveDecode/mixed",
+      "before_median_us": 335.273,
+      "after_median_us": 323.312,
+      "wall_change_percent": -3.568,
+      "before_cpu_us": 335.192,
+      "after_cpu_us": 323.238,
+      "cpu_change_percent": -3.566,
+      "before_bytes_per_op": 204800,
+      "after_bytes_per_op": 204800,
+      "before_allocations_per_op": 1,
+      "after_allocations_per_op": 1,
+      "before_samples_ns": [
+        368504.0,
+        351260.0,
+        318376.0,
+        319286.0
+      ],
+      "after_samples_ns": [
+        343865.0,
+        320409.0,
+        320794.0,
+        325829.0
+      ],
+      "before_cpu_samples_ns": [
+        368405.0,
+        351189.0,
+        318317.0,
+        319196.0
+      ],
+      "after_cpu_samples_ns": [
+        343814.0,
+        320346.0,
+        320715.0,
+        325761.0
+      ]
+    },
+    {
+      "benchmark": "BenchmarkArchiveDecode/text",
+      "before_median_us": 210.026,
+      "after_median_us": 227.624,
+      "wall_change_percent": 8.379,
+      "before_cpu_us": 209.986,
+      "after_cpu_us": 227.581,
+      "cpu_change_percent": 8.379,
+      "before_bytes_per_op": 196608,
+      "after_bytes_per_op": 196608,
+      "before_allocations_per_op": 1,
+      "after_allocations_per_op": 1,
+      "before_samples_ns": [
+        209501.0,
+        209226.0,
+        210551.0,
+        247023.0
+      ],
+      "after_samples_ns": [
+        232810.0,
+        227519.0,
+        227728.0,
+        223318.0
+      ],
+      "before_cpu_samples_ns": [
+        209474.0,
+        209197.0,
+        210497.0,
+        246980.0
+      ],
+      "after_cpu_samples_ns": [
+        232777.0,
+        227489.0,
+        227672.0,
+        223264.0
+      ]
+    },
+    {
+      "benchmark": "BenchmarkDecode/raw",
+      "before_median_us": 68.576,
+      "after_median_us": 66.299,
+      "wall_change_percent": -3.32,
+      "before_cpu_us": 68.562,
+      "after_cpu_us": 66.281,
+      "cpu_change_percent": -3.328,
+      "before_bytes_per_op": 524288,
+      "after_bytes_per_op": 524288,
+      "before_allocations_per_op": 1,
+      "after_allocations_per_op": 1,
+      "before_samples_ns": [
+        69553.0,
+        67599.0,
+        66470.0,
+        75189.0
+      ],
+      "after_samples_ns": [
+        67447.0,
+        66429.0,
+        64706.0,
+        66169.0
+      ],
+      "before_cpu_samples_ns": [
+        69546.0,
+        67579.0,
+        66455.0,
+        75143.0
+      ],
+      "after_cpu_samples_ns": [
+        67429.0,
+        66409.0,
+        64679.0,
+        66153.0
+      ]
+    },
+    {
+      "benchmark": "BenchmarkDecode/repeat",
+      "before_median_us": 47.181,
+      "after_median_us": 47.816,
+      "wall_change_percent": 1.345,
+      "before_cpu_us": 47.168,
+      "after_cpu_us": 47.806,
+      "cpu_change_percent": 1.354,
+      "before_bytes_per_op": 507904,
+      "after_bytes_per_op": 507904,
+      "before_allocations_per_op": 1,
+      "after_allocations_per_op": 1,
+      "before_samples_ns": [
+        47548.0,
+        46591.0,
+        48772.0,
+        46814.0
+      ],
+      "after_samples_ns": [
+        47257.0,
+        48417.0,
+        47421.0,
+        48210.0
+      ],
+      "before_cpu_samples_ns": [
+        47530.0,
+        46582.0,
+        48754.0,
+        46806.0
+      ],
+      "after_cpu_samples_ns": [
+        47246.0,
+        48403.0,
+        47408.0,
+        48205.0
+      ]
+    },
+    {
+      "benchmark": "BenchmarkHTTPDecodeCorpus/asset-ui.css",
+      "before_median_us": 28.883,
+      "after_median_us": 27.536,
+      "wall_change_percent": -4.662,
+      "before_cpu_us": 28.875,
+      "after_cpu_us": 27.532,
+      "cpu_change_percent": -4.649,
+      "before_bytes_per_op": 8192,
+      "after_bytes_per_op": 8192,
+      "before_allocations_per_op": 1,
+      "after_allocations_per_op": 1,
+      "before_samples_ns": [
+        28535.0,
+        29230.0,
+        27764.0,
+        29694.0
+      ],
+      "after_samples_ns": [
+        27236.0,
+        27836.0,
+        25721.0,
+        28424.0
+      ],
+      "before_cpu_samples_ns": [
+        28527.0,
+        29222.0,
+        27758.0,
+        29686.0
+      ],
+      "after_cpu_samples_ns": [
+        27232.0,
+        27832.0,
+        25712.0,
+        28418.0
+      ]
+    },
+    {
+      "benchmark": "BenchmarkHTTPDecodeCorpus/asset-ui.js",
+      "before_median_us": 4.853,
+      "after_median_us": 4.875,
+      "wall_change_percent": 0.453,
+      "before_cpu_us": 4.851,
+      "after_cpu_us": 4.873,
+      "cpu_change_percent": 0.453,
+      "before_bytes_per_op": 576,
+      "after_bytes_per_op": 576,
+      "before_allocations_per_op": 1,
+      "after_allocations_per_op": 1,
+      "before_samples_ns": [
+        4832.0,
+        5008.0,
+        4855.0,
+        4851.0
+      ],
+      "after_samples_ns": [
+        4864.0,
+        4886.0,
+        4862.0,
+        4897.0
+      ],
+      "before_cpu_samples_ns": [
+        4831.0,
+        5007.0,
+        4853.0,
+        4850.0
+      ],
+      "after_cpu_samples_ns": [
+        4862.0,
+        4885.0,
+        4861.0,
+        4896.0
+      ]
+    },
+    {
+      "benchmark": "BenchmarkHTTPDecodeCorpus/dat",
+      "before_median_us": 14.182,
+      "after_median_us": 13.945,
+      "wall_change_percent": -1.671,
+      "before_cpu_us": 14.181,
+      "after_cpu_us": 13.942,
+      "cpu_change_percent": -1.682,
+      "before_bytes_per_op": 4096,
+      "after_bytes_per_op": 4096,
+      "before_allocations_per_op": 1,
+      "after_allocations_per_op": 1,
+      "before_samples_ns": [
+        14312.0,
+        14205.0,
+        14130.0,
+        14160.0
+      ],
+      "after_samples_ns": [
+        13959.0,
+        13946.0,
+        13923.0,
+        13945.0
+      ],
+      "before_cpu_samples_ns": [
+        14307.0,
+        14203.0,
+        14127.0,
+        14158.0
+      ],
+      "after_cpu_samples_ns": [
+        13955.0,
+        13943.0,
+        13920.0,
+        13941.0
+      ]
+    },
+    {
+      "benchmark": "BenchmarkHTTPDecodeCorpus/thread",
+      "before_median_us": 38.095,
+      "after_median_us": 36.216,
+      "wall_change_percent": -4.932,
+      "before_cpu_us": 38.087,
+      "after_cpu_us": 36.206,
+      "cpu_change_percent": -4.939,
+      "before_bytes_per_op": 27264,
+      "after_bytes_per_op": 27264,
+      "before_allocations_per_op": 1,
+      "after_allocations_per_op": 1,
+      "before_samples_ns": [
+        37959.0,
+        38011.0,
+        38179.0,
+        39604.0
+      ],
+      "after_samples_ns": [
+        36275.0,
+        36216.0,
+        36216.0,
+        36032.0
+      ],
+      "before_cpu_samples_ns": [
+        37947.0,
+        38004.0,
+        38169.0,
+        39590.0
+      ],
+      "after_cpu_samples_ns": [
+        36267.0,
+        36205.0,
+        36206.0,
+        36025.0
+      ]
+    },
+    {
+      "benchmark": "BenchmarkHTTPDecodeCorpus/top",
+      "before_median_us": 16.247,
+      "after_median_us": 15.897,
+      "wall_change_percent": -2.154,
+      "before_cpu_us": 16.244,
+      "after_cpu_us": 15.894,
+      "cpu_change_percent": -2.158,
+      "before_bytes_per_op": 4864,
+      "after_bytes_per_op": 4864,
+      "before_allocations_per_op": 1,
+      "after_allocations_per_op": 1,
+      "before_samples_ns": [
+        16279.0,
+        16191.0,
+        16260.0,
+        16234.0
+      ],
+      "after_samples_ns": [
+        15830.0,
+        15876.0,
+        15918.0,
+        15945.0
+      ],
+      "before_cpu_samples_ns": [
+        16275.0,
+        16187.0,
+        16257.0,
+        16232.0
+      ],
+      "after_cpu_samples_ns": [
+        15825.0,
+        15874.0,
+        15914.0,
+        15941.0
+      ]
+    }
+  ],
+  "frozen_http_corpus": [
+    {
+      "label": "top",
+      "raw_bytes": 4305,
+      "raw_sha256": "fa7b6a1a1b339aac04fe9951770b13f2d45fa3af1382bf1a38600e1ab4513979",
+      "frame_sha256": "4a4e06f98f8f576c32612fb5c745a60363b3318cc32db13b8cee389e442a72da"
+    },
+    {
+      "label": "board",
+      "raw_bytes": 4457,
+      "raw_sha256": "9be90d1ce9e3eaa31ac6f75ba7cf7f2741297266c1c1b4f2f55d316894df72a1",
+      "frame_sha256": "601dcd85f26a9985a5b02f2a71d21e97618db35a540fb52052495989c3f072d6"
+    },
+    {
+      "label": "thread",
+      "raw_bytes": 24664,
+      "raw_sha256": "a0794f226ea69ec8f96665b8bf0d1502ac01073a0d9b5e732eae938967a46d65",
+      "frame_sha256": "c007dedf81995f636c00d40d4f8f0c87e9289f923f2a5a19556d6baab2f0bcc7"
+    },
+    {
+      "label": "thread-last50",
+      "raw_bytes": 24664,
+      "raw_sha256": "a0794f226ea69ec8f96665b8bf0d1502ac01073a0d9b5e732eae938967a46d65",
+      "frame_sha256": "c007dedf81995f636c00d40d4f8f0c87e9289f923f2a5a19556d6baab2f0bcc7"
+    },
+    {
+      "label": "menu",
+      "raw_bytes": 299,
+      "raw_sha256": "11b21c447d19dbbdd96925685a1f382e94463d78476758b0c5d5be69c3d54f0f",
+      "frame_sha256": "2ee90544091696811b01b005dac359f1a03fec6569de56e2ee462052a9afa584"
+    },
+    {
+      "label": "subject",
+      "raw_bytes": 82,
+      "raw_sha256": "7315a4bfcde9bf1bcf403b4501e3333237f4d7f54568c21addda00a2c19f36ef",
+      "frame_sha256": "e99d3f94ececf412e07d1b1d14a983e8415eb5623c6a9eba280a64cb8804dcef"
+    },
+    {
+      "label": "settings",
+      "raw_bytes": 571,
+      "raw_sha256": "309023164947fe7613916af1bfe480f0d24e3a6b8b4ba10e35e62290495e3387",
+      "frame_sha256": "d8b45262a9d81308bc823a1a63a89a96fd3726112bec07eb8f50146243db3422"
+    },
+    {
+      "label": "dat",
+      "raw_bytes": 3624,
+      "raw_sha256": "f15ca8e22f27b76ed7e0ee691e48e202f5539454bc81905392aa43d8093bee6f",
+      "frame_sha256": "10b4108db56fef4c1597544bd727146568c0ddc49df579e77d15e53ce457b112"
+    },
+    {
+      "label": "senbura-dat",
+      "raw_bytes": 452,
+      "raw_sha256": "c571e73f72730d5703bae4efa2b6f79e0d7e26988a6120062dcd2226e8ef9514",
+      "frame_sha256": "74b5c43ad797f24243b2bbf337dcfd27e0a66304a56048367e9963970eacaed7"
+    },
+    {
+      "label": "asset-thread.css",
+      "raw_bytes": 1454,
+      "raw_sha256": "0921aeec578e174fd79eb00a2cd1b1a9504542d95d014879afaf02db1e761705",
+      "frame_sha256": "ad2e20e20fc199549dcf97e0c2a73461e8ae40be37ed8e05c0865180f96b19ae"
+    },
+    {
+      "label": "asset-public.css",
+      "raw_bytes": 2920,
+      "raw_sha256": "3ad7f9255fce7c657c5ed9024020535b098d52a8474d7a0c086415e37b83f699",
+      "frame_sha256": "b596090d024d0e624fea897ec700936cd0e22a2e10a75294f2f42ea87bbd176a"
+    },
+    {
+      "label": "asset-list.css",
+      "raw_bytes": 1199,
+      "raw_sha256": "3b85c078bcda88fb60cfaa56fa0a43b02cce336ba66d16467ebe247cf1928efa",
+      "frame_sha256": "9a6fb2e4cc34a8d022b6f5a34770cda345398880ceb516e97dfec8824a9361cd"
+    },
+    {
+      "label": "asset-ui.js",
+      "raw_bytes": 523,
+      "raw_sha256": "3cfaae79044c623d9678583844be497956742e969ddeeef05d1caee8b9f956e0",
+      "frame_sha256": "021eb65124b2fefea68d7113d6a85cd14cc543b64994e3c8912e5c0684fef2c4"
+    },
+    {
+      "label": "asset-list.js",
+      "raw_bytes": 3714,
+      "raw_sha256": "8c6245e1219108889343f2e38bc0398fbcda9b0f613f571d9eafc506bfb4e1dc",
+      "frame_sha256": "0a3a9213899f813294752237297bc37f24bcbaae733dc839033a152a11c660e1"
+    },
+    {
+      "label": "asset-thread.js",
+      "raw_bytes": 1637,
+      "raw_sha256": "b3128ec45e2c48e0dda1c52073ce0b48f3fa4ec4fa9bb899db521693ed8fc84f",
+      "frame_sha256": "97db1eec80342ddaec9bd280d6e22a047bde63961fc0975e4adbebf4c97fb799"
+    },
+    {
+      "label": "asset-favicon.svg",
+      "raw_bytes": 463,
+      "raw_sha256": "c18c82c6bbca171dd8df013a1600e21b569d78b51c50ceb5e25bf696d5dbaf5d",
+      "frame_sha256": "09574f39f883e214615e82d28189db7df1d9f55693bbef118f5f428ba284f919"
+    },
+    {
+      "label": "asset-ui.css",
+      "raw_bytes": 7315,
+      "raw_sha256": "d681ca34c09600874fee8f40b79117187de02142ca2da2ebb5e13ea4bcf797df",
+      "frame_sha256": "543bbd6a095b2d960541df78d8e550409924520faffc7f5917ff2793862c214e"
+    }
+  ],
+  "source_sha256": {
+    "internal/zstddecode/decode.go": "69f854aade386e775bddb2e6ef5d596edce343f480d45768dd7a1607690b38d2",
+    "internal/zstddecode/length_value.go": "21cb81d62471ba2e444d547e8642b5d869bbb10d69322854961277dc854910bb",
+    "internal/zstddecode/length_value_test.go": "fabeb1e20b94e568b42d5d99900cb64d761474940628c4f1b86fbbfe505bbf6b"
+  },
+  "archive_text_confirmation": {
+    "sample_duration": "1s",
+    "samples_per_version": 4,
+    "order": [
+      "before x2",
+      "after x2",
+      "after x2",
+      "before x2"
+    ],
+    "samples": {
+      "BenchmarkArchiveDecode/text": {
+        "before": [
+          {
+            "ns_per_op": 227930.0,
+            "cpu_ns_per_op": 227901.0,
+            "bytes_per_op": 196608,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 209311.0,
+            "cpu_ns_per_op": 209282.0,
+            "bytes_per_op": 196608,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 210937.0,
+            "cpu_ns_per_op": 210880.0,
+            "bytes_per_op": 196608,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 209783.0,
+            "cpu_ns_per_op": 209752.0,
+            "bytes_per_op": 196608,
+            "allocations_per_op": 1
+          }
+        ],
+        "after": [
+          {
+            "ns_per_op": 204964.0,
+            "cpu_ns_per_op": 204933.0,
+            "bytes_per_op": 196608,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 203019.0,
+            "cpu_ns_per_op": 202984.0,
+            "bytes_per_op": 196608,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 201905.0,
+            "cpu_ns_per_op": 201865.0,
+            "bytes_per_op": 196608,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 202257.0,
+            "cpu_ns_per_op": 202214.0,
+            "bytes_per_op": 196608,
+            "allocations_per_op": 1
+          }
+        ]
+      }
+    }
+  },
+  "trials": {
+    "packed": {
+      "BenchmarkHTTPDecodeCorpus/top": {
+        "baseline": [
+          {
+            "ns_per_op": 16255.0,
+            "cpu_ns_per_op": 16255.0,
+            "bytes_per_op": 4864,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 16129.0,
+            "cpu_ns_per_op": 16125.0,
+            "bytes_per_op": 4864,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 16341.0,
+            "cpu_ns_per_op": 16335.0,
+            "bytes_per_op": 4864,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 16225.0,
+            "cpu_ns_per_op": 16222.0,
+            "bytes_per_op": 4864,
+            "allocations_per_op": 1
+          }
+        ],
+        "packed": [
+          {
+            "ns_per_op": 16826.0,
+            "cpu_ns_per_op": 16823.0,
+            "bytes_per_op": 4864,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 16789.0,
+            "cpu_ns_per_op": 16788.0,
+            "bytes_per_op": 4864,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 16702.0,
+            "cpu_ns_per_op": 16699.0,
+            "bytes_per_op": 4864,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 16810.0,
+            "cpu_ns_per_op": 16808.0,
+            "bytes_per_op": 4864,
+            "allocations_per_op": 1
+          }
+        ]
+      },
+      "BenchmarkHTTPDecodeCorpus/dat": {
+        "baseline": [
+          {
+            "ns_per_op": 14086.0,
+            "cpu_ns_per_op": 14083.0,
+            "bytes_per_op": 4096,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 14069.0,
+            "cpu_ns_per_op": 14066.0,
+            "bytes_per_op": 4096,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 14096.0,
+            "cpu_ns_per_op": 14095.0,
+            "bytes_per_op": 4096,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 14059.0,
+            "cpu_ns_per_op": 14056.0,
+            "bytes_per_op": 4096,
+            "allocations_per_op": 1
+          }
+        ],
+        "packed": [
+          {
+            "ns_per_op": 14217.0,
+            "cpu_ns_per_op": 14216.0,
+            "bytes_per_op": 4096,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 14210.0,
+            "cpu_ns_per_op": 14208.0,
+            "bytes_per_op": 4096,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 14254.0,
+            "cpu_ns_per_op": 14252.0,
+            "bytes_per_op": 4096,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 14185.0,
+            "cpu_ns_per_op": 14184.0,
+            "bytes_per_op": 4096,
+            "allocations_per_op": 1
+          }
+        ]
+      },
+      "BenchmarkHTTPDecodeCorpus/asset-ui.css": {
+        "baseline": [
+          {
+            "ns_per_op": 26286.0,
+            "cpu_ns_per_op": 26284.0,
+            "bytes_per_op": 8192,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 26264.0,
+            "cpu_ns_per_op": 26259.0,
+            "bytes_per_op": 8192,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 26350.0,
+            "cpu_ns_per_op": 26348.0,
+            "bytes_per_op": 8192,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 26268.0,
+            "cpu_ns_per_op": 26263.0,
+            "bytes_per_op": 8192,
+            "allocations_per_op": 1
+          }
+        ],
+        "packed": [
+          {
+            "ns_per_op": 27439.0,
+            "cpu_ns_per_op": 27430.0,
+            "bytes_per_op": 8192,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 27317.0,
+            "cpu_ns_per_op": 27313.0,
+            "bytes_per_op": 8192,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 27234.0,
+            "cpu_ns_per_op": 27229.0,
+            "bytes_per_op": 8192,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 27002.0,
+            "cpu_ns_per_op": 26997.0,
+            "bytes_per_op": 8192,
+            "allocations_per_op": 1
+          }
+        ]
+      },
+      "BenchmarkArchiveDecode/text": {
+        "baseline": [
+          {
+            "ns_per_op": 211948.0,
+            "cpu_ns_per_op": 211932.0,
+            "bytes_per_op": 196608,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 214970.0,
+            "cpu_ns_per_op": 214954.0,
+            "bytes_per_op": 196608,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 211619.0,
+            "cpu_ns_per_op": 211585.0,
+            "bytes_per_op": 196608,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 211347.0,
+            "cpu_ns_per_op": 211307.0,
+            "bytes_per_op": 196608,
+            "allocations_per_op": 1
+          }
+        ],
+        "packed": [
+          {
+            "ns_per_op": 219687.0,
+            "cpu_ns_per_op": 219680.0,
+            "bytes_per_op": 196608,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 220586.0,
+            "cpu_ns_per_op": 220543.0,
+            "bytes_per_op": 196608,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 220070.0,
+            "cpu_ns_per_op": 220008.0,
+            "bytes_per_op": 196608,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 220375.0,
+            "cpu_ns_per_op": 220308.0,
+            "bytes_per_op": 196608,
+            "allocations_per_op": 1
+          }
+        ]
+      },
+      "BenchmarkArchiveDecode/mixed": {
+        "baseline": [
+          {
+            "ns_per_op": 326418.0,
+            "cpu_ns_per_op": 326354.0,
+            "bytes_per_op": 204800,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 325567.0,
+            "cpu_ns_per_op": 325476.0,
+            "bytes_per_op": 204800,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 321055.0,
+            "cpu_ns_per_op": 320938.0,
+            "bytes_per_op": 204800,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 328061.0,
+            "cpu_ns_per_op": 328027.0,
+            "bytes_per_op": 204800,
+            "allocations_per_op": 1
+          }
+        ],
+        "packed": [
+          {
+            "ns_per_op": 328968.0,
+            "cpu_ns_per_op": 328948.0,
+            "bytes_per_op": 204800,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 328951.0,
+            "cpu_ns_per_op": 328928.0,
+            "bytes_per_op": 204800,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 328630.0,
+            "cpu_ns_per_op": 328565.0,
+            "bytes_per_op": 204800,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 328235.0,
+            "cpu_ns_per_op": 328218.0,
+            "bytes_per_op": 204800,
+            "allocations_per_op": 1
+          }
+        ]
+      },
+      "BenchmarkArchiveDecode/entropy": {
+        "baseline": [
+          {
+            "ns_per_op": 967260.0,
+            "cpu_ns_per_op": 967091.0,
+            "bytes_per_op": 442368,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 961832.0,
+            "cpu_ns_per_op": 961777.0,
+            "bytes_per_op": 442368,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 972508.0,
+            "cpu_ns_per_op": 972339.0,
+            "bytes_per_op": 442368,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 967434.0,
+            "cpu_ns_per_op": 967432.0,
+            "bytes_per_op": 442368,
+            "allocations_per_op": 1
+          }
+        ],
+        "packed": [
+          {
+            "ns_per_op": 976439.0,
+            "cpu_ns_per_op": 976220.0,
+            "bytes_per_op": 442368,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 964573.0,
+            "cpu_ns_per_op": 964314.0,
+            "bytes_per_op": 442368,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 986846.0,
+            "cpu_ns_per_op": 986788.0,
+            "bytes_per_op": 442368,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 988571.0,
+            "cpu_ns_per_op": 988351.0,
+            "bytes_per_op": 442368,
+            "allocations_per_op": 1
+          }
+        ]
+      }
+    },
+    "buffered": {
+      "BenchmarkHTTPDecodeCorpus/top": {
+        "baseline": [
+          {
+            "ns_per_op": 16701.0,
+            "cpu_ns_per_op": 16699.0,
+            "bytes_per_op": 4864,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 17125.0,
+            "cpu_ns_per_op": 17125.0,
+            "bytes_per_op": 4864,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 16197.0,
+            "cpu_ns_per_op": 16193.0,
+            "bytes_per_op": 4864,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 16158.0,
+            "cpu_ns_per_op": 16156.0,
+            "bytes_per_op": 4864,
+            "allocations_per_op": 1
+          }
+        ],
+        "buffered": [
+          {
+            "ns_per_op": 26465.0,
+            "cpu_ns_per_op": 26462.0,
+            "bytes_per_op": 4864,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 18504.0,
+            "cpu_ns_per_op": 18502.0,
+            "bytes_per_op": 4864,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 20540.0,
+            "cpu_ns_per_op": 20537.0,
+            "bytes_per_op": 4864,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 16646.0,
+            "cpu_ns_per_op": 16644.0,
+            "bytes_per_op": 4864,
+            "allocations_per_op": 1
+          }
+        ]
+      },
+      "BenchmarkHTTPDecodeCorpus/dat": {
+        "baseline": [
+          {
+            "ns_per_op": 14184.0,
+            "cpu_ns_per_op": 14183.0,
+            "bytes_per_op": 4096,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 14157.0,
+            "cpu_ns_per_op": 14156.0,
+            "bytes_per_op": 4096,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 14159.0,
+            "cpu_ns_per_op": 14153.0,
+            "bytes_per_op": 4096,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 14170.0,
+            "cpu_ns_per_op": 14167.0,
+            "bytes_per_op": 4096,
+            "allocations_per_op": 1
+          }
+        ],
+        "buffered": [
+          {
+            "ns_per_op": 15837.0,
+            "cpu_ns_per_op": 15835.0,
+            "bytes_per_op": 4096,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 14503.0,
+            "cpu_ns_per_op": 14501.0,
+            "bytes_per_op": 4096,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 14352.0,
+            "cpu_ns_per_op": 14351.0,
+            "bytes_per_op": 4096,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 14336.0,
+            "cpu_ns_per_op": 14334.0,
+            "bytes_per_op": 4096,
+            "allocations_per_op": 1
+          }
+        ]
+      },
+      "BenchmarkHTTPDecodeCorpus/asset-ui.css": {
+        "baseline": [
+          {
+            "ns_per_op": 26574.0,
+            "cpu_ns_per_op": 26572.0,
+            "bytes_per_op": 8192,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 26811.0,
+            "cpu_ns_per_op": 26811.0,
+            "bytes_per_op": 8192,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 26458.0,
+            "cpu_ns_per_op": 26454.0,
+            "bytes_per_op": 8192,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 26497.0,
+            "cpu_ns_per_op": 26490.0,
+            "bytes_per_op": 8192,
+            "allocations_per_op": 1
+          }
+        ],
+        "buffered": [
+          {
+            "ns_per_op": 27482.0,
+            "cpu_ns_per_op": 27477.0,
+            "bytes_per_op": 8192,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 27913.0,
+            "cpu_ns_per_op": 27911.0,
+            "bytes_per_op": 8192,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 27153.0,
+            "cpu_ns_per_op": 27152.0,
+            "bytes_per_op": 8192,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 27078.0,
+            "cpu_ns_per_op": 27071.0,
+            "bytes_per_op": 8192,
+            "allocations_per_op": 1
+          }
+        ]
+      },
+      "BenchmarkArchiveDecode/text": {
+        "baseline": [
+          {
+            "ns_per_op": 215155.0,
+            "cpu_ns_per_op": 215150.0,
+            "bytes_per_op": 196608,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 215299.0,
+            "cpu_ns_per_op": 215255.0,
+            "bytes_per_op": 196608,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 214586.0,
+            "cpu_ns_per_op": 214536.0,
+            "bytes_per_op": 196608,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 214692.0,
+            "cpu_ns_per_op": 214630.0,
+            "bytes_per_op": 196608,
+            "allocations_per_op": 1
+          }
+        ],
+        "buffered": [
+          {
+            "ns_per_op": 232993.0,
+            "cpu_ns_per_op": 232952.0,
+            "bytes_per_op": 196608,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 230370.0,
+            "cpu_ns_per_op": 230355.0,
+            "bytes_per_op": 196608,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 229181.0,
+            "cpu_ns_per_op": 229167.0,
+            "bytes_per_op": 196608,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 232195.0,
+            "cpu_ns_per_op": 232156.0,
+            "bytes_per_op": 196608,
+            "allocations_per_op": 1
+          }
+        ]
+      },
+      "BenchmarkArchiveDecode/mixed": {
+        "baseline": [
+          {
+            "ns_per_op": 326912.0,
+            "cpu_ns_per_op": 326909.0,
+            "bytes_per_op": 204800,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 326656.0,
+            "cpu_ns_per_op": 326591.0,
+            "bytes_per_op": 204800,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 324870.0,
+            "cpu_ns_per_op": 324831.0,
+            "bytes_per_op": 204800,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 323905.0,
+            "cpu_ns_per_op": 323825.0,
+            "bytes_per_op": 204800,
+            "allocations_per_op": 1
+          }
+        ],
+        "buffered": [
+          {
+            "ns_per_op": 350449.0,
+            "cpu_ns_per_op": 350412.0,
+            "bytes_per_op": 204800,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 350576.0,
+            "cpu_ns_per_op": 350565.0,
+            "bytes_per_op": 204800,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 357661.0,
+            "cpu_ns_per_op": 357577.0,
+            "bytes_per_op": 204800,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 353611.0,
+            "cpu_ns_per_op": 353583.0,
+            "bytes_per_op": 204800,
+            "allocations_per_op": 1
+          }
+        ]
+      },
+      "BenchmarkArchiveDecode/entropy": {
+        "baseline": [
+          {
+            "ns_per_op": 985720.0,
+            "cpu_ns_per_op": 985559.0,
+            "bytes_per_op": 442368,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 1079087.0,
+            "cpu_ns_per_op": 1078854.0,
+            "bytes_per_op": 442368,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 973575.0,
+            "cpu_ns_per_op": 973388.0,
+            "bytes_per_op": 442368,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 961264.0,
+            "cpu_ns_per_op": 961054.0,
+            "bytes_per_op": 442368,
+            "allocations_per_op": 1
+          }
+        ],
+        "buffered": [
+          {
+            "ns_per_op": 1008141.0,
+            "cpu_ns_per_op": 1008027.0,
+            "bytes_per_op": 442368,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 1002295.0,
+            "cpu_ns_per_op": 1002091.0,
+            "bytes_per_op": 442368,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 1007626.0,
+            "cpu_ns_per_op": 1007468.0,
+            "bytes_per_op": 442368,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 1013868.0,
+            "cpu_ns_per_op": 1013728.0,
+            "bytes_per_op": 442368,
+            "allocations_per_op": 1
+          }
+        ]
+      }
+    },
+    "length": {
+      "BenchmarkHTTPDecodeCorpus/top": {
+        "baseline": [
+          {
+            "ns_per_op": 16302.0,
+            "cpu_ns_per_op": 16302.0,
+            "bytes_per_op": 4864,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 16280.0,
+            "cpu_ns_per_op": 16279.0,
+            "bytes_per_op": 4864,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 16338.0,
+            "cpu_ns_per_op": 16331.0,
+            "bytes_per_op": 4864,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 16100.0,
+            "cpu_ns_per_op": 16098.0,
+            "bytes_per_op": 4864,
+            "allocations_per_op": 1
+          }
+        ],
+        "length": [
+          {
+            "ns_per_op": 16209.0,
+            "cpu_ns_per_op": 16207.0,
+            "bytes_per_op": 4864,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 16289.0,
+            "cpu_ns_per_op": 16279.0,
+            "bytes_per_op": 4864,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 16096.0,
+            "cpu_ns_per_op": 16093.0,
+            "bytes_per_op": 4864,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 16075.0,
+            "cpu_ns_per_op": 16072.0,
+            "bytes_per_op": 4864,
+            "allocations_per_op": 1
+          }
+        ]
+      },
+      "BenchmarkHTTPDecodeCorpus/dat": {
+        "baseline": [
+          {
+            "ns_per_op": 14171.0,
+            "cpu_ns_per_op": 14168.0,
+            "bytes_per_op": 4096,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 14193.0,
+            "cpu_ns_per_op": 14190.0,
+            "bytes_per_op": 4096,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 14112.0,
+            "cpu_ns_per_op": 14110.0,
+            "bytes_per_op": 4096,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 14155.0,
+            "cpu_ns_per_op": 14152.0,
+            "bytes_per_op": 4096,
+            "allocations_per_op": 1
+          }
+        ],
+        "length": [
+          {
+            "ns_per_op": 13947.0,
+            "cpu_ns_per_op": 13946.0,
+            "bytes_per_op": 4096,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 13915.0,
+            "cpu_ns_per_op": 13913.0,
+            "bytes_per_op": 4096,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 13946.0,
+            "cpu_ns_per_op": 13943.0,
+            "bytes_per_op": 4096,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 13913.0,
+            "cpu_ns_per_op": 13912.0,
+            "bytes_per_op": 4096,
+            "allocations_per_op": 1
+          }
+        ]
+      },
+      "BenchmarkHTTPDecodeCorpus/asset-ui.css": {
+        "baseline": [
+          {
+            "ns_per_op": 26429.0,
+            "cpu_ns_per_op": 26421.0,
+            "bytes_per_op": 8192,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 26485.0,
+            "cpu_ns_per_op": 26484.0,
+            "bytes_per_op": 8192,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 26424.0,
+            "cpu_ns_per_op": 26421.0,
+            "bytes_per_op": 8192,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 26402.0,
+            "cpu_ns_per_op": 26399.0,
+            "bytes_per_op": 8192,
+            "allocations_per_op": 1
+          }
+        ],
+        "length": [
+          {
+            "ns_per_op": 26100.0,
+            "cpu_ns_per_op": 26092.0,
+            "bytes_per_op": 8192,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 27372.0,
+            "cpu_ns_per_op": 27366.0,
+            "bytes_per_op": 8192,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 24852.0,
+            "cpu_ns_per_op": 24847.0,
+            "bytes_per_op": 8192,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 24783.0,
+            "cpu_ns_per_op": 24774.0,
+            "bytes_per_op": 8192,
+            "allocations_per_op": 1
+          }
+        ]
+      },
+      "BenchmarkArchiveDecode/text": {
+        "baseline": [
+          {
+            "ns_per_op": 212716.0,
+            "cpu_ns_per_op": 212682.0,
+            "bytes_per_op": 196608,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 213479.0,
+            "cpu_ns_per_op": 213472.0,
+            "bytes_per_op": 196608,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 224111.0,
+            "cpu_ns_per_op": 224017.0,
+            "bytes_per_op": 196608,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 212353.0,
+            "cpu_ns_per_op": 212269.0,
+            "bytes_per_op": 196608,
+            "allocations_per_op": 1
+          }
+        ],
+        "length": [
+          {
+            "ns_per_op": 236722.0,
+            "cpu_ns_per_op": 236705.0,
+            "bytes_per_op": 196608,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 234644.0,
+            "cpu_ns_per_op": 234587.0,
+            "bytes_per_op": 196608,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 210290.0,
+            "cpu_ns_per_op": 210258.0,
+            "bytes_per_op": 196608,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 210969.0,
+            "cpu_ns_per_op": 210957.0,
+            "bytes_per_op": 196608,
+            "allocations_per_op": 1
+          }
+        ]
+      },
+      "BenchmarkArchiveDecode/mixed": {
+        "baseline": [
+          {
+            "ns_per_op": 326492.0,
+            "cpu_ns_per_op": 326460.0,
+            "bytes_per_op": 204800,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 327120.0,
+            "cpu_ns_per_op": 327012.0,
+            "bytes_per_op": 204800,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 322081.0,
+            "cpu_ns_per_op": 322010.0,
+            "bytes_per_op": 204800,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 319396.0,
+            "cpu_ns_per_op": 319370.0,
+            "bytes_per_op": 204800,
+            "allocations_per_op": 1
+          }
+        ],
+        "length": [
+          {
+            "ns_per_op": 353059.0,
+            "cpu_ns_per_op": 353034.0,
+            "bytes_per_op": 204800,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 383897.0,
+            "cpu_ns_per_op": 383823.0,
+            "bytes_per_op": 204800,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 318739.0,
+            "cpu_ns_per_op": 318681.0,
+            "bytes_per_op": 204800,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 328845.0,
+            "cpu_ns_per_op": 328808.0,
+            "bytes_per_op": 204800,
+            "allocations_per_op": 1
+          }
+        ]
+      },
+      "BenchmarkArchiveDecode/entropy": {
+        "baseline": [
+          {
+            "ns_per_op": 971008.0,
+            "cpu_ns_per_op": 970919.0,
+            "bytes_per_op": 442368,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 967515.0,
+            "cpu_ns_per_op": 967442.0,
+            "bytes_per_op": 442368,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 965412.0,
+            "cpu_ns_per_op": 965269.0,
+            "bytes_per_op": 442368,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 961393.0,
+            "cpu_ns_per_op": 961300.0,
+            "bytes_per_op": 442368,
+            "allocations_per_op": 1
+          }
+        ],
+        "length": [
+          {
+            "ns_per_op": 1190660.0,
+            "cpu_ns_per_op": 1190461.0,
+            "bytes_per_op": 442368,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 994277.0,
+            "cpu_ns_per_op": 994050.0,
+            "bytes_per_op": 442368,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 992515.0,
+            "cpu_ns_per_op": 992379.0,
+            "bytes_per_op": 442368,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 993625.0,
+            "cpu_ns_per_op": 993449.0,
+            "bytes_per_op": 442368,
+            "allocations_per_op": 1
+          }
+        ]
+      }
+    },
+    "specialized": {
+      "BenchmarkHTTPDecodeCorpus/top": {
+        "baseline": [
+          {
+            "ns_per_op": 18054.0,
+            "cpu_ns_per_op": 18043.0,
+            "bytes_per_op": 4864,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 17556.0,
+            "cpu_ns_per_op": 17553.0,
+            "bytes_per_op": 4864,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 16292.0,
+            "cpu_ns_per_op": 16288.0,
+            "bytes_per_op": 4864,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 16377.0,
+            "cpu_ns_per_op": 16375.0,
+            "bytes_per_op": 4864,
+            "allocations_per_op": 1
+          }
+        ],
+        "specialized": [
+          {
+            "ns_per_op": 15951.0,
+            "cpu_ns_per_op": 15947.0,
+            "bytes_per_op": 4864,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 15880.0,
+            "cpu_ns_per_op": 15876.0,
+            "bytes_per_op": 4864,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 15928.0,
+            "cpu_ns_per_op": 15922.0,
+            "bytes_per_op": 4864,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 15937.0,
+            "cpu_ns_per_op": 15933.0,
+            "bytes_per_op": 4864,
+            "allocations_per_op": 1
+          }
+        ]
+      },
+      "BenchmarkHTTPDecodeCorpus/dat": {
+        "baseline": [
+          {
+            "ns_per_op": 14481.0,
+            "cpu_ns_per_op": 14478.0,
+            "bytes_per_op": 4096,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 16018.0,
+            "cpu_ns_per_op": 16017.0,
+            "bytes_per_op": 4096,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 15356.0,
+            "cpu_ns_per_op": 15351.0,
+            "bytes_per_op": 4096,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 14847.0,
+            "cpu_ns_per_op": 14845.0,
+            "bytes_per_op": 4096,
+            "allocations_per_op": 1
+          }
+        ],
+        "specialized": [
+          {
+            "ns_per_op": 13775.0,
+            "cpu_ns_per_op": 13773.0,
+            "bytes_per_op": 4096,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 13732.0,
+            "cpu_ns_per_op": 13731.0,
+            "bytes_per_op": 4096,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 13738.0,
+            "cpu_ns_per_op": 13734.0,
+            "bytes_per_op": 4096,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 13747.0,
+            "cpu_ns_per_op": 13745.0,
+            "bytes_per_op": 4096,
+            "allocations_per_op": 1
+          }
+        ]
+      },
+      "BenchmarkHTTPDecodeCorpus/asset-ui.css": {
+        "baseline": [
+          {
+            "ns_per_op": 31658.0,
+            "cpu_ns_per_op": 31656.0,
+            "bytes_per_op": 8192,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 30959.0,
+            "cpu_ns_per_op": 30957.0,
+            "bytes_per_op": 8192,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 29916.0,
+            "cpu_ns_per_op": 29909.0,
+            "bytes_per_op": 8192,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 28546.0,
+            "cpu_ns_per_op": 28541.0,
+            "bytes_per_op": 8192,
+            "allocations_per_op": 1
+          }
+        ],
+        "specialized": [
+          {
+            "ns_per_op": 25320.0,
+            "cpu_ns_per_op": 25317.0,
+            "bytes_per_op": 8192,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 25211.0,
+            "cpu_ns_per_op": 25208.0,
+            "bytes_per_op": 8192,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 25253.0,
+            "cpu_ns_per_op": 25248.0,
+            "bytes_per_op": 8192,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 25111.0,
+            "cpu_ns_per_op": 25108.0,
+            "bytes_per_op": 8192,
+            "allocations_per_op": 1
+          }
+        ]
+      },
+      "BenchmarkArchiveDecode/text": {
+        "baseline": [
+          {
+            "ns_per_op": 244789.0,
+            "cpu_ns_per_op": 244743.0,
+            "bytes_per_op": 196608,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 258812.0,
+            "cpu_ns_per_op": 258775.0,
+            "bytes_per_op": 196608,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 228731.0,
+            "cpu_ns_per_op": 228689.0,
+            "bytes_per_op": 196608,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 241723.0,
+            "cpu_ns_per_op": 241699.0,
+            "bytes_per_op": 196608,
+            "allocations_per_op": 1
+          }
+        ],
+        "specialized": [
+          {
+            "ns_per_op": 207570.0,
+            "cpu_ns_per_op": 207531.0,
+            "bytes_per_op": 196608,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 208288.0,
+            "cpu_ns_per_op": 208266.0,
+            "bytes_per_op": 196608,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 210129.0,
+            "cpu_ns_per_op": 210100.0,
+            "bytes_per_op": 196608,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 210334.0,
+            "cpu_ns_per_op": 210262.0,
+            "bytes_per_op": 196608,
+            "allocations_per_op": 1
+          }
+        ]
+      },
+      "BenchmarkArchiveDecode/mixed": {
+        "baseline": [
+          {
+            "ns_per_op": 383350.0,
+            "cpu_ns_per_op": 383280.0,
+            "bytes_per_op": 204800,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 336203.0,
+            "cpu_ns_per_op": 336200.0,
+            "bytes_per_op": 204800,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 331989.0,
+            "cpu_ns_per_op": 331876.0,
+            "bytes_per_op": 204800,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 331581.0,
+            "cpu_ns_per_op": 331495.0,
+            "bytes_per_op": 204800,
+            "allocations_per_op": 1
+          }
+        ],
+        "specialized": [
+          {
+            "ns_per_op": 319718.0,
+            "cpu_ns_per_op": 319624.0,
+            "bytes_per_op": 204800,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 319701.0,
+            "cpu_ns_per_op": 319655.0,
+            "bytes_per_op": 204800,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 322782.0,
+            "cpu_ns_per_op": 322712.0,
+            "bytes_per_op": 204800,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 321865.0,
+            "cpu_ns_per_op": 321786.0,
+            "bytes_per_op": 204800,
+            "allocations_per_op": 1
+          }
+        ]
+      },
+      "BenchmarkArchiveDecode/entropy": {
+        "baseline": [
+          {
+            "ns_per_op": 982138.0,
+            "cpu_ns_per_op": 982114.0,
+            "bytes_per_op": 442368,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 985727.0,
+            "cpu_ns_per_op": 985485.0,
+            "bytes_per_op": 442368,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 993324.0,
+            "cpu_ns_per_op": 993162.0,
+            "bytes_per_op": 442368,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 980549.0,
+            "cpu_ns_per_op": 980356.0,
+            "bytes_per_op": 442368,
+            "allocations_per_op": 1
+          }
+        ],
+        "specialized": [
+          {
+            "ns_per_op": 970333.0,
+            "cpu_ns_per_op": 970258.0,
+            "bytes_per_op": 442368,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 962835.0,
+            "cpu_ns_per_op": 962748.0,
+            "bytes_per_op": 442368,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 964765.0,
+            "cpu_ns_per_op": 964725.0,
+            "bytes_per_op": 442368,
+            "allocations_per_op": 1
+          },
+          {
+            "ns_per_op": 983611.0,
+            "cpu_ns_per_op": 983409.0,
+            "bytes_per_op": 442368,
+            "allocations_per_op": 1
+          }
+        ]
+      }
+    }
+  },
+  "trial_decisions": {
+    "packed": "Rejected: no improvement from packing FSE cell into uint32",
+    "buffered": "Rejected: sequence bit cache slower",
+    "length": "Rejected: small-code wrappers worsened large frames",
+    "specialized": "Adopted: remove length-kind branch; literal calculation is inlined by Go1.27.3. Large frame gain not established."
+  },
+  "verification": [
+    {
+      "frame_bytes": 1942,
+      "frame_sha256": "4a4e06f98f8f576c32612fb5c745a60363b3318cc32db13b8cee389e442a72da",
+      "go_decoder_matches": true,
+      "input_unchanged": true,
+      "label": "top",
+      "raw_bytes": 4305,
+      "raw_sha256": "fa7b6a1a1b339aac04fe9951770b13f2d45fa3af1382bf1a38600e1ab4513979",
+      "libzstd_matches": true
+    },
+    {
+      "frame_bytes": 2152,
+      "frame_sha256": "601dcd85f26a9985a5b02f2a71d21e97618db35a540fb52052495989c3f072d6",
+      "go_decoder_matches": true,
+      "input_unchanged": true,
+      "label": "board",
+      "raw_bytes": 4457,
+      "raw_sha256": "9be90d1ce9e3eaa31ac6f75ba7cf7f2741297266c1c1b4f2f55d316894df72a1",
+      "libzstd_matches": true
+    },
+    {
+      "frame_bytes": 4109,
+      "frame_sha256": "c007dedf81995f636c00d40d4f8f0c87e9289f923f2a5a19556d6baab2f0bcc7",
+      "go_decoder_matches": true,
+      "input_unchanged": true,
+      "label": "thread",
+      "raw_bytes": 24664,
+      "raw_sha256": "a0794f226ea69ec8f96665b8bf0d1502ac01073a0d9b5e732eae938967a46d65",
+      "libzstd_matches": true
+    },
+    {
+      "frame_bytes": 4109,
+      "frame_sha256": "c007dedf81995f636c00d40d4f8f0c87e9289f923f2a5a19556d6baab2f0bcc7",
+      "go_decoder_matches": true,
+      "input_unchanged": true,
+      "label": "thread-last50",
+      "raw_bytes": 24664,
+      "raw_sha256": "a0794f226ea69ec8f96665b8bf0d1502ac01073a0d9b5e732eae938967a46d65",
+      "libzstd_matches": true
+    },
+    {
+      "frame_bytes": 223,
+      "frame_sha256": "2ee90544091696811b01b005dac359f1a03fec6569de56e2ee462052a9afa584",
+      "go_decoder_matches": true,
+      "input_unchanged": true,
+      "label": "menu",
+      "raw_bytes": 299,
+      "raw_sha256": "11b21c447d19dbbdd96925685a1f382e94463d78476758b0c5d5be69c3d54f0f",
+      "libzstd_matches": true
+    },
+    {
+      "frame_bytes": 91,
+      "frame_sha256": "e99d3f94ececf412e07d1b1d14a983e8415eb5623c6a9eba280a64cb8804dcef",
+      "go_decoder_matches": true,
+      "input_unchanged": true,
+      "label": "subject",
+      "raw_bytes": 82,
+      "raw_sha256": "7315a4bfcde9bf1bcf403b4501e3333237f4d7f54568c21addda00a2c19f36ef",
+      "libzstd_matches": true
+    },
+    {
+      "frame_bytes": 294,
+      "frame_sha256": "d8b45262a9d81308bc823a1a63a89a96fd3726112bec07eb8f50146243db3422",
+      "go_decoder_matches": true,
+      "input_unchanged": true,
+      "label": "settings",
+      "raw_bytes": 571,
+      "raw_sha256": "309023164947fe7613916af1bfe480f0d24e3a6b8b4ba10e35e62290495e3387",
+      "libzstd_matches": true
+    },
+    {
+      "frame_bytes": 1159,
+      "frame_sha256": "10b4108db56fef4c1597544bd727146568c0ddc49df579e77d15e53ce457b112",
+      "go_decoder_matches": true,
+      "input_unchanged": true,
+      "label": "dat",
+      "raw_bytes": 3624,
+      "raw_sha256": "f15ca8e22f27b76ed7e0ee691e48e202f5539454bc81905392aa43d8093bee6f",
+      "libzstd_matches": true
+    },
+    {
+      "frame_bytes": 416,
+      "frame_sha256": "74b5c43ad797f24243b2bbf337dcfd27e0a66304a56048367e9963970eacaed7",
+      "go_decoder_matches": true,
+      "input_unchanged": true,
+      "label": "senbura-dat",
+      "raw_bytes": 452,
+      "raw_sha256": "c571e73f72730d5703bae4efa2b6f79e0d7e26988a6120062dcd2226e8ef9514",
+      "libzstd_matches": true
+    },
+    {
+      "frame_bytes": 570,
+      "frame_sha256": "ad2e20e20fc199549dcf97e0c2a73461e8ae40be37ed8e05c0865180f96b19ae",
+      "go_decoder_matches": true,
+      "input_unchanged": true,
+      "label": "asset-thread.css",
+      "raw_bytes": 1454,
+      "raw_sha256": "0921aeec578e174fd79eb00a2cd1b1a9504542d95d014879afaf02db1e761705",
+      "libzstd_matches": true
+    },
+    {
+      "frame_bytes": 1136,
+      "frame_sha256": "b596090d024d0e624fea897ec700936cd0e22a2e10a75294f2f42ea87bbd176a",
+      "go_decoder_matches": true,
+      "input_unchanged": true,
+      "label": "asset-public.css",
+      "raw_bytes": 2920,
+      "raw_sha256": "3ad7f9255fce7c657c5ed9024020535b098d52a8474d7a0c086415e37b83f699",
+      "libzstd_matches": true
+    },
+    {
+      "frame_bytes": 549,
+      "frame_sha256": "9a6fb2e4cc34a8d022b6f5a34770cda345398880ceb516e97dfec8824a9361cd",
+      "go_decoder_matches": true,
+      "input_unchanged": true,
+      "label": "asset-list.css",
+      "raw_bytes": 1199,
+      "raw_sha256": "3b85c078bcda88fb60cfaa56fa0a43b02cce336ba66d16467ebe247cf1928efa",
+      "libzstd_matches": true
+    },
+    {
+      "frame_bytes": 319,
+      "frame_sha256": "021eb65124b2fefea68d7113d6a85cd14cc543b64994e3c8912e5c0684fef2c4",
+      "go_decoder_matches": true,
+      "input_unchanged": true,
+      "label": "asset-ui.js",
+      "raw_bytes": 523,
+      "raw_sha256": "3cfaae79044c623d9678583844be497956742e969ddeeef05d1caee8b9f956e0",
+      "libzstd_matches": true
+    },
+    {
+      "frame_bytes": 1706,
+      "frame_sha256": "0a3a9213899f813294752237297bc37f24bcbaae733dc839033a152a11c660e1",
+      "go_decoder_matches": true,
+      "input_unchanged": true,
+      "label": "asset-list.js",
+      "raw_bytes": 3714,
+      "raw_sha256": "8c6245e1219108889343f2e38bc0398fbcda9b0f613f571d9eafc506bfb4e1dc",
+      "libzstd_matches": true
+    },
+    {
+      "frame_bytes": 939,
+      "frame_sha256": "97db1eec80342ddaec9bd280d6e22a047bde63961fc0975e4adbebf4c97fb799",
+      "go_decoder_matches": true,
+      "input_unchanged": true,
+      "label": "asset-thread.js",
+      "raw_bytes": 1637,
+      "raw_sha256": "b3128ec45e2c48e0dda1c52073ce0b48f3fa4ec4fa9bb899db521693ed8fc84f",
+      "libzstd_matches": true
+    },
+    {
+      "frame_bytes": 375,
+      "frame_sha256": "09574f39f883e214615e82d28189db7df1d9f55693bbef118f5f428ba284f919",
+      "go_decoder_matches": true,
+      "input_unchanged": true,
+      "label": "asset-favicon.svg",
+      "raw_bytes": 463,
+      "raw_sha256": "c18c82c6bbca171dd8df013a1600e21b569d78b51c50ceb5e25bf696d5dbaf5d",
+      "libzstd_matches": true
+    },
+    {
+      "frame_bytes": 2497,
+      "frame_sha256": "543bbd6a095b2d960541df78d8e550409924520faffc7f5917ff2793862c214e",
+      "go_decoder_matches": true,
+      "input_unchanged": true,
+      "label": "asset-ui.css",
+      "raw_bytes": 7315,
+      "raw_sha256": "d681ca34c09600874fee8f40b79117187de02142ca2da2ebb5e13ea4bcf797df",
+      "libzstd_matches": true
+    },
+    {
+      "frame_bytes": 12211,
+      "frame_sha256": "e8b1091e92d565052f8ae67d8bdd0faea511e664ea6a484d1e0057eeea606b0f",
+      "go_decoder_matches": true,
+      "input_unchanged": true,
+      "label": "archive-text",
+      "raw_bytes": 193755,
+      "raw_sha256": "042e474becb52a5f94b1d211cb01d26e2def6d1569f451e11eb3d6e2d7a3851a",
+      "libzstd_matches": true
+    },
+    {
+      "frame_bytes": 12189,
+      "frame_sha256": "494b66b7f8ace6416fcae49703a4e482745a5b1f62ed5bffa4acaa916b366692",
+      "go_decoder_matches": true,
+      "input_unchanged": true,
+      "label": "dat-text",
+      "raw_bytes": 193755,
+      "raw_sha256": "042e474becb52a5f94b1d211cb01d26e2def6d1569f451e11eb3d6e2d7a3851a",
+      "libzstd_matches": true
+    },
+    {
+      "frame_bytes": 31026,
+      "frame_sha256": "27ee3c2d8f3073268d787739c64fb64d63a53ebda4b446a848e2e1c77134df4e",
+      "go_decoder_matches": true,
+      "input_unchanged": true,
+      "label": "archive-mixed",
+      "raw_bytes": 204125,
+      "raw_sha256": "f7103a9c16cb5ca09f5105fc4c9d8154e0dae4af7fe2d0abbbf42abcd1f36986",
+      "libzstd_matches": true
+    },
+    {
+      "frame_bytes": 31015,
+      "frame_sha256": "7ea0352ac15429bec2b185a886770de0adbe54cddf958860b33d7e136042c2da",
+      "go_decoder_matches": true,
+      "input_unchanged": true,
+      "label": "dat-mixed",
+      "raw_bytes": 204125,
+      "raw_sha256": "f7103a9c16cb5ca09f5105fc4c9d8154e0dae4af7fe2d0abbbf42abcd1f36986",
+      "libzstd_matches": true
+    },
+    {
+      "frame_bytes": 177206,
+      "frame_sha256": "60c911c2d06ee3b6187c3a3cd7fbc7d2c8209cfdc872cf781f769a99cf431730",
+      "go_decoder_matches": true,
+      "input_unchanged": true,
+      "label": "archive-entropy",
+      "raw_bytes": 435955,
+      "raw_sha256": "1e8bcac3601026ab44818a11540c617bb900431a554055cbe73c735ed073488c",
+      "libzstd_matches": true
+    },
+    {
+      "frame_bytes": 177198,
+      "frame_sha256": "8e818d7230e11d5b0f6456f5c0385a8905017551e28473aa3cbeea651d2f133a",
+      "go_decoder_matches": true,
+      "input_unchanged": true,
+      "label": "dat-entropy",
+      "raw_bytes": 435955,
+      "raw_sha256": "1e8bcac3601026ab44818a11540c617bb900431a554055cbe73c735ed073488c",
+      "libzstd_matches": true
+    },
+    {
+      "frame_bytes": 524309,
+      "frame_sha256": "03de2cea2eecde239ed91549a1cddac513d05c779e7382a4a4f65feca058ef2f",
+      "go_decoder_matches": true,
+      "input_unchanged": true,
+      "label": "raw",
+      "raw_bytes": 524288,
+      "raw_sha256": "4e4878af994a27452c2700de668c3c0c356a479725d9a9adfac52cda24bf7f2d",
+      "libzstd_matches": true
+    },
+    {
+      "frame_bytes": 64,
+      "frame_sha256": "c190cc99b1f8842bfcd5756c5d835c6a33495471a474b2a22fba6d18751d498b",
+      "go_decoder_matches": true,
+      "input_unchanged": true,
+      "label": "repeat",
+      "raw_bytes": 500000,
+      "raw_sha256": "4c9e4939e2e4dc1dea6059443c650ec5e68201a8a02b9f27508c93736cbf25d7",
+      "libzstd_matches": true
+    }
+  ],
+  "binary_sha256": {
+    "baseline.test": "51955237f6cfb85dd9d761eb1c104df072af03df85fe4c347fb4276f86388143",
+    "final.test": "29ef5c10de4628738a6d6622770fd6f12cd7ade5861e44d8b938fc8177811eca"
+  },
+  "source_artifacts": "var/zstd-decode-second-20261031/",
+  "baseline_method": "Decoder sources from clean HEAD 9f49679; same tracked benchmarks as final. New test only adds RFC length-code vectors.",
+  "validation": {
+    "normal_tests": "zstddecode/zstdencode/compat/store passed",
+    "race": "zstddecode/zstdencode/compat/store passed",
+    "bootstrap_targeted": "TestNetworkCompressionCache and TestNetworkCompressionDiagnostic passed",
+    "vet": "all cmd/internal/tools packages passed",
+    "cgo_disabled_build": "all cmd/internal/tools packages passed",
+    "fixed_code_vectors": "all 36 literal and 53 match codes match RFC 8878 tables 16 and 17",
+    "frame_comparison": "25 frames match original bytes, independent Go decoder and libzstd; compressed inputs unchanged",
+    "fuzz": {
+      "FuzzDecode": {
+        "executions": 6142,
+        "requested_seconds": 20,
+        "passed": true
+      },
+      "FuzzArchiveRoundTrip": {
+        "executions": 359,
+        "requested_seconds": 20,
+        "passed": true
+      }
+    },
+    "not_run": [
+      "whole bootstrap suite",
+      "live replacement",
+      "browser/client decoding performance",
+      "HTTP load or WAN latency"
+    ],
+    "designcheck": "85 Markdown files, 91 JSON files, 738 local links and synthetic format checks passed"
+  }
+}

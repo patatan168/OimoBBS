@@ -100,7 +100,7 @@ func TestSharedAdminLoopbackHTTPWithoutSecondPort(t *testing.T) {
 		t.Fatal(e)
 	}
 	for _, ip := range []string{"127.0.0.1", "192.0.2.19"} {
-		req := httptest.NewRequest("GET", repo.cfg.Public.BaseURL+base+"/login", nil)
+		req := webReadTestRequest("GET", repo.cfg.Public.BaseURL+base+"/login", nil)
 		req.RemoteAddr = ip + ":45678"
 		w := httptest.NewRecorder()
 		server.Handler.ServeHTTP(w, req)

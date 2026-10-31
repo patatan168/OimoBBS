@@ -1,5 +1,5 @@
 <!-- 構造化ローカルルールをプレーンテキストで編集する管理画面。 -->
-<!doctype html><html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>ローカルルール — OimoBBS管理</title>{{template "admin-assets" .}}</head>
+<!doctype html><html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>{{with boardNavigation}}{{.Name}} — {{.CurrentTitle}}{{else}}ローカルルール — OimoBBS管理{{end}}</title>{{template "admin-assets" .}}</head>
 <body class="admin">{{template "admin-header" .}}<main id="main" tabindex="-1"><h1>ローカルルール</h1>
 {{if .Message}}<p role="alert">{{.Message}}</p>{{end}}
 <p>保存後、板のWeb画面と専ブラのローカルルール表示に反映されます。</p>

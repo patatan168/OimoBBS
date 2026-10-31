@@ -223,7 +223,7 @@ func validateOnlineBoardCopy(ctx context.Context, root string, b *postingBoard, 
 				e = store.ErrCorrupt
 				break
 			}
-			if v.Kind == "expire" || v.Kind == "pressure" {
+			if v.Kind == "expire" || v.Kind == "pressure" || v.Kind == "closure" {
 				seq, expires, _, ok := p.RetentionState()
 				if proof == nil || !ok || seq != v.Expected || expires != v.Expires {
 					e = store.ErrCorrupt

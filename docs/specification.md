@@ -29,6 +29,7 @@
 | 匿名Cookie | CAPを含む新規投稿で必須。有効期間30日、残り7日以下で更新 | [Cookie](features/posting.md#匿名cookie) |
 | 識別表示 | 日ID・トリップ・CAP・回線表示は板設定と資格に従う | [識別表示](features/posting.md#投稿者の識別表示) |
 | 板・スレッド | 入力上限と投稿条件を板別に設定。既定のスレッド上限は1000レス | [板の設定](features/boards.md) |
+| Web取得 | Web・管理GET/HEADはgzip/zstdの受け入れ宣言が必要。非対応は406、専ブラ用URLは例外 | [圧縮の受付条件](features/reading.md#webの取得条件) |
 | 専ブラ通信 | 固定変換表の文字コード、DATの条件付き取得・HEAD・Rangeに対応 | [閲覧と通信](features/reading.md#閲覧と専ブラ向け通信) |
 | 公開条件 | 転載禁止と専ブラ閲覧専用を別に設定 | [転載・専ブラ専用](features/reading.md#転載禁止と専ブラ閲覧専用) |
 | 接続元の制限 | 掲示板全体と板の両方で閲覧を許可する必要がある | [閲覧・投稿の許可](features/reading.md#閲覧と投稿の許可) |

@@ -1,6 +1,7 @@
 /bin/
 /var/
 /coverage.out
+/internal/webui/generated/
 /compose.slip.yaml
 
 __pycache__/

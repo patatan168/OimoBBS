@@ -58,7 +58,12 @@ func validateKey(c decodedCapture, key domain.Hash) error {
 	if ip.Is4() {
 		family = 4
 	}
-	want := c.Input.Dedup(key, c.Observation.BoardID, uint64(c.Target), append([]byte{family}, ip.AsSlice()...), c.Committed)
+	var want domain.Dedup
+	if c.Dedup.Mode == "independent" {
+		want = c.Input.IndependentDedup(key, c.Observation.BoardID, uint64(c.Target), append([]byte{family}, ip.AsSlice()...), c.Observation.RequestID, c.Committed)
+	} else {
+		want = c.Input.Dedup(key, c.Observation.BoardID, uint64(c.Target), append([]byte{family}, ip.AsSlice()...), c.Committed)
+	}
 	want.PostNumber = c.Dedup.PostNumber
 	if !reflect.DeepEqual(want, c.Dedup) {
 		return ErrCapture

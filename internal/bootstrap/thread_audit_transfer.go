@@ -266,7 +266,7 @@ func (r *Repository) transferThreadAudits(ctx context.Context, limit int, idle b
 	}
 	// 周期経路はreader28を確認済み。形式有効化の全板監査を毎回やり直さない。
 	if !idle {
-		if _, e := r.enableStorageReader(ctx, 28, "thread_audit_transfer_enable"); e != nil {
+		if e := r.ensureRuntimeStorageReader(ctx, 28, "thread_audit_transfer_enable"); e != nil {
 			return e
 		}
 	}

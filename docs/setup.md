@@ -226,10 +226,13 @@ HTTPSセットアップ例での接続先です。実際のドメインと板キ
 | 専ブラ登録用の板メニュー | https://bbs.example.com/bbsmenu.json |
 
 ```sh
+curl --fail --compressed https://bbs.example.com/
 curl --fail https://bbs.example.com/bbsmenu.json
 curl --fail https://bbs.example.com/operate/subject.txt
 ./bin/oimobbs healthcheck --config config.json
 ```
+
+Webと管理画面のGET/HEADにはgzip/zstdの受け入れ宣言が必要です。curlでは `--compressed` を指定します。専ブラ用URLとhealthcheckの扱いは[Webの取得条件](features/reading.md#webの取得条件)を参照してください。
 
 次の順に確認します。ローカル検証ではURLを `http://127.0.0.1:8080` に置き換えます。
 
@@ -249,8 +252,7 @@ HTTPを明示的に使う、loopback限定の手動検証手順です。標準HT
 
 ```sh
 go version
-mkdir -p bin
-CGO_ENABLED=0 go build -trimpath -o bin/oimobbs ./cmd/oimobbs
+bash scripts/build.sh
 ```
 
 ### 2. 自分用の設定ファイルを作る
@@ -394,11 +396,10 @@ ls -l ./bin/oimobbs
 `No such file or directory` なら、まだビルドしていないか、別の場所へ配置しています。`--binary` を指定した場合やsystemdへ登録済みの場合は、既存の実行ファイルの場所を使ってください。既定の場所へまだ作成していない場合は、リポジトリ直下で次を実行します。
 
 ```sh
-mkdir -p bin
-CGO_ENABLED=0 go build -trimpath -o ./bin/oimobbs ./cmd/oimobbs
+bash scripts/build.sh
 ```
 
-miseでGoを用意している場合は、ビルドの `go build` を `mise exec -- go build` に置き換えます。この操作は実行ファイルを作るだけです。既存の設定・保存データは使い続け、`init`・板作成・管理者登録は繰り返しません。
+miseでGoを用意している場合は、`mise exec -- bash scripts/build.sh` を実行します。静的資産の生成後に実行ファイルを作ります。既存の設定・保存データは使い続け、`init`・板作成・管理者登録は繰り返しません。
 
 **手動で起動する場合**は、ビルド成功後に443番の待受権限を付与します。setcapはlibcapのコマンドです。実行ファイルを別の場所へ配置した場合は、以降の `./bin/oimobbs` をそのパスに置き換えてください。
 

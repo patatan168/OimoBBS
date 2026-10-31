@@ -4,6 +4,7 @@ package bootstrap
 import (
 	"slices"
 
+	"oimobbs/internal/domain"
 	"oimobbs/internal/store"
 )
 
@@ -44,6 +45,9 @@ func (d boardDirectory) matchesKey(key string) bool {
 
 // validateMetadata は公開キーと別名の一意性・正規順・容量を検査する。
 func (d boardDirectory) validateMetadata() error {
+	if d.ClosedAt != nil && (*d.ClosedAt <= 0 || d.Status != "active" || boardClosureDeadline(*d.ClosedAt) <= *d.ClosedAt) {
+		return store.ErrCorrupt
+	}
 	if !validBoardKey(d.Key) || d.Name != "" && !validName(d.Name) || len(d.Aliases) > boardAliasLimit {
 		return store.ErrCorrupt
 	}
@@ -75,5 +79,9 @@ func validateMetadataTransition(prior, next boardDirectory) error {
 func (b *postingBoard) presentAdminBoard(v AdminBoard) AdminBoard {
 	m := b.metadata()
 	v.Key, v.Name = m.Key, m.Name
+	if at := b.closedAt.Load(); at != 0 {
+		value := domain.Time(at)
+		v.ClosedAt = &value
+	}
 	return v
 }

@@ -69,19 +69,19 @@ func TestAdminThreadFilterCursorBinding(t *testing.T) {
 	s := adminauth.Session{}
 	path := "/boards/" + strings.Repeat("1", 32) + "/threads"
 	now := time.Now()
-	r := httptest.NewRequest("GET", path+"?q=Topic&limit=1", nil)
+	r := webReadTestRequest("GET", path+"?q=Topic&limit=1", nil)
 	page, err := adminListSlice(r, s, "rev", []string{"1", "2"}, now)
 	if err != nil || page.Next == "" {
 		t.Fatal(page, err)
 	}
 	for _, query := range []string{"Topic", "Other", ""} {
-		r = httptest.NewRequest("GET", path+"?"+url.Values{"q": {query}, "cursor": {page.Next}}.Encode(), nil)
+		r = webReadTestRequest("GET", path+"?"+url.Values{"q": {query}, "cursor": {page.Next}}.Encode(), nil)
 		_, err = adminListSlice(r, s, "rev", []string{"1", "2"}, now)
 		if (err == nil) != (query == "Topic") {
 			t.Fatal(query, err)
 		}
 	}
-	r = httptest.NewRequest("GET", "/boards?q=Topic", nil)
+	r = webReadTestRequest("GET", "/boards?q=Topic", nil)
 	if _, err := adminListSlice(r, s, "rev", nil, now); err == nil {
 		t.Fatal("filter accepted on unrelated route")
 	}
@@ -106,7 +106,7 @@ func TestPostingFormCurrentBoardRules(t *testing.T) {
 	// 既存の管理保存経路を使い、フォームへ反映される確定値を変更する。
 	patchBoardForGuide(t, client, board.ID.String(), edit, headers)
 	request := func() string {
-		r := httptest.NewRequest("GET", "http://127.0.0.1:9080/web/post?bbs=guide", nil)
+		r := webReadTestRequest("GET", "http://127.0.0.1:9080/web/post?bbs=guide", nil)
 		w := httptest.NewRecorder()
 		repo.WebPostingHandler(board.ID, nil).ServeHTTP(w, r)
 		if w.Code != 200 {
@@ -168,7 +168,7 @@ func TestSearchOrderAndAdminFilterHTTP(t *testing.T) {
 		t.Fatal(result, err)
 	}
 	for _, order := range []string{"newest", "oldest", "responses"} {
-		r := httptest.NewRequest("GET", "http://127.0.0.1:9080/search?board=browse&sort="+order, nil)
+		r := webReadTestRequest("GET", "http://127.0.0.1:9080/search?board=browse&sort="+order, nil)
 		w := httptest.NewRecorder()
 		repo.SiteWebHandler(nil).ServeHTTP(w, r)
 		body := w.Body.String()

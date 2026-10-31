@@ -43,7 +43,7 @@ try {
  const countries=["countries.css","countries.js","list.css","list.js"];
  const routes=[
   ["/",[]],["/maintenance",[]],["/manual",["admin-access.css"]],["/caps",["dates.css","dates.js"]],
-  ["/boards",["list.css","list.js"]],
+  ["/boards",["admin-board.css","list.css","list.js"]],
   [`/boards/${board}/settings`,[...settings,...countries,"admin-board.css","admin-board.js"]],
   [`/boards/${board}/rules`,["admin-rules.css","admin-rules.js"]],
   [`/boards/${board}/thread-settings`,[...settings,"admin-thread-settings.css","admin-thread-settings.js"]],

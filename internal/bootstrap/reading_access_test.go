@@ -49,7 +49,7 @@ func TestReadingGateRejectsBeforeConditionalResponse(t *testing.T) {
 	repo.liveReading.Store(&readingSnapshot{Policies: map[string]*compiledReadingPolicy{"site": v}})
 	for _, method := range []string{"GET", "HEAD"} {
 		for _, path := range []string{"/", "/bbsmenu.json", "/search", "/test/dat/123.dat"} {
-			r := httptest.NewRequest(method, repo.cfg.Public.BaseURL+path, nil)
+			r := webReadTestRequest(method, repo.cfg.Public.BaseURL+path, nil)
 			r.RemoteAddr = "192.0.2.8:12345"
 			r.Header.Set("Range", "bytes=0-10")
 			r.Header.Set("If-None-Match", "*")
@@ -116,7 +116,7 @@ func TestReadingStreamingRevocationThroughBandwidthAndReprint(t *testing.T) {
 				v, _ := compileReadingPolicy(p)
 				repo.liveReading.Store(&readingSnapshot{Policies: map[string]*compiledReadingPolicy{"site": v}})
 			}
-			req := httptest.NewRequest("GET", repo.cfg.Public.BaseURL+"/", nil)
+			req := webReadTestRequest("GET", repo.cfg.Public.BaseURL+"/", nil)
 			req.RemoteAddr = "192.0.2.1:12345"
 			var sent int
 			var sendErr error
@@ -155,7 +155,7 @@ func TestReadingStreamingRevocationThroughBandwidthAndReprint(t *testing.T) {
 func TestReadingAdminChangeDoesNotInvalidatePublicResponse(t *testing.T) {
 	_, repo := adminFixture(t)
 	defer repo.Close()
-	req := httptest.NewRequest("GET", repo.cfg.Public.BaseURL+"/", nil)
+	req := webReadTestRequest("GET", repo.cfg.Public.BaseURL+"/", nil)
 	req.RemoteAddr = "192.0.2.1:12345"
 	base := httptest.NewRecorder()
 	w, denied := repo.readingGate(base, req, "site")

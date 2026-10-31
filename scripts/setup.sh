@@ -40,6 +40,7 @@ setup_temp=$(mktemp -d)
 # cleanup はこの実行が作成した一時バイナリだけを回収する。
 cleanup() { rm -rf -- "$setup_temp"; }
 trap cleanup EXIT
+(cd -- "$setup_root" && "${setup_go[@]}" generate ./internal/webui)
 (cd -- "$setup_root" && CGO_ENABLED=0 "${setup_go[@]}" build -o "$setup_temp/setup" ./tools/setup)
 if "$setup_help"; then
   "$setup_temp/setup" --source-root "$setup_root" "$@"

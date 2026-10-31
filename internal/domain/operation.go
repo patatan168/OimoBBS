@@ -379,7 +379,7 @@ func (o Operation) validateCommon(old *Thread) error {
 			if d.RequestID == nil {
 				return ErrOperation
 			}
-		} else if d.Mode != "implicit" || d.RequestID != nil {
+		} else if (d.Mode != "implicit" && d.Mode != "independent") || d.RequestID != nil {
 			return ErrOperation
 		}
 		if d.KeyID == 0 || d.PostNumber == 0 || int64(o.Committed) > math.MaxInt64-duration || d.Expires != o.Committed+Time(duration) {

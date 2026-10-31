@@ -5,7 +5,9 @@ COPY go.mod go.sum ./
 RUN go mod download
 COPY internal ./internal
 COPY cmd ./cmd
-RUN CGO_ENABLED=0 go build -trimpath -ldflags='-s -w' -o /out/oimobbs ./cmd/oimobbs \
+COPY tools/webassets ./tools/webassets
+RUN go generate ./internal/webui \
+    && CGO_ENABLED=0 go build -trimpath -ldflags='-s -w' -o /out/oimobbs ./cmd/oimobbs \
     && CGO_ENABLED=0 go build -trimpath -ldflags='-s -w' -o /out/oimoedge ./cmd/oimoedge \
     && CGO_ENABLED=0 go build -trimpath -ldflags='-s -w' -o /out/oimoseal ./cmd/oimoseal
 
@@ -17,7 +19,7 @@ USER 10001:10001
 ENTRYPOINT ["/usr/local/bin/oimoedge"]
 
 FROM build AS update-check
-RUN go test -timeout=5m ./internal/adminauth ./internal/webui ./internal/publicedge ./internal/selfupdate \
+RUN go test -timeout=5m ./internal/adminauth ./internal/webui ./internal/publicedge ./internal/selfupdate ./tools/webassets \
     && go vet ./cmd/... ./internal/...
 
 FROM alpine:3.23 AS runtime

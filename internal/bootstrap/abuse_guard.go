@@ -82,6 +82,7 @@ type guardSignature struct {
 }
 type guardEntry struct {
 	body, title, name, mail, rawIP string
+	content, contentIP             domain.Hash
 	create                         bool
 	match                          *guardEntry
 	flood                          *guardFloodRow
@@ -107,19 +108,21 @@ type GuardEvent struct {
 	Rejected   bool      `json:"rejected"`
 }
 type abuseGuard struct {
-	log            *securitylog.Log
-	globalRules    *globalRuleSet
-	flood          *guardFloodIndex
-	violations     map[domain.Hash]violationState
-	mu             sync.Mutex
-	configured     bool
-	settings       AbuseGuardSettings
-	entries        []guardEntry
-	signatureFloor int
-	pending        int
-	events         []GuardEvent
-	floor          domain.Time
-	overflowUntil  domain.Time
+	content         contentRateLimiter
+	contentSettings func() ContentRateSettings
+	log             *securitylog.Log
+	globalRules     *globalRuleSet
+	flood           *guardFloodIndex
+	violations      map[domain.Hash]violationState
+	mu              sync.Mutex
+	configured      bool
+	settings        AbuseGuardSettings
+	entries         []guardEntry
+	signatureFloor  int
+	pending         int
+	events          []GuardEvent
+	floor           domain.Time
+	overflowUntil   domain.Time
 }
 
 // guardBodySignature は空白を畳み、最大4096個の3文字組だけを保持する。過大本文は明示する。

@@ -183,6 +183,11 @@ func loadReadingSnapshot(state store.ControlState) (*readingSnapshot, error) {
 
 // checkReading は管理画面を共通閲覧設定から分離し、板では共通条件と板条件の両方を適用する。
 func (r *Repository) checkReading(scope string, ip netip.Addr, agent string) error {
+	if index := r.liveReadingBoards.Load(); index != nil && scope != "admin" && scope != "site" {
+		if b := index.Boards[scope]; b != nil && b.closedAt.Load() != 0 {
+			return errReadingDenied
+		}
+	}
 	snapshot := r.liveReading.Load()
 	if snapshot == nil {
 		return nil

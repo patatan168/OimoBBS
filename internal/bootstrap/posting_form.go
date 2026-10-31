@@ -194,6 +194,11 @@ func (r *Repository) submitForm(ctx context.Context, owner domain.ID, body []byt
 	if e != nil {
 		return fail(e)
 	}
+	if !commandCandidate && !privateReceipt && inputErr == nil && preparedInput.RequestID == nil {
+		if err := r.ensureContentRateFormat(); err != nil {
+			return fail(err)
+		}
+	}
 	var originRecast tokenReissue
 	if ip, err := netip.ParseAddr(observation.Resolved.IP); err == nil {
 		r.mu.RLock()
@@ -237,7 +242,7 @@ func (r *Repository) submitForm(ctx context.Context, owner domain.ID, body []byt
 			return fail(errPostingRebuild), nil
 		}
 		anonState = r.liveAnonymous.Load()
-		if b.stopped {
+		if b.stopped || b.closedAt.Load() != 0 {
 			return fail(ErrPostingUnavailable), nil
 		}
 		if !b.matchesKey(fields["bbs"]) {
@@ -349,7 +354,12 @@ func (r *Repository) submitForm(ctx context.Context, owner domain.ID, body []byt
 			confirmationToken = ""
 		}
 		at := domain.Time(now.UnixNano())
-		d := input.Dedup(b.dedupKey, b.owner, key, append([]byte{family}, ip.AsSlice()...), at)
+		var d domain.Dedup
+		if !commandCandidate && !privateReceipt {
+			d = input.IndependentDedup(b.dedupKey, b.owner, key, append([]byte{family}, ip.AsSlice()...), observation.RequestID, at)
+		} else {
+			d = input.Dedup(b.dedupKey, b.owner, key, append([]byte{family}, ip.AsSlice()...), at)
+		}
 		// 待機中の規約更新も再検査し、専ブラとWebに同じ同意を適用する。
 		if latest := r.liveConsent.Load(); latest != nil {
 			site.Terms, site.Consent = latest.Site.Terms, latest.Site.Consent
@@ -432,7 +442,7 @@ func (r *Repository) submitForm(ctx context.Context, owner domain.ID, body []byt
 			if e := ctx.Err(); e != nil {
 				return fail(e), nil
 			}
-			return r.executeCapCommand(b, key, command, *cap, d, site), nil
+			return r.executeCapCommand(b, key, command, *cap, d), nil
 		}
 		var water struct {
 			Last domain.U64 `json:"last_removed_bump"`
@@ -477,7 +487,11 @@ func (r *Repository) submitForm(ctx context.Context, owner domain.ID, body []byt
 			if e != nil {
 				return fail(e), nil
 			}
-			c.Dedup = input.Dedup(b.dedupKey, b.owner, key, append([]byte{family}, ip.AsSlice()...), domain.Time(c.Now.UnixNano()))
+			if !commandCandidate && !privateReceipt {
+				c.Dedup = input.IndependentDedup(b.dedupKey, b.owner, key, append([]byte{family}, ip.AsSlice()...), observation.RequestID, domain.Time(c.Now.UnixNano()))
+			} else {
+				c.Dedup = input.Dedup(b.dedupKey, b.owner, key, append([]byte{family}, ip.AsSlice()...), domain.Time(c.Now.UnixNano()))
+			}
 			defer func() {
 				if !finished {
 					if err := b.admission.limits.Release(ticket); err != nil {

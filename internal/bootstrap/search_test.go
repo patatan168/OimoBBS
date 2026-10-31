@@ -66,7 +66,7 @@ func TestSearchAndModerationHTML(t *testing.T) {
 		t.Fatal(rows, more, e)
 	}
 	request := func(path, method string) *httptest.ResponseRecorder {
-		req := httptest.NewRequest(method, cfg.Public.BaseURL+path, nil)
+		req := webReadTestRequest(method, cfg.Public.BaseURL+path, nil)
 		w := httptest.NewRecorder()
 		repo.SiteWebHandler(nil).ServeHTTP(w, req)
 		return w

@@ -38,7 +38,7 @@ func TestOperationsAutomaticResourcesPersistence(t *testing.T) {
 		t.Fatal(response.StatusCode, body)
 	}
 	var site siteState
-	if err := strictjson.Decode(repo.site.State().Rows["site:state"].Value, &site); err != nil || site.MinimumReader != reportIntervalReader {
+	if err := strictjson.Decode(repo.site.State().Rows["site:state"].Value, &site); err != nil || site.MinimumReader != contentRateReader {
 		t.Fatal("reader guard", err, site.MinimumReader)
 	}
 	client.server.Close()

@@ -62,7 +62,14 @@ func TestEdgeHealthcheckUsesPublicOrigin(t *testing.T) {
 		t.Fatal(e)
 	}
 	var served atomic.Bool
-	front := httptest.NewUnstartedServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { served.Store(true); w.WriteHeader(200) }))
+	front := httptest.NewUnstartedServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Header.Get("Accept-Encoding") != "gzip" {
+			w.WriteHeader(http.StatusNotAcceptable)
+			return
+		}
+		served.Store(true)
+		w.WriteHeader(200)
+	}))
 	front.TLS = &tls.Config{Certificates: []tls.Certificate{pair}, MinVersion: tls.VersionTLS12}
 	front.StartTLS()
 	defer front.Close()

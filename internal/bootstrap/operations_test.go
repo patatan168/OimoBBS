@@ -13,6 +13,7 @@ import (
 	"oimobbs/internal/strictjson"
 	"oimobbs/internal/textcodec"
 	"os"
+	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -72,7 +73,7 @@ func TestOperationsHTTPPersistenceAndLiveLimits(t *testing.T) {
 		t.Fatal("save", res.StatusCode, body)
 	}
 	var expandedSite siteState
-	if err := strictjson.Decode(repo.site.State().Rows["site:state"].Value, &expandedSite); err != nil || expandedSite.MinimumReader != reportIntervalReader {
+	if err := strictjson.Decode(repo.site.State().Rows["site:state"].Value, &expandedSite); err != nil || expandedSite.MinimumReader != contentRateReader {
 		t.Fatal("expanded bandwidth reader", err)
 	}
 	if repo.DeliveryStatus().Budget != 10_000_000_000 || repo.feedCompression.Status().Limit == 0 || repo.feedCompression.Status().Workers < 1 {
@@ -138,7 +139,7 @@ func TestOperationsHTTPPersistenceAndLiveLimits(t *testing.T) {
 	if err != nil {
 		t.Fatal("reopen", err)
 	}
-	if repo.operations() != next || repo.reportSince() != since || repo.feedCompression.Status().Workers < 1 || repo.feedCompression.Status().Limit == 0 {
+	if !reflect.DeepEqual(repo.operations(), next) || repo.reportSince() != since || repo.feedCompression.Status().Workers < 1 || repo.feedCompression.Status().Limit == 0 {
 		t.Fatal("saved values")
 	}
 	client = newAdminClient(t, repo)

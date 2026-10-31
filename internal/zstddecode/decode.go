@@ -1,6 +1,6 @@
 // Package zstddecode は独自保存圧縮器が生成する辞書なしZstandard frameを有界に復号する。
-// raw/RLE block、新規Huffman表、raw literal、RLE/動的FSE列に対応する。
-// 辞書・checksum・表再利用・既定FSE表は未対応として拒否し、部分結果を返さない。
+// raw/RLE block、新規Huffman表、raw literal、定義済み/RLE/動的FSE列に対応する。
+// 辞書・checksum・表再利用は未対応として拒否し、部分結果を返さない。
 package zstddecode
 
 import (
@@ -247,13 +247,16 @@ func readTableInto(data []byte, symbols, maxLog int, cells []fseCell) (fseTable,
 	return fseTable{cells: cells, log: log}, (b.position + 7) / 8, nil
 }
 
-// sequenceTable は単一symbolまたは新規頻度表だけを受理する。
+// sequenceTable は定義済み・単一symbol・新規頻度表を受理する。
 func sequenceTable(data []byte, mode, symbols int) (fseTable, int, error) {
 	return sequenceTableInto(data, mode, symbols, nil)
 }
 
 // sequenceTableInto はRLEを含む同じ形式検査を行い、動的表だけを作業領域へ構築する。
 func sequenceTableInto(data []byte, mode, symbols int, cells []fseCell) (fseTable, int, error) {
+	if mode == 0 {
+		return predefinedTable(symbols)
+	}
 	if mode == 1 {
 		if len(data) == 0 || int(data[0]) >= symbols {
 			return fseTable{}, 0, ErrInvalid
@@ -280,49 +283,6 @@ func (t fseTable) cell(state int) (fseCell, error) {
 		return fseCell{}, ErrInvalid
 	}
 	return t.cells[state], nil
-}
-
-// lengthValue は形式の段階的な範囲から基準長と追加bit数を計算する。
-func lengthValue(code int, match bool) (int, int) {
-	if match {
-		if code < 32 {
-			return code + 3, 0
-		}
-		if code < 36 {
-			return 35 + (code-32)*2, 1
-		}
-		if code < 38 {
-			return 43 + (code-36)*4, 2
-		}
-		if code < 40 {
-			return 51 + (code-38)*8, 3
-		}
-		if code < 42 {
-			return 67 + (code-40)*16, 4
-		}
-		if code == 42 {
-			return 99, 5
-		}
-		width := code - 36
-		return (1 << uint(width)) + 3, width
-	}
-	if code < 16 {
-		return code, 0
-	}
-	if code < 20 {
-		return 16 + (code-16)*2, 1
-	}
-	if code < 22 {
-		return 24 + (code-20)*4, 2
-	}
-	if code < 24 {
-		return 32 + (code-22)*8, 3
-	}
-	if code == 24 {
-		return 48, 4
-	}
-	width := code - 19
-	return 1 << uint(width), width
 }
 
 // decodeBlock は列を順に実行し、literal・履歴offset・block長を毎回検査する。
@@ -405,8 +365,13 @@ func decodeBlock(data, out []byte, size int, repeats *[3]int) ([]byte, error) {
 			tables[1].cells[states[1]],
 			tables[2].cells[states[2]],
 		}
-		ml, mw := lengthValue(int(cells[2].symbol), true)
-		ll, lw := lengthValue(int(cells[0].symbol), false)
+		// 定義済みoffset表には28まであるが、21以上は1MiB窓を必ず超える。
+		// 追加bitの読取り前に拒否し、sequenceThreeの幅上限も保つ。
+		if cells[1].symbol > 20 {
+			return nil, ErrInvalid
+		}
+		ml, mw := matchLengthValue(int(cells[2].symbol))
+		ll, lw := literalLengthValue(int(cells[0].symbol))
 		offsetExtra, matchExtra, literalExtra := b.sequenceThree(int(cells[1].symbol), mw, lw)
 		offsetValue := (1 << uint(cells[1].symbol)) + int(offsetExtra)
 		ml += int(matchExtra)

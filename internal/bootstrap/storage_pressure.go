@@ -35,12 +35,13 @@ type pressureCandidate struct {
 	key             uint64
 	last            domain.Time
 	full, reclaimed bool
+	closed          bool
 }
 
 // EnableStoragePressureReclamation は新しい削除writerより前にreader99をSyncする。
 // 公開本文と満了原本の自動回収も有効にする。検査だけのOpenでは有効にしない。
 func (r *Repository) EnableStoragePressureReclamation(ctx context.Context) error {
-	if _, e := r.enableStorageReader(ctx, 99, "storage_pressure_enable"); e != nil {
+	if e := r.ensureRuntimeStorageReader(ctx, 99, "storage_pressure_enable"); e != nil {
 		return e
 	}
 	if e := r.EnableRequiredOriginalReclamation(ctx); e != nil {
@@ -121,6 +122,9 @@ func (r *Repository) SweepStoragePressure(ctx context.Context) (err error) {
 		})
 		if errors.Is(e, board.ErrBusy) {
 			status.StopReason = "busy"
+			if candidate.closed {
+				return nil
+			}
 			continue
 		}
 		if e != nil {
@@ -165,7 +169,7 @@ func (r *Repository) prepareStoragePressure(ctx context.Context, now time.Time) 
 	return candidates, guard, e
 }
 
-// pressureCandidates は未満杯→満杯の順と最終投稿時刻で決定的に並べる。
+// pressureCandidates は閉鎖板を先頭に、未満杯→満杯と最終投稿時刻で決定的に並べる。
 // 既に公開回収済みで原本の残る列を先に完了させ、不要な追加スレ落としを避ける。
 func (r *Repository) pressureCandidates(ctx context.Context, now domain.Time) ([]pressureCandidate, error) {
 	out := []pressureCandidate{}
@@ -174,13 +178,20 @@ func (r *Repository) pressureCandidates(ctx context.Context, now domain.Time) ([
 			rows := []pressureCandidate{}
 			for key, p := range b.threads {
 				last, full, pending, ok := p.StoragePressureState()
-				if ok && last <= now-domain.Time(storagePressureIdle) && (!p.Reclaimed() || pending) {
-					rows = append(rows, pressureCandidate{worker: b, board: id, key: key, last: last, full: full, reclaimed: p.Reclaimed()})
+				closed := b.closedAt.Load() != 0
+				if closed {
+					last, full, pending, ok = p.ClosedBoardPressureState()
+				}
+				if ok && (closed || last <= now-domain.Time(storagePressureIdle)) && (!p.Reclaimed() || pending) {
+					rows = append(rows, pressureCandidate{worker: b, board: id, key: key, last: last, full: full, reclaimed: p.Reclaimed(), closed: closed})
 				}
 			}
 			return rows, nil
 		})
 		if errors.Is(e, board.ErrBusy) {
+			if b.closedAt.Load() != 0 {
+				return nil, e
+			}
 			continue
 		}
 		if e != nil {
@@ -193,6 +204,9 @@ func (r *Repository) pressureCandidates(ctx context.Context, now domain.Time) ([
 }
 
 func pressureCandidateLess(a, b pressureCandidate) bool {
+	if a.closed != b.closed {
+		return a.closed
+	}
 	if a.reclaimed != b.reclaimed {
 		return a.reclaimed
 	}
@@ -221,7 +235,14 @@ func (r *Repository) reclaimPressureOwned(ctx context.Context, b *postingBoard, 
 		return result, store.ErrIncomplete
 	}
 	last, _, _, ok := p.StoragePressureState()
-	if !ok || last > now-domain.Time(storagePressureIdle) {
+	closed := b.closedAt.Load() != 0
+	if closed && now < domain.Time(b.closedAt.Load()) {
+		return result, evidence.ErrRetirementClock
+	}
+	if closed {
+		last, _, _, ok = p.ClosedBoardPressureState()
+	}
+	if !ok || !closed && last > now-domain.Time(storagePressureIdle) {
 		return result, nil
 	}
 	held, e := p.StoragePressureHeld(requiredGCJournals(b), now, func(i evidence.RequiredPostingIdentity, at domain.Time) (bool, error) {
@@ -245,11 +266,24 @@ func (r *Repository) reclaimPressureOwned(ctx context.Context, b *postingBoard, 
 		result.dropped = 1
 		return result, nil
 	}
+	if closed {
+		if !storagePressureNeeded(r.PostingCapacity(), true) {
+			return result, nil
+		}
+		if e := b.authorizeClosedPressureOwned(c.key, now); e != nil {
+			return result, e
+		}
+	}
 	return r.prunePressureOriginals(ctx, b, c.key, guard, now, result)
 }
 
 // savePressure は通常期限を保った公開停止を先行Syncし、既存の回収手順へ渡す。
 func (b *postingBoard) savePressure(key uint64, now domain.Time) error {
+	return b.saveEarlyReclamation(key, now, "pressure", "storage_pressure")
+}
+
+// saveEarlyReclamation は容量不足または閉鎖後の最終期限を先行保存し、元の保持期限を改変しない。
+func (b *postingBoard) saveEarlyReclamation(key uint64, now domain.Time, kind, reason string) error {
 	p := b.threads[key]
 	seq, expires, policy, ok := p.RetentionState()
 	if !ok {
@@ -263,12 +297,12 @@ func (b *postingBoard) savePressure(key uint64, now domain.Time) error {
 	if b.currentSiteRevision != nil {
 		version = b.currentSiteRevision()
 	}
-	v := DeletionRecord{ID: domain.NewID(), Board: b.owner, Thread: domain.U64(key), Kind: "pressure", Ranges: []app.RedactionRange{}, Expected: seq, TargetOperation: domain.NewID(), Format: 1, Phase: "intent", Created: now, Expires: expires, CleanupDue: now, Actor: domain.Actor{Kind: "system", Reason: "storage_pressure"}, Versions: domain.Versions{Site: version, Board: state.Settings.Version, Thread: policy}, Audit: "pending"}
+	v := DeletionRecord{ID: domain.NewID(), Board: b.owner, Thread: domain.U64(key), Kind: kind, Ranges: []app.RedactionRange{}, Expected: seq, TargetOperation: domain.NewID(), Format: 1, Phase: "intent", Created: now, Expires: expires, CleanupDue: now, Actor: domain.Actor{Kind: "system", Reason: reason}, Versions: domain.Versions{Site: version, Board: state.Settings.Version, Thread: policy}, Audit: "pending"}
 	if e := b.saveDeletion(v); e != nil {
 		b.stopped = true
 		return e
 	}
-	if e := b.afterDeletion("pressure:intent"); e != nil {
+	if e := b.afterDeletion(kind + ":intent"); e != nil {
 		b.stopped = true
 		return e
 	}
@@ -326,7 +360,7 @@ func (s StoragePressureStatus) Description() string {
 	case "protected":
 		return "候補が保全中のため待機"
 	case "no_eligible_threads":
-		return "回収できる古いスレッドなし"
+		return "回収できるスレッドなし"
 	case "reclaiming":
 		return "容量回収中"
 	default:

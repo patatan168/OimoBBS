@@ -17,7 +17,7 @@ type editingForm struct {
 // prepareEditing は所有列で確定済みの公開条件を確認し、保存不要のフォーム値を作る。
 // 同じスレッドの返信batch内でも候補を公開せず、削除・期限・停止・Cookieの検査を保つ。
 func (b *postingBoard) prepareEditing(key uint64, route, existing string, secure bool) (editingForm, error) {
-	if b.stopped {
+	if b.stopped || b.closedAt.Load() != 0 {
 		return editingForm{}, ErrPostingUnavailable
 	}
 	board, err := b.postingFormSettings()

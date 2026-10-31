@@ -82,6 +82,8 @@ func TestAbuseGuardHTTPPostingRestartAndSnapshot(t *testing.T) {
 	if err != nil || !first.Accepted {
 		t.Fatal("first", first, err)
 	}
+	// 本文の類似度検知を検証するため、完全一致の投稿入力とは名前を変える。
+	fields.Set("FROM", "二件目の投稿者")
 	fields.Set("oimo_request_id", "guard-post-second-0001")
 	second, err := sendForm(formA, fields)
 	if err != nil || !second.Accepted {
@@ -97,6 +99,7 @@ func TestAbuseGuardHTTPPostingRestartAndSnapshot(t *testing.T) {
 	v.Similar.MatchPosts = 1
 	saveGuardSettings(t, c, v, "guard-stricter-save-0001")
 	fields.Set("bbs", "guardone")
+	fields.Del("FROM")
 	fields.Set("oimo_request_id", "guard-post-first-0001")
 	retry, err := sendForm(formA, fields)
 	if err != nil || !retry.Accepted || !retry.Duplicate || retry.Key != first.Key {

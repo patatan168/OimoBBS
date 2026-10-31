@@ -52,10 +52,27 @@ func TestEntropyInverseAndReuse(t *testing.T) {
 		base   int
 	}
 	samples := [][]int{{3, 1000, 1, 0, 7, 200, 4000}, {9, 2, 21, 100, 17, 3, 40}, {1, 1, 1, 1, 1, 1, 1, 1}, {100000, 1, 1, 1, 1, 1, 1, 1}}
+	random := rand.New(rand.NewPCG(119, 37))
+	for _, symbols := range []int{12, 21, 36, 53} {
+		counts := make([]int, symbols)
+		for i := range counts {
+			counts[i] = 1 + random.IntN(10000)
+		}
+		samples = append(samples, counts)
+	}
 	for log := uint(5); log <= 9; log++ {
 		size := 1 << log
 		var work entropyWork
 		for _, counts := range samples {
+			present := 0
+			for _, n := range counts {
+				if n > 0 {
+					present++
+				}
+			}
+			if present > size {
+				continue
+			}
 			table := entropyTableWithWork(counts, log, &work)
 			norm := distribution(counts, log)
 			symbolAt := make([]int, size)
@@ -80,6 +97,10 @@ func TestEntropyInverseAndReuse(t *testing.T) {
 				}
 				for state := range size {
 					previous, value, width := table.advance(symbol, uint16(state))
+					next, nextWidth := table.transition(symbol, uint16(state))
+					if next != previous || nextWidth != width {
+						t.Fatal("cost transition disagrees with encoder")
+					}
 					d := decode[previous]
 					if d.symbol != symbol || d.width != width || d.base+int(value) != state || value >= 1<<width {
 						t.Fatalf("log=%d symbol=%d state=%d inverse mismatch", log, symbol, state)

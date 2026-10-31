@@ -190,7 +190,7 @@ func TestHiddenBoardStrictCompatibility(t *testing.T) {
 // hiddenPublicRequest はHEADを含む公開ルーターの制限を確認する。
 func hiddenPublicRequest(t *testing.T, repo *Repository, method, path string, headers http.Header) *httptest.ResponseRecorder {
 	t.Helper()
-	req := httptest.NewRequest(method, repo.cfg.Public.BaseURL+path, nil)
+	req := webReadTestRequest(method, repo.cfg.Public.BaseURL+path, nil)
 	for key, values := range headers {
 		req.Header[key] = values
 	}

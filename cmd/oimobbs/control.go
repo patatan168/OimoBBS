@@ -23,7 +23,7 @@ func runControl(args []string, out, diagnostics io.Writer) error {
 	apply := false
 	if args[0] == "prepare-snapshot" {
 		flags.StringVar(&path, "output", "", "新規候補ディレクトリ（データ領域外の絶対path）")
-		flags.IntVar(&level, "level", 6, "0=raw、gzip=1/6/9")
+		flags.IntVar(&level, "level", 6, "0=raw、保存Zstandard=1/6（9は旧指定の互換用）")
 	} else if args[0] == "reclaim-wal" {
 		flags.BoolVar(&apply, "apply", false, "照合済みの旧WALを削除（既定は対象表示のみ）")
 	} else if args[0] != "enable-snapshots" {

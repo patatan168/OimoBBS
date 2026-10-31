@@ -112,6 +112,17 @@ func (in Input) Dedup(key domain.Hash, board domain.ID, target uint64, canonical
 	return d
 }
 
+// IndependentDedup は要求IDのない新規送信を観測済みHTTP要求へ束縛する。
+// 同じ内容の送信件数は投稿規制で数え、明示IDによる再送は従来どおり照合する。
+func (in Input) IndependentDedup(key domain.Hash, board domain.ID, target uint64, canonicalIP []byte, requestID domain.ID, now domain.Time) domain.Dedup {
+	d := in.Dedup(key, board, target, canonicalIP, now)
+	if in.RequestID == nil {
+		d.Mode = "independent"
+		d.Subject = identity.MAC(key[:], "oimo/independent-post/v1", d.Subject[:], requestID[:])
+	}
+	return d
+}
+
 // splitName は数値参照の構文内にある#を区切りとせず、最初の生#だけで分ける。
 // 参照を復号しないので、参照から秘密や制御命令が発生しない。
 func splitName(raw string) (string, string) {

@@ -3,6 +3,7 @@ package webui
 
 import (
 	"bytes"
+	"io/fs"
 	"regexp"
 	"slices"
 	"strings"
@@ -19,7 +20,7 @@ func TestPageAssetIsolation(t *testing.T) {
 		{"admin", flags{}, nil},
 		{"admin", flags{Login: true}, []string{"admin-auth.css", "admin-auth.js"}},
 		{"admin", flags{Reauth: true}, []string{"admin-auth.css", "admin-auth.js"}},
-		{"boards", flags{}, []string{"list.css", "list.js"}},
+		{"boards", flags{}, []string{"admin-board.css", "list.css", "list.js"}},
 		{"boards", flags{Editing: true}, []string{"admin-settings.css", "admin-board.css", "list.css", "countries.css", "countries.js", "list.js", "admin-board.js", "admin-settings.js"}},
 		{"reading", flags{}, []string{"admin-settings.css", "protection.css", "admin-reading.css", "list.css", "countries.css", "countries.js", "list.js", "admin-settings.js"}},
 		{"waf", flags{}, []string{"admin-settings.css", "protection.css", "admin-waf.css", "admin-waf.js", "admin-settings.js"}},
@@ -58,13 +59,13 @@ func TestPageAssetIsolation(t *testing.T) {
 }
 
 func TestAllTemplatesParseWithPageAssets(t *testing.T) {
-	entries, err := files.ReadDir("templates")
+	entries, err := fs.ReadDir(files, "templates")
 	if err != nil {
 		t.Fatal(err)
 	}
 	used := map[string]bool{}
 	for _, entry := range entries {
-		raw, err := files.ReadFile("templates/" + entry.Name())
+		raw, err := fs.ReadFile(files, "templates/"+entry.Name())
 		if err != nil {
 			t.Fatal(err)
 		}

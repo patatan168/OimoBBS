@@ -4,9 +4,9 @@ import {createRequire} from "node:module";
 import {mkdir} from "node:fs/promises";
 
 const {chromium}=createRequire(import.meta.url)(process.env.OIMO_PLAYWRIGHT);
-const base=process.env.OIMO_BOARD_ADMIN_URL;
+const base=process.env.OIMO_BOARD_ADMIN_URL || process.env.OIMO_LAYOUT_URL;
 const publicBase=base.replace(/\/admin\/?$/,"");
-const directory=process.env.OIMO_BOARD_SCREENSHOTS;
+const directory=process.env.OIMO_BOARD_SCREENSHOTS || process.env.OIMO_LAYOUT_SCREENSHOTS;
 const browser=await chromium.launch({headless:true,executablePath:process.env.OIMO_CHROMIUM,args:["--no-sandbox"]});
 try {
  const context=await browser.newContext();const page=await context.newPage();const errors=[];
@@ -54,7 +54,7 @@ try {
  await page.getByLabel("板キー",{exact:true}).fill("renamed_board");
  await Promise.all([page.waitForNavigation(),page.getByRole("button",{name:"板名・キーを保存",exact:true}).click()]);
  assert.equal(page.url(),settings);
- assert.ok((await page.locator("h1").innerText()).includes("変更後の板名"));
+ assert.ok((await page.locator(".board-target-name").innerText()).includes("変更後の板名"));
  for(const key of ["browser_board","renamed_board"]) {
   assert.equal((await publicPage.goto(publicBase+thread.replace("browser_board",key))).status(),200);
   assert.ok((await publicPage.locator("main").innerText()).includes("板名とキーを変えても残る本文です。"));
@@ -64,12 +64,12 @@ try {
  await page.getByRole("link",{name:"板名・キーを変更",exact:true}).click();
  assert.ok((await page.locator("main").innerText()).includes("browser_board"));
  if(directory)await page.screenshot({path:`${directory}/board-metadata.png`,fullPage:true});
- assert.ok((await page.locator(".site-footer").innerText()).includes("バージョン1.0.3"));
+ assert.ok((await page.locator(".site-footer").innerText()).includes("バージョン1.0.4"));
  // JavaScriptを使わない場合も同じ追加・変更フォームへ到達する。
  const plain=await browser.newContext({javaScriptEnabled:false,storageState:await page.context().storageState()});
  const noJS=await plain.newPage();
  assert.equal((await noJS.goto(base+"/boards/new")).status(),200);
  assert.equal(await noJS.getByLabel("板の名前",{exact:true}).count(),1);
  assert.deepEqual(errors,[]);
- console.log("PASS: board creation, reauthentication return, validation, rename, old/new URLs, unchanged DAT, mobile/desktop and no-JS forms; version 1.0.3");
+ console.log("PASS: board creation, reauthentication return, validation, rename, old/new URLs, unchanged DAT, mobile/desktop and no-JS forms; version 1.0.4");
 } finally {await browser.close();}

@@ -79,6 +79,7 @@ func TestBoardPostingRatesOnlineHistoryAndRecovery(t *testing.T) {
 	}
 	rates.Enabled = false
 	saveBoardRates(t, c, board.ID, rates, "rates-online-disable-01")
+	fields.Set("MESSAGE", "投稿枠が無効なときの本文")
 	fields.Set("oimo_request_id", "rate-disabled-create-01")
 	result, e = sendForm(server, fields)
 	if e != nil || !result.Accepted {
@@ -86,6 +87,7 @@ func TestBoardPostingRatesOnlineHistoryAndRecovery(t *testing.T) {
 	}
 	rates.Enabled = true
 	saveBoardRates(t, c, board.ID, rates, "rates-online-reenable-1")
+	fields.Set("MESSAGE", "投稿枠の再有効化後の本文")
 	fields.Set("oimo_request_id", "rate-reenabled-create-1")
 	result, e = sendForm(server, fields)
 	if e != nil || result.Accepted {

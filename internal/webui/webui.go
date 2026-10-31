@@ -2,28 +2,70 @@
 package webui
 
 import (
+	"context"
 	"crypto/sha256"
 	"embed"
 	"encoding/base64"
 	"fmt"
 	"html/template"
+	"io/fs"
 	"net/http"
 	"oimobbs/internal/compat"
 	"strings"
 	"sync"
 )
 
-//go:embed templates/*.html assets/*.css assets/*.js assets/*.svg inline/*.js inline/*.css
-var files embed.FS
+//go:generate go run ../../tools/webassets -root ../..
 
-var assetCompression = compat.NewCompressionCache(256<<10, 1)
+//go:embed generated
+var generatedFiles embed.FS
+
+var files = generatedRoot()
 var versionedAssetPaths = make(map[string]string)
 var assetNames = make(map[string]string)
 var publicAssets = loadPublicAssets()
 
+// generatedRoot は生成済みファイルだけをテンプレートと配信の入力にする。
+func generatedRoot() fs.FS {
+	root, err := fs.Sub(generatedFiles, "generated")
+	if err != nil {
+		panic(err)
+	}
+	return root
+}
+
+type encodedAsset struct{ gzip, zstd []byte }
+
+// loadPrecompressedAsset は事前生成済みの圧縮本文を一度だけ読み込む。
+func loadPrecompressedAsset(name string) encodedAsset {
+	read := func(suffix string) []byte {
+		body, err := fs.ReadFile(files, "assets/"+name+suffix)
+		if err != nil {
+			panic(err)
+		}
+		return body
+	}
+	return encodedAsset{gzip: read(".gz"), zstd: read(".zst")}
+}
+
+// compress は圧縮せず生成済み本文を返し、要求取消には従来どおり追従する。
+func (a encodedAsset) compress(ctx context.Context, coding, _ string, _ []byte) ([]byte, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	switch coding {
+	case "gzip":
+		return a.gzip, nil
+	case "zstd":
+		return a.zstd, nil
+	default:
+		return nil, fmt.Errorf("unsupported asset encoding: %s", coding)
+	}
+}
+
 // loadPublicAssets は起動時に固定CSS/JS/SVGだけを読み、内容に束縛した表現を準備する。
 func loadPublicAssets() map[string]compat.Representation {
-	entries, err := files.ReadDir("assets")
+	entries, err := fs.ReadDir(files, "assets")
 	if err != nil {
 		panic(err)
 	}
@@ -41,13 +83,14 @@ func loadPublicAssets() map[string]compat.Representation {
 			continue
 		}
 		name := entry.Name()
-		body, err := files.ReadFile("assets/" + name)
+		body, err := fs.ReadFile(files, "assets/"+name)
 		if err != nil {
 			panic(err)
 		}
 		sum := sha256.Sum256(body)
 		tag := fmt.Sprintf("asset-%x", sum)
-		p := compat.Representation{DAT: body, ContentType: kind, DisableRange: true, ETagIdentity: `"` + tag + `-identity"`, ETagGzip: `"` + tag + compat.GzipETagSuffix + `"`, ETagZstd: `"` + tag + compat.ZstdETagSuffix + `"`, Compress: assetCompression.Compress}
+		encoded := loadPrecompressedAsset(name)
+		p := compat.Representation{DAT: body, ContentType: kind, DisableRange: true, ETagIdentity: `"` + tag + `-identity"`, ETagGzip: fmt.Sprintf(`"asset-%x-gzip"`, sha256.Sum256(encoded.gzip)), ETagZstd: fmt.Sprintf(`"asset-%x-zstd"`, sha256.Sum256(encoded.zstd)), Compress: encoded.compress}
 		versioned := fmt.Sprintf("/web/assets/%x/%s", sum, name)
 		result["/web/assets/"+name], result[versioned] = p, p
 		versionedAssetPaths[name] = versioned
@@ -58,7 +101,7 @@ func loadPublicAssets() map[string]compat.Representation {
 
 // Template は独立したHTMLと共通部品を読み込む。構文不正は起動時に検出する。
 func Template(name string) *template.Template {
-	return template.Must(template.New(name+".html").Funcs(templateFunctions).Funcs(template.FuncMap{"assetPath": assetPath, "adminRecoveryHead": func() template.HTML { return adminRecovery.head }, "adminCan": func(string) bool { return false }, "adminCurrent": func(string) bool { return false }, "adminHome": func() string { return "/login" }, "adminBase": func() string { return "" }, "adminURL": func(path string) string { return path }}).ParseFS(files, "templates/common.html", "templates/rule-list.html", "templates/"+name+".html"))
+	return template.Must(template.New(name+".html").Funcs(templateFunctions).Funcs(template.FuncMap{"assetPath": assetPath, "adminRecoveryHead": func() template.HTML { return adminRecovery.head }, "boardNavigation": func() any { return nil }, "adminCan": func(string) bool { return false }, "adminCurrent": func(string) bool { return false }, "adminHome": func() string { return "/login" }, "adminBase": func() string { return "" }, "adminURL": func(path string) string { return path }}).ParseFS(files, "templates/common.html", "templates/rule-list.html", "templates/"+name+".html"))
 }
 
 // assetPath は内容に束縛した既知資産のURLを返す。未知名はテンプレート生成時に拒否する。

@@ -226,3 +226,33 @@ func FuzzValidateKeyAndFrameMetadata(f *testing.F) {
 		checkKeyAndFrame(t, body, data, target, domain.Hash{first})
 	})
 }
+
+// TestIndependentDedupObservationBinding は新規送信索引をHTTP要求に束縛し、旧索引も検証できることを確認する。
+func TestIndependentDedupObservationBinding(t *testing.T) {
+	raw, key := metadataFixture(t)
+	var c Capture
+	if err := json.Unmarshal(raw, &c); err != nil {
+		t.Fatal(err)
+	}
+	ip := netip.MustParseAddr(c.Observation.Resolved.IP).Unmap()
+	family := byte(6)
+	if ip.Is4() {
+		family = 4
+	}
+	c.Dedup = c.Input.IndependentDedup(key, c.Observation.BoardID, uint64(c.Target), append([]byte{family}, ip.AsSlice()...), c.Observation.RequestID, c.Committed)
+	raw, err := json.Marshal(c)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := ValidateKey(raw, key); err != nil {
+		t.Fatal(err)
+	}
+	c.Observation.RequestID = domain.NewID()
+	raw, err = json.Marshal(c)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := ValidateKey(raw, key); err == nil {
+		t.Fatal("unbound HTTP request accepted")
+	}
+}

@@ -16,6 +16,20 @@ func TestOwnFrames(t *testing.T) {
 	for _, n := range []int{255, 256, 65791, 65792, 131072, 131073, 524288} {
 		samples = append(samples, bytes.Repeat([]byte("abcd"), (n+3)/4)[:n])
 	}
+	// 小frame専用経路の前後でも、長短のHuffman符号と厳密な終端検査を保つ。
+	rng := rand.New(rand.NewSource(167))
+	for _, size := range []int{32767, 32768, 32769} {
+		body := make([]byte, size)
+		for i := range body {
+			value := rng.Intn(256)
+			if value < 192 {
+				body[i] = byte('a' + value%3)
+			} else {
+				body[i] = byte(value)
+			}
+		}
+		samples = append(samples, body)
+	}
 	var encoder zstdencode.Encoder
 	for _, raw := range samples {
 		frame := encoder.Encode(raw)
@@ -47,6 +61,15 @@ func FuzzDecode(f *testing.F) {
 	}
 	raw := testutil.DATFixture("entropy")
 	f.Add(encoder.Encode(raw), uint32(len(raw)))
+	// 配信用の単一stream・短い4streamヘッダーも破損入力の起点にする。
+	random := rand.New(rand.NewSource(137))
+	for _, size := range []int{256, 1536, 4096, 32768} {
+		raw := make([]byte, size)
+		for i := range raw {
+			raw[i] = byte(random.Intn(64))
+		}
+		f.Add(encoder.Encode(raw), uint32(size))
+	}
 	f.Fuzz(func(t *testing.T, frame []byte, size uint32) {
 		if len(frame) > 600000 {
 			t.Skip()
@@ -91,6 +114,7 @@ func TestArchiveProfiles(t *testing.T) {
 
 func FuzzArchiveRoundTrip(f *testing.F) {
 	f.Add([]byte("archive body"), byte(0), byte(0))
+	f.Add(testutil.DATFixture("entropy")[:32768], byte(1), byte(128))
 	f.Add(bytes.Repeat([]byte{255, 0, 97}, 2048), byte(3), byte(2))
 	f.Add(testutil.DATFixture("mixed")[:16384], byte(1), byte(128))
 	f.Fuzz(func(t *testing.T, raw []byte, hash, accuracy byte) {

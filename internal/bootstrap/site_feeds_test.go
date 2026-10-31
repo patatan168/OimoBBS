@@ -56,7 +56,7 @@ func checkDedicatedFeeds(t *testing.T, request feedRequest, base, key string) (s
 		t.Fatal("subject", decode(body))
 	}
 	for _, path := range []string{"/bbsmenu.json", "/bbsmenu.html", "/alpha/SETTING.TXT", "/alpha/head.txt", "/alpha/subject.txt", "/", "/alpha/", "/test/read.cgi/alpha/" + key + "/"} {
-		g, b := request("GET", path, nil, http.Header{"Accept-Encoding": {"identity"}})
+		g, b := request("GET", path, nil, http.Header{"Accept-Encoding": {"identity,gzip;q=0.1"}})
 		h, hb := request("HEAD", path, nil)
 		if g.StatusCode != 200 || h.StatusCode != 200 || hb != "" || h.ContentLength != int64(len(b)) {
 			t.Fatal("feed HEAD", path)
@@ -67,7 +67,7 @@ func checkDedicatedFeeds(t *testing.T, request feedRequest, base, key string) (s
 			t.Fatal("HTML CSP changed", path)
 		}
 		etag := g.Header.Get("ETag")
-		cached, cachedBody := request("GET", path, nil, http.Header{"Accept-Encoding": {"identity"}, "If-None-Match": {etag}})
+		cached, cachedBody := request("GET", path, nil, http.Header{"Accept-Encoding": {"identity,gzip;q=0.1"}, "If-None-Match": {etag}})
 		if etag == "" || cached.StatusCode != 304 || cachedBody != "" || cached.Header.Get("Content-Length") != "" {
 			t.Fatal("feed conditional", path, cached.StatusCode)
 		}

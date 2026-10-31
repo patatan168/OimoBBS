@@ -12,7 +12,7 @@ import (
 )
 
 func TestRejectedDedupCodec(t *testing.T) {
-	for _, mode := range []string{"explicit", "implicit"} {
+	for _, mode := range []string{"explicit", "implicit", "independent"} {
 		t.Run(mode, func(t *testing.T) {
 			d := PackDedup{ID: domain.ID{1}, Seq: 7, Committed: 1700000000e9, Value: domain.Dedup{Mode: mode, KeyID: 8, Subject: domain.Hash{2}, Request: domain.Hash{3}, PostNumber: 5}}
 			duration := domain.Time(30 * time.Second)
@@ -39,7 +39,7 @@ func TestRejectedDedupCodec(t *testing.T) {
 			}
 			for _, offset := range []int{0, 1, 2, 3, 132, 135, 152, 155} {
 				bad := bytes.Clone(x)
-				bad[offset] = 3
+				bad[offset] = 4
 				le.PutUint32(bad[156:], checksum(bad[:156]))
 				if _, e = DecodeRejectedDedup(bad, 9, d.Committed); e == nil {
 					t.Fatalf("reserved/tag offset %d accepted", offset)

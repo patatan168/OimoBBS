@@ -96,6 +96,9 @@ func (repo *Repository) legacyPostingPage(w http.ResponseWriter, r *http.Request
 	var limited *abuse.RateLimited
 	if errors.As(result.Err, &limited) {
 		status, message = 429, "投稿間隔を空けて同じ内容を再送してください。"
+		if errors.Is(result.Err, ErrSameContent) {
+			message = "同じ内容の連投上限に達しました。あと約" + strconv.FormatUint(limited.RetryAfter, 10) + "秒待ってから投稿してください。"
+		}
 		w.Header().Set("Retry-After", strconv.FormatUint(limited.RetryAfter, 10))
 	}
 	writeLegacyResult(w, r, status, "error", message, "")

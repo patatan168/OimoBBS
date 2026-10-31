@@ -114,13 +114,24 @@ func (v networkState) validate() error {
 }
 
 func validateNetworkValue(key string, old, next json.RawMessage) error {
-	var v networkState
-	if key != "active" || strictjson.DecodeLimit(next, &v, store.MaxNetworkValueJSON) != nil || v.validate() != nil {
+	if key != "active" {
 		return store.ErrCorrupt
 	}
+	// 先に直前の値を読むことで、次値の挿入が次の履歴で必要な値を追い出さない。
+	var p networkState
 	if len(old) > 0 {
-		var p networkState
-		if strictjson.DecodeLimit(old, &p, store.MaxNetworkValueJSON) != nil || v.Version < p.Version || v.Version > p.Version+1 || v.LastAttempt < p.LastAttempt || v.LastSuccess < p.LastSuccess {
+		var err error
+		p, err = validatedNetworkValues.decode(old)
+		if err != nil {
+			return err
+		}
+	}
+	v, err := validatedNetworkValues.decode(next)
+	if err != nil {
+		return err
+	}
+	if len(old) > 0 {
+		if v.Version < p.Version || v.Version > p.Version+1 || v.LastAttempt < p.LastAttempt || v.LastSuccess < p.LastSuccess {
 			return store.ErrCorrupt
 		}
 		if v.Version == p.Version && !reflect.DeepEqual(v.Config, p.Config) {

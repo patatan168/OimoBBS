@@ -88,7 +88,7 @@ func TestAdminBoardMetadataURLsPostingAndRecovery(t *testing.T) {
 	for _, key := range []string{"original", "renamed"} {
 		for _, suffix := range []string{"/", "/subject.txt", "/SETTING.TXT", "/dat/" + strconv.FormatUint(first.Key, 10) + ".dat"} {
 			w := httptest.NewRecorder()
-			public.Handler.ServeHTTP(w, httptest.NewRequest("GET", cfg.Public.BaseURL+"/"+key+suffix, nil))
+			public.Handler.ServeHTTP(w, webReadTestRequest("GET", cfg.Public.BaseURL+"/"+key+suffix, nil))
 			if w.Code != 200 {
 				t.Fatalf("%s%s: %d %s", key, suffix, w.Code, w.Body.String())
 			}
@@ -100,7 +100,7 @@ func TestAdminBoardMetadataURLsPostingAndRecovery(t *testing.T) {
 			}
 		}
 		w := httptest.NewRecorder()
-		public.Handler.ServeHTTP(w, httptest.NewRequest("GET", cfg.Public.BaseURL+"/test/read.cgi/"+key+"/"+strconv.FormatUint(first.Key, 10)+"/", nil))
+		public.Handler.ServeHTTP(w, webReadTestRequest("GET", cfg.Public.BaseURL+"/test/read.cgi/"+key+"/"+strconv.FormatUint(first.Key, 10)+"/", nil))
 		if w.Code != 200 || !strings.Contains(w.Body.String(), "/test/read.cgi/renamed/") {
 			t.Fatal("thread", key, w.Code, w.Body.String())
 		}
@@ -114,7 +114,7 @@ func TestAdminBoardMetadataURLsPostingAndRecovery(t *testing.T) {
 	}
 	// 変更前に開いた投稿フォームと新しいキーの両方で同じ板へ返信できる。
 	for i, key := range []string{"original", "renamed"} {
-		reply := url.Values{"bbs": {key}, "key": {strconv.FormatUint(first.Key, 10)}, "MESSAGE": {"変更後本文"}, "oimo_request_id": {"metadata-reply-" + key}}
+		reply := url.Values{"bbs": {key}, "key": {strconv.FormatUint(first.Key, 10)}, "MESSAGE": {"変更後本文 " + key}, "oimo_request_id": {"metadata-reply-" + key}}
 		result, e := sendForm(form, reply)
 		if e != nil || !result.Accepted || result.Number != uint32(i+2) {
 			t.Fatal("reply", key, result, e)

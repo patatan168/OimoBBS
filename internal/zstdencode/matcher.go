@@ -44,8 +44,8 @@ func bitPrice(total, count int) int {
 	return whole*256 + fraction
 }
 
-// literalPrices は先頭8KiBの重複を除いたsampleから、literalのbit費用とprefix幅を選ぶ。
-func literalPrices(body []byte) ([256]int, uint64) {
+// literalPrices は先頭8KiBの重複を除いたsampleから、bit費用・prefix幅・省探索の適性を返す。
+func literalPrices(body []byte) ([256]int, uint64, bool) {
 	sample := body[:min(len(body), 8192)]
 	var history [1024]uint16
 	var counts [256]int
@@ -82,11 +82,13 @@ func literalPrices(body []byte) ([256]int, uint64) {
 	if information < total*9*128 {
 		mask = 0xffffffffffffff
 	}
-	return price, mask
+	// 4bit前後のliteralと繰返し構造を持つblockだけ、保存用の省探索方針を使う。
+	structured := total > 0 && information >= total*7*128 && information < total*5*256 && total*2 >= len(sample) && total*32 <= len(sample)*31
+	return price, mask, structured
 }
 
 // worthwhile は短い参照の追加情報がliteralより高くなる候補を落とす。
-func worthwhile(body []byte, i, n, offset int, repeat bool, price *[256]int) bool {
+func (e *Encoder) worthwhile(body []byte, i, n, offset int, repeat bool, price *[256]int) bool {
 	if n >= 16 {
 		return true
 	}
@@ -94,7 +96,7 @@ func worthwhile(body []byte, i, n, offset int, repeat bool, price *[256]int) boo
 	if repeat {
 		for _, v := range body[i : i+n] {
 			literal += price[v]
-			if literal > 7*256 {
+			if literal > e.repeatCost {
 				return true
 			}
 		}
@@ -103,8 +105,8 @@ func worthwhile(body []byte, i, n, offset int, repeat bool, price *[256]int) boo
 	for _, v := range body[i : i+n] {
 		literal += price[v]
 	}
-	reference := bits.Len(uint(offset+3)) - 1 + 12
-	return literal > reference*256
+	reference := (bits.Len(uint(offset+3))-1)*256 + e.referenceCost
+	return literal > reference
 }
 
 // parse は有界な候補探索と直前offsetの継続でliteralと参照に分ける。
@@ -112,25 +114,44 @@ func (e *Encoder) parse(body []byte, begin, end int, repeats [3]int) {
 	e.literals = e.literals[:0]
 	e.coded = e.coded[:0]
 	e.counts = [3][53]int{}
-	prices, hashMask := literalPrices(body[begin:end])
+	prices, hashMask, structured := literalPrices(body[begin:end])
+	e.configureMatchPolicy(structured, end-begin)
+	// 短い候補表を使わない小さい配信本文でも、4byteの一致を拾う。
+	if e.smallHTTP && !e.shortMatches && hashMask == 0xffffffffff {
+		hashMask = 0xffffffff
+	}
 	if e.archiveMask != 0 {
 		hashMask = e.archiveMask
 	}
 	anchor := begin
+	lazyLimit := 32
+	if e.archiveLog == 0 {
+		lazyLimit = 128
+	}
 	for i := begin; i+8 <= end; {
 		value := binary.LittleEndian.Uint64(body[i : i+8])
 		lh := longHash(value, hashMask)
 		bucket := &e.long[(lh>>16)&((1<<15)-1)]
-		prior := [1]uint64{*bucket}
+		prior := [3]uint64{*bucket, 0, 0}
+		sh := uint32(0)
+		if e.shortMatches {
+			sh = longHash(value, 0xffffff)
+			shortBucket := &e.short[(sh>>16)&((1<<12)-1)]
+			prior[1] = *shortBucket
+			// 同じ3byte prefixの最新位置が短い一致でも、その直前の長い一致を残す。
+			prior[2] = e.shortPrevious[(sh>>16)&((1<<12)-1)]
+			e.shortPrevious[(sh>>16)&((1<<12)-1)] = *shortBucket
+			*shortBucket = uint64(sh)<<32 | uint64(i+1)
+		}
 		*bucket = uint64(lh)<<32 | uint64(i+1)
-		fingerprintMiss := uint32(prior[0]>>32) != lh
+		fingerprintMiss := uint32(prior[0]>>32) != lh && (!e.shortMatches || uint32(prior[1]>>32) != sh && uint32(prior[2]>>32) != sh)
 		if fingerprintMiss {
 			repeat := repeats[0]
 			if i == anchor {
 				repeat = repeats[1]
 			}
 			if repeat <= 0 || repeat > i || binary.LittleEndian.Uint32(body[i-repeat:i-repeat+4])&0xffffff != uint32(value)&0xffffff {
-				i += skipLiterals(body, i, anchor, end, &prices)
+				i += e.skipLiterals(body, i, anchor, end, &prices)
 				continue
 			}
 		}
@@ -162,8 +183,16 @@ func (e *Encoder) parse(body []byte, begin, end int, repeats [3]int) {
 				}
 			}
 		}
-		for _, entry := range prior {
-			if entry == 0 || uint32(entry>>32) != lh {
+		for index, entry := range prior {
+			// 末尾までのrepeatは他候補で長くできず、同長でも優先される。
+			if repeatChosen && match == end-i {
+				break
+			}
+			hash, mask := lh, hashMask
+			if index > 0 {
+				hash, mask = sh, 0xffffff
+			}
+			if entry == 0 || uint32(entry>>32) != hash {
 				continue
 			}
 			lp := int(uint32(entry)) - 1
@@ -172,7 +201,7 @@ func (e *Encoder) parse(body []byte, begin, end int, repeats [3]int) {
 			}
 			if lp >= 0 && i-lp <= windowLimit {
 				different := binary.LittleEndian.Uint64(body[lp:lp+8]) ^ value
-				if different&hashMask != 0 {
+				if different&mask != 0 {
 					continue
 				}
 				n := bits.TrailingZeros64(different) / 8
@@ -185,7 +214,8 @@ func (e *Encoder) parse(body []byte, begin, end int, repeats [3]int) {
 				}
 			}
 		}
-		if !repeatChosen && match >= 4 && match < 32 && i+9 <= end {
+		// HTTPでは32〜127byteの一致も先読みする。保存の探索順は維持する。
+		if !repeatChosen && match >= 4 && match < lazyLimit && i+9 <= end {
 			next := binary.LittleEndian.Uint64(body[i+1 : i+9])
 			key := longHash(next, hashMask)
 			entry := e.long[(key>>16)&((1<<15)-1)]
@@ -195,8 +225,8 @@ func (e *Encoder) parse(body []byte, begin, end int, repeats [3]int) {
 				continue
 			}
 		}
-		if match < 3 || !worthwhile(body, i, match, offset, repeatChosen, &prices) {
-			i += skipLiterals(body, i, anchor, end, &prices)
+		if match < 3 || !e.worthwhile(body, i, match, offset, repeatChosen, &prices) {
+			i += e.skipLiterals(body, i, anchor, end, &prices)
 			continue
 		}
 		// 探索で省いた直前の一致もliteral境界まで戻して参照へ含める。
@@ -231,7 +261,7 @@ func (e *Encoder) parse(body []byte, begin, end int, repeats [3]int) {
 				if different == 0 {
 					match = matchLength(body, p, i+candidate, end, 8)
 				}
-				if worthwhile(body, i+candidate, match, repeats[0], true, &prices) {
+				if e.worthwhile(body, i+candidate, match, repeats[0], true, &prices) {
 					gap, n = candidate, match
 					break
 				}
@@ -271,11 +301,11 @@ func boolInt(v bool) int {
 }
 
 // skipLiterals は高価なbyteを飛ばさず、長いliteral区間だけ探索間隔を広げる。
-func skipLiterals(body []byte, i, anchor, end int, prices *[256]int) int {
-	step := min(16, 1+(i-anchor)/16)
+func (e *Encoder) skipLiterals(body []byte, i, anchor, end int, prices *[256]int) int {
 	if prices[body[i]] > 5*256 {
 		return 1
 	}
+	step := min(e.literalSkipMax, 1+((i-anchor)>>(e.literalShift&7)))
 	for n := 1; n < step && i+n < end; n++ {
 		if prices[body[i+n]] > 5*256 {
 			return n

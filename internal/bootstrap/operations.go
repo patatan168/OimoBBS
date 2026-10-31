@@ -44,11 +44,12 @@ type OperationSettings struct {
 	CacheWorkers          int                   `json:"cache_workers"`
 	Reports               ReportPolicy          `json:"reports"`
 	ReportIntervalMinutes int                   `json:"report_interval_minutes,omitempty"`
+	ContentRates          *ContentRateSettings  `json:"same_content,omitempty"`
 }
 
 func (v OperationSettings) valid() bool {
 	m := v.Maintenance
-	return v.ReportIntervalMinutes >= 0 && v.ReportIntervalMinutes <= 1440 && m.IntervalSeconds >= 60 && m.IntervalSeconds <= 86400 && m.MaxThreads >= 1 && m.MaxThreads <= 1000 && m.MaxSeconds >= 1 && m.MaxSeconds <= 300 && v.EgressBits%1_000_000 == 0 && v.CacheBytes%(1<<20) == 0 && v.EgressBits >= 1_000_000 && v.EgressBits <= delivery.MaxBudgetBits && v.CacheBytes <= 1<<40 && v.CacheWorkers >= 0 && v.CacheWorkers <= 4096 && v.Reports.valid()
+	return v.contentRates().valid() && v.ReportIntervalMinutes >= 0 && v.ReportIntervalMinutes <= 1440 && m.IntervalSeconds >= 60 && m.IntervalSeconds <= 86400 && m.MaxThreads >= 1 && m.MaxThreads <= 1000 && m.MaxSeconds >= 1 && m.MaxSeconds <= 300 && v.EgressBits%1_000_000 == 0 && v.CacheBytes%(1<<20) == 0 && v.EgressBits >= 1_000_000 && v.EgressBits <= delivery.MaxBudgetBits && v.CacheBytes <= 1<<40 && v.CacheWorkers >= 0 && v.CacheWorkers <= 4096 && v.Reports.valid()
 }
 
 type operationState struct {
@@ -108,6 +109,8 @@ func (r *Repository) operations() OperationSettings {
 		settings := v.Settings
 		settings.CacheBytes, settings.CacheWorkers = 0, 0
 		settings.ReportIntervalMinutes = settings.reportIntervalMinutes()
+		rates := settings.contentRates()
+		settings.ContentRates = &rates
 		return settings
 	}
 	m := PackMaintenanceConfig{IntervalSeconds: 300, MaxThreads: 5, MaxSeconds: 30}
@@ -117,7 +120,8 @@ func (r *Repository) operations() OperationSettings {
 			m.MaxSeconds = 30
 		}
 	}
-	return OperationSettings{m, r.cfg.EgressBits, 0, 0, defaultReportPolicy(), 10}
+	rates := defaultContentRateSettings()
+	return OperationSettings{m, r.cfg.EgressBits, 0, 0, defaultReportPolicy(), 10, &rates}
 }
 func (r *Repository) reportSince() domain.Time {
 	var at domain.Time
@@ -159,6 +163,11 @@ func (r *Repository) updateOperations(s adminauth.Session, v OperationSettings, 
 		return AdminOperations{}, e
 	}
 	v.CacheBytes, v.CacheWorkers = 0, 0
+	rates := r.operations().contentRates()
+	if v.ContentRates != nil {
+		rates = *v.ContentRates
+	}
+	v.ContentRates = &rates
 	if v.ReportIntervalMinutes == 0 {
 		v.ReportIntervalMinutes = r.operations().reportIntervalMinutes()
 	}
@@ -223,7 +232,7 @@ func (r *Repository) updateOperations(s adminauth.Session, v OperationSettings, 
 	if e = strictjson.Decode(state.Rows["site:state"].Value, &site); e != nil {
 		return AdminOperations{}, e
 	}
-	site.MinimumReader = max(site.MinimumReader, reportIntervalReader)
+	site.MinimumReader = max(site.MinimumReader, contentRateReader)
 	if v.EgressBits > 1_000_000_000 {
 		site.MinimumReader = max(site.MinimumReader, postingResourcesReader)
 	}
@@ -244,7 +253,11 @@ func (r *Repository) updateOperations(s adminauth.Session, v OperationSettings, 
 		return AdminOperations{}, &adminFailure{status: 503, code: "SAVE_UNCERTAIN", operation: receipt.ID}
 	}
 	r.publicRevision.Store(uint64(site.PublicRevision))
-	r.liveOperations.Store(&next)
+	// 返却する設定と稼働中の不変設定で編集可能なpointerを共有しない。
+	live := next
+	liveRates := v.contentRates()
+	live.Settings.ContentRates = &liveRates
+	r.liveOperations.Store(&live)
 	if current.Settings.Reports != v.Reports {
 		r.autoReportVotes = make(map[autoReportTarget][]autoReportVote)
 	}

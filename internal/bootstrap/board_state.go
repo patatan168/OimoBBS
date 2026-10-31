@@ -20,12 +20,13 @@ func validBoardKey(k string) bool {
 }
 
 type boardDirectory struct {
-	Name       string     `json:"name,omitempty"`
-	Key        string     `json:"key"`
-	Aliases    []string   `json:"aliases"`
-	Status     string     `json:"status"`
-	CategoryID *domain.ID `json:"category_id"`
-	JobID      domain.ID  `json:"job_id"`
+	ClosedAt   *domain.Time `json:"closed_at_ns,omitempty"`
+	Name       string       `json:"name,omitempty"`
+	Key        string       `json:"key"`
+	Aliases    []string     `json:"aliases"`
+	Status     string       `json:"status"`
+	CategoryID *domain.ID   `json:"category_id"`
+	JobID      domain.ID    `json:"job_id"`
 }
 type boardValue struct {
 	Name        string        `json:"name"`
@@ -84,6 +85,9 @@ func validateDirectory(key string, old, next json.RawMessage) error {
 	var prior boardDirectory
 	if err := strictjson.Decode(old, &prior); err != nil {
 		return err
+	}
+	if prior.ClosedAt != nil && (v.ClosedAt == nil || *v.ClosedAt != *prior.ClosedAt) {
+		return errors.New("closed board cannot reopen or change closure time")
 	}
 	if validateMetadataTransition(prior, v) != nil || prior.JobID != v.JobID || (prior.Status != "provisioning" && prior.Status != "active") || v.Status != "active" || prior.Status == "provisioning" && (v.CategoryID != nil || v.Name != "" || prior.Key != v.Key || len(v.Aliases) != 0) {
 		return errors.New("invalid board activation")

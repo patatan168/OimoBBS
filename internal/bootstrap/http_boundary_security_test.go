@@ -61,7 +61,7 @@ func TestAdminBrowserBoundaryBeforeLoginNonce(t *testing.T) {
 		t.Fatal("duplicate browser metadata issued login nonce")
 	}
 	for _, site := range []string{"", "same-origin", "none"} {
-		req := httptest.NewRequest("GET", repo.cfg.Admin.Origin+"/login", nil)
+		req := webReadTestRequest("GET", repo.cfg.Admin.Origin+"/login", nil)
 		req.RemoteAddr = "127.0.0.1:12345"
 		if site != "" {
 			req.Header.Set("Sec-Fetch-Site", site)

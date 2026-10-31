@@ -18,3 +18,14 @@ function enhanceAdminMenu(menu) {
   });
 }
 for (const menu of document.querySelectorAll(".admin-menu")) enhanceAdminMenu(menu);
+
+/** 固定した板ナビの高さに合わせ、ページ内リンクの移動先が隠れないようにする。 */
+function enhanceBoardContext(context) {
+  const updateOffset = () => {
+    const height = getComputedStyle(context).position === "sticky" ? context.getBoundingClientRect().height : 0;
+    document.documentElement.style.setProperty('--board-context-height', `${Math.ceil(height) + 16}px`);
+  };
+  updateOffset();
+  new ResizeObserver(updateOffset).observe(context);
+}
+for (const context of document.querySelectorAll('.board-context')) enhanceBoardContext(context);

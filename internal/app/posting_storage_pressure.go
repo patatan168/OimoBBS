@@ -9,7 +9,17 @@ import (
 // StoragePressureState は最終ユーザー投稿・満杯と回収残りを返す。
 // システム報告・固定スレッド・停止列・本文回収済みで原本も回収済みの列は対象外。
 func (p *PostingLog) StoragePressureState() (last domain.Time, full, pending, ok bool) {
-	if p.stopped || p.key == 1 {
+	return p.storagePressureState(false)
+}
+
+// ClosedBoardPressureState は閉鎖板の固定スレッドも容量回収対象にする。
+// 保全予約は呼出元がStoragePressureHeldで別途検査する。
+func (p *PostingLog) ClosedBoardPressureState() (last domain.Time, full, pending, ok bool) {
+	return p.storagePressureState(true)
+}
+
+func (p *PostingLog) storagePressureState(closed bool) (last domain.Time, full, pending, ok bool) {
+	if p.stopped || p.key == 1 && !closed {
 		return
 	}
 	var after domain.After
@@ -18,14 +28,14 @@ func (p *PostingLog) StoragePressureState() (last domain.Time, full, pending, ok
 		s := p.thread.State()
 		after, policy = s.After, s.Policy
 	} else if p.reclaimed != nil {
-		if p.reclaimed.proof.Kind != "pressure" {
+		if p.reclaimed.proof.Kind != "pressure" && !closed {
 			return
 		}
 		after, policy = p.reclaimed.proof.After, p.reclaimed.proof.Policy
 	} else {
 		return
 	}
-	if policy.Pinned {
+	if policy.Pinned && !closed {
 		return
 	}
 	pending = p.thread != nil

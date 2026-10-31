@@ -467,6 +467,9 @@ func inspectSiteState(state store.ControlState, owner domain.ID, baseURL string)
 			return siteState{}, store.ErrCorrupt
 		}
 		v := operation.Settings
+		if v.ContentRates != nil && site.MinimumReader < contentRateReader {
+			return siteState{}, store.ErrCorrupt
+		}
 		if v.ReportIntervalMinutes != 0 && site.MinimumReader < reportIntervalReader {
 			return siteState{}, store.ErrCorrupt
 		}

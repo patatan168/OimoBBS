@@ -80,7 +80,7 @@ func (b *postingBoard) runPostingBatch(operations []board.BatchOperation) []boar
 // runPostingReadyBatchは保存前に到着済みの続きも収集する。確認だけの群を先に返し、保存候補がある群の収集だけを所有列の上限内で行う。
 func (b *postingBoard) runPostingReadyBatch(operations []board.BatchOperation, collect func() []board.BatchOperation) []board.BatchResult {
 	b.collection.note(time.Now(), len(operations))
-	// board.Workerもこのfieldを所有列内だけで読む。次群の開始時に待ち予算を固定する。
+	// 次群の基本予算は従来どおり保存群の終了時点で選ぶ。
 	defer func() {
 		if b.postBatch != nil {
 			b.postBatch.CollectWindow = b.collection.window(time.Now())

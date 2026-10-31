@@ -92,7 +92,7 @@ func Test5chBoardIdentityConformance(t *testing.T) {
 			if !strings.Contains(page, `value="`+tc.mode+`" selected`) || !strings.Contains(page, "ID末尾も非表示") {
 				t.Fatal("UI mismatch")
 			}
-			fields := url.Values{"bbs": {"identity"}, "subject": {"題"}, "MESSAGE": {"本文"}, "mail": {"sage"}, "oimo_request_id": {"conformance-display-" + tc.mode}}
+			fields := url.Values{"bbs": {"identity"}, "subject": {"題"}, "MESSAGE": {"本文 " + tc.mode}, "mail": {"sage"}, "oimo_request_id": {"conformance-display-" + tc.mode}}
 			result, e := sendForm(form, fields)
 			if e != nil || !result.Accepted {
 				t.Fatal(result, e)

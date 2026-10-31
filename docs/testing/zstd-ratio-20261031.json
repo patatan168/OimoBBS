@@ -1,0 +1,4582 @@
+{
+  "date": "2026-10-31",
+  "baseline_revision": "325193a81ba472c3836586292e786229fae38d20",
+  "scope": "encoder microbenchmarks, not live HTTP throughput or production memory",
+  "conditions": {
+    "cpus": [
+      10,
+      11
+    ],
+    "GOMAXPROCS": 2,
+    "samples_per_process": 2,
+    "benchtime": "200ms",
+    "order": [
+      "before",
+      "after",
+      "after",
+      "before"
+    ],
+    "shared_host": true
+  },
+  "inputs": [
+    {
+      "label": "top",
+      "bytes": 4305,
+      "sha256": "fa7b6a1a1b339aac04fe9951770b13f2d45fa3af1382bf1a38600e1ab4513979"
+    },
+    {
+      "label": "board",
+      "bytes": 4457,
+      "sha256": "9be90d1ce9e3eaa31ac6f75ba7cf7f2741297266c1c1b4f2f55d316894df72a1"
+    },
+    {
+      "label": "thread",
+      "bytes": 24664,
+      "sha256": "a0794f226ea69ec8f96665b8bf0d1502ac01073a0d9b5e732eae938967a46d65"
+    },
+    {
+      "label": "thread-last50",
+      "bytes": 24664,
+      "sha256": "a0794f226ea69ec8f96665b8bf0d1502ac01073a0d9b5e732eae938967a46d65"
+    },
+    {
+      "label": "menu",
+      "bytes": 299,
+      "sha256": "11b21c447d19dbbdd96925685a1f382e94463d78476758b0c5d5be69c3d54f0f"
+    },
+    {
+      "label": "subject",
+      "bytes": 82,
+      "sha256": "7315a4bfcde9bf1bcf403b4501e3333237f4d7f54568c21addda00a2c19f36ef"
+    },
+    {
+      "label": "settings",
+      "bytes": 571,
+      "sha256": "309023164947fe7613916af1bfe480f0d24e3a6b8b4ba10e35e62290495e3387"
+    },
+    {
+      "label": "dat",
+      "bytes": 3624,
+      "sha256": "f15ca8e22f27b76ed7e0ee691e48e202f5539454bc81905392aa43d8093bee6f"
+    },
+    {
+      "label": "senbura-dat",
+      "bytes": 452,
+      "sha256": "c571e73f72730d5703bae4efa2b6f79e0d7e26988a6120062dcd2226e8ef9514"
+    },
+    {
+      "label": "asset-thread.css",
+      "bytes": 1454,
+      "sha256": "0921aeec578e174fd79eb00a2cd1b1a9504542d95d014879afaf02db1e761705"
+    },
+    {
+      "label": "asset-public.css",
+      "bytes": 2920,
+      "sha256": "3ad7f9255fce7c657c5ed9024020535b098d52a8474d7a0c086415e37b83f699"
+    },
+    {
+      "label": "asset-list.css",
+      "bytes": 1199,
+      "sha256": "3b85c078bcda88fb60cfaa56fa0a43b02cce336ba66d16467ebe247cf1928efa"
+    },
+    {
+      "label": "asset-ui.js",
+      "bytes": 523,
+      "sha256": "3cfaae79044c623d9678583844be497956742e969ddeeef05d1caee8b9f956e0"
+    },
+    {
+      "label": "asset-list.js",
+      "bytes": 3714,
+      "sha256": "8c6245e1219108889343f2e38bc0398fbcda9b0f613f571d9eafc506bfb4e1dc"
+    },
+    {
+      "label": "asset-thread.js",
+      "bytes": 1637,
+      "sha256": "b3128ec45e2c48e0dda1c52073ce0b48f3fa4ec4fa9bb899db521693ed8fc84f"
+    },
+    {
+      "label": "asset-favicon.svg",
+      "bytes": 463,
+      "sha256": "c18c82c6bbca171dd8df013a1600e21b569d78b51c50ceb5e25bf696d5dbaf5d"
+    },
+    {
+      "label": "asset-ui.css",
+      "bytes": 7315,
+      "sha256": "d681ca34c09600874fee8f40b79117187de02142ca2da2ebb5e13ea4bcf797df"
+    },
+    {
+      "label": "current-admin-css",
+      "bytes": 8063,
+      "sha256": "3bc0d123fcdf7dd165cf4d0f5b99543949351073e427791c7d49eefcae46f3ca"
+    },
+    {
+      "label": "current-admin-js",
+      "bytes": 762,
+      "sha256": "db5961f541e1b46d6b27074cc52b5362693a3531fb785c88b93d243c25a79770"
+    },
+    {
+      "label": "current-admin-board-css",
+      "bytes": 1393,
+      "sha256": "317621a1065bd4e061f3535ada1608d57fc3702b88fc61441d20e29ab33ef348"
+    },
+    {
+      "label": "current-admin-settings-js",
+      "bytes": 2724,
+      "sha256": "6e3f64164c23e0e849bde1ee32be71097ce46630c7a54ebdce6e208db7106bac"
+    },
+    {
+      "label": "current-admin-posts-css",
+      "bytes": 2757,
+      "sha256": "18a5a3ee6d6e9f5ed2b1c0e10b0a1d2b59229163367a9d23b82b2cf3ad3c5cc8"
+    },
+    {
+      "label": "current-admin-rules-js",
+      "bytes": 2344,
+      "sha256": "ea351c193c4d184aa74323b6e413ceab7415ebfedfe2d65ca116a74ba5df61e3"
+    },
+    {
+      "label": "current-admin-waf-js",
+      "bytes": 1399,
+      "sha256": "c2bfbb0e3adfcef23de517cf2dbc9aa54a590f62f5087dd9af7dc81f9ebfa167"
+    },
+    {
+      "label": "current-countries-js",
+      "bytes": 432,
+      "sha256": "bb9786ae1a885d6a3ecc178ea035bdf224bed88b94f37349915ae1629cd1613c"
+    }
+  ],
+  "results": {
+    "rows": [
+      {
+        "name": "BenchmarkEncode/entropy-2",
+        "before": {
+          "ns/op": 1764718.0,
+          "MB/s": 247.04500000000002,
+          "cpu-ns/op": 1786990.5,
+          "encoded-bytes": 177198.0,
+          "B/op": 180560.0,
+          "allocs/op": 19.0
+        },
+        "after": {
+          "ns/op": 1790988.0,
+          "MB/s": 243.42000000000002,
+          "cpu-ns/op": 1813797.0,
+          "encoded-bytes": 177198.0,
+          "B/op": 180560.0,
+          "allocs/op": 19.0
+        },
+        "saved_percent": 0.0,
+        "time_change_percent": 1.4886231114546344,
+        "cpu_change_percent": 1.5000919143106861,
+        "samples": {
+          "after": [
+            {
+              "ns/op": 1774049.0,
+              "MB/s": 245.74,
+              "cpu-ns/op": 1796112.0,
+              "encoded-bytes": 177198.0,
+              "B/op": 180599.0,
+              "allocs/op": 19.0
+            },
+            {
+              "ns/op": 1793646.0,
+              "MB/s": 243.06,
+              "cpu-ns/op": 1815699.0,
+              "encoded-bytes": 177198.0,
+              "B/op": 180560.0,
+              "allocs/op": 19.0
+            },
+            {
+              "ns/op": 1788330.0,
+              "MB/s": 243.78,
+              "cpu-ns/op": 1811895.0,
+              "encoded-bytes": 177198.0,
+              "B/op": 180560.0,
+              "allocs/op": 19.0
+            },
+            {
+              "ns/op": 1866622.0,
+              "MB/s": 233.55,
+              "cpu-ns/op": 1891190.0,
+              "encoded-bytes": 177198.0,
+              "B/op": 180560.0,
+              "allocs/op": 19.0
+            }
+          ],
+          "before": [
+            {
+              "ns/op": 1759040.0,
+              "MB/s": 247.84,
+              "cpu-ns/op": 1780615.0,
+              "encoded-bytes": 177198.0,
+              "B/op": 180560.0,
+              "allocs/op": 19.0
+            },
+            {
+              "ns/op": 1747813.0,
+              "MB/s": 249.43,
+              "cpu-ns/op": 1769309.0,
+              "encoded-bytes": 177198.0,
+              "B/op": 180599.0,
+              "allocs/op": 19.0
+            },
+            {
+              "ns/op": 1770891.0,
+              "MB/s": 246.18,
+              "cpu-ns/op": 1797149.0,
+              "encoded-bytes": 177198.0,
+              "B/op": 180560.0,
+              "allocs/op": 19.0
+            },
+            {
+              "ns/op": 1770396.0,
+              "MB/s": 246.25,
+              "cpu-ns/op": 1793366.0,
+              "encoded-bytes": 177198.0,
+              "B/op": 180560.0,
+              "allocs/op": 19.0
+            }
+          ]
+        }
+      },
+      {
+        "name": "BenchmarkEncode/text-2",
+        "before": {
+          "ns/op": 607366.0,
+          "MB/s": 319.01,
+          "cpu-ns/op": 609696.0,
+          "encoded-bytes": 12189.0,
+          "B/op": 12528.0,
+          "allocs/op": 11.0
+        },
+        "after": {
+          "ns/op": 614032.0,
+          "MB/s": 315.545,
+          "cpu-ns/op": 616309.0,
+          "encoded-bytes": 12147.0,
+          "B/op": 12528.0,
+          "allocs/op": 11.0
+        },
+        "saved_percent": 0.34457297563376815,
+        "time_change_percent": 1.0975260386653085,
+        "cpu_change_percent": 1.084638902010182,
+        "samples": {
+          "after": [
+            {
+              "ns/op": 617258.0,
+              "MB/s": 313.9,
+              "cpu-ns/op": 619424.0,
+              "encoded-bytes": 12147.0,
+              "B/op": 12528.0,
+              "allocs/op": 11.0
+            },
+            {
+              "ns/op": 614520.0,
+              "MB/s": 315.29,
+              "cpu-ns/op": 617013.0,
+              "encoded-bytes": 12147.0,
+              "B/op": 12528.0,
+              "allocs/op": 11.0
+            },
+            {
+              "ns/op": 613544.0,
+              "MB/s": 315.8,
+              "cpu-ns/op": 615605.0,
+              "encoded-bytes": 12147.0,
+              "B/op": 12528.0,
+              "allocs/op": 11.0
+            },
+            {
+              "ns/op": 612255.0,
+              "MB/s": 316.46,
+              "cpu-ns/op": 614156.0,
+              "encoded-bytes": 12147.0,
+              "B/op": 12528.0,
+              "allocs/op": 11.0
+            }
+          ],
+          "before": [
+            {
+              "ns/op": 606847.0,
+              "MB/s": 319.28,
+              "cpu-ns/op": 609346.0,
+              "encoded-bytes": 12189.0,
+              "B/op": 12528.0,
+              "allocs/op": 11.0
+            },
+            {
+              "ns/op": 606600.0,
+              "MB/s": 319.41,
+              "cpu-ns/op": 609081.0,
+              "encoded-bytes": 12189.0,
+              "B/op": 12528.0,
+              "allocs/op": 11.0
+            },
+            {
+              "ns/op": 609405.0,
+              "MB/s": 317.94,
+              "cpu-ns/op": 611781.0,
+              "encoded-bytes": 12189.0,
+              "B/op": 12528.0,
+              "allocs/op": 11.0
+            },
+            {
+              "ns/op": 607885.0,
+              "MB/s": 318.74,
+              "cpu-ns/op": 610046.0,
+              "encoded-bytes": 12189.0,
+              "B/op": 12528.0,
+              "allocs/op": 11.0
+            }
+          ]
+        }
+      },
+      {
+        "name": "BenchmarkEncode/mixed-2",
+        "before": {
+          "ns/op": 838177.5,
+          "MB/s": 243.535,
+          "cpu-ns/op": 843140.0,
+          "encoded-bytes": 31015.0,
+          "B/op": 33016.0,
+          "allocs/op": 11.0
+        },
+        "after": {
+          "ns/op": 842060.0,
+          "MB/s": 242.41500000000002,
+          "cpu-ns/op": 847336.0,
+          "encoded-bytes": 31015.0,
+          "B/op": 33016.0,
+          "allocs/op": 11.0
+        },
+        "saved_percent": 0.0,
+        "time_change_percent": 0.4632073755260757,
+        "cpu_change_percent": 0.4976634959793058,
+        "samples": {
+          "after": [
+            {
+              "ns/op": 845453.0,
+              "MB/s": 241.44,
+              "cpu-ns/op": 850518.0,
+              "encoded-bytes": 31015.0,
+              "B/op": 33016.0,
+              "allocs/op": 11.0
+            },
+            {
+              "ns/op": 844810.0,
+              "MB/s": 241.62,
+              "cpu-ns/op": 850714.0,
+              "encoded-bytes": 31015.0,
+              "B/op": 33016.0,
+              "allocs/op": 11.0
+            },
+            {
+              "ns/op": 838615.0,
+              "MB/s": 243.41,
+              "cpu-ns/op": 843091.0,
+              "encoded-bytes": 31015.0,
+              "B/op": 33016.0,
+              "allocs/op": 11.0
+            },
+            {
+              "ns/op": 839310.0,
+              "MB/s": 243.21,
+              "cpu-ns/op": 844154.0,
+              "encoded-bytes": 31015.0,
+              "B/op": 33016.0,
+              "allocs/op": 11.0
+            }
+          ],
+          "before": [
+            {
+              "ns/op": 837483.0,
+              "MB/s": 243.74,
+              "cpu-ns/op": 842368.0,
+              "encoded-bytes": 31015.0,
+              "B/op": 33016.0,
+              "allocs/op": 11.0
+            },
+            {
+              "ns/op": 837824.0,
+              "MB/s": 243.64,
+              "cpu-ns/op": 842144.0,
+              "encoded-bytes": 31015.0,
+              "B/op": 33016.0,
+              "allocs/op": 11.0
+            },
+            {
+              "ns/op": 838531.0,
+              "MB/s": 243.43,
+              "cpu-ns/op": 843912.0,
+              "encoded-bytes": 31015.0,
+              "B/op": 33016.0,
+              "allocs/op": 11.0
+            },
+            {
+              "ns/op": 848385.0,
+              "MB/s": 240.6,
+              "cpu-ns/op": 853662.0,
+              "encoded-bytes": 31015.0,
+              "B/op": 33016.0,
+              "allocs/op": 11.0
+            }
+          ]
+        }
+      },
+      {
+        "name": "BenchmarkEncode/raw-2",
+        "before": {
+          "ns/op": 3136390.0,
+          "MB/s": 167.165,
+          "cpu-ns/op": 3217564.0,
+          "encoded-bytes": 524309.0,
+          "B/op": 532480.0,
+          "allocs/op": 1.0
+        },
+        "after": {
+          "ns/op": 3284062.5,
+          "MB/s": 159.645,
+          "cpu-ns/op": 3362848.5,
+          "encoded-bytes": 524309.0,
+          "B/op": 532480.0,
+          "allocs/op": 1.0
+        },
+        "saved_percent": 0.0,
+        "time_change_percent": 4.7083589732144215,
+        "cpu_change_percent": 4.5153569594886145,
+        "samples": {
+          "after": [
+            {
+              "ns/op": 3291755.0,
+              "MB/s": 159.27,
+              "cpu-ns/op": 3369875.0,
+              "encoded-bytes": 524309.0,
+              "B/op": 532480.0,
+              "allocs/op": 1.0
+            },
+            {
+              "ns/op": 3311772.0,
+              "MB/s": 158.31,
+              "cpu-ns/op": 3393233.0,
+              "encoded-bytes": 524309.0,
+              "B/op": 532480.0,
+              "allocs/op": 1.0
+            },
+            {
+              "ns/op": 3257490.0,
+              "MB/s": 160.95,
+              "cpu-ns/op": 3329811.0,
+              "encoded-bytes": 524309.0,
+              "B/op": 532480.0,
+              "allocs/op": 1.0
+            },
+            {
+              "ns/op": 3276370.0,
+              "MB/s": 160.02,
+              "cpu-ns/op": 3355822.0,
+              "encoded-bytes": 524309.0,
+              "B/op": 532480.0,
+              "allocs/op": 1.0
+            }
+          ],
+          "before": [
+            {
+              "ns/op": 3126471.0,
+              "MB/s": 167.69,
+              "cpu-ns/op": 3204419.0,
+              "encoded-bytes": 524309.0,
+              "B/op": 532480.0,
+              "allocs/op": 1.0
+            },
+            {
+              "ns/op": 3143808.0,
+              "MB/s": 166.77,
+              "cpu-ns/op": 3231278.0,
+              "encoded-bytes": 524309.0,
+              "B/op": 532480.0,
+              "allocs/op": 1.0
+            },
+            {
+              "ns/op": 3141220.0,
+              "MB/s": 166.91,
+              "cpu-ns/op": 3219181.0,
+              "encoded-bytes": 524309.0,
+              "B/op": 532480.0,
+              "allocs/op": 1.0
+            },
+            {
+              "ns/op": 3131560.0,
+              "MB/s": 167.42,
+              "cpu-ns/op": 3215947.0,
+              "encoded-bytes": 524309.0,
+              "B/op": 532480.0,
+              "allocs/op": 1.0
+            }
+          ]
+        }
+      },
+      {
+        "name": "BenchmarkEncode/repeat-2",
+        "before": {
+          "ns/op": 92198.5,
+          "MB/s": 5423.085,
+          "cpu-ns/op": 92512.0,
+          "encoded-bytes": 64.0,
+          "B/op": 64.0,
+          "allocs/op": 1.0
+        },
+        "after": {
+          "ns/op": 91733.0,
+          "MB/s": 5450.6,
+          "cpu-ns/op": 92092.5,
+          "encoded-bytes": 64.0,
+          "B/op": 64.0,
+          "allocs/op": 1.0
+        },
+        "saved_percent": 0.0,
+        "time_change_percent": -0.5048889081709529,
+        "cpu_change_percent": -0.4534546869595313,
+        "samples": {
+          "after": [
+            {
+              "ns/op": 91719.0,
+              "MB/s": 5451.43,
+              "cpu-ns/op": 92118.0,
+              "encoded-bytes": 64.0,
+              "B/op": 64.0,
+              "allocs/op": 1.0
+            },
+            {
+              "ns/op": 92365.0,
+              "MB/s": 5413.32,
+              "cpu-ns/op": 92663.0,
+              "encoded-bytes": 64.0,
+              "B/op": 64.0,
+              "allocs/op": 1.0
+            },
+            {
+              "ns/op": 91685.0,
+              "MB/s": 5453.47,
+              "cpu-ns/op": 92067.0,
+              "encoded-bytes": 64.0,
+              "B/op": 64.0,
+              "allocs/op": 1.0
+            },
+            {
+              "ns/op": 91747.0,
+              "MB/s": 5449.77,
+              "cpu-ns/op": 91982.0,
+              "encoded-bytes": 64.0,
+              "B/op": 64.0,
+              "allocs/op": 1.0
+            }
+          ],
+          "before": [
+            {
+              "ns/op": 92339.0,
+              "MB/s": 5414.81,
+              "cpu-ns/op": 92687.0,
+              "encoded-bytes": 64.0,
+              "B/op": 64.0,
+              "allocs/op": 1.0
+            },
+            {
+              "ns/op": 92351.0,
+              "MB/s": 5414.15,
+              "cpu-ns/op": 92589.0,
+              "encoded-bytes": 64.0,
+              "B/op": 64.0,
+              "allocs/op": 1.0
+            },
+            {
+              "ns/op": 92058.0,
+              "MB/s": 5431.36,
+              "cpu-ns/op": 92435.0,
+              "encoded-bytes": 64.0,
+              "B/op": 64.0,
+              "allocs/op": 1.0
+            },
+            {
+              "ns/op": 91789.0,
+              "MB/s": 5447.27,
+              "cpu-ns/op": 91996.0,
+              "encoded-bytes": 64.0,
+              "B/op": 64.0,
+              "allocs/op": 1.0
+            }
+          ]
+        }
+      },
+      {
+        "name": "BenchmarkEncode/rle-2",
+        "before": {
+          "ns/op": 88671.5,
+          "MB/s": 5638.795,
+          "cpu-ns/op": 88890.0,
+          "encoded-bytes": 25.0,
+          "B/op": 32.0,
+          "allocs/op": 1.0
+        },
+        "after": {
+          "ns/op": 90443.5,
+          "MB/s": 5528.295,
+          "cpu-ns/op": 90715.5,
+          "encoded-bytes": 25.0,
+          "B/op": 32.0,
+          "allocs/op": 1.0
+        },
+        "saved_percent": 0.0,
+        "time_change_percent": 1.9983873059551183,
+        "cpu_change_percent": 2.053661829227127,
+        "samples": {
+          "after": [
+            {
+              "ns/op": 92719.0,
+              "MB/s": 5392.66,
+              "cpu-ns/op": 93014.0,
+              "encoded-bytes": 25.0,
+              "B/op": 32.0,
+              "allocs/op": 1.0
+            },
+            {
+              "ns/op": 90180.0,
+              "MB/s": 5544.45,
+              "cpu-ns/op": 90456.0,
+              "encoded-bytes": 25.0,
+              "B/op": 32.0,
+              "allocs/op": 1.0
+            },
+            {
+              "ns/op": 90472.0,
+              "MB/s": 5526.56,
+              "cpu-ns/op": 90725.0,
+              "encoded-bytes": 25.0,
+              "B/op": 32.0,
+              "allocs/op": 1.0
+            },
+            {
+              "ns/op": 90415.0,
+              "MB/s": 5530.03,
+              "cpu-ns/op": 90706.0,
+              "encoded-bytes": 25.0,
+              "B/op": 32.0,
+              "allocs/op": 1.0
+            }
+          ],
+          "before": [
+            {
+              "ns/op": 90381.0,
+              "MB/s": 5532.14,
+              "cpu-ns/op": 90596.0,
+              "encoded-bytes": 25.0,
+              "B/op": 32.0,
+              "allocs/op": 1.0
+            },
+            {
+              "ns/op": 88792.0,
+              "MB/s": 5631.12,
+              "cpu-ns/op": 88991.0,
+              "encoded-bytes": 25.0,
+              "B/op": 32.0,
+              "allocs/op": 1.0
+            },
+            {
+              "ns/op": 88335.0,
+              "MB/s": 5660.26,
+              "cpu-ns/op": 88542.0,
+              "encoded-bytes": 25.0,
+              "B/op": 32.0,
+              "allocs/op": 1.0
+            },
+            {
+              "ns/op": 88551.0,
+              "MB/s": 5646.47,
+              "cpu-ns/op": 88789.0,
+              "encoded-bytes": 25.0,
+              "B/op": 32.0,
+              "allocs/op": 1.0
+            }
+          ]
+        }
+      },
+      {
+        "name": "BenchmarkHTTPCorpus/top-2",
+        "before": {
+          "ns/op": 94948.0,
+          "MB/s": 45.345,
+          "cpu-ns/op": 95533.5,
+          "encoded-bytes": 1942.0,
+          "B/op": 2512.0,
+          "allocs/op": 9.0
+        },
+        "after": {
+          "ns/op": 93944.0,
+          "MB/s": 45.83,
+          "cpu-ns/op": 94403.5,
+          "encoded-bytes": 1930.0,
+          "B/op": 2512.0,
+          "allocs/op": 9.0
+        },
+        "saved_percent": 0.6179196704428425,
+        "time_change_percent": -1.0574209040738136,
+        "cpu_change_percent": -1.1828311534697211,
+        "samples": {
+          "after": [
+            {
+              "ns/op": 94860.0,
+              "MB/s": 45.38,
+              "cpu-ns/op": 95349.0,
+              "encoded-bytes": 1930.0,
+              "B/op": 2512.0,
+              "allocs/op": 9.0
+            },
+            {
+              "ns/op": 93305.0,
+              "MB/s": 46.14,
+              "cpu-ns/op": 93745.0,
+              "encoded-bytes": 1930.0,
+              "B/op": 2512.0,
+              "allocs/op": 9.0
+            },
+            {
+              "ns/op": 94583.0,
+              "MB/s": 45.52,
+              "cpu-ns/op": 95062.0,
+              "encoded-bytes": 1930.0,
+              "B/op": 2512.0,
+              "allocs/op": 9.0
+            },
+            {
+              "ns/op": 92523.0,
+              "MB/s": 46.53,
+              "cpu-ns/op": 93085.0,
+              "encoded-bytes": 1930.0,
+              "B/op": 2512.0,
+              "allocs/op": 9.0
+            }
+          ],
+          "before": [
+            {
+              "ns/op": 95521.0,
+              "MB/s": 45.07,
+              "cpu-ns/op": 96091.0,
+              "encoded-bytes": 1942.0,
+              "B/op": 2512.0,
+              "allocs/op": 9.0
+            },
+            {
+              "ns/op": 94375.0,
+              "MB/s": 45.62,
+              "cpu-ns/op": 95002.0,
+              "encoded-bytes": 1942.0,
+              "B/op": 2512.0,
+              "allocs/op": 9.0
+            },
+            {
+              "ns/op": 95594.0,
+              "MB/s": 45.03,
+              "cpu-ns/op": 96065.0,
+              "encoded-bytes": 1942.0,
+              "B/op": 2512.0,
+              "allocs/op": 9.0
+            },
+            {
+              "ns/op": 93581.0,
+              "MB/s": 46.0,
+              "cpu-ns/op": 94039.0,
+              "encoded-bytes": 1942.0,
+              "B/op": 2512.0,
+              "allocs/op": 9.0
+            }
+          ]
+        }
+      },
+      {
+        "name": "BenchmarkHTTPCorpus/board-2",
+        "before": {
+          "ns/op": 102505.0,
+          "MB/s": 43.485,
+          "cpu-ns/op": 103048.5,
+          "encoded-bytes": 2152.0,
+          "B/op": 2784.0,
+          "allocs/op": 9.0
+        },
+        "after": {
+          "ns/op": 109616.5,
+          "MB/s": 40.66,
+          "cpu-ns/op": 110140.0,
+          "encoded-bytes": 2149.0,
+          "B/op": 2784.0,
+          "allocs/op": 9.0
+        },
+        "saved_percent": 0.13940520446096655,
+        "time_change_percent": 6.937710355592408,
+        "cpu_change_percent": 6.88171103897679,
+        "samples": {
+          "after": [
+            {
+              "ns/op": 110162.0,
+              "MB/s": 40.46,
+              "cpu-ns/op": 110630.0,
+              "encoded-bytes": 2149.0,
+              "B/op": 2784.0,
+              "allocs/op": 9.0
+            },
+            {
+              "ns/op": 109071.0,
+              "MB/s": 40.86,
+              "cpu-ns/op": 109650.0,
+              "encoded-bytes": 2149.0,
+              "B/op": 2784.0,
+              "allocs/op": 9.0
+            },
+            {
+              "ns/op": 111999.0,
+              "MB/s": 39.79,
+              "cpu-ns/op": 112707.0,
+              "encoded-bytes": 2149.0,
+              "B/op": 2784.0,
+              "allocs/op": 9.0
+            },
+            {
+              "ns/op": 108423.0,
+              "MB/s": 41.11,
+              "cpu-ns/op": 108994.0,
+              "encoded-bytes": 2149.0,
+              "B/op": 2784.0,
+              "allocs/op": 9.0
+            }
+          ],
+          "before": [
+            {
+              "ns/op": 102778.0,
+              "MB/s": 43.37,
+              "cpu-ns/op": 103421.0,
+              "encoded-bytes": 2152.0,
+              "B/op": 2784.0,
+              "allocs/op": 9.0
+            },
+            {
+              "ns/op": 102232.0,
+              "MB/s": 43.6,
+              "cpu-ns/op": 102820.0,
+              "encoded-bytes": 2152.0,
+              "B/op": 2784.0,
+              "allocs/op": 9.0
+            },
+            {
+              "ns/op": 102853.0,
+              "MB/s": 43.33,
+              "cpu-ns/op": 103277.0,
+              "encoded-bytes": 2152.0,
+              "B/op": 2784.0,
+              "allocs/op": 9.0
+            },
+            {
+              "ns/op": 102060.0,
+              "MB/s": 43.67,
+              "cpu-ns/op": 102536.0,
+              "encoded-bytes": 2152.0,
+              "B/op": 2784.0,
+              "allocs/op": 9.0
+            }
+          ]
+        }
+      },
+      {
+        "name": "BenchmarkHTTPCorpus/thread-2",
+        "before": {
+          "ns/op": 175743.0,
+          "MB/s": 140.33999999999997,
+          "cpu-ns/op": 176887.0,
+          "encoded-bytes": 4109.0,
+          "B/op": 5344.0,
+          "allocs/op": 9.0
+        },
+        "after": {
+          "ns/op": 190085.5,
+          "MB/s": 129.755,
+          "cpu-ns/op": 191646.5,
+          "encoded-bytes": 4101.0,
+          "B/op": 5344.0,
+          "allocs/op": 9.0
+        },
+        "saved_percent": 0.19469457288878073,
+        "time_change_percent": 8.161064736575563,
+        "cpu_change_percent": 8.344027543007693,
+        "samples": {
+          "after": [
+            {
+              "ns/op": 189550.0,
+              "MB/s": 130.12,
+              "cpu-ns/op": 190966.0,
+              "encoded-bytes": 4101.0,
+              "B/op": 5344.0,
+              "allocs/op": 9.0
+            },
+            {
+              "ns/op": 189525.0,
+              "MB/s": 130.14,
+              "cpu-ns/op": 191226.0,
+              "encoded-bytes": 4101.0,
+              "B/op": 5344.0,
+              "allocs/op": 9.0
+            },
+            {
+              "ns/op": 193814.0,
+              "MB/s": 127.26,
+              "cpu-ns/op": 194532.0,
+              "encoded-bytes": 4101.0,
+              "B/op": 5344.0,
+              "allocs/op": 9.0
+            },
+            {
+              "ns/op": 190621.0,
+              "MB/s": 129.39,
+              "cpu-ns/op": 192067.0,
+              "encoded-bytes": 4101.0,
+              "B/op": 5344.0,
+              "allocs/op": 9.0
+            }
+          ],
+          "before": [
+            {
+              "ns/op": 176136.0,
+              "MB/s": 140.03,
+              "cpu-ns/op": 177393.0,
+              "encoded-bytes": 4109.0,
+              "B/op": 5344.0,
+              "allocs/op": 9.0
+            },
+            {
+              "ns/op": 174613.0,
+              "MB/s": 141.25,
+              "cpu-ns/op": 176009.0,
+              "encoded-bytes": 4109.0,
+              "B/op": 5344.0,
+              "allocs/op": 9.0
+            },
+            {
+              "ns/op": 175570.0,
+              "MB/s": 140.48,
+              "cpu-ns/op": 176565.0,
+              "encoded-bytes": 4109.0,
+              "B/op": 5344.0,
+              "allocs/op": 9.0
+            },
+            {
+              "ns/op": 175916.0,
+              "MB/s": 140.2,
+              "cpu-ns/op": 177209.0,
+              "encoded-bytes": 4109.0,
+              "B/op": 5344.0,
+              "allocs/op": 9.0
+            }
+          ]
+        }
+      },
+      {
+        "name": "BenchmarkHTTPCorpus/thread-last50-2",
+        "before": {
+          "ns/op": 175168.0,
+          "MB/s": 140.805,
+          "cpu-ns/op": 176559.0,
+          "encoded-bytes": 4109.0,
+          "B/op": 5344.0,
+          "allocs/op": 9.0
+        },
+        "after": {
+          "ns/op": 189288.0,
+          "MB/s": 130.29500000000002,
+          "cpu-ns/op": 190769.0,
+          "encoded-bytes": 4101.0,
+          "B/op": 5344.0,
+          "allocs/op": 9.0
+        },
+        "saved_percent": 0.19469457288878073,
+        "time_change_percent": 8.060833028863712,
+        "cpu_change_percent": 8.048301134464975,
+        "samples": {
+          "after": [
+            {
+              "ns/op": 189411.0,
+              "MB/s": 130.21,
+              "cpu-ns/op": 191041.0,
+              "encoded-bytes": 4101.0,
+              "B/op": 5344.0,
+              "allocs/op": 9.0
+            },
+            {
+              "ns/op": 189165.0,
+              "MB/s": 130.38,
+              "cpu-ns/op": 190497.0,
+              "encoded-bytes": 4101.0,
+              "B/op": 5344.0,
+              "allocs/op": 9.0
+            },
+            {
+              "ns/op": 190269.0,
+              "MB/s": 129.63,
+              "cpu-ns/op": 191592.0,
+              "encoded-bytes": 4101.0,
+              "B/op": 5344.0,
+              "allocs/op": 9.0
+            },
+            {
+              "ns/op": 188113.0,
+              "MB/s": 131.11,
+              "cpu-ns/op": 189699.0,
+              "encoded-bytes": 4101.0,
+              "B/op": 5344.0,
+              "allocs/op": 9.0
+            }
+          ],
+          "before": [
+            {
+              "ns/op": 175234.0,
+              "MB/s": 140.75,
+              "cpu-ns/op": 176741.0,
+              "encoded-bytes": 4109.0,
+              "B/op": 5344.0,
+              "allocs/op": 9.0
+            },
+            {
+              "ns/op": 175245.0,
+              "MB/s": 140.74,
+              "cpu-ns/op": 176720.0,
+              "encoded-bytes": 4109.0,
+              "B/op": 5344.0,
+              "allocs/op": 9.0
+            },
+            {
+              "ns/op": 175047.0,
+              "MB/s": 140.9,
+              "cpu-ns/op": 176288.0,
+              "encoded-bytes": 4109.0,
+              "B/op": 5344.0,
+              "allocs/op": 9.0
+            },
+            {
+              "ns/op": 175102.0,
+              "MB/s": 140.86,
+              "cpu-ns/op": 176398.0,
+              "encoded-bytes": 4109.0,
+              "B/op": 5344.0,
+              "allocs/op": 9.0
+            }
+          ]
+        }
+      },
+      {
+        "name": "BenchmarkHTTPCorpus/menu-2",
+        "before": {
+          "ns/op": 14717.5,
+          "MB/s": 20.314999999999998,
+          "cpu-ns/op": 14811.5,
+          "encoded-bytes": 203.0,
+          "B/op": 384.0,
+          "allocs/op": 7.0
+        },
+        "after": {
+          "ns/op": 15406.5,
+          "MB/s": 19.405,
+          "cpu-ns/op": 15503.5,
+          "encoded-bytes": 203.0,
+          "B/op": 384.0,
+          "allocs/op": 7.0
+        },
+        "saved_percent": 0.0,
+        "time_change_percent": 4.681501613725159,
+        "cpu_change_percent": 4.6720453701515785,
+        "samples": {
+          "after": [
+            {
+              "ns/op": 15495.0,
+              "MB/s": 19.3,
+              "cpu-ns/op": 15598.0,
+              "encoded-bytes": 203.0,
+              "B/op": 384.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 15364.0,
+              "MB/s": 19.46,
+              "cpu-ns/op": 15441.0,
+              "encoded-bytes": 203.0,
+              "B/op": 384.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 15449.0,
+              "MB/s": 19.35,
+              "cpu-ns/op": 15566.0,
+              "encoded-bytes": 203.0,
+              "B/op": 384.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 15152.0,
+              "MB/s": 19.73,
+              "cpu-ns/op": 15231.0,
+              "encoded-bytes": 203.0,
+              "B/op": 384.0,
+              "allocs/op": 7.0
+            }
+          ],
+          "before": [
+            {
+              "ns/op": 14980.0,
+              "MB/s": 19.96,
+              "cpu-ns/op": 15094.0,
+              "encoded-bytes": 203.0,
+              "B/op": 384.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 14721.0,
+              "MB/s": 20.31,
+              "cpu-ns/op": 14819.0,
+              "encoded-bytes": 203.0,
+              "B/op": 384.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 14714.0,
+              "MB/s": 20.32,
+              "cpu-ns/op": 14804.0,
+              "encoded-bytes": 203.0,
+              "B/op": 384.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 14678.0,
+              "MB/s": 20.37,
+              "cpu-ns/op": 14746.0,
+              "encoded-bytes": 203.0,
+              "B/op": 384.0,
+              "allocs/op": 7.0
+            }
+          ]
+        }
+      },
+      {
+        "name": "BenchmarkHTTPCorpus/subject-2",
+        "before": {
+          "ns/op": 4110.0,
+          "MB/s": 19.950000000000003,
+          "cpu-ns/op": 4130.5,
+          "encoded-bytes": 91.0,
+          "B/op": 96.0,
+          "allocs/op": 1.0
+        },
+        "after": {
+          "ns/op": 4115.0,
+          "MB/s": 19.93,
+          "cpu-ns/op": 4136.0,
+          "encoded-bytes": 91.0,
+          "B/op": 96.0,
+          "allocs/op": 1.0
+        },
+        "saved_percent": 0.0,
+        "time_change_percent": 0.12165450121655041,
+        "cpu_change_percent": 0.13315579227697327,
+        "samples": {
+          "after": [
+            {
+              "ns/op": 4109.0,
+              "MB/s": 19.96,
+              "cpu-ns/op": 4129.0,
+              "encoded-bytes": 91.0,
+              "B/op": 96.0,
+              "allocs/op": 1.0
+            },
+            {
+              "ns/op": 4103.0,
+              "MB/s": 19.98,
+              "cpu-ns/op": 4124.0,
+              "encoded-bytes": 91.0,
+              "B/op": 96.0,
+              "allocs/op": 1.0
+            },
+            {
+              "ns/op": 4121.0,
+              "MB/s": 19.9,
+              "cpu-ns/op": 4143.0,
+              "encoded-bytes": 91.0,
+              "B/op": 96.0,
+              "allocs/op": 1.0
+            },
+            {
+              "ns/op": 4128.0,
+              "MB/s": 19.87,
+              "cpu-ns/op": 4152.0,
+              "encoded-bytes": 91.0,
+              "B/op": 96.0,
+              "allocs/op": 1.0
+            }
+          ],
+          "before": [
+            {
+              "ns/op": 4104.0,
+              "MB/s": 19.98,
+              "cpu-ns/op": 4122.0,
+              "encoded-bytes": 91.0,
+              "B/op": 96.0,
+              "allocs/op": 1.0
+            },
+            {
+              "ns/op": 4132.0,
+              "MB/s": 19.85,
+              "cpu-ns/op": 4154.0,
+              "encoded-bytes": 91.0,
+              "B/op": 96.0,
+              "allocs/op": 1.0
+            },
+            {
+              "ns/op": 4096.0,
+              "MB/s": 20.02,
+              "cpu-ns/op": 4115.0,
+              "encoded-bytes": 91.0,
+              "B/op": 96.0,
+              "allocs/op": 1.0
+            },
+            {
+              "ns/op": 4116.0,
+              "MB/s": 19.92,
+              "cpu-ns/op": 4139.0,
+              "encoded-bytes": 91.0,
+              "B/op": 96.0,
+              "allocs/op": 1.0
+            }
+          ]
+        }
+      },
+      {
+        "name": "BenchmarkHTTPCorpus/settings-2",
+        "before": {
+          "ns/op": 24150.0,
+          "MB/s": 23.65,
+          "cpu-ns/op": 24299.5,
+          "encoded-bytes": 294.0,
+          "B/op": 496.0,
+          "allocs/op": 7.0
+        },
+        "after": {
+          "ns/op": 23708.5,
+          "MB/s": 24.085,
+          "cpu-ns/op": 23846.0,
+          "encoded-bytes": 293.0,
+          "B/op": 496.0,
+          "allocs/op": 7.0
+        },
+        "saved_percent": 0.3401360544217687,
+        "time_change_percent": -1.8281573498964754,
+        "cpu_change_percent": -1.8662935451346785,
+        "samples": {
+          "after": [
+            {
+              "ns/op": 24013.0,
+              "MB/s": 23.78,
+              "cpu-ns/op": 24140.0,
+              "encoded-bytes": 293.0,
+              "B/op": 496.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 23899.0,
+              "MB/s": 23.89,
+              "cpu-ns/op": 24036.0,
+              "encoded-bytes": 293.0,
+              "B/op": 496.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 23518.0,
+              "MB/s": 24.28,
+              "cpu-ns/op": 23656.0,
+              "encoded-bytes": 293.0,
+              "B/op": 496.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 23483.0,
+              "MB/s": 24.32,
+              "cpu-ns/op": 23639.0,
+              "encoded-bytes": 293.0,
+              "B/op": 496.0,
+              "allocs/op": 7.0
+            }
+          ],
+          "before": [
+            {
+              "ns/op": 24449.0,
+              "MB/s": 23.36,
+              "cpu-ns/op": 24598.0,
+              "encoded-bytes": 294.0,
+              "B/op": 496.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 24496.0,
+              "MB/s": 23.31,
+              "cpu-ns/op": 24642.0,
+              "encoded-bytes": 294.0,
+              "B/op": 496.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 23851.0,
+              "MB/s": 23.94,
+              "cpu-ns/op": 24001.0,
+              "encoded-bytes": 294.0,
+              "B/op": 496.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 23652.0,
+              "MB/s": 24.14,
+              "cpu-ns/op": 23819.0,
+              "encoded-bytes": 294.0,
+              "B/op": 496.0,
+              "allocs/op": 7.0
+            }
+          ]
+        }
+      },
+      {
+        "name": "BenchmarkHTTPCorpus/dat-2",
+        "before": {
+          "ns/op": 58855.5,
+          "MB/s": 61.58,
+          "cpu-ns/op": 59360.5,
+          "encoded-bytes": 1154.0,
+          "B/op": 1760.0,
+          "allocs/op": 9.0
+        },
+        "after": {
+          "ns/op": 61434.5,
+          "MB/s": 58.985,
+          "cpu-ns/op": 61953.5,
+          "encoded-bytes": 1154.0,
+          "B/op": 1760.0,
+          "allocs/op": 9.0
+        },
+        "saved_percent": 0.0,
+        "time_change_percent": 4.381918427334752,
+        "cpu_change_percent": 4.368224661180409,
+        "samples": {
+          "after": [
+            {
+              "ns/op": 61871.0,
+              "MB/s": 58.57,
+              "cpu-ns/op": 62333.0,
+              "encoded-bytes": 1154.0,
+              "B/op": 1760.0,
+              "allocs/op": 9.0
+            },
+            {
+              "ns/op": 61492.0,
+              "MB/s": 58.93,
+              "cpu-ns/op": 61978.0,
+              "encoded-bytes": 1154.0,
+              "B/op": 1760.0,
+              "allocs/op": 9.0
+            },
+            {
+              "ns/op": 61377.0,
+              "MB/s": 59.04,
+              "cpu-ns/op": 61929.0,
+              "encoded-bytes": 1154.0,
+              "B/op": 1760.0,
+              "allocs/op": 9.0
+            },
+            {
+              "ns/op": 60620.0,
+              "MB/s": 59.78,
+              "cpu-ns/op": 61115.0,
+              "encoded-bytes": 1154.0,
+              "B/op": 1760.0,
+              "allocs/op": 9.0
+            }
+          ],
+          "before": [
+            {
+              "ns/op": 59590.0,
+              "MB/s": 60.82,
+              "cpu-ns/op": 60044.0,
+              "encoded-bytes": 1154.0,
+              "B/op": 1760.0,
+              "allocs/op": 9.0
+            },
+            {
+              "ns/op": 58588.0,
+              "MB/s": 61.86,
+              "cpu-ns/op": 59112.0,
+              "encoded-bytes": 1154.0,
+              "B/op": 1760.0,
+              "allocs/op": 9.0
+            },
+            {
+              "ns/op": 59123.0,
+              "MB/s": 61.3,
+              "cpu-ns/op": 59609.0,
+              "encoded-bytes": 1154.0,
+              "B/op": 1760.0,
+              "allocs/op": 9.0
+            },
+            {
+              "ns/op": 58355.0,
+              "MB/s": 62.1,
+              "cpu-ns/op": 58835.0,
+              "encoded-bytes": 1154.0,
+              "B/op": 1760.0,
+              "allocs/op": 9.0
+            }
+          ]
+        }
+      },
+      {
+        "name": "BenchmarkHTTPCorpus/senbura-dat-2",
+        "before": {
+          "ns/op": 21137.5,
+          "MB/s": 21.38,
+          "cpu-ns/op": 21271.0,
+          "encoded-bytes": 396.0,
+          "B/op": 608.0,
+          "allocs/op": 7.0
+        },
+        "after": {
+          "ns/op": 21894.5,
+          "MB/s": 20.645,
+          "cpu-ns/op": 22020.0,
+          "encoded-bytes": 396.0,
+          "B/op": 608.0,
+          "allocs/op": 7.0
+        },
+        "saved_percent": 0.0,
+        "time_change_percent": 3.581312832643402,
+        "cpu_change_percent": 3.521226082459683,
+        "samples": {
+          "after": [
+            {
+              "ns/op": 21839.0,
+              "MB/s": 20.7,
+              "cpu-ns/op": 21992.0,
+              "encoded-bytes": 396.0,
+              "B/op": 608.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 22286.0,
+              "MB/s": 20.28,
+              "cpu-ns/op": 22405.0,
+              "encoded-bytes": 396.0,
+              "B/op": 608.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 21791.0,
+              "MB/s": 20.74,
+              "cpu-ns/op": 21931.0,
+              "encoded-bytes": 396.0,
+              "B/op": 608.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 21950.0,
+              "MB/s": 20.59,
+              "cpu-ns/op": 22048.0,
+              "encoded-bytes": 396.0,
+              "B/op": 608.0,
+              "allocs/op": 7.0
+            }
+          ],
+          "before": [
+            {
+              "ns/op": 21158.0,
+              "MB/s": 21.36,
+              "cpu-ns/op": 21316.0,
+              "encoded-bytes": 396.0,
+              "B/op": 608.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 21160.0,
+              "MB/s": 21.36,
+              "cpu-ns/op": 21278.0,
+              "encoded-bytes": 396.0,
+              "B/op": 608.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 21117.0,
+              "MB/s": 21.4,
+              "cpu-ns/op": 21264.0,
+              "encoded-bytes": 396.0,
+              "B/op": 608.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 21087.0,
+              "MB/s": 21.44,
+              "cpu-ns/op": 21206.0,
+              "encoded-bytes": 396.0,
+              "B/op": 608.0,
+              "allocs/op": 7.0
+            }
+          ]
+        }
+      },
+      {
+        "name": "BenchmarkHTTPCorpus/asset-thread.css-2",
+        "before": {
+          "ns/op": 33227.0,
+          "MB/s": 43.76,
+          "cpu-ns/op": 33445.0,
+          "encoded-bytes": 566.0,
+          "B/op": 688.0,
+          "allocs/op": 6.0
+        },
+        "after": {
+          "ns/op": 35329.5,
+          "MB/s": 41.155,
+          "cpu-ns/op": 35493.0,
+          "encoded-bytes": 565.0,
+          "B/op": 688.0,
+          "allocs/op": 6.0
+        },
+        "saved_percent": 0.17667844522968199,
+        "time_change_percent": 6.327685316158549,
+        "cpu_change_percent": 6.123486320825244,
+        "samples": {
+          "after": [
+            {
+              "ns/op": 35328.0,
+              "MB/s": 41.16,
+              "cpu-ns/op": 35483.0,
+              "encoded-bytes": 565.0,
+              "B/op": 688.0,
+              "allocs/op": 6.0
+            },
+            {
+              "ns/op": 35449.0,
+              "MB/s": 41.02,
+              "cpu-ns/op": 35662.0,
+              "encoded-bytes": 565.0,
+              "B/op": 688.0,
+              "allocs/op": 6.0
+            },
+            {
+              "ns/op": 35331.0,
+              "MB/s": 41.15,
+              "cpu-ns/op": 35503.0,
+              "encoded-bytes": 565.0,
+              "B/op": 688.0,
+              "allocs/op": 6.0
+            },
+            {
+              "ns/op": 34895.0,
+              "MB/s": 41.67,
+              "cpu-ns/op": 35090.0,
+              "encoded-bytes": 565.0,
+              "B/op": 688.0,
+              "allocs/op": 6.0
+            }
+          ],
+          "before": [
+            {
+              "ns/op": 33350.0,
+              "MB/s": 43.6,
+              "cpu-ns/op": 33568.0,
+              "encoded-bytes": 566.0,
+              "B/op": 688.0,
+              "allocs/op": 6.0
+            },
+            {
+              "ns/op": 33247.0,
+              "MB/s": 43.73,
+              "cpu-ns/op": 33488.0,
+              "encoded-bytes": 566.0,
+              "B/op": 688.0,
+              "allocs/op": 6.0
+            },
+            {
+              "ns/op": 33195.0,
+              "MB/s": 43.8,
+              "cpu-ns/op": 33371.0,
+              "encoded-bytes": 566.0,
+              "B/op": 688.0,
+              "allocs/op": 6.0
+            },
+            {
+              "ns/op": 33207.0,
+              "MB/s": 43.79,
+              "cpu-ns/op": 33402.0,
+              "encoded-bytes": 566.0,
+              "B/op": 688.0,
+              "allocs/op": 6.0
+            }
+          ]
+        }
+      },
+      {
+        "name": "BenchmarkHTTPCorpus/asset-public.css-2",
+        "before": {
+          "ns/op": 69347.0,
+          "MB/s": 42.11,
+          "cpu-ns/op": 69772.5,
+          "encoded-bytes": 1136.0,
+          "B/op": 1328.0,
+          "allocs/op": 7.0
+        },
+        "after": {
+          "ns/op": 75112.0,
+          "MB/s": 38.875,
+          "cpu-ns/op": 75573.0,
+          "encoded-bytes": 1137.0,
+          "B/op": 1328.0,
+          "allocs/op": 7.0
+        },
+        "saved_percent": -0.0880281690140845,
+        "time_change_percent": 8.31326517369173,
+        "cpu_change_percent": 8.31344727507255,
+        "samples": {
+          "after": [
+            {
+              "ns/op": 76003.0,
+              "MB/s": 38.42,
+              "cpu-ns/op": 76446.0,
+              "encoded-bytes": 1137.0,
+              "B/op": 1328.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 75262.0,
+              "MB/s": 38.8,
+              "cpu-ns/op": 75748.0,
+              "encoded-bytes": 1137.0,
+              "B/op": 1328.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 74962.0,
+              "MB/s": 38.95,
+              "cpu-ns/op": 75360.0,
+              "encoded-bytes": 1137.0,
+              "B/op": 1328.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 74949.0,
+              "MB/s": 38.96,
+              "cpu-ns/op": 75398.0,
+              "encoded-bytes": 1137.0,
+              "B/op": 1328.0,
+              "allocs/op": 7.0
+            }
+          ],
+          "before": [
+            {
+              "ns/op": 69643.0,
+              "MB/s": 41.93,
+              "cpu-ns/op": 70059.0,
+              "encoded-bytes": 1136.0,
+              "B/op": 1328.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 68433.0,
+              "MB/s": 42.67,
+              "cpu-ns/op": 68897.0,
+              "encoded-bytes": 1136.0,
+              "B/op": 1328.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 69798.0,
+              "MB/s": 41.84,
+              "cpu-ns/op": 70177.0,
+              "encoded-bytes": 1136.0,
+              "B/op": 1328.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 69051.0,
+              "MB/s": 42.29,
+              "cpu-ns/op": 69486.0,
+              "encoded-bytes": 1136.0,
+              "B/op": 1328.0,
+              "allocs/op": 7.0
+            }
+          ]
+        }
+      },
+      {
+        "name": "BenchmarkHTTPCorpus/asset-list.css-2",
+        "before": {
+          "ns/op": 30913.0,
+          "MB/s": 38.79,
+          "cpu-ns/op": 31093.5,
+          "encoded-bytes": 544.0,
+          "B/op": 688.0,
+          "allocs/op": 6.0
+        },
+        "after": {
+          "ns/op": 31997.5,
+          "MB/s": 37.475,
+          "cpu-ns/op": 32185.0,
+          "encoded-bytes": 542.0,
+          "B/op": 688.0,
+          "allocs/op": 6.0
+        },
+        "saved_percent": 0.36764705882352944,
+        "time_change_percent": 3.508232782324594,
+        "cpu_change_percent": 3.510379982954648,
+        "samples": {
+          "after": [
+            {
+              "ns/op": 32400.0,
+              "MB/s": 37.01,
+              "cpu-ns/op": 32600.0,
+              "encoded-bytes": 542.0,
+              "B/op": 688.0,
+              "allocs/op": 6.0
+            },
+            {
+              "ns/op": 32071.0,
+              "MB/s": 37.39,
+              "cpu-ns/op": 32258.0,
+              "encoded-bytes": 542.0,
+              "B/op": 688.0,
+              "allocs/op": 6.0
+            },
+            {
+              "ns/op": 31924.0,
+              "MB/s": 37.56,
+              "cpu-ns/op": 32112.0,
+              "encoded-bytes": 542.0,
+              "B/op": 688.0,
+              "allocs/op": 6.0
+            },
+            {
+              "ns/op": 31780.0,
+              "MB/s": 37.73,
+              "cpu-ns/op": 31943.0,
+              "encoded-bytes": 542.0,
+              "B/op": 688.0,
+              "allocs/op": 6.0
+            }
+          ],
+          "before": [
+            {
+              "ns/op": 31247.0,
+              "MB/s": 38.37,
+              "cpu-ns/op": 31486.0,
+              "encoded-bytes": 544.0,
+              "B/op": 688.0,
+              "allocs/op": 6.0
+            },
+            {
+              "ns/op": 31063.0,
+              "MB/s": 38.6,
+              "cpu-ns/op": 31238.0,
+              "encoded-bytes": 544.0,
+              "B/op": 688.0,
+              "allocs/op": 6.0
+            },
+            {
+              "ns/op": 30763.0,
+              "MB/s": 38.98,
+              "cpu-ns/op": 30949.0,
+              "encoded-bytes": 544.0,
+              "B/op": 688.0,
+              "allocs/op": 6.0
+            },
+            {
+              "ns/op": 30533.0,
+              "MB/s": 39.27,
+              "cpu-ns/op": 30689.0,
+              "encoded-bytes": 544.0,
+              "B/op": 688.0,
+              "allocs/op": 6.0
+            }
+          ]
+        }
+      },
+      {
+        "name": "BenchmarkHTTPCorpus/asset-ui.js-2",
+        "before": {
+          "ns/op": 18170.5,
+          "MB/s": 28.79,
+          "cpu-ns/op": 18268.0,
+          "encoded-bytes": 300.0,
+          "B/op": 432.0,
+          "allocs/op": 6.0
+        },
+        "after": {
+          "ns/op": 19882.0,
+          "MB/s": 26.315,
+          "cpu-ns/op": 20017.0,
+          "encoded-bytes": 300.0,
+          "B/op": 432.0,
+          "allocs/op": 6.0
+        },
+        "saved_percent": 0.0,
+        "time_change_percent": 9.419113398090317,
+        "cpu_change_percent": 9.574118677468801,
+        "samples": {
+          "after": [
+            {
+              "ns/op": 20584.0,
+              "MB/s": 25.41,
+              "cpu-ns/op": 20724.0,
+              "encoded-bytes": 300.0,
+              "B/op": 432.0,
+              "allocs/op": 6.0
+            },
+            {
+              "ns/op": 20233.0,
+              "MB/s": 25.85,
+              "cpu-ns/op": 20388.0,
+              "encoded-bytes": 300.0,
+              "B/op": 432.0,
+              "allocs/op": 6.0
+            },
+            {
+              "ns/op": 19322.0,
+              "MB/s": 27.07,
+              "cpu-ns/op": 19417.0,
+              "encoded-bytes": 300.0,
+              "B/op": 432.0,
+              "allocs/op": 6.0
+            },
+            {
+              "ns/op": 19531.0,
+              "MB/s": 26.78,
+              "cpu-ns/op": 19646.0,
+              "encoded-bytes": 300.0,
+              "B/op": 432.0,
+              "allocs/op": 6.0
+            }
+          ],
+          "before": [
+            {
+              "ns/op": 18480.0,
+              "MB/s": 28.3,
+              "cpu-ns/op": 18598.0,
+              "encoded-bytes": 300.0,
+              "B/op": 432.0,
+              "allocs/op": 6.0
+            },
+            {
+              "ns/op": 18437.0,
+              "MB/s": 28.37,
+              "cpu-ns/op": 18538.0,
+              "encoded-bytes": 300.0,
+              "B/op": 432.0,
+              "allocs/op": 6.0
+            },
+            {
+              "ns/op": 17795.0,
+              "MB/s": 29.39,
+              "cpu-ns/op": 17898.0,
+              "encoded-bytes": 300.0,
+              "B/op": 432.0,
+              "allocs/op": 6.0
+            },
+            {
+              "ns/op": 17904.0,
+              "MB/s": 29.21,
+              "cpu-ns/op": 17998.0,
+              "encoded-bytes": 300.0,
+              "B/op": 432.0,
+              "allocs/op": 6.0
+            }
+          ]
+        }
+      },
+      {
+        "name": "BenchmarkHTTPCorpus/asset-list.js-2",
+        "before": {
+          "ns/op": 86236.0,
+          "MB/s": 43.065,
+          "cpu-ns/op": 86683.5,
+          "encoded-bytes": 1706.0,
+          "B/op": 2272.0,
+          "allocs/op": 9.0
+        },
+        "after": {
+          "ns/op": 91534.0,
+          "MB/s": 40.575,
+          "cpu-ns/op": 92004.5,
+          "encoded-bytes": 1698.0,
+          "B/op": 2256.0,
+          "allocs/op": 9.0
+        },
+        "saved_percent": 0.46893317702227433,
+        "time_change_percent": 6.14360591864187,
+        "cpu_change_percent": 6.138423113972102,
+        "samples": {
+          "after": [
+            {
+              "ns/op": 93242.0,
+              "MB/s": 39.83,
+              "cpu-ns/op": 93880.0,
+              "encoded-bytes": 1698.0,
+              "B/op": 2256.0,
+              "allocs/op": 9.0
+            },
+            {
+              "ns/op": 91412.0,
+              "MB/s": 40.63,
+              "cpu-ns/op": 91925.0,
+              "encoded-bytes": 1698.0,
+              "B/op": 2256.0,
+              "allocs/op": 9.0
+            },
+            {
+              "ns/op": 91656.0,
+              "MB/s": 40.52,
+              "cpu-ns/op": 92084.0,
+              "encoded-bytes": 1698.0,
+              "B/op": 2256.0,
+              "allocs/op": 9.0
+            },
+            {
+              "ns/op": 90601.0,
+              "MB/s": 40.99,
+              "cpu-ns/op": 90998.0,
+              "encoded-bytes": 1698.0,
+              "B/op": 2256.0,
+              "allocs/op": 9.0
+            }
+          ],
+          "before": [
+            {
+              "ns/op": 86794.0,
+              "MB/s": 42.79,
+              "cpu-ns/op": 87302.0,
+              "encoded-bytes": 1706.0,
+              "B/op": 2272.0,
+              "allocs/op": 9.0
+            },
+            {
+              "ns/op": 85787.0,
+              "MB/s": 43.29,
+              "cpu-ns/op": 86232.0,
+              "encoded-bytes": 1706.0,
+              "B/op": 2272.0,
+              "allocs/op": 9.0
+            },
+            {
+              "ns/op": 86685.0,
+              "MB/s": 42.84,
+              "cpu-ns/op": 87135.0,
+              "encoded-bytes": 1706.0,
+              "B/op": 2272.0,
+              "allocs/op": 9.0
+            },
+            {
+              "ns/op": 85779.0,
+              "MB/s": 43.3,
+              "cpu-ns/op": 86180.0,
+              "encoded-bytes": 1706.0,
+              "B/op": 2272.0,
+              "allocs/op": 9.0
+            }
+          ]
+        }
+      },
+      {
+        "name": "BenchmarkHTTPCorpus/asset-thread.js-2",
+        "before": {
+          "ns/op": 46668.0,
+          "MB/s": 35.08,
+          "cpu-ns/op": 46877.0,
+          "encoded-bytes": 933.0,
+          "B/op": 1232.0,
+          "allocs/op": 7.0
+        },
+        "after": {
+          "ns/op": 45495.5,
+          "MB/s": 35.985,
+          "cpu-ns/op": 45719.0,
+          "encoded-bytes": 931.0,
+          "B/op": 1232.0,
+          "allocs/op": 7.0
+        },
+        "saved_percent": 0.21436227224008575,
+        "time_change_percent": -2.5124282163366707,
+        "cpu_change_percent": -2.4702946007637006,
+        "samples": {
+          "after": [
+            {
+              "ns/op": 45781.0,
+              "MB/s": 35.76,
+              "cpu-ns/op": 46024.0,
+              "encoded-bytes": 931.0,
+              "B/op": 1232.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 46094.0,
+              "MB/s": 35.51,
+              "cpu-ns/op": 46330.0,
+              "encoded-bytes": 931.0,
+              "B/op": 1232.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 45210.0,
+              "MB/s": 36.21,
+              "cpu-ns/op": 45414.0,
+              "encoded-bytes": 931.0,
+              "B/op": 1232.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 44478.0,
+              "MB/s": 36.8,
+              "cpu-ns/op": 44663.0,
+              "encoded-bytes": 931.0,
+              "B/op": 1232.0,
+              "allocs/op": 7.0
+            }
+          ],
+          "before": [
+            {
+              "ns/op": 47372.0,
+              "MB/s": 34.56,
+              "cpu-ns/op": 47602.0,
+              "encoded-bytes": 933.0,
+              "B/op": 1232.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 46545.0,
+              "MB/s": 35.17,
+              "cpu-ns/op": 46743.0,
+              "encoded-bytes": 933.0,
+              "B/op": 1232.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 46791.0,
+              "MB/s": 34.99,
+              "cpu-ns/op": 47011.0,
+              "encoded-bytes": 933.0,
+              "B/op": 1232.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 46464.0,
+              "MB/s": 35.23,
+              "cpu-ns/op": 46677.0,
+              "encoded-bytes": 933.0,
+              "B/op": 1232.0,
+              "allocs/op": 7.0
+            }
+          ]
+        }
+      },
+      {
+        "name": "BenchmarkHTTPCorpus/asset-favicon.svg-2",
+        "before": {
+          "ns/op": 16645.5,
+          "MB/s": 27.815,
+          "cpu-ns/op": 16761.0,
+          "encoded-bytes": 360.0,
+          "B/op": 576.0,
+          "allocs/op": 7.0
+        },
+        "after": {
+          "ns/op": 17149.5,
+          "MB/s": 26.995,
+          "cpu-ns/op": 17293.5,
+          "encoded-bytes": 360.0,
+          "B/op": 576.0,
+          "allocs/op": 7.0
+        },
+        "saved_percent": 0.0,
+        "time_change_percent": 3.027845363611781,
+        "cpu_change_percent": 3.177018077680338,
+        "samples": {
+          "after": [
+            {
+              "ns/op": 17423.0,
+              "MB/s": 26.57,
+              "cpu-ns/op": 17550.0,
+              "encoded-bytes": 360.0,
+              "B/op": 576.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 17274.0,
+              "MB/s": 26.8,
+              "cpu-ns/op": 17425.0,
+              "encoded-bytes": 360.0,
+              "B/op": 576.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 16982.0,
+              "MB/s": 27.26,
+              "cpu-ns/op": 17081.0,
+              "encoded-bytes": 360.0,
+              "B/op": 576.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 17025.0,
+              "MB/s": 27.19,
+              "cpu-ns/op": 17162.0,
+              "encoded-bytes": 360.0,
+              "B/op": 576.0,
+              "allocs/op": 7.0
+            }
+          ],
+          "before": [
+            {
+              "ns/op": 16706.0,
+              "MB/s": 27.71,
+              "cpu-ns/op": 16811.0,
+              "encoded-bytes": 360.0,
+              "B/op": 576.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 16772.0,
+              "MB/s": 27.61,
+              "cpu-ns/op": 16898.0,
+              "encoded-bytes": 360.0,
+              "B/op": 576.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 16491.0,
+              "MB/s": 28.08,
+              "cpu-ns/op": 16590.0,
+              "encoded-bytes": 360.0,
+              "B/op": 576.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 16585.0,
+              "MB/s": 27.92,
+              "cpu-ns/op": 16711.0,
+              "encoded-bytes": 360.0,
+              "B/op": 576.0,
+              "allocs/op": 7.0
+            }
+          ]
+        }
+      },
+      {
+        "name": "BenchmarkHTTPCorpus/asset-ui.css-2",
+        "before": {
+          "ns/op": 150045.0,
+          "MB/s": 48.754999999999995,
+          "cpu-ns/op": 150887.5,
+          "encoded-bytes": 2497.0,
+          "B/op": 2864.0,
+          "allocs/op": 7.0
+        },
+        "after": {
+          "ns/op": 161028.5,
+          "MB/s": 45.425,
+          "cpu-ns/op": 161979.5,
+          "encoded-bytes": 2479.0,
+          "B/op": 2864.0,
+          "allocs/op": 7.0
+        },
+        "saved_percent": 0.7208650380456548,
+        "time_change_percent": 7.32013729214569,
+        "cpu_change_percent": 7.351172230966774,
+        "samples": {
+          "after": [
+            {
+              "ns/op": 161427.0,
+              "MB/s": 45.31,
+              "cpu-ns/op": 162422.0,
+              "encoded-bytes": 2479.0,
+              "B/op": 2864.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 166691.0,
+              "MB/s": 43.88,
+              "cpu-ns/op": 165181.0,
+              "encoded-bytes": 2479.0,
+              "B/op": 2864.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 160630.0,
+              "MB/s": 45.54,
+              "cpu-ns/op": 161537.0,
+              "encoded-bytes": 2479.0,
+              "B/op": 2864.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 160363.0,
+              "MB/s": 45.62,
+              "cpu-ns/op": 161356.0,
+              "encoded-bytes": 2479.0,
+              "B/op": 2864.0,
+              "allocs/op": 7.0
+            }
+          ],
+          "before": [
+            {
+              "ns/op": 150493.0,
+              "MB/s": 48.61,
+              "cpu-ns/op": 151294.0,
+              "encoded-bytes": 2497.0,
+              "B/op": 2864.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 149597.0,
+              "MB/s": 48.9,
+              "cpu-ns/op": 150481.0,
+              "encoded-bytes": 2497.0,
+              "B/op": 2864.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 150519.0,
+              "MB/s": 48.6,
+              "cpu-ns/op": 151367.0,
+              "encoded-bytes": 2497.0,
+              "B/op": 2864.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 149340.0,
+              "MB/s": 48.98,
+              "cpu-ns/op": 150271.0,
+              "encoded-bytes": 2497.0,
+              "B/op": 2864.0,
+              "allocs/op": 7.0
+            }
+          ]
+        }
+      },
+      {
+        "name": "BenchmarkHTTPCorpus/current-admin-css-2",
+        "before": {
+          "ns/op": 146038.5,
+          "MB/s": 55.215,
+          "cpu-ns/op": 146912.5,
+          "encoded-bytes": 2280.0,
+          "B/op": 2480.0,
+          "allocs/op": 7.0
+        },
+        "after": {
+          "ns/op": 155015.0,
+          "MB/s": 52.015,
+          "cpu-ns/op": 156003.0,
+          "encoded-bytes": 2266.0,
+          "B/op": 2480.0,
+          "allocs/op": 7.0
+        },
+        "saved_percent": 0.6140350877192983,
+        "time_change_percent": 6.146666803616863,
+        "cpu_change_percent": 6.187696758274486,
+        "samples": {
+          "after": [
+            {
+              "ns/op": 155996.0,
+              "MB/s": 51.69,
+              "cpu-ns/op": 156992.0,
+              "encoded-bytes": 2266.0,
+              "B/op": 2480.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 154964.0,
+              "MB/s": 52.03,
+              "cpu-ns/op": 155941.0,
+              "encoded-bytes": 2266.0,
+              "B/op": 2480.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 155066.0,
+              "MB/s": 52.0,
+              "cpu-ns/op": 156065.0,
+              "encoded-bytes": 2266.0,
+              "B/op": 2480.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 153284.0,
+              "MB/s": 52.6,
+              "cpu-ns/op": 154322.0,
+              "encoded-bytes": 2266.0,
+              "B/op": 2480.0,
+              "allocs/op": 7.0
+            }
+          ],
+          "before": [
+            {
+              "ns/op": 146264.0,
+              "MB/s": 55.13,
+              "cpu-ns/op": 147100.0,
+              "encoded-bytes": 2280.0,
+              "B/op": 2480.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 145813.0,
+              "MB/s": 55.3,
+              "cpu-ns/op": 146725.0,
+              "encoded-bytes": 2280.0,
+              "B/op": 2480.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 146682.0,
+              "MB/s": 54.97,
+              "cpu-ns/op": 147589.0,
+              "encoded-bytes": 2280.0,
+              "B/op": 2480.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 145614.0,
+              "MB/s": 55.37,
+              "cpu-ns/op": 146490.0,
+              "encoded-bytes": 2280.0,
+              "B/op": 2480.0,
+              "allocs/op": 7.0
+            }
+          ]
+        }
+      },
+      {
+        "name": "BenchmarkHTTPCorpus/current-admin-js-2",
+        "before": {
+          "ns/op": 23038.0,
+          "MB/s": 33.08,
+          "cpu-ns/op": 23177.5,
+          "encoded-bytes": 434.0,
+          "B/op": 624.0,
+          "allocs/op": 7.0
+        },
+        "after": {
+          "ns/op": 25092.0,
+          "MB/s": 30.369999999999997,
+          "cpu-ns/op": 25243.0,
+          "encoded-bytes": 434.0,
+          "B/op": 624.0,
+          "allocs/op": 7.0
+        },
+        "saved_percent": 0.0,
+        "time_change_percent": 8.91570448823682,
+        "cpu_change_percent": 8.911660015100843,
+        "samples": {
+          "after": [
+            {
+              "ns/op": 25465.0,
+              "MB/s": 29.92,
+              "cpu-ns/op": 25642.0,
+              "encoded-bytes": 434.0,
+              "B/op": 624.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 25246.0,
+              "MB/s": 30.18,
+              "cpu-ns/op": 25379.0,
+              "encoded-bytes": 434.0,
+              "B/op": 624.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 24934.0,
+              "MB/s": 30.56,
+              "cpu-ns/op": 25107.0,
+              "encoded-bytes": 434.0,
+              "B/op": 624.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 24938.0,
+              "MB/s": 30.56,
+              "cpu-ns/op": 25075.0,
+              "encoded-bytes": 434.0,
+              "B/op": 624.0,
+              "allocs/op": 7.0
+            }
+          ],
+          "before": [
+            {
+              "ns/op": 22934.0,
+              "MB/s": 33.23,
+              "cpu-ns/op": 23088.0,
+              "encoded-bytes": 434.0,
+              "B/op": 624.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 22844.0,
+              "MB/s": 33.36,
+              "cpu-ns/op": 22971.0,
+              "encoded-bytes": 434.0,
+              "B/op": 624.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 23322.0,
+              "MB/s": 32.67,
+              "cpu-ns/op": 23486.0,
+              "encoded-bytes": 434.0,
+              "B/op": 624.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 23142.0,
+              "MB/s": 32.93,
+              "cpu-ns/op": 23267.0,
+              "encoded-bytes": 434.0,
+              "B/op": 624.0,
+              "allocs/op": 7.0
+            }
+          ]
+        }
+      },
+      {
+        "name": "BenchmarkHTTPCorpus/current-admin-board-css-2",
+        "before": {
+          "ns/op": 32159.0,
+          "MB/s": 43.325,
+          "cpu-ns/op": 32334.0,
+          "encoded-bytes": 548.0,
+          "B/op": 688.0,
+          "allocs/op": 6.0
+        },
+        "after": {
+          "ns/op": 35894.5,
+          "MB/s": 38.81,
+          "cpu-ns/op": 36107.0,
+          "encoded-bytes": 542.0,
+          "B/op": 688.0,
+          "allocs/op": 6.0
+        },
+        "saved_percent": 1.094890510948905,
+        "time_change_percent": 11.615721881899322,
+        "cpu_change_percent": 11.668831570483086,
+        "samples": {
+          "after": [
+            {
+              "ns/op": 36106.0,
+              "MB/s": 38.58,
+              "cpu-ns/op": 36308.0,
+              "encoded-bytes": 542.0,
+              "B/op": 688.0,
+              "allocs/op": 6.0
+            },
+            {
+              "ns/op": 36363.0,
+              "MB/s": 38.31,
+              "cpu-ns/op": 36628.0,
+              "encoded-bytes": 542.0,
+              "B/op": 688.0,
+              "allocs/op": 6.0
+            },
+            {
+              "ns/op": 35612.0,
+              "MB/s": 39.12,
+              "cpu-ns/op": 35799.0,
+              "encoded-bytes": 542.0,
+              "B/op": 688.0,
+              "allocs/op": 6.0
+            },
+            {
+              "ns/op": 35683.0,
+              "MB/s": 39.04,
+              "cpu-ns/op": 35906.0,
+              "encoded-bytes": 542.0,
+              "B/op": 688.0,
+              "allocs/op": 6.0
+            }
+          ],
+          "before": [
+            {
+              "ns/op": 32541.0,
+              "MB/s": 42.81,
+              "cpu-ns/op": 32702.0,
+              "encoded-bytes": 548.0,
+              "B/op": 688.0,
+              "allocs/op": 6.0
+            },
+            {
+              "ns/op": 32505.0,
+              "MB/s": 42.86,
+              "cpu-ns/op": 32712.0,
+              "encoded-bytes": 548.0,
+              "B/op": 688.0,
+              "allocs/op": 6.0
+            },
+            {
+              "ns/op": 31813.0,
+              "MB/s": 43.79,
+              "cpu-ns/op": 31966.0,
+              "encoded-bytes": 548.0,
+              "B/op": 688.0,
+              "allocs/op": 6.0
+            },
+            {
+              "ns/op": 31701.0,
+              "MB/s": 43.94,
+              "cpu-ns/op": 31892.0,
+              "encoded-bytes": 548.0,
+              "B/op": 688.0,
+              "allocs/op": 6.0
+            }
+          ]
+        }
+      },
+      {
+        "name": "BenchmarkHTTPCorpus/current-admin-settings-js-2",
+        "before": {
+          "ns/op": 73399.0,
+          "MB/s": 37.114999999999995,
+          "cpu-ns/op": 73872.5,
+          "encoded-bytes": 1445.0,
+          "B/op": 2000.0,
+          "allocs/op": 9.0
+        },
+        "after": {
+          "ns/op": 78146.5,
+          "MB/s": 34.86,
+          "cpu-ns/op": 78753.5,
+          "encoded-bytes": 1441.0,
+          "B/op": 2000.0,
+          "allocs/op": 9.0
+        },
+        "saved_percent": 0.2768166089965398,
+        "time_change_percent": 6.468071772094985,
+        "cpu_change_percent": 6.607330197299399,
+        "samples": {
+          "after": [
+            {
+              "ns/op": 78728.0,
+              "MB/s": 34.6,
+              "cpu-ns/op": 79344.0,
+              "encoded-bytes": 1441.0,
+              "B/op": 2000.0,
+              "allocs/op": 9.0
+            },
+            {
+              "ns/op": 86596.0,
+              "MB/s": 31.46,
+              "cpu-ns/op": 87031.0,
+              "encoded-bytes": 1441.0,
+              "B/op": 2000.0,
+              "allocs/op": 9.0
+            },
+            {
+              "ns/op": 77565.0,
+              "MB/s": 35.12,
+              "cpu-ns/op": 78163.0,
+              "encoded-bytes": 1441.0,
+              "B/op": 2000.0,
+              "allocs/op": 9.0
+            },
+            {
+              "ns/op": 75938.0,
+              "MB/s": 35.87,
+              "cpu-ns/op": 76279.0,
+              "encoded-bytes": 1441.0,
+              "B/op": 2000.0,
+              "allocs/op": 9.0
+            }
+          ],
+          "before": [
+            {
+              "ns/op": 74205.0,
+              "MB/s": 36.71,
+              "cpu-ns/op": 74667.0,
+              "encoded-bytes": 1445.0,
+              "B/op": 2000.0,
+              "allocs/op": 9.0
+            },
+            {
+              "ns/op": 73054.0,
+              "MB/s": 37.29,
+              "cpu-ns/op": 73557.0,
+              "encoded-bytes": 1445.0,
+              "B/op": 2000.0,
+              "allocs/op": 9.0
+            },
+            {
+              "ns/op": 73744.0,
+              "MB/s": 36.94,
+              "cpu-ns/op": 74188.0,
+              "encoded-bytes": 1445.0,
+              "B/op": 2000.0,
+              "allocs/op": 9.0
+            },
+            {
+              "ns/op": 72788.0,
+              "MB/s": 37.42,
+              "cpu-ns/op": 73269.0,
+              "encoded-bytes": 1445.0,
+              "B/op": 2000.0,
+              "allocs/op": 9.0
+            }
+          ]
+        }
+      },
+      {
+        "name": "BenchmarkHTTPCorpus/current-admin-posts-css-2",
+        "before": {
+          "ns/op": 64925.0,
+          "MB/s": 42.465,
+          "cpu-ns/op": 65333.0,
+          "encoded-bytes": 948.0,
+          "B/op": 1200.0,
+          "allocs/op": 7.0
+        },
+        "after": {
+          "ns/op": 58322.5,
+          "MB/s": 47.269999999999996,
+          "cpu-ns/op": 58643.5,
+          "encoded-bytes": 934.0,
+          "B/op": 1200.0,
+          "allocs/op": 7.0
+        },
+        "saved_percent": 1.4767932489451476,
+        "time_change_percent": -10.16942626107047,
+        "cpu_change_percent": -10.239082852463532,
+        "samples": {
+          "after": [
+            {
+              "ns/op": 63342.0,
+              "MB/s": 43.53,
+              "cpu-ns/op": 63603.0,
+              "encoded-bytes": 934.0,
+              "B/op": 1200.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 58294.0,
+              "MB/s": 47.29,
+              "cpu-ns/op": 58634.0,
+              "encoded-bytes": 934.0,
+              "B/op": 1200.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 58351.0,
+              "MB/s": 47.25,
+              "cpu-ns/op": 58653.0,
+              "encoded-bytes": 934.0,
+              "B/op": 1200.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 58037.0,
+              "MB/s": 47.5,
+              "cpu-ns/op": 58385.0,
+              "encoded-bytes": 934.0,
+              "B/op": 1200.0,
+              "allocs/op": 7.0
+            }
+          ],
+          "before": [
+            {
+              "ns/op": 65956.0,
+              "MB/s": 41.8,
+              "cpu-ns/op": 66422.0,
+              "encoded-bytes": 948.0,
+              "B/op": 1200.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 64554.0,
+              "MB/s": 42.71,
+              "cpu-ns/op": 64958.0,
+              "encoded-bytes": 948.0,
+              "B/op": 1200.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 65296.0,
+              "MB/s": 42.22,
+              "cpu-ns/op": 65708.0,
+              "encoded-bytes": 948.0,
+              "B/op": 1200.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 64005.0,
+              "MB/s": 43.07,
+              "cpu-ns/op": 64452.0,
+              "encoded-bytes": 948.0,
+              "B/op": 1200.0,
+              "allocs/op": 7.0
+            }
+          ]
+        }
+      },
+      {
+        "name": "BenchmarkHTTPCorpus/current-admin-rules-js-2",
+        "before": {
+          "ns/op": 66911.0,
+          "MB/s": 35.03,
+          "cpu-ns/op": 67351.0,
+          "encoded-bytes": 1302.0,
+          "B/op": 1872.0,
+          "allocs/op": 9.0
+        },
+        "after": {
+          "ns/op": 69127.0,
+          "MB/s": 33.91,
+          "cpu-ns/op": 69504.0,
+          "encoded-bytes": 1301.0,
+          "B/op": 1872.0,
+          "allocs/op": 9.0
+        },
+        "saved_percent": 0.07680491551459294,
+        "time_change_percent": 3.3118620256759046,
+        "cpu_change_percent": 3.1966860180249634,
+        "samples": {
+          "after": [
+            {
+              "ns/op": 70850.0,
+              "MB/s": 33.08,
+              "cpu-ns/op": 71302.0,
+              "encoded-bytes": 1301.0,
+              "B/op": 1872.0,
+              "allocs/op": 9.0
+            },
+            {
+              "ns/op": 68594.0,
+              "MB/s": 34.17,
+              "cpu-ns/op": 68904.0,
+              "encoded-bytes": 1301.0,
+              "B/op": 1872.0,
+              "allocs/op": 9.0
+            },
+            {
+              "ns/op": 69660.0,
+              "MB/s": 33.65,
+              "cpu-ns/op": 70104.0,
+              "encoded-bytes": 1301.0,
+              "B/op": 1872.0,
+              "allocs/op": 9.0
+            },
+            {
+              "ns/op": 68433.0,
+              "MB/s": 34.25,
+              "cpu-ns/op": 68744.0,
+              "encoded-bytes": 1301.0,
+              "B/op": 1872.0,
+              "allocs/op": 9.0
+            }
+          ],
+          "before": [
+            {
+              "ns/op": 67285.0,
+              "MB/s": 34.84,
+              "cpu-ns/op": 67767.0,
+              "encoded-bytes": 1302.0,
+              "B/op": 1872.0,
+              "allocs/op": 9.0
+            },
+            {
+              "ns/op": 67158.0,
+              "MB/s": 34.9,
+              "cpu-ns/op": 67592.0,
+              "encoded-bytes": 1302.0,
+              "B/op": 1872.0,
+              "allocs/op": 9.0
+            },
+            {
+              "ns/op": 66664.0,
+              "MB/s": 35.16,
+              "cpu-ns/op": 67110.0,
+              "encoded-bytes": 1302.0,
+              "B/op": 1872.0,
+              "allocs/op": 9.0
+            },
+            {
+              "ns/op": 65794.0,
+              "MB/s": 35.63,
+              "cpu-ns/op": 66200.0,
+              "encoded-bytes": 1302.0,
+              "B/op": 1872.0,
+              "allocs/op": 9.0
+            }
+          ]
+        }
+      },
+      {
+        "name": "BenchmarkHTTPCorpus/current-admin-waf-js-2",
+        "before": {
+          "ns/op": 34570.5,
+          "MB/s": 40.47,
+          "cpu-ns/op": 34781.5,
+          "encoded-bytes": 697.0,
+          "B/op": 912.0,
+          "allocs/op": 7.0
+        },
+        "after": {
+          "ns/op": 35921.0,
+          "MB/s": 38.95,
+          "cpu-ns/op": 36137.0,
+          "encoded-bytes": 697.0,
+          "B/op": 912.0,
+          "allocs/op": 7.0
+        },
+        "saved_percent": 0.0,
+        "time_change_percent": 3.90650988559611,
+        "cpu_change_percent": 3.8971867228267953,
+        "samples": {
+          "after": [
+            {
+              "ns/op": 36785.0,
+              "MB/s": 38.03,
+              "cpu-ns/op": 37056.0,
+              "encoded-bytes": 697.0,
+              "B/op": 912.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 35939.0,
+              "MB/s": 38.93,
+              "cpu-ns/op": 36119.0,
+              "encoded-bytes": 697.0,
+              "B/op": 912.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 35903.0,
+              "MB/s": 38.97,
+              "cpu-ns/op": 36155.0,
+              "encoded-bytes": 697.0,
+              "B/op": 912.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 35599.0,
+              "MB/s": 39.3,
+              "cpu-ns/op": 35770.0,
+              "encoded-bytes": 697.0,
+              "B/op": 912.0,
+              "allocs/op": 7.0
+            }
+          ],
+          "before": [
+            {
+              "ns/op": 34770.0,
+              "MB/s": 40.24,
+              "cpu-ns/op": 35009.0,
+              "encoded-bytes": 697.0,
+              "B/op": 912.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 34279.0,
+              "MB/s": 40.81,
+              "cpu-ns/op": 34454.0,
+              "encoded-bytes": 697.0,
+              "B/op": 912.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 34801.0,
+              "MB/s": 40.2,
+              "cpu-ns/op": 35041.0,
+              "encoded-bytes": 697.0,
+              "B/op": 912.0,
+              "allocs/op": 7.0
+            },
+            {
+              "ns/op": 34371.0,
+              "MB/s": 40.7,
+              "cpu-ns/op": 34554.0,
+              "encoded-bytes": 697.0,
+              "B/op": 912.0,
+              "allocs/op": 7.0
+            }
+          ]
+        }
+      },
+      {
+        "name": "BenchmarkHTTPCorpus/current-countries-js-2",
+        "before": {
+          "ns/op": 15506.5,
+          "MB/s": 27.86,
+          "cpu-ns/op": 15590.0,
+          "encoded-bytes": 265.0,
+          "B/op": 400.0,
+          "allocs/op": 6.0
+        },
+        "after": {
+          "ns/op": 16120.5,
+          "MB/s": 26.8,
+          "cpu-ns/op": 16201.0,
+          "encoded-bytes": 265.0,
+          "B/op": 400.0,
+          "allocs/op": 6.0
+        },
+        "saved_percent": 0.0,
+        "time_change_percent": 3.959629832650813,
+        "cpu_change_percent": 3.9191789608723493,
+        "samples": {
+          "after": [
+            {
+              "ns/op": 16109.0,
+              "MB/s": 26.82,
+              "cpu-ns/op": 16185.0,
+              "encoded-bytes": 265.0,
+              "B/op": 400.0,
+              "allocs/op": 6.0
+            },
+            {
+              "ns/op": 16602.0,
+              "MB/s": 26.02,
+              "cpu-ns/op": 16686.0,
+              "encoded-bytes": 265.0,
+              "B/op": 400.0,
+              "allocs/op": 6.0
+            },
+            {
+              "ns/op": 15909.0,
+              "MB/s": 27.15,
+              "cpu-ns/op": 15985.0,
+              "encoded-bytes": 265.0,
+              "B/op": 400.0,
+              "allocs/op": 6.0
+            },
+            {
+              "ns/op": 16132.0,
+              "MB/s": 26.78,
+              "cpu-ns/op": 16217.0,
+              "encoded-bytes": 265.0,
+              "B/op": 400.0,
+              "allocs/op": 6.0
+            }
+          ],
+          "before": [
+            {
+              "ns/op": 15538.0,
+              "MB/s": 27.8,
+              "cpu-ns/op": 15618.0,
+              "encoded-bytes": 265.0,
+              "B/op": 400.0,
+              "allocs/op": 6.0
+            },
+            {
+              "ns/op": 15475.0,
+              "MB/s": 27.92,
+              "cpu-ns/op": 15562.0,
+              "encoded-bytes": 265.0,
+              "B/op": 400.0,
+              "allocs/op": 6.0
+            },
+            {
+              "ns/op": 15254.0,
+              "MB/s": 28.32,
+              "cpu-ns/op": 15331.0,
+              "encoded-bytes": 265.0,
+              "B/op": 400.0,
+              "allocs/op": 6.0
+            },
+            {
+              "ns/op": 15889.0,
+              "MB/s": 27.19,
+              "cpu-ns/op": 15971.0,
+              "encoded-bytes": 265.0,
+              "B/op": 400.0,
+              "allocs/op": 6.0
+            }
+          ]
+        }
+      },
+      {
+        "name": "BenchmarkPackCompressionTarget/text-2",
+        "before": {
+          "ns/op": 1503533.5,
+          "MB/s": 128.865,
+          "cpu-ns/op": 2390982.0,
+          "encoded-bytes": 12191.0,
+          "B/op": 25717.0,
+          "allocs/op": 38.0
+        },
+        "after": {
+          "ns/op": 1506129.5,
+          "MB/s": 128.645,
+          "cpu-ns/op": 2406828.0,
+          "encoded-bytes": 12191.0,
+          "B/op": 25717.5,
+          "allocs/op": 38.0
+        },
+        "saved_percent": 0.0,
+        "time_change_percent": 0.1726599374074489,
+        "cpu_change_percent": 0.6627402464761234,
+        "samples": {
+          "after": [
+            {
+              "ns/op": 1500675.0,
+              "MB/s": 129.11,
+              "cpu-ns/op": 2393646.0,
+              "encoded-bytes": 12191.0,
+              "B/op": 25819.0,
+              "allocs/op": 38.0
+            },
+            {
+              "ns/op": 1502047.0,
+              "MB/s": 128.99,
+              "cpu-ns/op": 2400283.0,
+              "encoded-bytes": 12191.0,
+              "B/op": 25616.0,
+              "allocs/op": 38.0
+            },
+            {
+              "ns/op": 1510212.0,
+              "MB/s": 128.3,
+              "cpu-ns/op": 2413373.0,
+              "encoded-bytes": 12191.0,
+              "B/op": 25819.0,
+              "allocs/op": 38.0
+            },
+            {
+              "ns/op": 1518156.0,
+              "MB/s": 127.63,
+              "cpu-ns/op": 2429561.0,
+              "encoded-bytes": 12191.0,
+              "B/op": 25616.0,
+              "allocs/op": 38.0
+            }
+          ],
+          "before": [
+            {
+              "ns/op": 1492371.0,
+              "MB/s": 129.83,
+              "cpu-ns/op": 2380761.0,
+              "encoded-bytes": 12191.0,
+              "B/op": 25818.0,
+              "allocs/op": 38.0
+            },
+            {
+              "ns/op": 1500120.0,
+              "MB/s": 129.16,
+              "cpu-ns/op": 2382774.0,
+              "encoded-bytes": 12191.0,
+              "B/op": 25616.0,
+              "allocs/op": 38.0
+            },
+            {
+              "ns/op": 1506947.0,
+              "MB/s": 128.57,
+              "cpu-ns/op": 2402057.0,
+              "encoded-bytes": 12191.0,
+              "B/op": 25819.0,
+              "allocs/op": 38.0
+            },
+            {
+              "ns/op": 1509939.0,
+              "MB/s": 128.32,
+              "cpu-ns/op": 2399190.0,
+              "encoded-bytes": 12191.0,
+              "B/op": 25616.0,
+              "allocs/op": 38.0
+            }
+          ]
+        }
+      },
+      {
+        "name": "BenchmarkPackCompressionTarget/mixed-2",
+        "before": {
+          "ns/op": 2142859.0,
+          "MB/s": 95.25999999999999,
+          "cpu-ns/op": 3472240.0,
+          "encoded-bytes": 30969.0,
+          "B/op": 66600.0,
+          "allocs/op": 38.0
+        },
+        "after": {
+          "ns/op": 2148028.5,
+          "MB/s": 95.025,
+          "cpu-ns/op": 3484833.5,
+          "encoded-bytes": 30969.0,
+          "B/op": 66600.0,
+          "allocs/op": 38.0
+        },
+        "saved_percent": 0.0,
+        "time_change_percent": 0.24124312425595207,
+        "cpu_change_percent": 0.36269094302237015,
+        "samples": {
+          "after": [
+            {
+              "ns/op": 2128129.0,
+              "MB/s": 95.92,
+              "cpu-ns/op": 3451890.0,
+              "encoded-bytes": 30969.0,
+              "B/op": 66600.0,
+              "allocs/op": 38.0
+            },
+            {
+              "ns/op": 2151331.0,
+              "MB/s": 94.88,
+              "cpu-ns/op": 3489540.0,
+              "encoded-bytes": 30969.0,
+              "B/op": 66600.0,
+              "allocs/op": 38.0
+            },
+            {
+              "ns/op": 2149024.0,
+              "MB/s": 94.98,
+              "cpu-ns/op": 3481557.0,
+              "encoded-bytes": 30969.0,
+              "B/op": 66601.0,
+              "allocs/op": 38.0
+            },
+            {
+              "ns/op": 2147033.0,
+              "MB/s": 95.07,
+              "cpu-ns/op": 3488110.0,
+              "encoded-bytes": 30969.0,
+              "B/op": 66600.0,
+              "allocs/op": 38.0
+            }
+          ],
+          "before": [
+            {
+              "ns/op": 2139015.0,
+              "MB/s": 95.43,
+              "cpu-ns/op": 3470600.0,
+              "encoded-bytes": 30969.0,
+              "B/op": 66600.0,
+              "allocs/op": 38.0
+            },
+            {
+              "ns/op": 2139200.0,
+              "MB/s": 95.42,
+              "cpu-ns/op": 3469570.0,
+              "encoded-bytes": 30969.0,
+              "B/op": 66600.0,
+              "allocs/op": 38.0
+            },
+            {
+              "ns/op": 2159580.0,
+              "MB/s": 94.52,
+              "cpu-ns/op": 3506100.0,
+              "encoded-bytes": 30969.0,
+              "B/op": 66600.0,
+              "allocs/op": 38.0
+            },
+            {
+              "ns/op": 2146518.0,
+              "MB/s": 95.1,
+              "cpu-ns/op": 3473880.0,
+              "encoded-bytes": 30969.0,
+              "B/op": 66600.0,
+              "allocs/op": 38.0
+            }
+          ]
+        }
+      },
+      {
+        "name": "BenchmarkPackCompressionTarget/entropy-2",
+        "before": {
+          "ns/op": 5240835.5,
+          "MB/s": 83.19,
+          "cpu-ns/op": 9221475.0,
+          "encoded-bytes": 176639.0,
+          "B/op": 361776.0,
+          "allocs/op": 62.0
+        },
+        "after": {
+          "ns/op": 5166377.5,
+          "MB/s": 84.38499999999999,
+          "cpu-ns/op": 9125205.5,
+          "encoded-bytes": 176639.0,
+          "B/op": 361776.0,
+          "allocs/op": 62.0
+        },
+        "saved_percent": 0.0,
+        "time_change_percent": -1.4207276683269265,
+        "cpu_change_percent": -1.043970731363475,
+        "samples": {
+          "after": [
+            {
+              "ns/op": 5089125.0,
+              "MB/s": 85.66,
+              "cpu-ns/op": 9044556.0,
+              "encoded-bytes": 176639.0,
+              "B/op": 361894.0,
+              "allocs/op": 62.0
+            },
+            {
+              "ns/op": 5191721.0,
+              "MB/s": 83.97,
+              "cpu-ns/op": 9110700.0,
+              "encoded-bytes": 176639.0,
+              "B/op": 361776.0,
+              "allocs/op": 62.0
+            },
+            {
+              "ns/op": 5186483.0,
+              "MB/s": 84.06,
+              "cpu-ns/op": 9139711.0,
+              "encoded-bytes": 176639.0,
+              "B/op": 361776.0,
+              "allocs/op": 62.0
+            },
+            {
+              "ns/op": 5146272.0,
+              "MB/s": 84.71,
+              "cpu-ns/op": 9153489.0,
+              "encoded-bytes": 176639.0,
+              "B/op": 361776.0,
+              "allocs/op": 62.0
+            }
+          ],
+          "before": [
+            {
+              "ns/op": 5192128.0,
+              "MB/s": 83.96,
+              "cpu-ns/op": 9150283.0,
+              "encoded-bytes": 176639.0,
+              "B/op": 361776.0,
+              "allocs/op": 62.0
+            },
+            {
+              "ns/op": 5190045.0,
+              "MB/s": 84.0,
+              "cpu-ns/op": 9144295.0,
+              "encoded-bytes": 176639.0,
+              "B/op": 361776.0,
+              "allocs/op": 62.0
+            },
+            {
+              "ns/op": 5289543.0,
+              "MB/s": 82.42,
+              "cpu-ns/op": 9294133.0,
+              "encoded-bytes": 176639.0,
+              "B/op": 361776.0,
+              "allocs/op": 62.0
+            },
+            {
+              "ns/op": 5325870.0,
+              "MB/s": 81.86,
+              "cpu-ns/op": 9292667.0,
+              "encoded-bytes": 176639.0,
+              "B/op": 361776.0,
+              "allocs/op": 62.0
+            }
+          ]
+        }
+      }
+    ],
+    "rss": {
+      "encode-before": {
+        "samples_kib": [
+          14180,
+          14004
+        ],
+        "median_kib": 14092.0
+      },
+      "encode-after": {
+        "samples_kib": [
+          13944,
+          14240
+        ],
+        "median_kib": 14092.0
+      },
+      "store-before": {
+        "samples_kib": [
+          15424,
+          17408
+        ],
+        "median_kib": 16416.0
+      },
+      "store-after": {
+        "samples_kib": [
+          15476,
+          17464
+        ],
+        "median_kib": 16470.0
+      }
+    },
+    "libzstd_version": 10504,
+    "independent_libzstd_checks": 200,
+    "frames": [
+      {
+        "label": "top",
+        "codec": "http",
+        "raw_bytes": 4305,
+        "before_bytes": 1942,
+        "after_bytes": 1930,
+        "gzip9_bytes": 1891,
+        "input_sha256": "fa7b6a1a1b339aac04fe9951770b13f2d45fa3af1382bf1a38600e1ab4513979",
+        "before_frame_sha256": "4a4e06f98f8f576c32612fb5c745a60363b3318cc32db13b8cee389e442a72da",
+        "after_frame_sha256": "70325da52ed2f62c0001be427172d987067eb4389c34ccaf1f14aef50905fe41"
+      },
+      {
+        "label": "top",
+        "codec": "archive1",
+        "raw_bytes": 4305,
+        "before_bytes": 1998,
+        "after_bytes": 1998,
+        "gzip9_bytes": 1891,
+        "input_sha256": "fa7b6a1a1b339aac04fe9951770b13f2d45fa3af1382bf1a38600e1ab4513979",
+        "before_frame_sha256": "120f3bb3f553159656ddb73c124527454a6ba8d435f897d31dc30da94a23e4cc",
+        "after_frame_sha256": "120f3bb3f553159656ddb73c124527454a6ba8d435f897d31dc30da94a23e4cc"
+      },
+      {
+        "label": "top",
+        "codec": "archive6",
+        "raw_bytes": 4305,
+        "before_bytes": 2007,
+        "after_bytes": 2007,
+        "gzip9_bytes": 1891,
+        "input_sha256": "fa7b6a1a1b339aac04fe9951770b13f2d45fa3af1382bf1a38600e1ab4513979",
+        "before_frame_sha256": "b24ee504cc5d662d3208312258f76ba2d0d6d02f8847aa641cfc2bf33dd6e41e",
+        "after_frame_sha256": "b24ee504cc5d662d3208312258f76ba2d0d6d02f8847aa641cfc2bf33dd6e41e"
+      },
+      {
+        "label": "top",
+        "codec": "archive9",
+        "raw_bytes": 4305,
+        "before_bytes": 1976,
+        "after_bytes": 1976,
+        "gzip9_bytes": 1891,
+        "input_sha256": "fa7b6a1a1b339aac04fe9951770b13f2d45fa3af1382bf1a38600e1ab4513979",
+        "before_frame_sha256": "82ee915ab5e27cf5cb475216a4631d5c7262c5dc91f92e8e0b415d0776a77681",
+        "after_frame_sha256": "82ee915ab5e27cf5cb475216a4631d5c7262c5dc91f92e8e0b415d0776a77681"
+      },
+      {
+        "label": "board",
+        "codec": "http",
+        "raw_bytes": 4457,
+        "before_bytes": 2152,
+        "after_bytes": 2149,
+        "gzip9_bytes": 2088,
+        "input_sha256": "9be90d1ce9e3eaa31ac6f75ba7cf7f2741297266c1c1b4f2f55d316894df72a1",
+        "before_frame_sha256": "601dcd85f26a9985a5b02f2a71d21e97618db35a540fb52052495989c3f072d6",
+        "after_frame_sha256": "2cd86264654c196788a93c322cc682c893f898b7809d8a23c180dbbd04da68ed"
+      },
+      {
+        "label": "board",
+        "codec": "archive1",
+        "raw_bytes": 4457,
+        "before_bytes": 2213,
+        "after_bytes": 2213,
+        "gzip9_bytes": 2088,
+        "input_sha256": "9be90d1ce9e3eaa31ac6f75ba7cf7f2741297266c1c1b4f2f55d316894df72a1",
+        "before_frame_sha256": "0e38497965c3a78652f0c9f04bc35a1b2472cdedab186666611950dadea74741",
+        "after_frame_sha256": "0e38497965c3a78652f0c9f04bc35a1b2472cdedab186666611950dadea74741"
+      },
+      {
+        "label": "board",
+        "codec": "archive6",
+        "raw_bytes": 4457,
+        "before_bytes": 2219,
+        "after_bytes": 2219,
+        "gzip9_bytes": 2088,
+        "input_sha256": "9be90d1ce9e3eaa31ac6f75ba7cf7f2741297266c1c1b4f2f55d316894df72a1",
+        "before_frame_sha256": "b2cf6f3f23a5bd96a198e53a2c46d3301087440651d051acf8243fc76fd89371",
+        "after_frame_sha256": "b2cf6f3f23a5bd96a198e53a2c46d3301087440651d051acf8243fc76fd89371"
+      },
+      {
+        "label": "board",
+        "codec": "archive9",
+        "raw_bytes": 4457,
+        "before_bytes": 2184,
+        "after_bytes": 2184,
+        "gzip9_bytes": 2088,
+        "input_sha256": "9be90d1ce9e3eaa31ac6f75ba7cf7f2741297266c1c1b4f2f55d316894df72a1",
+        "before_frame_sha256": "a73fa45c5452b3f260d2ac33a5a3055d2b735f2609a7ab63c35993f36e080ba0",
+        "after_frame_sha256": "a73fa45c5452b3f260d2ac33a5a3055d2b735f2609a7ab63c35993f36e080ba0"
+      },
+      {
+        "label": "thread",
+        "codec": "http",
+        "raw_bytes": 24664,
+        "before_bytes": 4109,
+        "after_bytes": 4101,
+        "gzip9_bytes": 4181,
+        "input_sha256": "a0794f226ea69ec8f96665b8bf0d1502ac01073a0d9b5e732eae938967a46d65",
+        "before_frame_sha256": "c007dedf81995f636c00d40d4f8f0c87e9289f923f2a5a19556d6baab2f0bcc7",
+        "after_frame_sha256": "a50f65f7a1eb3bf36045cfc8d15f23441b58c7df14c2c410da1ae313e4b15b7d"
+      },
+      {
+        "label": "thread",
+        "codec": "archive1",
+        "raw_bytes": 24664,
+        "before_bytes": 4187,
+        "after_bytes": 4187,
+        "gzip9_bytes": 4181,
+        "input_sha256": "a0794f226ea69ec8f96665b8bf0d1502ac01073a0d9b5e732eae938967a46d65",
+        "before_frame_sha256": "c06d019a587c464de7ca00916b86cab96c2ca1c4259529e6d7463c755d9310ea",
+        "after_frame_sha256": "c06d019a587c464de7ca00916b86cab96c2ca1c4259529e6d7463c755d9310ea"
+      },
+      {
+        "label": "thread",
+        "codec": "archive6",
+        "raw_bytes": 24664,
+        "before_bytes": 4190,
+        "after_bytes": 4190,
+        "gzip9_bytes": 4181,
+        "input_sha256": "a0794f226ea69ec8f96665b8bf0d1502ac01073a0d9b5e732eae938967a46d65",
+        "before_frame_sha256": "265bbfba66b920c994e119df59f92f4f4089b6b9e1888b080c1678b3c7b5c771",
+        "after_frame_sha256": "265bbfba66b920c994e119df59f92f4f4089b6b9e1888b080c1678b3c7b5c771"
+      },
+      {
+        "label": "thread",
+        "codec": "archive9",
+        "raw_bytes": 24664,
+        "before_bytes": 4159,
+        "after_bytes": 4159,
+        "gzip9_bytes": 4181,
+        "input_sha256": "a0794f226ea69ec8f96665b8bf0d1502ac01073a0d9b5e732eae938967a46d65",
+        "before_frame_sha256": "c551ad53226014091edfa163a24a58e065a321d4a15b849ce7db5cb89225356c",
+        "after_frame_sha256": "c551ad53226014091edfa163a24a58e065a321d4a15b849ce7db5cb89225356c"
+      },
+      {
+        "label": "thread-last50",
+        "codec": "http",
+        "raw_bytes": 24664,
+        "before_bytes": 4109,
+        "after_bytes": 4101,
+        "gzip9_bytes": 4181,
+        "input_sha256": "a0794f226ea69ec8f96665b8bf0d1502ac01073a0d9b5e732eae938967a46d65",
+        "before_frame_sha256": "c007dedf81995f636c00d40d4f8f0c87e9289f923f2a5a19556d6baab2f0bcc7",
+        "after_frame_sha256": "a50f65f7a1eb3bf36045cfc8d15f23441b58c7df14c2c410da1ae313e4b15b7d"
+      },
+      {
+        "label": "thread-last50",
+        "codec": "archive1",
+        "raw_bytes": 24664,
+        "before_bytes": 4187,
+        "after_bytes": 4187,
+        "gzip9_bytes": 4181,
+        "input_sha256": "a0794f226ea69ec8f96665b8bf0d1502ac01073a0d9b5e732eae938967a46d65",
+        "before_frame_sha256": "c06d019a587c464de7ca00916b86cab96c2ca1c4259529e6d7463c755d9310ea",
+        "after_frame_sha256": "c06d019a587c464de7ca00916b86cab96c2ca1c4259529e6d7463c755d9310ea"
+      },
+      {
+        "label": "thread-last50",
+        "codec": "archive6",
+        "raw_bytes": 24664,
+        "before_bytes": 4190,
+        "after_bytes": 4190,
+        "gzip9_bytes": 4181,
+        "input_sha256": "a0794f226ea69ec8f96665b8bf0d1502ac01073a0d9b5e732eae938967a46d65",
+        "before_frame_sha256": "265bbfba66b920c994e119df59f92f4f4089b6b9e1888b080c1678b3c7b5c771",
+        "after_frame_sha256": "265bbfba66b920c994e119df59f92f4f4089b6b9e1888b080c1678b3c7b5c771"
+      },
+      {
+        "label": "thread-last50",
+        "codec": "archive9",
+        "raw_bytes": 24664,
+        "before_bytes": 4159,
+        "after_bytes": 4159,
+        "gzip9_bytes": 4181,
+        "input_sha256": "a0794f226ea69ec8f96665b8bf0d1502ac01073a0d9b5e732eae938967a46d65",
+        "before_frame_sha256": "c551ad53226014091edfa163a24a58e065a321d4a15b849ce7db5cb89225356c",
+        "after_frame_sha256": "c551ad53226014091edfa163a24a58e065a321d4a15b849ce7db5cb89225356c"
+      },
+      {
+        "label": "menu",
+        "codec": "http",
+        "raw_bytes": 299,
+        "before_bytes": 203,
+        "after_bytes": 203,
+        "gzip9_bytes": 219,
+        "input_sha256": "11b21c447d19dbbdd96925685a1f382e94463d78476758b0c5d5be69c3d54f0f",
+        "before_frame_sha256": "acaab3871591aef8f942def1af5f97e090cb4adc2824e29369c700cee08ca752",
+        "after_frame_sha256": "acaab3871591aef8f942def1af5f97e090cb4adc2824e29369c700cee08ca752"
+      },
+      {
+        "label": "menu",
+        "codec": "archive1",
+        "raw_bytes": 299,
+        "before_bytes": 237,
+        "after_bytes": 237,
+        "gzip9_bytes": 219,
+        "input_sha256": "11b21c447d19dbbdd96925685a1f382e94463d78476758b0c5d5be69c3d54f0f",
+        "before_frame_sha256": "dec128951db4cf2659f26db704ab2caeb41b5f3eb15ab74bc70f00b050e10d13",
+        "after_frame_sha256": "dec128951db4cf2659f26db704ab2caeb41b5f3eb15ab74bc70f00b050e10d13"
+      },
+      {
+        "label": "menu",
+        "codec": "archive6",
+        "raw_bytes": 299,
+        "before_bytes": 240,
+        "after_bytes": 240,
+        "gzip9_bytes": 219,
+        "input_sha256": "11b21c447d19dbbdd96925685a1f382e94463d78476758b0c5d5be69c3d54f0f",
+        "before_frame_sha256": "d8b1423112e4ffc082db82c0856c1fc4bf758326099a8bbe01045d49d64163b5",
+        "after_frame_sha256": "d8b1423112e4ffc082db82c0856c1fc4bf758326099a8bbe01045d49d64163b5"
+      },
+      {
+        "label": "menu",
+        "codec": "archive9",
+        "raw_bytes": 299,
+        "before_bytes": 240,
+        "after_bytes": 240,
+        "gzip9_bytes": 219,
+        "input_sha256": "11b21c447d19dbbdd96925685a1f382e94463d78476758b0c5d5be69c3d54f0f",
+        "before_frame_sha256": "d8b1423112e4ffc082db82c0856c1fc4bf758326099a8bbe01045d49d64163b5",
+        "after_frame_sha256": "d8b1423112e4ffc082db82c0856c1fc4bf758326099a8bbe01045d49d64163b5"
+      },
+      {
+        "label": "subject",
+        "codec": "http",
+        "raw_bytes": 82,
+        "before_bytes": 91,
+        "after_bytes": 91,
+        "gzip9_bytes": 99,
+        "input_sha256": "7315a4bfcde9bf1bcf403b4501e3333237f4d7f54568c21addda00a2c19f36ef",
+        "before_frame_sha256": "e99d3f94ececf412e07d1b1d14a983e8415eb5623c6a9eba280a64cb8804dcef",
+        "after_frame_sha256": "e99d3f94ececf412e07d1b1d14a983e8415eb5623c6a9eba280a64cb8804dcef"
+      },
+      {
+        "label": "subject",
+        "codec": "archive1",
+        "raw_bytes": 82,
+        "before_bytes": 91,
+        "after_bytes": 91,
+        "gzip9_bytes": 99,
+        "input_sha256": "7315a4bfcde9bf1bcf403b4501e3333237f4d7f54568c21addda00a2c19f36ef",
+        "before_frame_sha256": "e99d3f94ececf412e07d1b1d14a983e8415eb5623c6a9eba280a64cb8804dcef",
+        "after_frame_sha256": "e99d3f94ececf412e07d1b1d14a983e8415eb5623c6a9eba280a64cb8804dcef"
+      },
+      {
+        "label": "subject",
+        "codec": "archive6",
+        "raw_bytes": 82,
+        "before_bytes": 91,
+        "after_bytes": 91,
+        "gzip9_bytes": 99,
+        "input_sha256": "7315a4bfcde9bf1bcf403b4501e3333237f4d7f54568c21addda00a2c19f36ef",
+        "before_frame_sha256": "e99d3f94ececf412e07d1b1d14a983e8415eb5623c6a9eba280a64cb8804dcef",
+        "after_frame_sha256": "e99d3f94ececf412e07d1b1d14a983e8415eb5623c6a9eba280a64cb8804dcef"
+      },
+      {
+        "label": "subject",
+        "codec": "archive9",
+        "raw_bytes": 82,
+        "before_bytes": 91,
+        "after_bytes": 91,
+        "gzip9_bytes": 99,
+        "input_sha256": "7315a4bfcde9bf1bcf403b4501e3333237f4d7f54568c21addda00a2c19f36ef",
+        "before_frame_sha256": "e99d3f94ececf412e07d1b1d14a983e8415eb5623c6a9eba280a64cb8804dcef",
+        "after_frame_sha256": "e99d3f94ececf412e07d1b1d14a983e8415eb5623c6a9eba280a64cb8804dcef"
+      },
+      {
+        "label": "settings",
+        "codec": "http",
+        "raw_bytes": 571,
+        "before_bytes": 294,
+        "after_bytes": 293,
+        "gzip9_bytes": 285,
+        "input_sha256": "309023164947fe7613916af1bfe480f0d24e3a6b8b4ba10e35e62290495e3387",
+        "before_frame_sha256": "d8b45262a9d81308bc823a1a63a89a96fd3726112bec07eb8f50146243db3422",
+        "after_frame_sha256": "2291ff9369881ae08262bcfcde34191b089fd8f3f6b3d34ae4345db4fd9d0096"
+      },
+      {
+        "label": "settings",
+        "codec": "archive1",
+        "raw_bytes": 571,
+        "before_bytes": 314,
+        "after_bytes": 314,
+        "gzip9_bytes": 285,
+        "input_sha256": "309023164947fe7613916af1bfe480f0d24e3a6b8b4ba10e35e62290495e3387",
+        "before_frame_sha256": "f093fd07057add8e3ae78ac8cea39bbd5ef602eaa6384a8b767867bf9d7aabae",
+        "after_frame_sha256": "f093fd07057add8e3ae78ac8cea39bbd5ef602eaa6384a8b767867bf9d7aabae"
+      },
+      {
+        "label": "settings",
+        "codec": "archive6",
+        "raw_bytes": 571,
+        "before_bytes": 319,
+        "after_bytes": 319,
+        "gzip9_bytes": 285,
+        "input_sha256": "309023164947fe7613916af1bfe480f0d24e3a6b8b4ba10e35e62290495e3387",
+        "before_frame_sha256": "af994113ad38df7475ac478bbc9ac7a0b647c855593922d58af28348b105ad4a",
+        "after_frame_sha256": "af994113ad38df7475ac478bbc9ac7a0b647c855593922d58af28348b105ad4a"
+      },
+      {
+        "label": "settings",
+        "codec": "archive9",
+        "raw_bytes": 571,
+        "before_bytes": 319,
+        "after_bytes": 319,
+        "gzip9_bytes": 285,
+        "input_sha256": "309023164947fe7613916af1bfe480f0d24e3a6b8b4ba10e35e62290495e3387",
+        "before_frame_sha256": "af994113ad38df7475ac478bbc9ac7a0b647c855593922d58af28348b105ad4a",
+        "after_frame_sha256": "af994113ad38df7475ac478bbc9ac7a0b647c855593922d58af28348b105ad4a"
+      },
+      {
+        "label": "dat",
+        "codec": "http",
+        "raw_bytes": 3624,
+        "before_bytes": 1154,
+        "after_bytes": 1154,
+        "gzip9_bytes": 1120,
+        "input_sha256": "f15ca8e22f27b76ed7e0ee691e48e202f5539454bc81905392aa43d8093bee6f",
+        "before_frame_sha256": "975f8df46bcff74764769ed9c62383110cbb42f4213d3a7d68fa59cc374d5507",
+        "after_frame_sha256": "975f8df46bcff74764769ed9c62383110cbb42f4213d3a7d68fa59cc374d5507"
+      },
+      {
+        "label": "dat",
+        "codec": "archive1",
+        "raw_bytes": 3624,
+        "before_bytes": 1191,
+        "after_bytes": 1191,
+        "gzip9_bytes": 1120,
+        "input_sha256": "f15ca8e22f27b76ed7e0ee691e48e202f5539454bc81905392aa43d8093bee6f",
+        "before_frame_sha256": "f602aa77aa473de88cee4dbca553b3a61bea52a653e73e21fcc88aca250cc376",
+        "after_frame_sha256": "f602aa77aa473de88cee4dbca553b3a61bea52a653e73e21fcc88aca250cc376"
+      },
+      {
+        "label": "dat",
+        "codec": "archive6",
+        "raw_bytes": 3624,
+        "before_bytes": 1198,
+        "after_bytes": 1198,
+        "gzip9_bytes": 1120,
+        "input_sha256": "f15ca8e22f27b76ed7e0ee691e48e202f5539454bc81905392aa43d8093bee6f",
+        "before_frame_sha256": "fdd993bb97486e0a86b92d23ea1281aad9f0df796c057ba0ca9635aa5edd231d",
+        "after_frame_sha256": "fdd993bb97486e0a86b92d23ea1281aad9f0df796c057ba0ca9635aa5edd231d"
+      },
+      {
+        "label": "dat",
+        "codec": "archive9",
+        "raw_bytes": 3624,
+        "before_bytes": 1196,
+        "after_bytes": 1196,
+        "gzip9_bytes": 1120,
+        "input_sha256": "f15ca8e22f27b76ed7e0ee691e48e202f5539454bc81905392aa43d8093bee6f",
+        "before_frame_sha256": "1d72e7beb0317111cc78b75b82f6519fa55284b70315ea072f8e15154e9570f3",
+        "after_frame_sha256": "1d72e7beb0317111cc78b75b82f6519fa55284b70315ea072f8e15154e9570f3"
+      },
+      {
+        "label": "senbura-dat",
+        "codec": "http",
+        "raw_bytes": 452,
+        "before_bytes": 396,
+        "after_bytes": 396,
+        "gzip9_bytes": 412,
+        "input_sha256": "c571e73f72730d5703bae4efa2b6f79e0d7e26988a6120062dcd2226e8ef9514",
+        "before_frame_sha256": "36c5d5f4fd46521745694b53668ef522f019b537a70fe97e23023ba9d8d6b7e7",
+        "after_frame_sha256": "36c5d5f4fd46521745694b53668ef522f019b537a70fe97e23023ba9d8d6b7e7"
+      },
+      {
+        "label": "senbura-dat",
+        "codec": "archive1",
+        "raw_bytes": 452,
+        "before_bytes": 432,
+        "after_bytes": 432,
+        "gzip9_bytes": 412,
+        "input_sha256": "c571e73f72730d5703bae4efa2b6f79e0d7e26988a6120062dcd2226e8ef9514",
+        "before_frame_sha256": "18b9e5aa0fcb10a84a6f51e2615b5b88c4630851f3c618d23ac46a3c8d7d4011",
+        "after_frame_sha256": "18b9e5aa0fcb10a84a6f51e2615b5b88c4630851f3c618d23ac46a3c8d7d4011"
+      },
+      {
+        "label": "senbura-dat",
+        "codec": "archive6",
+        "raw_bytes": 452,
+        "before_bytes": 434,
+        "after_bytes": 434,
+        "gzip9_bytes": 412,
+        "input_sha256": "c571e73f72730d5703bae4efa2b6f79e0d7e26988a6120062dcd2226e8ef9514",
+        "before_frame_sha256": "c66e8a9171194b44bc5ec7faa65e9a50d68a9b44f7325b7bcfea860541eb0b26",
+        "after_frame_sha256": "c66e8a9171194b44bc5ec7faa65e9a50d68a9b44f7325b7bcfea860541eb0b26"
+      },
+      {
+        "label": "senbura-dat",
+        "codec": "archive9",
+        "raw_bytes": 452,
+        "before_bytes": 430,
+        "after_bytes": 430,
+        "gzip9_bytes": 412,
+        "input_sha256": "c571e73f72730d5703bae4efa2b6f79e0d7e26988a6120062dcd2226e8ef9514",
+        "before_frame_sha256": "142a2cfacff0ed04df5fbdb173d29adea21095d9d1e34bad58405539e358f478",
+        "after_frame_sha256": "142a2cfacff0ed04df5fbdb173d29adea21095d9d1e34bad58405539e358f478"
+      },
+      {
+        "label": "asset-thread.css",
+        "codec": "http",
+        "raw_bytes": 1454,
+        "before_bytes": 566,
+        "after_bytes": 565,
+        "gzip9_bytes": 522,
+        "input_sha256": "0921aeec578e174fd79eb00a2cd1b1a9504542d95d014879afaf02db1e761705",
+        "before_frame_sha256": "dcecd21ad60d749c64a21bc57250fa6821975346a3d7b118db83cbb0a4208bfe",
+        "after_frame_sha256": "08c8344c936aebc107d393169e397bce569f7c38ee316b7c8fd4149cdd3bc5ce"
+      },
+      {
+        "label": "asset-thread.css",
+        "codec": "archive1",
+        "raw_bytes": 1454,
+        "before_bytes": 590,
+        "after_bytes": 590,
+        "gzip9_bytes": 522,
+        "input_sha256": "0921aeec578e174fd79eb00a2cd1b1a9504542d95d014879afaf02db1e761705",
+        "before_frame_sha256": "07eeb0efad04e234e66ea96b4b9883a818722fc204b899cb7952db63a6a327b7",
+        "after_frame_sha256": "07eeb0efad04e234e66ea96b4b9883a818722fc204b899cb7952db63a6a327b7"
+      },
+      {
+        "label": "asset-thread.css",
+        "codec": "archive6",
+        "raw_bytes": 1454,
+        "before_bytes": 596,
+        "after_bytes": 596,
+        "gzip9_bytes": 522,
+        "input_sha256": "0921aeec578e174fd79eb00a2cd1b1a9504542d95d014879afaf02db1e761705",
+        "before_frame_sha256": "cb627917243f91b2ca5a242ddd17c0d1cc6ea43175c4d4705ac370239aed6651",
+        "after_frame_sha256": "cb627917243f91b2ca5a242ddd17c0d1cc6ea43175c4d4705ac370239aed6651"
+      },
+      {
+        "label": "asset-thread.css",
+        "codec": "archive9",
+        "raw_bytes": 1454,
+        "before_bytes": 596,
+        "after_bytes": 596,
+        "gzip9_bytes": 522,
+        "input_sha256": "0921aeec578e174fd79eb00a2cd1b1a9504542d95d014879afaf02db1e761705",
+        "before_frame_sha256": "cb627917243f91b2ca5a242ddd17c0d1cc6ea43175c4d4705ac370239aed6651",
+        "after_frame_sha256": "cb627917243f91b2ca5a242ddd17c0d1cc6ea43175c4d4705ac370239aed6651"
+      },
+      {
+        "label": "asset-public.css",
+        "codec": "http",
+        "raw_bytes": 2920,
+        "before_bytes": 1136,
+        "after_bytes": 1137,
+        "gzip9_bytes": 1059,
+        "input_sha256": "3ad7f9255fce7c657c5ed9024020535b098d52a8474d7a0c086415e37b83f699",
+        "before_frame_sha256": "b596090d024d0e624fea897ec700936cd0e22a2e10a75294f2f42ea87bbd176a",
+        "after_frame_sha256": "5c6a64cb5ed117a008278c3eb12edf8624347e9ea99d3e84361d2edc89dbf096"
+      },
+      {
+        "label": "asset-public.css",
+        "codec": "archive1",
+        "raw_bytes": 2920,
+        "before_bytes": 1163,
+        "after_bytes": 1163,
+        "gzip9_bytes": 1059,
+        "input_sha256": "3ad7f9255fce7c657c5ed9024020535b098d52a8474d7a0c086415e37b83f699",
+        "before_frame_sha256": "fc2cd33050018e3cee3c316389d4bb1aaf9e9a530a1a2417e68ff2fa663a96cd",
+        "after_frame_sha256": "fc2cd33050018e3cee3c316389d4bb1aaf9e9a530a1a2417e68ff2fa663a96cd"
+      },
+      {
+        "label": "asset-public.css",
+        "codec": "archive6",
+        "raw_bytes": 2920,
+        "before_bytes": 1170,
+        "after_bytes": 1170,
+        "gzip9_bytes": 1059,
+        "input_sha256": "3ad7f9255fce7c657c5ed9024020535b098d52a8474d7a0c086415e37b83f699",
+        "before_frame_sha256": "bb5e3e8aecc1bf175054cfae5c07c8308469fe885e12be0feff7a6b3282427f0",
+        "after_frame_sha256": "bb5e3e8aecc1bf175054cfae5c07c8308469fe885e12be0feff7a6b3282427f0"
+      },
+      {
+        "label": "asset-public.css",
+        "codec": "archive9",
+        "raw_bytes": 2920,
+        "before_bytes": 1167,
+        "after_bytes": 1167,
+        "gzip9_bytes": 1059,
+        "input_sha256": "3ad7f9255fce7c657c5ed9024020535b098d52a8474d7a0c086415e37b83f699",
+        "before_frame_sha256": "0d5a8adf411044f050e455c69c3847c3672702ab82c9edec0bdcbdff2ea69ee7",
+        "after_frame_sha256": "0d5a8adf411044f050e455c69c3847c3672702ab82c9edec0bdcbdff2ea69ee7"
+      },
+      {
+        "label": "asset-list.css",
+        "codec": "http",
+        "raw_bytes": 1199,
+        "before_bytes": 544,
+        "after_bytes": 542,
+        "gzip9_bytes": 519,
+        "input_sha256": "3b85c078bcda88fb60cfaa56fa0a43b02cce336ba66d16467ebe247cf1928efa",
+        "before_frame_sha256": "92dcd7b34b77f0037931856a2804ffc9dc8d512e336560d312df079647b46e51",
+        "after_frame_sha256": "0228b3f3f887231cfc77abe37099b26f72464cad9a15ed04f2139ca80d80e036"
+      },
+      {
+        "label": "asset-list.css",
+        "codec": "archive1",
+        "raw_bytes": 1199,
+        "before_bytes": 567,
+        "after_bytes": 567,
+        "gzip9_bytes": 519,
+        "input_sha256": "3b85c078bcda88fb60cfaa56fa0a43b02cce336ba66d16467ebe247cf1928efa",
+        "before_frame_sha256": "54e44b5c7abfe98da4094889bf3e020bcc553443382f5f86e1871ce83dfa6019",
+        "after_frame_sha256": "54e44b5c7abfe98da4094889bf3e020bcc553443382f5f86e1871ce83dfa6019"
+      },
+      {
+        "label": "asset-list.css",
+        "codec": "archive6",
+        "raw_bytes": 1199,
+        "before_bytes": 573,
+        "after_bytes": 573,
+        "gzip9_bytes": 519,
+        "input_sha256": "3b85c078bcda88fb60cfaa56fa0a43b02cce336ba66d16467ebe247cf1928efa",
+        "before_frame_sha256": "08aaadd6911345a0f9b21ca3d234530afe11538e1e4d577ed280075ae1d5ee56",
+        "after_frame_sha256": "08aaadd6911345a0f9b21ca3d234530afe11538e1e4d577ed280075ae1d5ee56"
+      },
+      {
+        "label": "asset-list.css",
+        "codec": "archive9",
+        "raw_bytes": 1199,
+        "before_bytes": 573,
+        "after_bytes": 573,
+        "gzip9_bytes": 519,
+        "input_sha256": "3b85c078bcda88fb60cfaa56fa0a43b02cce336ba66d16467ebe247cf1928efa",
+        "before_frame_sha256": "08aaadd6911345a0f9b21ca3d234530afe11538e1e4d577ed280075ae1d5ee56",
+        "after_frame_sha256": "08aaadd6911345a0f9b21ca3d234530afe11538e1e4d577ed280075ae1d5ee56"
+      },
+      {
+        "label": "asset-ui.js",
+        "codec": "http",
+        "raw_bytes": 523,
+        "before_bytes": 300,
+        "after_bytes": 300,
+        "gzip9_bytes": 307,
+        "input_sha256": "3cfaae79044c623d9678583844be497956742e969ddeeef05d1caee8b9f956e0",
+        "before_frame_sha256": "2adbc8a8151ab01ce0a474e4a9a8c72ec0cd96e56515249cba739521081456ef",
+        "after_frame_sha256": "2adbc8a8151ab01ce0a474e4a9a8c72ec0cd96e56515249cba739521081456ef"
+      },
+      {
+        "label": "asset-ui.js",
+        "codec": "archive1",
+        "raw_bytes": 523,
+        "before_bytes": 338,
+        "after_bytes": 338,
+        "gzip9_bytes": 307,
+        "input_sha256": "3cfaae79044c623d9678583844be497956742e969ddeeef05d1caee8b9f956e0",
+        "before_frame_sha256": "0fb9a762e45b057cda29a6c5de66319f92ae3c69b2397afa2c98841bbf89a814",
+        "after_frame_sha256": "0fb9a762e45b057cda29a6c5de66319f92ae3c69b2397afa2c98841bbf89a814"
+      },
+      {
+        "label": "asset-ui.js",
+        "codec": "archive6",
+        "raw_bytes": 523,
+        "before_bytes": 342,
+        "after_bytes": 342,
+        "gzip9_bytes": 307,
+        "input_sha256": "3cfaae79044c623d9678583844be497956742e969ddeeef05d1caee8b9f956e0",
+        "before_frame_sha256": "25ee53994fef36f348cb39703fd2c4f46b090b771a8e6a63f11a042a35ed326b",
+        "after_frame_sha256": "25ee53994fef36f348cb39703fd2c4f46b090b771a8e6a63f11a042a35ed326b"
+      },
+      {
+        "label": "asset-ui.js",
+        "codec": "archive9",
+        "raw_bytes": 523,
+        "before_bytes": 339,
+        "after_bytes": 339,
+        "gzip9_bytes": 307,
+        "input_sha256": "3cfaae79044c623d9678583844be497956742e969ddeeef05d1caee8b9f956e0",
+        "before_frame_sha256": "aeed77cbd87c2afe11d0d4c2202189bfd4881ee6d3062b3fb01bc6217eba818d",
+        "after_frame_sha256": "aeed77cbd87c2afe11d0d4c2202189bfd4881ee6d3062b3fb01bc6217eba818d"
+      },
+      {
+        "label": "asset-list.js",
+        "codec": "http",
+        "raw_bytes": 3714,
+        "before_bytes": 1706,
+        "after_bytes": 1698,
+        "gzip9_bytes": 1653,
+        "input_sha256": "8c6245e1219108889343f2e38bc0398fbcda9b0f613f571d9eafc506bfb4e1dc",
+        "before_frame_sha256": "0a3a9213899f813294752237297bc37f24bcbaae733dc839033a152a11c660e1",
+        "after_frame_sha256": "715b18abf71b4fdc25317ec6fef77c482cdf9457c407030f54c876257d8021c0"
+      },
+      {
+        "label": "asset-list.js",
+        "codec": "archive1",
+        "raw_bytes": 3714,
+        "before_bytes": 1733,
+        "after_bytes": 1733,
+        "gzip9_bytes": 1653,
+        "input_sha256": "8c6245e1219108889343f2e38bc0398fbcda9b0f613f571d9eafc506bfb4e1dc",
+        "before_frame_sha256": "49e336d7e1f532b3be3135e0d6b9a774161d08b26f3ab0f87cf11bea9bda3892",
+        "after_frame_sha256": "49e336d7e1f532b3be3135e0d6b9a774161d08b26f3ab0f87cf11bea9bda3892"
+      },
+      {
+        "label": "asset-list.js",
+        "codec": "archive6",
+        "raw_bytes": 3714,
+        "before_bytes": 1741,
+        "after_bytes": 1741,
+        "gzip9_bytes": 1653,
+        "input_sha256": "8c6245e1219108889343f2e38bc0398fbcda9b0f613f571d9eafc506bfb4e1dc",
+        "before_frame_sha256": "001019aebf7651441fcda23694938fe7424bad7ac11a950039817f26818da784",
+        "after_frame_sha256": "001019aebf7651441fcda23694938fe7424bad7ac11a950039817f26818da784"
+      },
+      {
+        "label": "asset-list.js",
+        "codec": "archive9",
+        "raw_bytes": 3714,
+        "before_bytes": 1735,
+        "after_bytes": 1735,
+        "gzip9_bytes": 1653,
+        "input_sha256": "8c6245e1219108889343f2e38bc0398fbcda9b0f613f571d9eafc506bfb4e1dc",
+        "before_frame_sha256": "c934610a943dc3823a660b93374d9e93796dec306bcfd42028dd9916f6315d55",
+        "after_frame_sha256": "c934610a943dc3823a660b93374d9e93796dec306bcfd42028dd9916f6315d55"
+      },
+      {
+        "label": "asset-thread.js",
+        "codec": "http",
+        "raw_bytes": 1637,
+        "before_bytes": 933,
+        "after_bytes": 931,
+        "gzip9_bytes": 915,
+        "input_sha256": "b3128ec45e2c48e0dda1c52073ce0b48f3fa4ec4fa9bb899db521693ed8fc84f",
+        "before_frame_sha256": "77dd3f4e906ed8587482fd5109c84d75dba4f4bf299130ce0c9d8a4c30d58cde",
+        "after_frame_sha256": "9c2330647a5b21ad4845656b53ec239407340771ae9cb117f7c233309a7d6b6e"
+      },
+      {
+        "label": "asset-thread.js",
+        "codec": "archive1",
+        "raw_bytes": 1637,
+        "before_bytes": 979,
+        "after_bytes": 979,
+        "gzip9_bytes": 915,
+        "input_sha256": "b3128ec45e2c48e0dda1c52073ce0b48f3fa4ec4fa9bb899db521693ed8fc84f",
+        "before_frame_sha256": "f8aba917846c814982be4941d4c808e45d2b678c0737feeeee696babca39bdec",
+        "after_frame_sha256": "f8aba917846c814982be4941d4c808e45d2b678c0737feeeee696babca39bdec"
+      },
+      {
+        "label": "asset-thread.js",
+        "codec": "archive6",
+        "raw_bytes": 1637,
+        "before_bytes": 985,
+        "after_bytes": 985,
+        "gzip9_bytes": 915,
+        "input_sha256": "b3128ec45e2c48e0dda1c52073ce0b48f3fa4ec4fa9bb899db521693ed8fc84f",
+        "before_frame_sha256": "e475bf1904e9c5a6b1f0667a1850a793160231c694597d3ea954d015647e5b4c",
+        "after_frame_sha256": "e475bf1904e9c5a6b1f0667a1850a793160231c694597d3ea954d015647e5b4c"
+      },
+      {
+        "label": "asset-thread.js",
+        "codec": "archive9",
+        "raw_bytes": 1637,
+        "before_bytes": 972,
+        "after_bytes": 972,
+        "gzip9_bytes": 915,
+        "input_sha256": "b3128ec45e2c48e0dda1c52073ce0b48f3fa4ec4fa9bb899db521693ed8fc84f",
+        "before_frame_sha256": "8a7216f2a2460e8b5b6dad99ea2d94adb2f1ddac93e4f7faa0ed2d0a34413435",
+        "after_frame_sha256": "8a7216f2a2460e8b5b6dad99ea2d94adb2f1ddac93e4f7faa0ed2d0a34413435"
+      },
+      {
+        "label": "asset-favicon.svg",
+        "codec": "http",
+        "raw_bytes": 463,
+        "before_bytes": 360,
+        "after_bytes": 360,
+        "gzip9_bytes": 371,
+        "input_sha256": "c18c82c6bbca171dd8df013a1600e21b569d78b51c50ceb5e25bf696d5dbaf5d",
+        "before_frame_sha256": "a8b800a4403dd2a1eeffeaa2a1daac356c08d898493354d99e72c4411ed15a0d",
+        "after_frame_sha256": "a8b800a4403dd2a1eeffeaa2a1daac356c08d898493354d99e72c4411ed15a0d"
+      },
+      {
+        "label": "asset-favicon.svg",
+        "codec": "archive1",
+        "raw_bytes": 463,
+        "before_bytes": 393,
+        "after_bytes": 393,
+        "gzip9_bytes": 371,
+        "input_sha256": "c18c82c6bbca171dd8df013a1600e21b569d78b51c50ceb5e25bf696d5dbaf5d",
+        "before_frame_sha256": "3b8014d07a5e977c1adf8dc6c5bf9f1f2b503ae67590b3d3916e41ccc26cfe74",
+        "after_frame_sha256": "3b8014d07a5e977c1adf8dc6c5bf9f1f2b503ae67590b3d3916e41ccc26cfe74"
+      },
+      {
+        "label": "asset-favicon.svg",
+        "codec": "archive6",
+        "raw_bytes": 463,
+        "before_bytes": 397,
+        "after_bytes": 397,
+        "gzip9_bytes": 371,
+        "input_sha256": "c18c82c6bbca171dd8df013a1600e21b569d78b51c50ceb5e25bf696d5dbaf5d",
+        "before_frame_sha256": "f7b91cfbca236f037cc936699cf904b4847fd074ba2a2416733ef0eecc356d1a",
+        "after_frame_sha256": "f7b91cfbca236f037cc936699cf904b4847fd074ba2a2416733ef0eecc356d1a"
+      },
+      {
+        "label": "asset-favicon.svg",
+        "codec": "archive9",
+        "raw_bytes": 463,
+        "before_bytes": 397,
+        "after_bytes": 397,
+        "gzip9_bytes": 371,
+        "input_sha256": "c18c82c6bbca171dd8df013a1600e21b569d78b51c50ceb5e25bf696d5dbaf5d",
+        "before_frame_sha256": "f7b91cfbca236f037cc936699cf904b4847fd074ba2a2416733ef0eecc356d1a",
+        "after_frame_sha256": "f7b91cfbca236f037cc936699cf904b4847fd074ba2a2416733ef0eecc356d1a"
+      },
+      {
+        "label": "asset-ui.css",
+        "codec": "http",
+        "raw_bytes": 7315,
+        "before_bytes": 2497,
+        "after_bytes": 2479,
+        "gzip9_bytes": 2305,
+        "input_sha256": "d681ca34c09600874fee8f40b79117187de02142ca2da2ebb5e13ea4bcf797df",
+        "before_frame_sha256": "543bbd6a095b2d960541df78d8e550409924520faffc7f5917ff2793862c214e",
+        "after_frame_sha256": "6b4fae0ec355e99f5af6e9d3d00dfb090bec068b6b7cdea2a97d1fa00c6176c8"
+      },
+      {
+        "label": "asset-ui.css",
+        "codec": "archive1",
+        "raw_bytes": 7315,
+        "before_bytes": 2521,
+        "after_bytes": 2521,
+        "gzip9_bytes": 2305,
+        "input_sha256": "d681ca34c09600874fee8f40b79117187de02142ca2da2ebb5e13ea4bcf797df",
+        "before_frame_sha256": "600cfca217fa43e596a023160295394461ed689a862a33b2cc3b7fa69c9f68af",
+        "after_frame_sha256": "600cfca217fa43e596a023160295394461ed689a862a33b2cc3b7fa69c9f68af"
+      },
+      {
+        "label": "asset-ui.css",
+        "codec": "archive6",
+        "raw_bytes": 7315,
+        "before_bytes": 2520,
+        "after_bytes": 2520,
+        "gzip9_bytes": 2305,
+        "input_sha256": "d681ca34c09600874fee8f40b79117187de02142ca2da2ebb5e13ea4bcf797df",
+        "before_frame_sha256": "64351fd8294a53b58a66e0b5bb61102928226c9eb8f405d96d3a59329341f720",
+        "after_frame_sha256": "64351fd8294a53b58a66e0b5bb61102928226c9eb8f405d96d3a59329341f720"
+      },
+      {
+        "label": "asset-ui.css",
+        "codec": "archive9",
+        "raw_bytes": 7315,
+        "before_bytes": 2520,
+        "after_bytes": 2520,
+        "gzip9_bytes": 2305,
+        "input_sha256": "d681ca34c09600874fee8f40b79117187de02142ca2da2ebb5e13ea4bcf797df",
+        "before_frame_sha256": "64351fd8294a53b58a66e0b5bb61102928226c9eb8f405d96d3a59329341f720",
+        "after_frame_sha256": "64351fd8294a53b58a66e0b5bb61102928226c9eb8f405d96d3a59329341f720"
+      },
+      {
+        "label": "current-admin-css",
+        "codec": "http",
+        "raw_bytes": 8063,
+        "before_bytes": 2280,
+        "after_bytes": 2266,
+        "gzip9_bytes": 2000,
+        "input_sha256": "3bc0d123fcdf7dd165cf4d0f5b99543949351073e427791c7d49eefcae46f3ca",
+        "before_frame_sha256": "20aa389f32a673bb9898bc808706e589feb8fa3d38dd826ff30a3a4560515833",
+        "after_frame_sha256": "1653960d13392747fc0d511756e358aba97efc694d8925dc46fe857c5ea96ea3"
+      },
+      {
+        "label": "current-admin-css",
+        "codec": "archive1",
+        "raw_bytes": 8063,
+        "before_bytes": 2304,
+        "after_bytes": 2304,
+        "gzip9_bytes": 2000,
+        "input_sha256": "3bc0d123fcdf7dd165cf4d0f5b99543949351073e427791c7d49eefcae46f3ca",
+        "before_frame_sha256": "2a6ebed9b347a4d212e1846c329372041d3be3a278c825e8bc27f4b71842cc49",
+        "after_frame_sha256": "2a6ebed9b347a4d212e1846c329372041d3be3a278c825e8bc27f4b71842cc49"
+      },
+      {
+        "label": "current-admin-css",
+        "codec": "archive6",
+        "raw_bytes": 8063,
+        "before_bytes": 2303,
+        "after_bytes": 2303,
+        "gzip9_bytes": 2000,
+        "input_sha256": "3bc0d123fcdf7dd165cf4d0f5b99543949351073e427791c7d49eefcae46f3ca",
+        "before_frame_sha256": "4dfb6b931830e9e10cdcb911e8370ba88207dfac957a62658f66fabafa87735d",
+        "after_frame_sha256": "4dfb6b931830e9e10cdcb911e8370ba88207dfac957a62658f66fabafa87735d"
+      },
+      {
+        "label": "current-admin-css",
+        "codec": "archive9",
+        "raw_bytes": 8063,
+        "before_bytes": 2303,
+        "after_bytes": 2303,
+        "gzip9_bytes": 2000,
+        "input_sha256": "3bc0d123fcdf7dd165cf4d0f5b99543949351073e427791c7d49eefcae46f3ca",
+        "before_frame_sha256": "4dfb6b931830e9e10cdcb911e8370ba88207dfac957a62658f66fabafa87735d",
+        "after_frame_sha256": "4dfb6b931830e9e10cdcb911e8370ba88207dfac957a62658f66fabafa87735d"
+      },
+      {
+        "label": "current-admin-js",
+        "codec": "http",
+        "raw_bytes": 762,
+        "before_bytes": 434,
+        "after_bytes": 434,
+        "gzip9_bytes": 429,
+        "input_sha256": "db5961f541e1b46d6b27074cc52b5362693a3531fb785c88b93d243c25a79770",
+        "before_frame_sha256": "b6736d68c5ffa7ca2360717185dec9b63b5ef23e9616c246e1179a28ea401bac",
+        "after_frame_sha256": "b6736d68c5ffa7ca2360717185dec9b63b5ef23e9616c246e1179a28ea401bac"
+      },
+      {
+        "label": "current-admin-js",
+        "codec": "archive1",
+        "raw_bytes": 762,
+        "before_bytes": 471,
+        "after_bytes": 471,
+        "gzip9_bytes": 429,
+        "input_sha256": "db5961f541e1b46d6b27074cc52b5362693a3531fb785c88b93d243c25a79770",
+        "before_frame_sha256": "037d2d2d368e773d6a7d3d1330bf3550824610e856a81f93743c84aefa700c21",
+        "after_frame_sha256": "037d2d2d368e773d6a7d3d1330bf3550824610e856a81f93743c84aefa700c21"
+      },
+      {
+        "label": "current-admin-js",
+        "codec": "archive6",
+        "raw_bytes": 762,
+        "before_bytes": 477,
+        "after_bytes": 477,
+        "gzip9_bytes": 429,
+        "input_sha256": "db5961f541e1b46d6b27074cc52b5362693a3531fb785c88b93d243c25a79770",
+        "before_frame_sha256": "d5acfcd0af161419063cc98a298e96e6f4e9f46b589356e0d44e231d86224dc1",
+        "after_frame_sha256": "d5acfcd0af161419063cc98a298e96e6f4e9f46b589356e0d44e231d86224dc1"
+      },
+      {
+        "label": "current-admin-js",
+        "codec": "archive9",
+        "raw_bytes": 762,
+        "before_bytes": 477,
+        "after_bytes": 477,
+        "gzip9_bytes": 429,
+        "input_sha256": "db5961f541e1b46d6b27074cc52b5362693a3531fb785c88b93d243c25a79770",
+        "before_frame_sha256": "d5acfcd0af161419063cc98a298e96e6f4e9f46b589356e0d44e231d86224dc1",
+        "after_frame_sha256": "d5acfcd0af161419063cc98a298e96e6f4e9f46b589356e0d44e231d86224dc1"
+      },
+      {
+        "label": "current-admin-board-css",
+        "codec": "http",
+        "raw_bytes": 1393,
+        "before_bytes": 548,
+        "after_bytes": 542,
+        "gzip9_bytes": 532,
+        "input_sha256": "317621a1065bd4e061f3535ada1608d57fc3702b88fc61441d20e29ab33ef348",
+        "before_frame_sha256": "30493ea769102502c9e9a22f93b92934936b169507e3d500b644e0c712522aea",
+        "after_frame_sha256": "09139127ae43dcb1c359f30edc31945e3bb2c6c1ddf188e4f87b6d5e70f51734"
+      },
+      {
+        "label": "current-admin-board-css",
+        "codec": "archive1",
+        "raw_bytes": 1393,
+        "before_bytes": 577,
+        "after_bytes": 577,
+        "gzip9_bytes": 532,
+        "input_sha256": "317621a1065bd4e061f3535ada1608d57fc3702b88fc61441d20e29ab33ef348",
+        "before_frame_sha256": "459f2b987c7d8f4c6eca0a2fa3f47e64ba6fd2f2c9b687ea3f521836b8e9291e",
+        "after_frame_sha256": "459f2b987c7d8f4c6eca0a2fa3f47e64ba6fd2f2c9b687ea3f521836b8e9291e"
+      },
+      {
+        "label": "current-admin-board-css",
+        "codec": "archive6",
+        "raw_bytes": 1393,
+        "before_bytes": 584,
+        "after_bytes": 584,
+        "gzip9_bytes": 532,
+        "input_sha256": "317621a1065bd4e061f3535ada1608d57fc3702b88fc61441d20e29ab33ef348",
+        "before_frame_sha256": "7fb019101e28b1c55c9ed2c0ea5da1c1709947f0d62244abaa7253a396122139",
+        "after_frame_sha256": "7fb019101e28b1c55c9ed2c0ea5da1c1709947f0d62244abaa7253a396122139"
+      },
+      {
+        "label": "current-admin-board-css",
+        "codec": "archive9",
+        "raw_bytes": 1393,
+        "before_bytes": 584,
+        "after_bytes": 584,
+        "gzip9_bytes": 532,
+        "input_sha256": "317621a1065bd4e061f3535ada1608d57fc3702b88fc61441d20e29ab33ef348",
+        "before_frame_sha256": "7fb019101e28b1c55c9ed2c0ea5da1c1709947f0d62244abaa7253a396122139",
+        "after_frame_sha256": "7fb019101e28b1c55c9ed2c0ea5da1c1709947f0d62244abaa7253a396122139"
+      },
+      {
+        "label": "current-admin-settings-js",
+        "codec": "http",
+        "raw_bytes": 2724,
+        "before_bytes": 1445,
+        "after_bytes": 1441,
+        "gzip9_bytes": 1403,
+        "input_sha256": "6e3f64164c23e0e849bde1ee32be71097ce46630c7a54ebdce6e208db7106bac",
+        "before_frame_sha256": "f061816f65f145b51119c9750aa3070fdd7ca6a112c75ac702ec25cebfe9ac1d",
+        "after_frame_sha256": "4c56d086e44c23d021563966fbecc5c4773628825933bb3485f15b2c2cf249d2"
+      },
+      {
+        "label": "current-admin-settings-js",
+        "codec": "archive1",
+        "raw_bytes": 2724,
+        "before_bytes": 1472,
+        "after_bytes": 1472,
+        "gzip9_bytes": 1403,
+        "input_sha256": "6e3f64164c23e0e849bde1ee32be71097ce46630c7a54ebdce6e208db7106bac",
+        "before_frame_sha256": "2b287b0a4e4daba1e1d8926eb55d9ba394babc3a7ba9b8c225db2c4cb34fd4bd",
+        "after_frame_sha256": "2b287b0a4e4daba1e1d8926eb55d9ba394babc3a7ba9b8c225db2c4cb34fd4bd"
+      },
+      {
+        "label": "current-admin-settings-js",
+        "codec": "archive6",
+        "raw_bytes": 2724,
+        "before_bytes": 1480,
+        "after_bytes": 1480,
+        "gzip9_bytes": 1403,
+        "input_sha256": "6e3f64164c23e0e849bde1ee32be71097ce46630c7a54ebdce6e208db7106bac",
+        "before_frame_sha256": "8088bb513aac7fdce10c992503b4bea99afa91baae43295429139a89f589bdf1",
+        "after_frame_sha256": "8088bb513aac7fdce10c992503b4bea99afa91baae43295429139a89f589bdf1"
+      },
+      {
+        "label": "current-admin-settings-js",
+        "codec": "archive9",
+        "raw_bytes": 2724,
+        "before_bytes": 1469,
+        "after_bytes": 1469,
+        "gzip9_bytes": 1403,
+        "input_sha256": "6e3f64164c23e0e849bde1ee32be71097ce46630c7a54ebdce6e208db7106bac",
+        "before_frame_sha256": "1e24fdbe710979605fb45f5d341663c14f16c3ebe6b5b52c07a775794c8e5823",
+        "after_frame_sha256": "1e24fdbe710979605fb45f5d341663c14f16c3ebe6b5b52c07a775794c8e5823"
+      },
+      {
+        "label": "current-admin-posts-css",
+        "codec": "http",
+        "raw_bytes": 2757,
+        "before_bytes": 948,
+        "after_bytes": 934,
+        "gzip9_bytes": 884,
+        "input_sha256": "18a5a3ee6d6e9f5ed2b1c0e10b0a1d2b59229163367a9d23b82b2cf3ad3c5cc8",
+        "before_frame_sha256": "c1cb805ace074e76adfedc72b07c83ba3f1a37a7d9e04c257d3bb893d5283b1d",
+        "after_frame_sha256": "5718260b277ae62a49bc6330ba832df87bf347fe48706e99f59da13c632fa0c6"
+      },
+      {
+        "label": "current-admin-posts-css",
+        "codec": "archive1",
+        "raw_bytes": 2757,
+        "before_bytes": 973,
+        "after_bytes": 973,
+        "gzip9_bytes": 884,
+        "input_sha256": "18a5a3ee6d6e9f5ed2b1c0e10b0a1d2b59229163367a9d23b82b2cf3ad3c5cc8",
+        "before_frame_sha256": "ba4ba311290e4c6acb52c5c45074705e8209587542096408a927159f639f0444",
+        "after_frame_sha256": "ba4ba311290e4c6acb52c5c45074705e8209587542096408a927159f639f0444"
+      },
+      {
+        "label": "current-admin-posts-css",
+        "codec": "archive6",
+        "raw_bytes": 2757,
+        "before_bytes": 980,
+        "after_bytes": 980,
+        "gzip9_bytes": 884,
+        "input_sha256": "18a5a3ee6d6e9f5ed2b1c0e10b0a1d2b59229163367a9d23b82b2cf3ad3c5cc8",
+        "before_frame_sha256": "6f6a0ff105babb374069ca6d317ab16d8200cd28c2bf9485fa41daedaadbd06d",
+        "after_frame_sha256": "6f6a0ff105babb374069ca6d317ab16d8200cd28c2bf9485fa41daedaadbd06d"
+      },
+      {
+        "label": "current-admin-posts-css",
+        "codec": "archive9",
+        "raw_bytes": 2757,
+        "before_bytes": 979,
+        "after_bytes": 979,
+        "gzip9_bytes": 884,
+        "input_sha256": "18a5a3ee6d6e9f5ed2b1c0e10b0a1d2b59229163367a9d23b82b2cf3ad3c5cc8",
+        "before_frame_sha256": "b3a5fe13fa98c007c50ecb3a6bcfc0c9763af62e59712ffc6343a6025ef198a6",
+        "after_frame_sha256": "b3a5fe13fa98c007c50ecb3a6bcfc0c9763af62e59712ffc6343a6025ef198a6"
+      },
+      {
+        "label": "current-admin-rules-js",
+        "codec": "http",
+        "raw_bytes": 2344,
+        "before_bytes": 1302,
+        "after_bytes": 1301,
+        "gzip9_bytes": 1262,
+        "input_sha256": "ea351c193c4d184aa74323b6e413ceab7415ebfedfe2d65ca116a74ba5df61e3",
+        "before_frame_sha256": "105379bc2e1c6ab0af09390bc68aa9ef269b58cf41b8719e7da7ef0ed0f7007e",
+        "after_frame_sha256": "d634ee66166ec00b86c0409d07253df8656b889ea84a1ba6cc5d7298ea0425e7"
+      },
+      {
+        "label": "current-admin-rules-js",
+        "codec": "archive1",
+        "raw_bytes": 2344,
+        "before_bytes": 1337,
+        "after_bytes": 1337,
+        "gzip9_bytes": 1262,
+        "input_sha256": "ea351c193c4d184aa74323b6e413ceab7415ebfedfe2d65ca116a74ba5df61e3",
+        "before_frame_sha256": "46f21b2c3bf8a7da7214accaf4b666bcf24543ff9cea674602bbdfd6532be79b",
+        "after_frame_sha256": "46f21b2c3bf8a7da7214accaf4b666bcf24543ff9cea674602bbdfd6532be79b"
+      },
+      {
+        "label": "current-admin-rules-js",
+        "codec": "archive6",
+        "raw_bytes": 2344,
+        "before_bytes": 1345,
+        "after_bytes": 1345,
+        "gzip9_bytes": 1262,
+        "input_sha256": "ea351c193c4d184aa74323b6e413ceab7415ebfedfe2d65ca116a74ba5df61e3",
+        "before_frame_sha256": "37949969430fdcb1f264a1e378f780f4bc41977b212ad0f76a05c4d8ec2b1c91",
+        "after_frame_sha256": "37949969430fdcb1f264a1e378f780f4bc41977b212ad0f76a05c4d8ec2b1c91"
+      },
+      {
+        "label": "current-admin-rules-js",
+        "codec": "archive9",
+        "raw_bytes": 2344,
+        "before_bytes": 1329,
+        "after_bytes": 1329,
+        "gzip9_bytes": 1262,
+        "input_sha256": "ea351c193c4d184aa74323b6e413ceab7415ebfedfe2d65ca116a74ba5df61e3",
+        "before_frame_sha256": "687d428f6927ad68bedbe8e707719f85348a7b0904f1c26657de3dd0bc4fa61c",
+        "after_frame_sha256": "687d428f6927ad68bedbe8e707719f85348a7b0904f1c26657de3dd0bc4fa61c"
+      },
+      {
+        "label": "current-admin-waf-js",
+        "codec": "http",
+        "raw_bytes": 1399,
+        "before_bytes": 697,
+        "after_bytes": 697,
+        "gzip9_bytes": 704,
+        "input_sha256": "c2bfbb0e3adfcef23de517cf2dbc9aa54a590f62f5087dd9af7dc81f9ebfa167",
+        "before_frame_sha256": "ff73612fa984a636f4cba1a5912f57d7098e764bed5c12db5c00c2b1f91a6ac4",
+        "after_frame_sha256": "d455fed568f166d1cb068e6408fc8c961684a2f9528de2d2413879201a7fbb93"
+      },
+      {
+        "label": "current-admin-waf-js",
+        "codec": "archive1",
+        "raw_bytes": 1399,
+        "before_bytes": 731,
+        "after_bytes": 731,
+        "gzip9_bytes": 704,
+        "input_sha256": "c2bfbb0e3adfcef23de517cf2dbc9aa54a590f62f5087dd9af7dc81f9ebfa167",
+        "before_frame_sha256": "b7525de7834d98575826fa9b29d9710fe069d3bf9a272fc45d79f920670342b7",
+        "after_frame_sha256": "b7525de7834d98575826fa9b29d9710fe069d3bf9a272fc45d79f920670342b7"
+      },
+      {
+        "label": "current-admin-waf-js",
+        "codec": "archive6",
+        "raw_bytes": 1399,
+        "before_bytes": 738,
+        "after_bytes": 738,
+        "gzip9_bytes": 704,
+        "input_sha256": "c2bfbb0e3adfcef23de517cf2dbc9aa54a590f62f5087dd9af7dc81f9ebfa167",
+        "before_frame_sha256": "50a0858cf40f81ef33325303cb160e46a5da17b9596fe75a3d31435f3f903584",
+        "after_frame_sha256": "50a0858cf40f81ef33325303cb160e46a5da17b9596fe75a3d31435f3f903584"
+      },
+      {
+        "label": "current-admin-waf-js",
+        "codec": "archive9",
+        "raw_bytes": 1399,
+        "before_bytes": 738,
+        "after_bytes": 738,
+        "gzip9_bytes": 704,
+        "input_sha256": "c2bfbb0e3adfcef23de517cf2dbc9aa54a590f62f5087dd9af7dc81f9ebfa167",
+        "before_frame_sha256": "50a0858cf40f81ef33325303cb160e46a5da17b9596fe75a3d31435f3f903584",
+        "after_frame_sha256": "50a0858cf40f81ef33325303cb160e46a5da17b9596fe75a3d31435f3f903584"
+      },
+      {
+        "label": "current-countries-js",
+        "codec": "http",
+        "raw_bytes": 432,
+        "before_bytes": 265,
+        "after_bytes": 265,
+        "gzip9_bytes": 273,
+        "input_sha256": "bb9786ae1a885d6a3ecc178ea035bdf224bed88b94f37349915ae1629cd1613c",
+        "before_frame_sha256": "4c7d53dbefbaf7632ae381aadcae6700f3a748949b8738f6d399169a25e7d522",
+        "after_frame_sha256": "4c7d53dbefbaf7632ae381aadcae6700f3a748949b8738f6d399169a25e7d522"
+      },
+      {
+        "label": "current-countries-js",
+        "codec": "archive1",
+        "raw_bytes": 432,
+        "before_bytes": 300,
+        "after_bytes": 300,
+        "gzip9_bytes": 273,
+        "input_sha256": "bb9786ae1a885d6a3ecc178ea035bdf224bed88b94f37349915ae1629cd1613c",
+        "before_frame_sha256": "f3a7b838c7024144636f468716dfd03804c91f59fa3e9b6dc5eec1655b7353bb",
+        "after_frame_sha256": "f3a7b838c7024144636f468716dfd03804c91f59fa3e9b6dc5eec1655b7353bb"
+      },
+      {
+        "label": "current-countries-js",
+        "codec": "archive6",
+        "raw_bytes": 432,
+        "before_bytes": 305,
+        "after_bytes": 305,
+        "gzip9_bytes": 273,
+        "input_sha256": "bb9786ae1a885d6a3ecc178ea035bdf224bed88b94f37349915ae1629cd1613c",
+        "before_frame_sha256": "612b181222a8844bc7a9f8daefddc432c64a20c9087fbed84ce2e409dbf0fe16",
+        "after_frame_sha256": "612b181222a8844bc7a9f8daefddc432c64a20c9087fbed84ce2e409dbf0fe16"
+      },
+      {
+        "label": "current-countries-js",
+        "codec": "archive9",
+        "raw_bytes": 432,
+        "before_bytes": 304,
+        "after_bytes": 304,
+        "gzip9_bytes": 273,
+        "input_sha256": "bb9786ae1a885d6a3ecc178ea035bdf224bed88b94f37349915ae1629cd1613c",
+        "before_frame_sha256": "03a1b4136cce36497d01bb1f390a1e653a75396bc335f003f69d45b69f87dd75",
+        "after_frame_sha256": "03a1b4136cce36497d01bb1f390a1e653a75396bc335f003f69d45b69f87dd75"
+      }
+    ],
+    "controls": [
+      {
+        "label": "control-periodic",
+        "codec": "http",
+        "raw_bytes": 500000,
+        "before_bytes": 64,
+        "after_bytes": 64,
+        "gzip9_bytes": 767,
+        "input_sha256": "4c9e4939e2e4dc1dea6059443c650ec5e68201a8a02b9f27508c93736cbf25d7",
+        "before_frame_sha256": "c190cc99b1f8842bfcd5756c5d835c6a33495471a474b2a22fba6d18751d498b",
+        "after_frame_sha256": "c190cc99b1f8842bfcd5756c5d835c6a33495471a474b2a22fba6d18751d498b"
+      },
+      {
+        "label": "control-periodic",
+        "codec": "archive1",
+        "raw_bytes": 500000,
+        "before_bytes": 72,
+        "after_bytes": 72,
+        "gzip9_bytes": 767,
+        "input_sha256": "4c9e4939e2e4dc1dea6059443c650ec5e68201a8a02b9f27508c93736cbf25d7",
+        "before_frame_sha256": "4e00fb8f7f66daee8d8a76a985cb115e1db36124f659f43505024b99bb74c9c5",
+        "after_frame_sha256": "4e00fb8f7f66daee8d8a76a985cb115e1db36124f659f43505024b99bb74c9c5"
+      },
+      {
+        "label": "control-periodic",
+        "codec": "archive6",
+        "raw_bytes": 500000,
+        "before_bytes": 72,
+        "after_bytes": 72,
+        "gzip9_bytes": 767,
+        "input_sha256": "4c9e4939e2e4dc1dea6059443c650ec5e68201a8a02b9f27508c93736cbf25d7",
+        "before_frame_sha256": "4e00fb8f7f66daee8d8a76a985cb115e1db36124f659f43505024b99bb74c9c5",
+        "after_frame_sha256": "4e00fb8f7f66daee8d8a76a985cb115e1db36124f659f43505024b99bb74c9c5"
+      },
+      {
+        "label": "control-periodic",
+        "codec": "archive9",
+        "raw_bytes": 500000,
+        "before_bytes": 72,
+        "after_bytes": 72,
+        "gzip9_bytes": 767,
+        "input_sha256": "4c9e4939e2e4dc1dea6059443c650ec5e68201a8a02b9f27508c93736cbf25d7",
+        "before_frame_sha256": "4e00fb8f7f66daee8d8a76a985cb115e1db36124f659f43505024b99bb74c9c5",
+        "after_frame_sha256": "4e00fb8f7f66daee8d8a76a985cb115e1db36124f659f43505024b99bb74c9c5"
+      },
+      {
+        "label": "control-rle-history",
+        "codec": "http",
+        "raw_bytes": 393216,
+        "before_bytes": 20110,
+        "after_bytes": 20110,
+        "gzip9_bytes": 49147,
+        "input_sha256": "3e7a623d2bcd8227ac4beff002a50025d6adc38e2699d866a65c445aea23f097",
+        "before_frame_sha256": "becc642088e0a223e632e43a392692d90eca5f970a0135491cc3d9ff9126807b",
+        "after_frame_sha256": "becc642088e0a223e632e43a392692d90eca5f970a0135491cc3d9ff9126807b"
+      },
+      {
+        "label": "control-rle-history",
+        "codec": "archive1",
+        "raw_bytes": 393216,
+        "before_bytes": 20163,
+        "after_bytes": 20152,
+        "gzip9_bytes": 49147,
+        "input_sha256": "3e7a623d2bcd8227ac4beff002a50025d6adc38e2699d866a65c445aea23f097",
+        "before_frame_sha256": "516ee680d895808d60c2ad9ca66b7fabe99dd5e068b42cfd7d83d129a0aced75",
+        "after_frame_sha256": "85e1ec6710fcefb435a3f654df0527c2bcaffcca40d6ee6b70dabfb57cf79a52"
+      },
+      {
+        "label": "control-rle-history",
+        "codec": "archive6",
+        "raw_bytes": 393216,
+        "before_bytes": 20132,
+        "after_bytes": 20121,
+        "gzip9_bytes": 49147,
+        "input_sha256": "3e7a623d2bcd8227ac4beff002a50025d6adc38e2699d866a65c445aea23f097",
+        "before_frame_sha256": "209e561257ce50d24e4f5e9563e2347259f010778afd3c6e0b05621d8588b1bc",
+        "after_frame_sha256": "a716509a62ed5c873d7d76bbf2f7b5834f265f4b1261febe8be70f71450012cb"
+      },
+      {
+        "label": "control-rle-history",
+        "codec": "archive9",
+        "raw_bytes": 393216,
+        "before_bytes": 20090,
+        "after_bytes": 20079,
+        "gzip9_bytes": 49147,
+        "input_sha256": "3e7a623d2bcd8227ac4beff002a50025d6adc38e2699d866a65c445aea23f097",
+        "before_frame_sha256": "14968d16fa041852dc0c04efa2710a36c7fb2db4510c00278e8c5f1fca7642c4",
+        "after_frame_sha256": "5bba7c6805412c15feb73a7b52db8f765af8d68667b5d9fbc60c706ea34e9a9d"
+      },
+      {
+        "label": "control-rle",
+        "codec": "http",
+        "raw_bytes": 500000,
+        "before_bytes": 25,
+        "after_bytes": 25,
+        "gzip9_bytes": 519,
+        "input_sha256": "6bb6aefaeaa4e19112e566b467c4301463a30b0a15b9c8248a00ed9cd8e5946b",
+        "before_frame_sha256": "489c9a03e90ae47a3520a69e3d87f86b6dce0bf3cc44ea921d22e572574d74a1",
+        "after_frame_sha256": "489c9a03e90ae47a3520a69e3d87f86b6dce0bf3cc44ea921d22e572574d74a1"
+      },
+      {
+        "label": "control-rle",
+        "codec": "archive1",
+        "raw_bytes": 500000,
+        "before_bytes": 66,
+        "after_bytes": 25,
+        "gzip9_bytes": 519,
+        "input_sha256": "6bb6aefaeaa4e19112e566b467c4301463a30b0a15b9c8248a00ed9cd8e5946b",
+        "before_frame_sha256": "77f81184f56fe15b0f5b11a8d2e0cede430cba7778fcdbdeb2c8cd32a8161aac",
+        "after_frame_sha256": "489c9a03e90ae47a3520a69e3d87f86b6dce0bf3cc44ea921d22e572574d74a1"
+      },
+      {
+        "label": "control-rle",
+        "codec": "archive6",
+        "raw_bytes": 500000,
+        "before_bytes": 66,
+        "after_bytes": 25,
+        "gzip9_bytes": 519,
+        "input_sha256": "6bb6aefaeaa4e19112e566b467c4301463a30b0a15b9c8248a00ed9cd8e5946b",
+        "before_frame_sha256": "77f81184f56fe15b0f5b11a8d2e0cede430cba7778fcdbdeb2c8cd32a8161aac",
+        "after_frame_sha256": "489c9a03e90ae47a3520a69e3d87f86b6dce0bf3cc44ea921d22e572574d74a1"
+      },
+      {
+        "label": "control-rle",
+        "codec": "archive9",
+        "raw_bytes": 500000,
+        "before_bytes": 66,
+        "after_bytes": 25,
+        "gzip9_bytes": 519,
+        "input_sha256": "6bb6aefaeaa4e19112e566b467c4301463a30b0a15b9c8248a00ed9cd8e5946b",
+        "before_frame_sha256": "77f81184f56fe15b0f5b11a8d2e0cede430cba7778fcdbdeb2c8cd32a8161aac",
+        "after_frame_sha256": "489c9a03e90ae47a3520a69e3d87f86b6dce0bf3cc44ea921d22e572574d74a1"
+      }
+    ]
+  },
+  "compatibility": {
+    "legacy_decoder_commit": "fc0c5857d7981c25c06267d2aea626c914f26318",
+    "legacy_decoder_release": "v1.0.3",
+    "archive_frames_verified": 168,
+    "ordinary_archive_outputs_byte_identical": 75,
+    "go_and_product_frame_checks": 224,
+    "libzstd_frame_checks": 224,
+    "reader_version_changed": false
+  },
+  "validation": {
+    "fuzz_encode_executions": 312,
+    "fuzz_archive_executions": 1236,
+    "fuzz_decode_executions": 6334,
+    "fuzz_seconds_requested_each": 20,
+    "full_bootstrap_suite": false,
+    "wan_and_live_load": false,
+    "encoder_fuzz_executions": 3832,
+    "archive_fuzz_executions": 924,
+    "decoder_fuzz_executions": 6445,
+    "normal_codecs_compat_store_webui_generator_cmd_publicedge": true,
+    "race_codecs_compat_store_webui_generator": true,
+    "http_tls_network_cache": true,
+    "legacy_pack_fixture_unchanged": true,
+    "production_load_tested": false,
+    "log_sha256": {
+      "oimo-zstd-ratio-final-tests.log": "1d6594c115f53f1b18d83299e8ec7bfa12ee716acd7dcf84f1c7477a0c8231dd",
+      "oimo-zstd-ratio-final-race.log": "02ab5bd63d8a50094f390a2271f24126b70edfe1c482d4cfd47a676dc1675453",
+      "oimo-zstd-ratio-http-tests.log": "9e1439dcb998e1769ed805cfa133f96460de1f6284a9655dc8ab9e7ea333c5bb",
+      "oimo-zstd-ratio-final-fuzz-encode.log": "410857dd28a697047eb1750247724c89e1af19f6eb6db7422222e8167d7fd242",
+      "oimo-zstd-ratio-final-fuzz-archive.log": "9ae786a14c40c1d0b495800e8c145632306cc395c3b48509de36ba9b7b2c082b",
+      "oimo-zstd-ratio-final-fuzz-decode.log": "a9812682717146d28fe44c371cc3b1f92939f4afc0fe6991b9be2a5f509cf4ac"
+    }
+  },
+  "private_artifact_directory": "var/measurements/zstd-ratio-20261031-223316"
+}

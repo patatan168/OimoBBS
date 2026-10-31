@@ -26,10 +26,12 @@ type editableOperationSettings struct {
 	EgressBits            uint64                `json:"egress_budget_bits_per_second"`
 	Reports               ReportPolicy          `json:"reports"`
 	ReportIntervalMinutes int                   `json:"report_interval_minutes,omitempty"`
+	ContentRates          *ContentRateSettings  `json:"same_content,omitempty"`
 }
 
 func (v OperationSettings) editable() editableOperationSettings {
-	return editableOperationSettings{v.Maintenance, v.EgressBits, v.Reports, v.reportIntervalMinutes()}
+	rates := v.contentRates()
+	return editableOperationSettings{v.Maintenance, v.EgressBits, v.Reports, v.reportIntervalMinutes(), &rates}
 }
 
 // operationsResponse は保存形式に含まれる過去の手動資源値をAPIへ公開しない。
@@ -100,9 +102,9 @@ func (h *adminHandler) operationsRoutes(w http.ResponseWriter, r *http.Request, 
 			h.fail(w, r, 400, "INVALID_JSON")
 			return
 		}
-		v = OperationSettings{Maintenance: input.Maintenance, EgressBits: input.EgressBits, Reports: input.Reports, ReportIntervalMinutes: input.ReportIntervalMinutes}
+		v = OperationSettings{Maintenance: input.Maintenance, EgressBits: input.EgressBits, Reports: input.Reports, ReportIntervalMinutes: input.ReportIntervalMinutes, ContentRates: input.ContentRates}
 	} else {
-		f, e := adminForm(w, r, 8<<10, "csrf", "revision", "request_id", "maintenance_enabled", "interval_seconds", "max_threads", "max_seconds", "egress_mbps", "window_minutes", "quorum", "stop_minutes", "report_interval_minutes")
+		f, e := adminForm(w, r, 8<<10, "csrf", "revision", "request_id", "maintenance_enabled", "interval_seconds", "max_threads", "max_seconds", "egress_mbps", "window_minutes", "quorum", "stop_minutes", "report_interval_minutes", "content_ip_seconds", "content_ip_posts", "content_cookie_seconds", "content_cookie_posts")
 		if e != nil {
 			h.fail(w, r, 400, "INVALID_FORM")
 			return
@@ -135,7 +137,18 @@ func (h *adminHandler) operationsRoutes(w http.ResponseWriter, r *http.Request, 
 			}
 			interval = n
 		}
-		v = OperationSettings{ReportIntervalMinutes: interval, Maintenance: PackMaintenanceConfig{enabled == "true", values["max_seconds"], values["interval_seconds"], values["max_threads"]}, EgressBits: uint64(values["egress_mbps"]) * 1_000_000, Reports: ReportPolicy{values["window_minutes"] * 60, values["quorum"], values["stop_minutes"] * 60}}
+		rates := h.repo.operations().contentRates()
+		for name, dst := range map[string]*int{"content_ip_seconds": &rates.IPSeconds, "content_ip_posts": &rates.IPPosts, "content_cookie_seconds": &rates.CookieSeconds, "content_cookie_posts": &rates.CookiePosts} {
+			if raw := f.Get(name); raw != "" {
+				n, err := strconv.Atoi(raw)
+				if err != nil {
+					h.fail(w, r, 422, "INVALID_OPERATIONS")
+					return
+				}
+				*dst = n
+			}
+		}
+		v = OperationSettings{ContentRates: &rates, ReportIntervalMinutes: interval, Maintenance: PackMaintenanceConfig{enabled == "true", values["max_seconds"], values["interval_seconds"], values["max_threads"]}, EgressBits: uint64(values["egress_mbps"]) * 1_000_000, Reports: ReportPolicy{values["window_minutes"] * 60, values["quorum"], values["stop_minutes"] * 60}}
 	}
 	result, e := h.repo.updateOperations(s, v, etag, key)
 	if e != nil {

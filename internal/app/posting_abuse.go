@@ -36,7 +36,7 @@ func (p *PostingLog) AbuseVisibility(now domain.Time) AbuseVisibility {
 
 // VisitRecentAbusePosts は確定済み現在本文と照合済みCookie主体を復旧専用callbackへ渡す。
 // sinceより古い投稿は走査を打ち切る。callbackは参照を保存せず、同じPostingLogを変更しない。
-func (p *PostingLog) VisitRecentAbusePosts(now, since domain.Time, visit func(domain.ID, domain.Post, *postcapture.TokenEvidence)) error {
+func (p *PostingLog) VisitRecentAbusePosts(now, since domain.Time, visit func(domain.ID, domain.Post, *postcapture.TokenEvidence, domain.Hash)) error {
 	if p.thread == nil || p.thread.State().After.State == "hidden" || p.expired || p.publicBlocked || now >= p.thread.State().Expires {
 		return nil
 	}
@@ -77,7 +77,7 @@ func (p *PostingLog) VisitRecentAbusePosts(now, since domain.Time, visit func(do
 		if err != nil {
 			return err
 		}
-		visit(record.ID, post, token)
+		visit(record.ID, post, token, rate.Content)
 	}
 	return nil
 }

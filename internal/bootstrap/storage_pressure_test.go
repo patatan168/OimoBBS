@@ -6,6 +6,7 @@ import (
 	"crypto/ed25519"
 	"errors"
 	"fmt"
+	"net/http"
 	"net/url"
 	"oimobbs/internal/disclosure"
 	"os"
@@ -160,7 +161,13 @@ func TestStoragePressureSevenDayBoundary(t *testing.T) {
 	}
 }
 
-func TestStoragePressurePreservesCaseIntent(t *testing.T) {
+func TestStoragePressurePreservesCaseIntent(t *testing.T) { testPressurePreservesCaseIntent(t, false) }
+
+func TestClosedBoardPressurePreservesCaseIntent(t *testing.T) {
+	testPressurePreservesCaseIntent(t, true)
+}
+
+func testPressurePreservesCaseIntent(t *testing.T, closeBoard bool) {
 	_, r, id, key := pressureRepositoryFixture(t)
 	now := time.Now()
 	scope := disclosure.Scope{Board: id, Thread: domain.U64(key), From: domain.Time(now.Add(-9 * 24 * time.Hour).UnixNano()), To: domain.Time(now.UnixNano()), Records: []domain.ID{}}
@@ -177,6 +184,19 @@ func TestStoragePressurePreservesCaseIntent(t *testing.T) {
 	r.mu.Unlock()
 	if e != nil || len(rows) != 1 {
 		t.Fatal(len(rows), e)
+	}
+	if closeBoard {
+		c := newAdminClient(t, r)
+		defer c.server.Close()
+		if c.login(adminTestSecret) != 303 || c.reauth(adminTestSecret) != 200 {
+			t.Fatal("auth")
+		}
+		path, fields := closureForm(t, c, id)
+		fields.Set("confirm_key", r.posting[id].boardKey())
+		res, body := c.request("POST", path, fields.Encode(), http.Header{"Content-Type": {"application/x-www-form-urlencoded"}})
+		if res.StatusCode != 303 {
+			t.Fatal(res.StatusCode, body)
+		}
 	}
 	r.packSpace = func(string) (platform.DiskSpace, error) {
 		return platform.DiskSpace{Total: 100 << 30, Available: 10 << 30}, nil
@@ -286,6 +306,14 @@ func TestStoragePressureKeepsOtherBoardPostingAvailable(t *testing.T) {
 }
 
 func TestStoragePressureHTTPAndBackupReplay(t *testing.T) {
+	testStoragePressureHTTPAndBackupReplay(t, false)
+}
+
+func TestClosedBoardPressureHTTPAndBackupReplay(t *testing.T) {
+	testStoragePressureHTTPAndBackupReplay(t, true)
+}
+
+func testStoragePressureHTTPAndBackupReplay(t *testing.T, closed bool) {
 	cfg, r := adminFixture(t)
 	defer r.Close()
 	info, e := r.CreateBoard(t.Context(), "pressure", "容量回収")
@@ -312,6 +340,19 @@ func TestStoragePressureHTTPAndBackupReplay(t *testing.T) {
 	if e != nil || resetErr != nil || !posted.Accepted {
 		t.Fatal(posted, e, resetErr)
 	}
+	if closed {
+		c := newAdminClient(t, r)
+		defer c.server.Close()
+		if c.login(adminTestSecret) != 303 || c.reauth(adminTestSecret) != 200 {
+			t.Fatal("auth")
+		}
+		path, fields := closureForm(t, c, info.ID)
+		fields.Set("confirm_key", info.Key)
+		res, body := c.request("POST", path, fields.Encode(), http.Header{"Content-Type": {"application/x-www-form-urlencoded"}})
+		if res.StatusCode != 303 {
+			t.Fatal(res.StatusCode, body)
+		}
+	}
 	r.packSpace = func(string) (platform.DiskSpace, error) {
 		return platform.DiskSpace{Total: 100 << 30, Available: (10 << 30) + (512 << 20)}, nil
 	}
@@ -323,13 +364,16 @@ func TestStoragePressureHTTPAndBackupReplay(t *testing.T) {
 	if snapshot, e := r.Thread(t.Context(), info.ID, posted.Key); e != nil || snapshot != nil {
 		t.Fatal("dropped HTTP thread still visible", e)
 	}
-	survivor, e := sendForm(server, url.Values{"bbs": {"pressure"}, "subject": {"新しいスレッド"}, "MESSAGE": {"survivor-current-post"}, "oimo_request_id": {"pressure-http-new-002"}})
-	if e != nil || !survivor.Accepted {
-		t.Fatal("new HTTP post failed", survivor, e)
+	if !closed {
+		survivor, e := sendForm(server, url.Values{"bbs": {"pressure"}, "subject": {"新しいスレッド"}, "MESSAGE": {"survivor-current-post"}, "oimo_request_id": {"pressure-http-new-002"}})
+		if e != nil || !survivor.Accepted {
+			t.Fatal("new HTTP post failed", survivor, e)
+		}
+		if snapshot, e := r.Thread(t.Context(), info.ID, survivor.Key); e != nil || snapshot == nil {
+			t.Fatal("new HTTP post missing", e)
+		}
 	}
-	if snapshot, e := r.Thread(t.Context(), info.ID, survivor.Key); e != nil || snapshot == nil {
-		t.Fatal("new HTTP post missing", e)
-	}
+
 	parent := t.TempDir()
 	if e = os.Chmod(parent, 0700); e != nil {
 		t.Fatal(e)

@@ -11,24 +11,26 @@ import (
 )
 
 func TestHuffmanTableScratchOverwrite(t *testing.T) {
-	var scratch [2048]huffmanCell
-	for i := range scratch {
-		scratch[i] = huffmanCell{255, 255}
-	}
-	for _, data := range [][]byte{{130, 0x11, 0x10}, {128, 0x10}, {130, 0x11, 0x10}} {
-		table, depth, used, err := huffmanTable(data, scratch[:])
-		if err != nil || &table[0] != &scratch[0] || len(table) != 1<<uint(depth) || used != len(data) {
-			t.Fatal("table scratch not reused", depth, used, err)
+	for _, build := range []func([]byte, []huffmanCell) ([]huffmanCell, int, int, error){huffmanTable, huffmanCompactTable} {
+		var scratch [2048]huffmanCell
+		for i := range scratch {
+			scratch[i] = huffmanCell{255, 255}
 		}
-		for symbol, cell := range table {
-			if cell != (huffmanCell{byte(symbol), uint8(depth)}) {
-				t.Fatal("stale table cell", symbol, cell)
+		for _, data := range [][]byte{{130, 0x11, 0x10}, {128, 0x10}, {130, 0x11, 0x10}} {
+			table, depth, used, err := build(data, scratch[:])
+			if err != nil || &table[0] != &scratch[0] || len(table) != 1<<uint(depth) || used != len(data) {
+				t.Fatal("table scratch not reused", depth, used, err)
+			}
+			for symbol, cell := range table {
+				if cell != (huffmanCell{byte(symbol), uint8(depth)}) {
+					t.Fatal("stale table cell", symbol, cell)
+				}
 			}
 		}
-	}
-	before := scratch
-	if table, _, _, err := huffmanTable([]byte{128}, scratch[:]); err == nil || table != nil || !reflect.DeepEqual(before, scratch) {
-		t.Fatal("invalid weights reused stale table")
+		before := scratch
+		if table, _, _, err := build([]byte{128}, scratch[:]); err == nil || table != nil || !reflect.DeepEqual(before, scratch) {
+			t.Fatal("invalid weights reused stale table")
+		}
 	}
 }
 

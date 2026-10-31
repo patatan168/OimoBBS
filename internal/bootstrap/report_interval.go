@@ -37,16 +37,42 @@ func decodeReportDefault(raw []byte, dst any, name, fallback string) error {
 	return strictjson.Decode(normalized, dst)
 }
 
+// decodeOperationDefaults は追加項目だけを補完し、旧署名値を変更せずに読み込む。
+func decodeOperationDefaults(raw []byte, dst any) error {
+	fields, err := strictjson.SelectFields(raw, "report_interval_minutes", "same_content")
+	if err != nil {
+		return err
+	}
+	if fields["report_interval_minutes"] != nil && fields["same_content"] != nil {
+		return strictjson.Decode(raw, dst)
+	}
+	var all map[string]json.RawMessage
+	if err := json.Unmarshal(raw, &all); err != nil {
+		return err
+	}
+	if fields["report_interval_minutes"] == nil {
+		all["report_interval_minutes"] = json.RawMessage("0")
+	}
+	if fields["same_content"] == nil {
+		all["same_content"] = json.RawMessage("null")
+	}
+	normalized, err := json.Marshal(all)
+	if err != nil {
+		return err
+	}
+	return strictjson.Decode(normalized, dst)
+}
+
 // UnmarshalJSON は旧運用設定の省略だけを既定値として読み込む。
 func (v *OperationSettings) UnmarshalJSON(raw []byte) error {
 	type wire OperationSettings
-	return decodeReportDefault(raw, (*wire)(v), "report_interval_minutes", "0")
+	return decodeOperationDefaults(raw, (*wire)(v))
 }
 
 // UnmarshalJSON は既存APIクライアントの送信間隔省略を許可する。
 func (v *editableOperationSettings) UnmarshalJSON(raw []byte) error {
 	type wire editableOperationSettings
-	return decodeReportDefault(raw, (*wire)(v), "report_interval_minutes", "0")
+	return decodeOperationDefaults(raw, (*wire)(v))
 }
 
 // UnmarshalJSON は旧依頼に識別hashがない場合だけnullを補完する。

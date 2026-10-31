@@ -203,7 +203,7 @@ func TestLocalRulesAdminPublicAndRecovery(t *testing.T) {
 // publicLocalRules は公開ルーターのGETとHTTP検証子を同じ経路で検査する。
 func publicLocalRules(t *testing.T, repo *Repository, path string, headers http.Header) *httptest.ResponseRecorder {
 	t.Helper()
-	req := httptest.NewRequest("GET", repo.cfg.Public.BaseURL+path, nil)
+	req := webReadTestRequest("GET", repo.cfg.Public.BaseURL+path, nil)
 	for key, values := range headers {
 		req.Header[key] = values
 	}

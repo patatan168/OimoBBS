@@ -6,8 +6,12 @@
 !internal/**
 !cmd/
 !cmd/**
+!tools/
+!tools/webassets/
+!tools/webassets/**
 !third_party/
 !third_party/argon2/
 !third_party/argon2/**
 !third_party/go-modules/
 !third_party/go-modules/**
+internal/webui/generated/

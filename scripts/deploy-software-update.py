@@ -270,7 +270,8 @@ class Systemd:
         before = self.fingerprint()
         env = {**os.environ, "CGO_ENABLED": "0", "GOWORK": "off", "GOFLAGS": "-mod=readonly", "GOTOOLCHAIN": "local"}
         go = self.c["go_binary"]
-        run([go, "test", "-timeout=5m", "./internal/adminauth", "./internal/webui", "./internal/publicedge", "./internal/selfupdate"], cwd=self.source, env=env)
+        run([go, "generate", "./internal/webui"], cwd=self.source, env=env)
+        run([go, "test", "-timeout=5m", "./internal/adminauth", "./internal/webui", "./internal/publicedge", "./internal/selfupdate", "./tools/webassets"], cwd=self.source, env=env)
         run([go, "vet", "./cmd/...", "./internal/..."], cwd=self.source, env=env)
         run([go, "build", "-trimpath", "-ldflags=-s -w", "-o", str(self.job / "oimobbs.new"), "./cmd/oimobbs"], cwd=self.source, env=env)
         save_json(self.job / "prepared.json", {"deployment": before, "candidate": digest(self.job / "oimobbs.new")})

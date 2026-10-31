@@ -1,4 +1,4 @@
-// 保存専用Zstandardの候補比較を最大2workerに制限し、CPU・メモリを有界にする。
+// 保存用Zstandardを再利用し、旧level 9の追加候補探索を省く。
 package store
 
 import (
@@ -36,15 +36,14 @@ func encodeStoredZstd(raw []byte, level uint8) ([]byte, error) {
 	}
 	archiveMutex.Lock()
 	defer archiveMutex.Unlock()
-	options := archiveProfiles(level)
-	if level == 9 && len(raw) >= 16<<10 {
-		options = []zstdencode.ArchiveOptions{
-			{AccuracyLog: 9, OptimizeEntropy: true},
-			{HashBytes: 7, AccuracyLog: 9, OptimizeEntropy: true},
-			{HashBytes: 4, AccuracyLog: 9, OptimizeEntropy: true},
+	if level == 9 {
+		// 既存metadataの9は受理するが、追加探索せず配信用と同じ単一経路を使う。
+		if len(raw) > (8<<20)+20 {
+			return nil, ErrCorrupt
 		}
+		return archiveEncoder.Encode(raw), nil
 	}
-	return archiveEncoder.EncodeBestArchive(raw, options)
+	return archiveEncoder.EncodeBestArchive(raw, archiveProfiles(level))
 }
 
 // archiveProfiles は測定済みの候補数だけを使い、若いスレッドの整理を軽くする。
@@ -55,7 +54,7 @@ func archiveProfiles(level uint8) []zstdencode.ArchiveOptions {
 	case 6:
 		return []zstdencode.ArchiveOptions{{HashBytes: 0, AccuracyLog: 8}}
 	default:
-		return []zstdencode.ArchiveOptions{{HashBytes: 0, AccuracyLog: 8}, {HashBytes: 0, AccuracyLog: 9}, {HashBytes: 7, AccuracyLog: 8}, {HashBytes: 4, AccuracyLog: 9}}
+		return nil
 	}
 }
 

@@ -44,13 +44,20 @@ func (w *bitWriter) align() []byte {
 	return w.data
 }
 
-// entropyTable はsymbolと次状態の直接indexで、前状態とbit幅を16bitで引く。
+// entropySymbol は出力bit幅の境界と、頻度順に並べた遷移先の位置を表す。
+type entropySymbol struct {
+	delta uint32
+	base  int32
+}
+
+// entropyTable は正規化頻度の合計分だけ遷移先を保持する。
 type entropyTable struct {
-	log    uint
-	first  []uint16
-	arena  []uint16
-	header []byte
-	single int
+	log     uint
+	first   []uint16
+	arena   []uint16
+	symbols []entropySymbol
+	header  []byte
+	single  int
 }
 
 // entropyWork は最大53symbol・512状態までの作業表をworker内で再利用する。
@@ -60,6 +67,7 @@ type entropyWork struct {
 	next      [53]int
 	positions [512]int
 	first     [53]uint16
+	symbols   [53]entropySymbol
 	header    [64]byte
 	arena     []uint16
 }
@@ -157,8 +165,14 @@ func entropyTableWithWork(counts []int, log uint, work *entropyWork) entropyTabl
 	}
 	counts = counts[:last+1]
 	norm := distributionInto(counts, log, work.norm[:len(counts)])
+	header := describeDistributionInto(norm, log, work.header[:])
+	return entropyTableFromNorm(norm, log, header, work)
+}
+
+// entropyTableFromNorm は検証済みの非負正規化頻度とheaderから逆引き表を構成する。
+func entropyTableFromNorm(norm []int, log uint, header []byte, work *entropyWork) entropyTable {
 	size := 1 << log
-	needed := len(counts) * size
+	needed := size
 	reuse := work.arena
 	if cap(reuse) < needed {
 		reuse = make([]uint16, needed)
@@ -166,9 +180,17 @@ func entropyTableWithWork(counts []int, log uint, work *entropyWork) entropyTabl
 		reuse = reuse[:needed]
 	}
 	work.arena = reuse
-	metadata := work.first[:len(counts)]
+	metadata := work.first[:len(norm)]
 	clear(metadata)
-	t := entropyTable{log: log, single: -1, first: metadata, arena: reuse, header: describeDistributionInto(norm, log, work.header[:])}
+	t := entropyTable{log: log, single: -1, first: metadata, arena: reuse, symbols: work.symbols[:len(norm)], header: header}
+	cumulative := 0
+	for symbol, n := range norm {
+		if n > 0 {
+			width := log - uint(bits.Len(uint(n))-1)
+			t.symbols[symbol] = entropySymbol{uint32(width<<16) - uint32(n<<width), int32(cumulative - n)}
+		}
+		cumulative += n
+	}
 	symbols := work.positions[:size]
 	position := 0
 	step := size/2 + size/8 + 3
@@ -188,11 +210,7 @@ func entropyTableWithWork(counts []int, log uint, work *entropyWork) entropyTabl
 		if width > 0 {
 			t.first[symbol] = uint16(state)
 		}
-		base := (n << width) - size
-		packed := uint16(state) | uint16(width)<<10
-		for v := base; v < base+1<<width; v++ {
-			reuse[symbol*size+v] = packed
-		}
+		reuse[int(t.symbols[symbol].base)+n] = uint16(state)
 	}
 	return t
 }
@@ -208,10 +226,25 @@ func (t *entropyTable) advance(symbol int, state uint16) (uint16, uint32, uint) 
 	if t.single >= 0 {
 		return 0, 0, 0
 	}
-	// logと幅は9以下。平坦な表で二重のslice参照を省く。
-	packed := t.arena[(symbol<<(t.log&63))|int(state)]
-	width := uint(packed >> 10)
-	return packed & 1023, uint32(state) & ((uint32(1) << (width & 31)) - 1), width
+	// 復号状態に表の大きさを加えると、正規化頻度の境界だけで出力幅を決められる。
+	entry := t.symbols[symbol]
+	value := uint32(state) + uint32(1)<<(t.log&31)
+	width := uint((value + entry.delta) >> 16)
+	previous := t.arena[int(entry.base)+int(value>>(width&31))]
+	return previous, uint32(state) & ((uint32(1) << (width & 31)) - 1), width
+}
+
+// transition は費用比較で不要な出力bit値を計算せず、遷移先と幅だけを返す。
+func (t *entropyTable) transition(symbol int, state uint16) (uint16, uint) {
+	if t.single >= 0 {
+		return 0, 0
+	}
+	// 復号状態に表の大きさを加えると、正規化頻度の境界だけで出力幅を決められる。
+	entry := t.symbols[symbol]
+	value := uint32(state) + uint32(1)<<(t.log&31)
+	width := uint((value + entry.delta) >> 16)
+	previous := t.arena[int(entry.base)+int(value>>(width&31))]
+	return previous, width
 }
 func (t *entropyTable) encode(w *bitWriter, symbol int, state uint16) uint16 {
 	previous, value, width := t.advance(symbol, state)

@@ -34,7 +34,7 @@ func runPack(args []string, out, diagnostics io.Writer) error {
 		flags.StringVar(&owner, "board", "", "板UUID")
 		flags.Uint64Var(&key, "thread", 0, "スレッドキー")
 		if args[0] == "compact" {
-			flags.IntVar(&level, "level", 6, "0=raw、保存Zstandardの生成方針=1/6/9")
+			flags.IntVar(&level, "level", 6, "0=raw、保存Zstandard=1/6（9は旧指定の互換用）")
 		}
 		flags.BoolVar(&apply, "apply", false, "照合後に切替または旧世代回収を適用（既定は検証のみ）")
 	}

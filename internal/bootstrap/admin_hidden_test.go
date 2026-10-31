@@ -37,7 +37,7 @@ func TestHiddenAdminHTTPS(t *testing.T) {
 		t.Fatal("mounted login", res.StatusCode, page)
 	}
 	for _, asset := range regexp.MustCompile(`(?:href|src)="(`+base+`/web/assets/[^"]+)"`).FindAllStringSubmatch(page, -1) {
-		req := httptest.NewRequest("GET", repo.cfg.Public.BaseURL+asset[1], nil)
+		req := webReadTestRequest("GET", repo.cfg.Public.BaseURL+asset[1], nil)
 		rec := httptest.NewRecorder()
 		server.Handler.ServeHTTP(rec, req)
 		if rec.Code != 200 || rec.Body.Len() == 0 || !strings.Contains(rec.Header().Get("X-Robots-Tag"), "noindex") {
@@ -120,7 +120,7 @@ func TestHiddenAdminHTTPS(t *testing.T) {
 		}
 	}
 	for _, path := range []string{"/", "/robots.txt"} {
-		req := httptest.NewRequest("GET", repo.cfg.Public.BaseURL+path, nil)
+		req := webReadTestRequest("GET", repo.cfg.Public.BaseURL+path, nil)
 		rec := httptest.NewRecorder()
 		server.Handler.ServeHTTP(rec, req)
 		if strings.Contains(rec.Body.String(), base) || strings.Contains(rec.Header().Get("Set-Cookie"), "oimo_admin") {
@@ -128,7 +128,7 @@ func TestHiddenAdminHTTPS(t *testing.T) {
 		}
 	}
 	for _, path := range []string{"/login", "/api/v1/site"} {
-		req := httptest.NewRequest("GET", repo.cfg.Public.BaseURL+path, nil)
+		req := webReadTestRequest("GET", repo.cfg.Public.BaseURL+path, nil)
 		rec := httptest.NewRecorder()
 		server.Handler.ServeHTTP(rec, req)
 		if rec.Code != 404 {
@@ -136,7 +136,7 @@ func TestHiddenAdminHTTPS(t *testing.T) {
 		}
 	}
 	for _, target := range []string{"http://localhost:9443" + base, "https://wrong.invalid:9443" + base + "/login"} {
-		req := httptest.NewRequest("GET", target, nil)
+		req := webReadTestRequest("GET", target, nil)
 		rec := httptest.NewRecorder()
 		server.Handler.ServeHTTP(rec, req)
 		if rec.Code != 403 || len(rec.Result().Cookies()) != 0 {
@@ -144,7 +144,7 @@ func TestHiddenAdminHTTPS(t *testing.T) {
 		}
 	}
 	for _, path := range []string{base + "/%6cogin", base + "/../login", base + "//login"} {
-		req := httptest.NewRequest("GET", repo.cfg.Public.BaseURL+path, nil)
+		req := webReadTestRequest("GET", repo.cfg.Public.BaseURL+path, nil)
 		rec := httptest.NewRecorder()
 		server.Handler.ServeHTTP(rec, req)
 		if rec.Code != 403 || len(rec.Result().Cookies()) != 0 {

@@ -115,7 +115,7 @@ func (b *postingBoard) saveExpiry(key uint64, seq domain.U64, expires domain.Tim
 				b.stopped = true
 				return e
 			}
-			if v.Kind == "expire" || v.Kind == "pressure" {
+			if v.Kind == "expire" || v.Kind == "pressure" || v.Kind == "closure" {
 				if v.Expires != expires || v.Expected != seq {
 					b.stopped = true
 					return app.ErrEvidenceGap

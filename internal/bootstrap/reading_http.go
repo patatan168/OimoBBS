@@ -21,6 +21,8 @@ func (repo *Repository) readingGate(w http.ResponseWriter, r *http.Request, scop
 		threadError(w, r, 403, "この接続元からの閲覧は許可されていません。")
 		return w, true
 	}
+	closureEpoch := repo.boardClosureEpoch.Load()
+	directory := scope == "site" && (r.URL.Path == "/" || r.URL.Path == "/search" || r.URL.Path == "/bbsmenu.html" || r.URL.Path == "/bbsmenu.json")
 	snapshot := repo.liveReading.Load()
 	classifier := repo.liveNetworks.Load()
 	private := false
@@ -34,6 +36,9 @@ func (repo *Repository) readingGate(w http.ResponseWriter, r *http.Request, scop
 	check := func() error {
 		if err := r.Context().Err(); err != nil {
 			return err
+		}
+		if directory && repo.boardClosureEpoch.Load() != closureEpoch {
+			return errReadingDenied
 		}
 		// 一覧・検索を組み立てた後の設定変更でも古い許可済み内容を配信しない。
 		current := repo.liveReading.Load()
@@ -72,6 +77,13 @@ func (repo *Repository) readableBoards(r *http.Request, boards []publicBoard) []
 
 // readingBoardGate は閲覧の許可を投稿にも必要とし、公開側の全操作に同じ条件を適用する。
 func (repo *Repository) readingBoardGate(w http.ResponseWriter, r *http.Request, owner domain.ID) (http.ResponseWriter, bool) {
+	if index := repo.liveReadingBoards.Load(); index != nil {
+		if b := index.Boards[owner.String()]; b != nil && b.closedAt.Load() != 0 {
+			w.Header().Set("Cache-Control", "no-store")
+			threadError(w, r, 410, "この板は閉鎖されました。")
+			return w, true
+		}
+	}
 	return repo.readingGate(w, r, owner.String())
 }
 

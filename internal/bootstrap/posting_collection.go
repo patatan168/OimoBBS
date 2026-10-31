@@ -10,11 +10,13 @@ type postingCollection struct {
 	count     int
 	busyUntil time.Time
 	slowUntil time.Time
+	lastSaved time.Time
 }
 
-// saved は成功した保存の実Sync待ちだけを観測し、遅い媒体では短い群への分割を抑える。
+// saved は成功した保存時刻と実Sync待ちを記録し、遅い媒体では短い群への分割を抑える。
 // 新しいtimerは作らず、通常の収集上限16msを500msだけ優先する。
 func (c *postingCollection) saved(now time.Time, syncDuration time.Duration) {
+	c.lastSaved = now
 	if syncDuration >= 8*time.Millisecond {
 		c.slowUntil = now.Add(500 * time.Millisecond)
 	}
@@ -36,4 +38,24 @@ func (c *postingCollection) window(now time.Time) time.Duration {
 		return 2 * time.Millisecond
 	}
 	return 16 * time.Millisecond
+}
+
+// startWindow は最後の保存から100ms以上空いた群の追加待ちを省く。
+// フォーム表示では間隔を延ばさず、待機あり・集中受付中は従来の予算を使う。
+// 所有列で群の開始時に一度だけ選び、追加収集で待ち時間を復活させない。
+func (c *postingCollection) startWindow(now time.Time, queued int) time.Duration {
+	window := c.window(now)
+	if queued == 0 && !now.Before(c.busyUntil) && !c.lastSaved.IsZero() && now.Sub(c.lastSaved) >= 100*time.Millisecond {
+		return 0
+	}
+	return window
+}
+
+// postingCollectionWindow は間隔の空いた群だけ即時保存へ進める。
+// それ以外は前群の終了時に確定した基本予算を保持し、集中時の収集方針を選び直さない。
+func (b *postingBoard) postingCollectionWindow(queued int) time.Duration {
+	if b.collection.startWindow(time.Now(), queued) == 0 {
+		return 0
+	}
+	return b.postBatch.CollectWindow
 }

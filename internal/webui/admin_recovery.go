@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"html/template"
+	"io/fs"
 	"strings"
 )
 
@@ -18,7 +19,7 @@ var adminRecovery = loadAdminRecovery()
 // loadAdminRecovery は利用者の値を含まない埋込みファイルと、そのCSPハッシュを準備する。
 func loadAdminRecovery() adminRecoveryContent {
 	read := func(name string) string {
-		raw, err := files.ReadFile("inline/admin-recovery." + name)
+		raw, err := fs.ReadFile(files, "inline/admin-recovery."+name)
 		if err != nil {
 			panic(err)
 		}

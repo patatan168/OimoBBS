@@ -69,7 +69,7 @@ func (h *adminHandler) authorizeRoute(s adminauth.Session, r *http.Request) erro
 			return h.repo.authorizeAdmin(s, "moderator", owner)
 		}
 		role := "board_admin"
-		if strings.HasSuffix(path, "/metadata") {
+		if strings.HasSuffix(path, "/metadata") || strings.HasSuffix(path, "/close") {
 			role = "site_admin"
 		}
 		if strings.HasSuffix(path, "/moderation") || strings.HasSuffix(path, "/moderation/cleanup") || strings.HasSuffix(path, "/actions") {

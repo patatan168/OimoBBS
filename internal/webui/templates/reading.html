@@ -1,8 +1,8 @@
 <!-- 共通・板・管理画面を区別し、許可条件を段階的に編集する閲覧制限画面。 -->
-<!doctype html><html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>{{.Title}} — OimoBBS管理</title>{{template "admin-assets" .}}</head>
+<!doctype html><html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>{{with boardNavigation}}{{.Name}} — {{.CurrentTitle}}{{else}}{{.Title}} — OimoBBS管理{{end}}</title>{{template "admin-assets" .}}</head>
 <body class="admin reading-page">{{template "admin-header" .}}<main id="main" tabindex="-1">
-<h1>{{.Title}}</h1><p>{{.Description}}</p>
-{{if .BoardSettings}}<p><a href="{{adminURL .BoardSettings}}">この板の設定へ戻る</a></p>{{end}}
+<h1>{{if .BoardSettings}}閲覧権限{{else}}{{.Title}}{{end}}</h1>{{if .BoardSettings}}<details class="board-scope-help"><summary>閲覧制限の適用範囲</summary><p>{{.Description}}</p></details>{{else}}<p>{{.Description}}</p>{{end}}
+{{if and .BoardSettings (not (boardNavigation))}}<p><a href="{{adminURL .BoardSettings}}">この板の設定へ戻る</a></p>{{end}}
 <nav class="page-actions settings-tabs" aria-label="閲覧制限の設定先"><a href="{{adminBase}}/reading" {{if eq .State.Scope "site"}}aria-current="page"{{end}}>掲示板全体</a><a href="{{adminBase}}/admin-access" {{if eq .State.Scope "admin"}}aria-current="page"{{end}}>管理画面</a></nav>
 {{if .Message}}<p role="alert">{{.Message}}</p>{{end}}
 {{if .Master}}<section class="card" aria-labelledby="reading-master"><h2 id="reading-master">現在の掲示板全体の閲覧設定</h2>

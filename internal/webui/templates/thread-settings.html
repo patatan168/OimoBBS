@@ -1,14 +1,13 @@
 <!-- 管理画面。動的な値はhtml/templateでエスケープする。 -->
 <!doctype html>
 <html lang="ja">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>レス数上限・終了レス</title>{{template "admin-assets" .}}
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>{{with boardNavigation}}{{.Name}} — {{.CurrentTitle}}{{else}}レス数上限・終了レス{{end}}</title>{{template "admin-assets" .}}
 </head>
 <body class="admin">{{template "admin-header" .}}
 <main id="main" tabindex="-1">
 <h1>レス数上限・終了レス
 </h1>
-<nav><a href="{{adminBase}}/boards">板一覧</a>
-</nav>
+{{if not (boardNavigation)}}<nav><a href="{{adminBase}}/boards">板一覧</a></nav>{{end}}
 {{if .Message}}
 <p role="alert">{{.Message}}
 </p>{{end}}

@@ -41,6 +41,8 @@ func TestAbuseGuardGlobalRatesHistoryAndBoardBoundary(t *testing.T) {
 	}
 	settings.Rates.Enabled = false
 	saveGuardSettings(t, c, settings, "global-rates-disable-0001")
+	// 同一内容制限とは別に、通常の投稿枠の無効化だけを検証する。
+	fields.Set("MESSAGE", "投稿枠の無効中に受け付ける別本文")
 	fields.Set("oimo_request_id", "global-disabled-create-0001")
 	result, err = sendForm(server, fields)
 	if err != nil || !result.Accepted {
@@ -48,6 +50,7 @@ func TestAbuseGuardGlobalRatesHistoryAndBoardBoundary(t *testing.T) {
 	}
 	settings.Rates.Enabled = true
 	saveGuardSettings(t, c, settings, "global-rates-resume-0001")
+	fields.Set("MESSAGE", "投稿枠の再有効化を検証する別本文")
 	fields.Set("oimo_request_id", "global-resumed-create-0001")
 	result, err = sendForm(server, fields)
 	if err != nil || result.Accepted {
@@ -84,6 +87,7 @@ func TestAbuseGuardGlobalRatesHistoryAndBoardBoundary(t *testing.T) {
 		t.Fatal(err)
 	}
 	server = formServer(t, repo, siteID(repo.site.State()), board.ID, true)
+	fields.Set("MESSAGE", "再起動後の投稿枠を検証する別本文")
 	fields.Set("oimo_request_id", "global-restart-create-0001")
 	result, err = sendForm(server, fields)
 	if err != nil || result.Accepted {

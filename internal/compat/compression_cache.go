@@ -18,8 +18,8 @@ import (
 // GzipETagSuffix は小本文level6・大本文の最小gzip選択を識別する。
 const GzipETagSuffix = "-gzip-v3"
 
-// ZstdETagSuffix は列ごとにFSE精度を選ぶ圧縮表現を識別する。
-const ZstdETagSuffix = "-zstd-v8"
+// ZstdETagSuffix は圧縮byteが変わる配信用Zstandard表現の世代を識別する。
+const ZstdETagSuffix = "-zstd-v13"
 
 // ErrCompressionCapacity は資源別の生成・待機上限（最大64件）または作業メモリへ達したことを表す。
 var ErrCompressionCapacity = errors.New("compression queue full")

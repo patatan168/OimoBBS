@@ -1,5 +1,24 @@
-/* 板設定の回線上書き欄。 */
+/* 板の閉鎖状態と回線上書き欄。 */
+.board-closed-notice { padding:12px 16px; margin:16px 0; border:1px solid var(--line); border-radius:10px; background:var(--surface); }
+.board-closed-notice h2 { margin:0; font-size:18px; }
+.board-closed-notice p { margin:12px 0; }
+.board-link-disabled { background:var(--surface); color:var(--muted); cursor:not-allowed; }
+.board-settings-fields { padding:0; border:0; border-radius:0; margin:0; }
+.board-settings-fields:disabled { color:var(--muted); }
+.board-settings-fields:disabled :is(input,select,textarea,button,.check-option) { cursor:not-allowed; color:var(--muted); background:var(--surface); border-color:var(--line); opacity:1; }
+.board-settings-fields:disabled .check-option:has(input:checked) { background:var(--surface); border-color:var(--line); }
+.board-settings-fields:disabled [data-settings-review] { display:none; }
 /* 行の削除と一覧への追加を離し、追加した行にも同じ間隔を適用する。 */
 [data-board-network-rows], [data-network-rows] { display:grid; gap:20px; }
 [data-board-network-rows] > button { justify-self:start; }
 [data-network-row] + [data-network-row] { border-top:1px solid var(--line); padding-top:20px; }
+.board-settings-fields > legend { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
+
+.board-secondary-action { margin:0 0 12px; text-align:right; }
+.board-link-disabled:hover { background:var(--surface); color:var(--muted); }
+
+.board-closed-notice > p { margin:0; }
+.board-closed-notice > details { margin-top:8px; }
+
+.board-setting-help { margin:12px 0; }
+.board-setting-help > summary { font-size:13px; }

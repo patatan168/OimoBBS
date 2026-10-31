@@ -30,6 +30,8 @@ import (
 // Repository はサイト管理・板workerの所有者。Closeまでdata dirの排他を保持する。
 // 公開受付は起動ゲートを通った別サーバーが管理し、未知/未検証データは開かない。
 type Repository struct {
+	boardClosureEpoch            atomic.Uint64
+	closedGCCursor               requiredGCState
 	pressureEnabled              atomic.Bool
 	pressureStatus               atomic.Pointer[StoragePressureStatus]
 	pressureMu                   sync.Mutex
@@ -43,6 +45,7 @@ type Repository struct {
 	postingIO                    postingIOPriority
 	liveSlipEnabled              atomic.Bool
 	liveOperations               atomic.Pointer[operationState]
+	contentRateReady             atomic.Bool
 	liveReading                  atomic.Pointer[readingSnapshot]
 	liveReadingBoards            atomic.Pointer[readingBoardIndex]
 	maintenanceWake              chan struct{}

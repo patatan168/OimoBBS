@@ -77,7 +77,7 @@ func TestSubjectCachePublicUpdatesAndRestart(t *testing.T) {
 		t.Fatal(err)
 	}
 	getPath := func(path, tag string) *httptest.ResponseRecorder {
-		r := httptest.NewRequest("GET", cfg.Public.BaseURL+path, nil)
+		r := webReadTestRequest("GET", cfg.Public.BaseURL+path, nil)
 		r.RemoteAddr = "127.0.0.1:12345"
 		r.Header.Set("If-None-Match", tag)
 		w := httptest.NewRecorder()

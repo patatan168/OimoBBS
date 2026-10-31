@@ -30,6 +30,9 @@ type Batch struct {
 	AcrossKeys bool
 	// CollectWindowは保存候補を持つ場合の累積収集待ち上限。零は即時収集。
 	CollectWindow time.Duration
+	// CollectionWindowは所有列で群の開始時に一度だけ評価し、CollectWindowより優先する。
+	// queuedは先頭を除く現在の待機数。nilなら固定予算を使い、追加収集では評価し直さない。
+	CollectionWindow func(queued int) time.Duration
 	// CollectLimitは確認等を含む操作数の上限。零は64、指定時も受付列の容量まで。
 	// 保存候補数は別途CollectBudgetで制限する。
 	CollectLimit int
@@ -69,6 +72,9 @@ func (w *Worker) execute(first task) *task {
 	completed := make([]bool, limit)
 	var carry *task
 	remaining := first.batch.CollectWindow
+	if first.batch.CollectionWindow != nil {
+		remaining = first.batch.CollectionWindow(len(w.queue))
+	}
 	take := func() (task, bool, bool) {
 		select {
 		case t := <-w.queue:

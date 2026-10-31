@@ -21,6 +21,9 @@ func (r *Repository) boardProvisionLookup(ctx context.Context, key string) (Boar
 			if !b.matchesKey(key) {
 				continue
 			}
+			if b.closedAt.Load() != 0 {
+				return BoardInfo{}, len(r.posting), &adminFailure{status: 409, code: "BOARD_CLOSED"}
+			}
 			value, err := b.worker.Submit(ctx, func() (any, error) {
 				return BoardInfo{ID: id, Key: b.boardKey(), Name: b.boardName(), Status: "open", Revision: b.control.State().Rows["board:state"].Revision}, nil
 			})

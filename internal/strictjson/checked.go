@@ -204,7 +204,6 @@ func (s *checkedScanner) checkedString(key bool) ([]byte, error) {
 	if s.pos == len(s.body) || s.body[s.pos] != '"' {
 		return nil, errSyntax
 	}
-	start := s.pos
 	s.pos++
 	end := bytes.IndexByte(s.body[s.pos:], '"')
 	if end < 0 {
@@ -222,24 +221,20 @@ func (s *checkedScanner) checkedString(key bool) ([]byte, error) {
 		}
 		return nil, nil
 	}
+	if key {
+		return s.decodedEscapedString(len(plain))
+	}
 	for s.pos < len(s.body) {
 		c := s.body[s.pos]
 		if c == '"' {
 			s.pos++
-			if !key {
-				return nil, nil
-			}
-			var decoded string
-			if err := json.Unmarshal(s.body[start:s.pos], &decoded); err != nil {
-				return nil, err
-			}
-			return []byte(decoded), nil
+			return nil, nil
 		}
 		if c < 0x20 {
 			return nil, errSyntax
 		}
 		if c == '\\' {
-			if err := s.checkedEscape(); err != nil {
+			if _, err := s.checkedEscapeValue(); err != nil {
 				return nil, err
 			}
 		} else {
@@ -249,39 +244,51 @@ func (s *checkedScanner) checkedString(key bool) ([]byte, error) {
 	return nil, errSyntax
 }
 
-// checkedEscape は正しいUnicode pairだけを許し、NULと単独surrogateを拒否する。
-func (s *checkedScanner) checkedEscape() error {
+// checkedEscapeValue はUnicode pairとNULの拒否条件を検査し、同時に復号値を返す。
+// 検査のみの呼出しでも同じ関数を使い、文字列の受理条件を分岐ごとに変えない。
+func (s *checkedScanner) checkedEscapeValue() (rune, error) {
 	s.pos++
 	if s.pos == len(s.body) {
-		return errSyntax
+		return 0, errSyntax
 	}
-	switch s.body[s.pos] {
-	case '"', '\\', '/', 'b', 'f', 'n', 'r', 't':
-		s.pos++
-		return nil
+	c := s.body[s.pos]
+	s.pos++
+	switch c {
+	case '"', '\\', '/':
+		return rune(c), nil
+	case 'b':
+		return '\b', nil
+	case 'f':
+		return '\f', nil
+	case 'n':
+		return '\n', nil
+	case 'r':
+		return '\r', nil
+	case 't':
+		return '\t', nil
 	case 'u':
-		if s.pos+5 > len(s.body) {
-			return errSyntax
+		if s.pos+4 > len(s.body) {
+			return 0, errSyntax
 		}
-		n, err := checkedHex4(s.body[s.pos+1 : s.pos+5])
+		n, err := checkedHex4(s.body[s.pos : s.pos+4])
 		if err != nil || n == 0 || n >= 0xdc00 && n <= 0xdfff {
-			return errSyntax
+			return 0, errSyntax
 		}
-		s.pos += 5
+		s.pos += 4
 		if n < 0xd800 || n > 0xdbff {
-			return nil
+			return rune(n), nil
 		}
 		if s.pos+6 > len(s.body) || s.body[s.pos] != '\\' || s.body[s.pos+1] != 'u' {
-			return errSyntax
+			return 0, errSyntax
 		}
 		low, err := checkedHex4(s.body[s.pos+2 : s.pos+6])
 		if err != nil || low < 0xdc00 || low > 0xdfff {
-			return errSyntax
+			return 0, errSyntax
 		}
 		s.pos += 6
-		return nil
+		return rune(0x10000 + (n-0xd800)*0x400 + low - 0xdc00), nil
 	default:
-		return errSyntax
+		return 0, errSyntax
 	}
 }
 

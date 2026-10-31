@@ -1,13 +1,13 @@
 <!-- 管理画面。動的な値はhtml/templateでエスケープする。 -->
 <!doctype html>
 <html lang="ja">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>投稿規制 — OimoBBS管理</title>{{template "admin-assets" .}}
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>{{with boardNavigation}}{{.Name}} — {{.CurrentTitle}}{{else}}投稿規制 — OimoBBS管理{{end}}</title>{{template "admin-assets" .}}
 </head>
 <body class="admin">{{template "admin-header" .}}
 <main id="main" tabindex="-1">
-<h1>投稿規制：{{.Name}}
+<h1>投稿規制
 </h1>
-<nav><a href="{{adminBase}}/boards">板一覧</a> <a href="{{adminURL (.ThreadsAction)}}">管理人用スレッド閲覧</a> <a href="{{adminURL (.Action)}}">最新の規制を読み直す</a>
+<nav class="board-page-actions">{{if not (boardNavigation)}}<a href="{{adminBase}}/boards">板一覧</a> <a href="{{adminURL (.ThreadsAction)}}">管理人用スレッド閲覧</a>{{end}} <a href="{{adminURL (.Action)}}">最新の規制を読み直す</a>
 {{if adminCan "/global-rules"}} <a href="{{adminBase}}/global-rules">掲示板全体の投稿規制</a>{{end}}</nav><p class="field-hint">この板の個別規制を表示しています。掲示板全体の共通規制も併せて適用されます。</p>{{if .Message}}
 <p role="{{if .QuickSubject}}status{{else}}alert{{end}}">{{.Message}}
 </p>{{end}}

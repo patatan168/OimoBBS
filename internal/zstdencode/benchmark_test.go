@@ -5,20 +5,25 @@ import (
 	"bytes"
 	"compress/gzip"
 	"io"
+	"math/rand"
 	"oimobbs/internal/testutil"
 	"os"
 	"testing"
 )
 
 func BenchmarkEncode(b *testing.B) {
-	for _, kind := range []string{"entropy", "text", "mixed"} {
+	for _, kind := range []string{"entropy", "text", "mixed", "raw", "repeat", "rle"} {
 		b.Run(kind, func(b *testing.B) {
-			raw := testutil.DATFixture(kind)
+			raw := benchmarkEncodeFixture(kind)
 			e := &Encoder{}
 			encoded := e.Encode(raw)
 			decoded, err := testutil.DecodeZstd(encoded)
 			if err != nil || !bytes.Equal(raw, decoded) {
 				b.Fatal("roundtrip", err)
+			}
+			cpuBefore, err := testutil.ProcessCPUTime()
+			if err != nil {
+				b.Fatal(err)
 			}
 			b.SetBytes(int64(len(raw)))
 			b.ReportAllocs()
@@ -26,6 +31,11 @@ func BenchmarkEncode(b *testing.B) {
 			for b.Loop() {
 				e.Encode(raw)
 			}
+			cpuAfter, err := testutil.ProcessCPUTime()
+			if err != nil {
+				b.Fatal(err)
+			}
+			b.ReportMetric(float64(cpuAfter-cpuBefore)/float64(b.N), "cpu-ns/op")
 			b.ReportMetric(float64(len(encoded)), "encoded-bytes")
 		})
 	}
@@ -97,5 +107,21 @@ func BenchmarkCompressionTarget(b *testing.B) {
 				})
 			}
 		})
+	}
+}
+
+// benchmarkEncodeFixture は合成DATと、未圧縮・多byte周期・単一byte周期の対照入力を返す。
+func benchmarkEncodeFixture(kind string) []byte {
+	switch kind {
+	case "raw":
+		raw := make([]byte, 512<<10)
+		rand.New(rand.NewSource(71)).Read(raw)
+		return raw
+	case "repeat":
+		return bytes.Repeat([]byte("abcde"), 100000)
+	case "rle":
+		return bytes.Repeat([]byte{0}, 500000)
+	default:
+		return testutil.DATFixture(kind)
 	}
 }

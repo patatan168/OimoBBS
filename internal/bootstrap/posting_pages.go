@@ -210,6 +210,10 @@ func (repo *Repository) postingResultPage(w http.ResponseWriter, r *http.Request
 	if errors.As(result.Err, &limited) {
 		w.Header().Set("Retry-After", fmt.Sprint(limited.RetryAfter))
 		heading, message := "投稿間隔を空けてください", "時間を置いて同じ内容を再送してください。"
+		if errors.Is(result.Err, ErrSameContent) {
+			heading = "同じ内容の連投上限に達しました"
+			message = fmt.Sprintf("あと約%d秒待ってから投稿してください。", limited.RetryAfter)
+		}
 		writePostingPage(w, 429, postingPage{Heading: heading, Message: message, Board: fields["bbs"], Retry: true, Fields: confirmationFields(fields)})
 		return
 	}

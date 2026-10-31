@@ -2,6 +2,8 @@
 
 リポジトリのルートで実行します。Go1.27.3とPython3が必要です。
 
+Go試験・ビルドを直接実行する前に、`mise exec -- go generate ./internal/webui` で静的資産を生成します。生成先の `internal/webui/generated/` はGit管理しません。共通チェック・セットアップ・Docker・自動更新では自動生成します。静的資産の生成と配信は `mise exec -- go test -race ./tools/webassets ./internal/webui`、生成物の一致は `mise exec -- go run ./tools/webassets -check` で確認できます。
+
 ## 検査を選ぶ
 
 | 変更・確認の対象 | 手順 |
@@ -9,6 +11,7 @@
 | 文書のみ | [文書・fixtureの検査](#文書を変更したとき) |
 | 実装全体・依存関係 | [共通チェック](#共通チェック)・[依存更新器](#依存更新器の検証) |
 | セットアップ・起動・専ブラ | [導入と基本動作](#導入と基本動作) |
+| Webの406・圧縮・専ブラ互換 | [HTTP配信と圧縮](#http配信と圧縮) |
 | 公開・管理画面の表示 | [ブラウザー検査の準備](#ブラウザー検査の準備)・[画面と管理操作](#画面と管理操作) |
 | ログイン・再認証・権限 | [管理認証と権限](#管理認証と権限) |
 | 提出用CSV・ZIP・案件検索 | [提出CSVとZIPの検査](#提出csvとzipの検査) |
@@ -94,6 +97,32 @@ mise exec -- go test -race ./internal/bootstrap -run '^Test(AdminBoardMetadata|B
 ```
 
 `OIMO_BOARD_SCREENSHOTS`を指定すると追加画面の390px・1280px表示と変更画面を保存します。再認証後の戻り先、エラー時の入力保持、JavaScriptなしのフォーム、旧URL・新URLで同じDATを取得できることを検査します。
+
+### 板の閉鎖
+
+```sh
+mise exec -- go test -race ./internal/bootstrap ./internal/app -run 'Test(BoardClosure|ClosedBoard|StoragePressure)' -count=1
+```
+
+閉鎖時の再認証・板キー確認、公開取得と返信の拒否、通常ログの保持、再起動、容量不足時の優先回収を検査します。本文回収済みスレッドの原本回収、全体の原本自動整理が無効の場合の期限回収を含みます。
+
+[ブラウザー検査の準備](#ブラウザー検査の準備)に従って環境変数を設定すると、次の検査で新しい隔離サイトを用意し、再認証後の戻り先・入力エラー・JavaScriptなしのフォーム・公開停止を確認できます。
+
+```sh
+mise exec -- go test ./internal/bootstrap -run '^TestBoardClosureBrowser$' -count=1 -v
+```
+
+`OIMO_LAYOUT_SCREENSHOTS`を指定すると、閉鎖確認画面の390px・1280px表示をライト・ダークの両テーマで保存します。実時間で6ヶ月間待つ試験や、本番サーバーの削除状態を確認する試験ではありません。
+
+## HTTP配信と圧縮
+
+```sh
+mise exec -- go test ./internal/bootstrap -run '^(TestWebCompressionRequired|TestAdminCompressionBeforeNonce|TestWebCompressionTLS)$' -count=1
+mise exec -- go test -race ./internal/compat ./internal/publicedge ./internal/webui ./tools/webassets
+mise exec -- go run ./tools/webassets -check
+```
+
+Web・管理画面の受付条件、専ブラのidentity/304/206、HTTP/1.1・HTTP/2の実TLS通信を検査します。実ブラウザや稼働サーバーの確認は別に行います。[圧縮対応必須化の検証記録](web-compression-required.md)と[圧縮の測定記録](measurements.md#http配信と圧縮)から、対象・比較元・未確認の範囲を確認できます。
 
 ## 導入と基本動作
 

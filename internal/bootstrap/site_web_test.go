@@ -48,6 +48,11 @@ func TestSiteWebBoardsAndIsolation(t *testing.T) {
 		if len(headers) > 0 {
 			req.Header = headers[0].Clone()
 		}
+		if method == "GET" || method == "HEAD" {
+			if _, present := req.Header["Accept-Encoding"]; !present {
+				req.Header.Set("Accept-Encoding", "gzip;q=0.1")
+			}
+		}
 		if method == "POST" {
 			req.Header.Set("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
 			req.Header.Set("Origin", cfg.Public.BaseURL)

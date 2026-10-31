@@ -48,7 +48,7 @@ func (repo *Repository) issueWebCSRF(ctx context.Context, owner domain.ID, route
 
 // makeWebCSRF は所有列内でだけ呼び、停止状態と発行時刻を確認する。保存状態は変更しない。
 func (b *postingBoard) makeWebCSRF(route, existing string, secure bool) (WebCSRFForm, error) {
-	if b.stopped {
+	if b.stopped || b.closedAt.Load() != 0 {
 		return WebCSRFForm{}, ErrPostingRequest
 	}
 	now := b.clock()

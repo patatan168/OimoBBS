@@ -194,7 +194,7 @@ func validateCapture(c decodedCapture) (decodedCapture, error) {
 	if c.BodySHA != sha256.Sum256([]byte(c.Input.Body)) || c.Dedup.KeyID != 8 || c.Dedup.PostNumber == 0 || c.Versions.Site == 0 || c.Versions.Board == 0 || c.Committed <= 0 || c.Input.Credential == (domain.Hash{}) {
 		return c, ErrCapture
 	}
-	if !reflect.DeepEqual(c.Input.RequestID, c.Dedup.RequestID) || c.Dedup.Mode != "implicit" && c.Dedup.Mode != "explicit" || (c.Input.RequestID != nil) != (c.Dedup.Mode == "explicit") {
+	if !reflect.DeepEqual(c.Input.RequestID, c.Dedup.RequestID) || c.Dedup.Mode != "implicit" && c.Dedup.Mode != "independent" && c.Dedup.Mode != "explicit" || (c.Input.RequestID != nil) != (c.Dedup.Mode == "explicit") {
 		return c, ErrCapture
 	}
 	duration := domain.Time(30 * 1e9)

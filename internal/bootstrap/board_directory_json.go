@@ -9,13 +9,25 @@ import (
 	"oimobbs/internal/strictjson"
 )
 
-// UnmarshalJSON は省略キーを一般的に許可せず、旧5項目と名前付き6項目を個別に完全検査する。
+// UnmarshalJSON は省略キーを一般的に許可せず、旧5項目・名前付き6項目・閉鎖日時付き7項目を個別に完全検査する。
 func (d *boardDirectory) UnmarshalJSON(raw []byte) error {
 	var fields map[string]json.RawMessage
 	if err := strictjson.Decode(raw, &fields); err != nil {
 		return err
 	}
-	if _, ok := fields["name"]; ok {
+	_, named := fields["name"]
+	_, closed := fields["closed_at_ns"]
+	if named || closed {
+		if !closed {
+			fields["closed_at_ns"] = json.RawMessage("null")
+			var err error
+			raw, err = json.Marshal(fields)
+			if err != nil {
+				return err
+			}
+		} else if string(fields["closed_at_ns"]) == "null" {
+			return store.ErrCorrupt
+		}
 		type wire boardDirectory
 		var v wire
 		if err := strictjson.Decode(raw, &v); err != nil {

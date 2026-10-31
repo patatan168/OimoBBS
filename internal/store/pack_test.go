@@ -9,6 +9,7 @@ import (
 	"oimobbs/internal/domain"
 	"oimobbs/internal/textcodec"
 	"os"
+	"reflect"
 	"strings"
 	"testing"
 )
@@ -343,5 +344,37 @@ func TestPackModerationOriginAndPolicy(t *testing.T) {
 	got, e := ReadPackDAT(pack, 1, uint64(len(line)-1))
 	if e != nil || !bytes.Equal(got, line[1:len(line)-1]) {
 		t.Fatal("redacted DAT range", e)
+	}
+}
+
+// TestPackIndependentDedup は新規HTTP送信の独立索引を固定長packへ往復できることを確認する。
+func TestPackIndependentDedup(t *testing.T) {
+	owner, frame := fixtureCreate(t)
+	f, _, err := ReadFrame(bytes.NewReader(frame))
+	if err != nil {
+		t.Fatal(err)
+	}
+	op, err := domain.ParseOperation(f.Records[0].JSON)
+	if err != nil {
+		t.Fatal(err)
+	}
+	op.Dedup.Mode, op.Dedup.RequestID = "independent", nil
+	op.Dedup.Expires = op.Committed + 30e9
+	f.Records[0].JSON, err = json.Marshal(op)
+	if err != nil {
+		t.Fatal(err)
+	}
+	builder := NewPackBuilder(nil)
+	if err := builder.Apply(f); err != nil {
+		t.Fatal(err)
+	}
+	snapshot := builder.Snapshot(owner, 1, 2, op.Committed+1)
+	raw, err := EncodePack(snapshot, 6)
+	if err != nil {
+		t.Fatal(err)
+	}
+	decoded, err := DecodePack(raw)
+	if err != nil || len(decoded.Dedup) != 1 || !reflect.DeepEqual(decoded.Dedup[0].Value, *op.Dedup) {
+		t.Fatal(decoded.Dedup, err)
 	}
 }

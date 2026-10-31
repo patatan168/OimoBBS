@@ -39,7 +39,7 @@ func TestOperationsRefreshesPublicReportGuides(t *testing.T) {
 		if request.Header == nil {
 			request.Header = http.Header{}
 		}
-		request.Header.Set("Accept-Encoding", "identity")
+		request.Header.Set("Accept-Encoding", "identity,gzip;q=0.1")
 		recorder := httptest.NewRecorder()
 		repo.SiteWebHandler(nil).ServeHTTP(recorder, request)
 		return recorder

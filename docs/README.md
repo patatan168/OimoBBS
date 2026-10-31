@@ -14,6 +14,8 @@
 | レスを削除したい・投稿者を規制したい | [レスとスレッドの管理](admin-guide.md#レスとスレッドを管理する) → [原本の扱い](features/records.md#レス削除あぼーんと原本) |
 | スレッドを落とす・保存容量を確認したい | [削除と回収の違い](features/records.md#公開停止と保存データの回収) → [容量の確認手順](operations.md#保存容量を確認する) |
 | 投稿・接続ログを提出したい | [提出用ログの取得](admin-guide.md#提出用ログを取得する) → [CSV列と署名ZIP](features/records.md#提出用ファイル) |
+| Web取得が406になる・専ブラの取得条件を確認したい | [Webの取得条件](features/reading.md#webの取得条件) |
+| 圧縮の仕様と測定結果を調べたい | [現在の圧縮処理](encoding.md#zstandardの符号化) → [HTTP配信の検証記録](testing/measurements.md#http配信と圧縮) |
 | 動作のルールを知りたい | [仕様の全体像](specification.md) → 下の機能別仕様 |
 | 実装を変更・検証したい | [内部設計](architecture.md) → [検証方法](testing/README.md) |
 

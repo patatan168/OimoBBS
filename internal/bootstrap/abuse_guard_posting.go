@@ -35,7 +35,7 @@ func (b *postingBoard) guardCandidate(op domain.Operation, id domain.ID, key uin
 	if len(posts) == 0 {
 		return guardEntry{}, store.ErrCorrupt
 	}
-	e := guardEntry{body: posts[0].Body, title: title, name: posts[0].Name, mail: posts[0].Mail, rawIP: rate.IP, create: op.Type == "create", id: id, board: b.owner, thread: key, number: posts[0].Number, at: op.Committed, ip: b.guardIPSubject(rate.IP), signature: guardBodySignature(posts[0].Body), cap: op.Actor.Kind == "cap"}
+	e := guardEntry{content: op.Dedup.Request, contentIP: b.contentIPSubject(rate.IP), body: posts[0].Body, title: title, name: posts[0].Name, mail: posts[0].Mail, rawIP: rate.IP, create: op.Type == "create", id: id, board: b.owner, thread: key, number: posts[0].Number, at: op.Committed, ip: b.guardIPSubject(rate.IP), signature: guardBodySignature(posts[0].Body), cap: op.Actor.Kind == "cap"}
 	if rate.TokenStatus == "valid" && rate.Token != nil {
 		e.token = rate.Token.Subject
 	}
@@ -60,6 +60,13 @@ func (b *postingBoard) reserveGuard(e guardEntry) error {
 	if err := g.check(e); err != nil {
 		return err
 	}
+	settings := defaultContentRateSettings()
+	if g.contentSettings != nil {
+		settings = g.contentSettings()
+	}
+	if err := g.content.reserve(e, settings); err != nil {
+		return err
+	}
 	e.body = ""
 	e.title = ""
 	e.name = ""
@@ -78,6 +85,9 @@ func (b *postingBoard) settleGuard(id domain.ID, durable bool) {
 	}
 	b.guard.mu.Lock()
 	defer b.guard.mu.Unlock()
+	if !durable {
+		b.guard.content.remove(id)
+	}
 	b.guard.settle(id, durable)
 }
 
@@ -100,6 +110,12 @@ func (r *Repository) restoreAbuseGuard() error {
 		g.mu.Unlock()
 	}
 	now := domain.Time(time.Now().UnixNano())
+	g.contentSettings = func() ContentRateSettings {
+		if v := r.liveOperations.Load(); v != nil {
+			return v.Settings.contentRates()
+		}
+		return defaultContentRateSettings()
+	}
 	var restored guardRestore
 	var initialWait uint32
 	var initialRates *AdminRateSettings
@@ -131,11 +147,12 @@ func (r *Repository) restoreAbuseGuard() error {
 				}
 			}
 			for key, p := range b.threads {
-				err := p.VisitRecentAbusePosts(now, now-guardHistorySeconds*1e9, func(id domain.ID, post domain.Post, token *postcapture.TokenEvidence) {
-					e := guardEntry{id: id, board: b.owner, thread: key, number: post.Number, at: post.Created, ip: b.guardIPSubject(post.Private.SourceIP), cap: post.Private.CapID != nil}
+				err := p.VisitRecentAbusePosts(now, now-guardHistorySeconds*1e9, func(id domain.ID, post domain.Post, token *postcapture.TokenEvidence, content domain.Hash) {
+					e := guardEntry{content: content, contentIP: b.contentIPSubject(post.Private.SourceIP), id: id, board: b.owner, thread: key, number: post.Number, at: post.Created, ip: b.guardIPSubject(post.Private.SourceIP), cap: post.Private.CapID != nil}
 					if token != nil {
 						e.token = token.Subject
 					}
+					g.content.remember(e)
 					restored.add(e, post.Body)
 				})
 				if err != nil {

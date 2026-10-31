@@ -13,6 +13,7 @@ import (
 	"net/netip"
 	"net/url"
 	"oimobbs/internal/adminauth"
+	"oimobbs/internal/compat"
 	"oimobbs/internal/delivery"
 	"oimobbs/internal/domain"
 	"oimobbs/internal/securityaudit"
@@ -156,6 +157,9 @@ func (h *adminHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		h.fail(w, r, 403, "REQUEST_REJECTED")
 		return
 	}
+	if !compat.RequireCompressedRead(w, r) {
+		return
+	}
 	var readingDenied bool
 	readingStart := time.Now()
 	w, readingDenied = h.repo.readingGate(w, r, "admin")
@@ -258,6 +262,10 @@ func (h *adminHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		h.failure(w, r, e)
 		return
 	}
+	if h.closedBoardSettingsGate(w, r, session) {
+		return
+	}
+	navigation.board = h.boardNavigation(r, session)
 	switch {
 	case r.URL.Path == "/updates" || strings.HasPrefix(r.URL.Path, "/updates/"):
 		h.updatesRoutes(w, r, session)
@@ -400,6 +408,11 @@ func adminForm(w http.ResponseWriter, r *http.Request, limit int64, names ...str
 	// 更新前に開かれた運用フォームは削除依頼の送信間隔を維持する。
 	if e == nil && slices.Contains(names, "report_interval_minutes") && !fields.Has("report_interval_minutes") {
 		fields.Set("report_interval_minutes", "")
+	}
+	for _, name := range []string{"content_ip_seconds", "content_ip_posts", "content_cookie_seconds", "content_cookie_posts"} {
+		if e == nil && slices.Contains(names, name) && !fields.Has(name) {
+			fields.Set(name, "")
+		}
 	}
 	// 更新前に開かれた共通対策フォームはBot設定を維持して保存する。
 	if e == nil && slices.Contains(names, "bot_mode") && !fields.Has("bot_mode") {
@@ -619,7 +632,11 @@ func adminJSON(w http.ResponseWriter, status int, value any) {
 }
 func (h *adminHandler) fail(w http.ResponseWriter, r *http.Request, status int, code string) {
 	if strings.HasPrefix(r.URL.Path, "/api/") {
-		adminJSON(w, status, map[string]any{"error": map[string]string{"code": code, "message": "操作を完了できませんでした。認証・入力・最新の設定を確認してください。"}, "request_id": domain.NewID()})
+		message := "操作を完了できませんでした。認証・入力・最新の設定を確認してください。"
+		if code == "BOARD_CLOSED" {
+			message = "この板は閉鎖済みのため、設定は変更できません。"
+		}
+		adminJSON(w, status, map[string]any{"error": map[string]string{"code": code, "message": message}, "request_id": domain.NewID()})
 		return
 	}
 	if code == "AUTHENTICATION_REQUIRED" && !strings.HasPrefix(r.URL.Path, "/web/assets/") {
@@ -630,6 +647,10 @@ func (h *adminHandler) fail(w http.ResponseWriter, r *http.Request, status int, 
 	message := "操作を完了できませんでした。入力とログイン状態を確認してください。"
 	backPath := ""
 	actionLabel := ""
+	if code == "BOARD_CLOSED" {
+		message = "この板は閉鎖済みのため、設定は変更できません。保存済みの設定は板一覧から確認できます。"
+		backPath, actionLabel = "/boards", "板一覧へ戻る"
+	}
 	if strings.HasPrefix(code, "UPDATE_") {
 		message = map[string]string{
 			"UPDATE_NOT_CONFIGURED":        "更新機能は未設定です。サーバー側の設定を確認してください。",

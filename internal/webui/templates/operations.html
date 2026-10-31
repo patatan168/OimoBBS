@@ -6,7 +6,7 @@
 <section class="admin-panel"><h2>公開本文・圧縮の自動調整</h2><p>保持上限とHTML生成・圧縮の同時処理数は全自動です。CPU・メモリと現在の空き容量に応じて調整され、手動での設定は不要です。</p>
 <dl class="admin-status-grid"><div><dt>現在の保持上限</dt><dd><output>{{.CacheLimitMiB}}</output><small>MiB</small></dd></div><div><dt>現在のHTML生成・圧縮の同時処理数</dt><dd><output>{{.GenerationWorkers}}</output><small>件</small></dd></div></dl>
 <p>表示は画面を開いた時点の値です。メモリが不足すると保持量と新規生成を抑え、余裕が戻ると再開します。実行中の保存や生成は完了まで続けます。</p></section>
-<p class="settings-impact">対象は掲示板全体です。整理の頻度、通報による停止条件、送信予算を変更できます。保存後は再起動せず反映します。</p><form data-settings-form method="post" action="{{adminBase}}/operations">
+<p class="settings-impact">対象は掲示板全体です。整理の頻度、同一内容の連投上限、通報による停止条件、送信予算を変更できます。保存後は再起動せず反映します。</p><form data-settings-form method="post" action="{{adminBase}}/operations">
 <input type="hidden" name="csrf" value="{{.CSRF}}"><input type="hidden" name="request_id" value="{{.RequestID}}"><input type="hidden" name="revision" value="{{.State.ETag}}">
 <section class="admin-panel"><h2>保存の自動整理</h2><div class="field-grid">
 <p><label>自動実行 <select name="maintenance_enabled"><option value="true" {{if .State.Settings.Maintenance.Enabled}}selected{{end}}>有効</option><option value="false" {{if not .State.Settings.Maintenance.Enabled}}selected{{end}}>無効</option></select></label></p>
@@ -14,6 +14,12 @@
 <p><label>1回に調べるスレッド数 <input type="number" name="max_threads" min="1" max="1000" value="{{.State.Settings.Maintenance.MaxThreads}}" required><small class="field-hint">多くすると1回で広い範囲を調べます。</small></label></p>
 <p><label>1回の処理時間上限（秒）<input type="number" name="max_seconds" min="1" max="300" value="{{.State.Settings.Maintenance.MaxSeconds}}" required><small class="field-hint">この時間を超えたら、処理中のスレッドが完了したところで止めます。</small></label></p>
 </div><p>時間上限はスレッド間で判定します。処理中のスレッドは完了まで続けます。</p></section>
+<section class="admin-panel" id="same-content"><h2>同一内容の連投制限</h2><p>同じ投稿先・本文・名前・メール欄などの投稿を数えます。IPと匿名Cookieの両方の上限を満たす必要があります。本文が異なる投稿は別枠です。</p><div class="field-grid">
+<p><label>同じIPの集計期間（秒）<input type="number" name="content_ip_seconds" min="1" max="600" value="{{.State.Settings.ContentRates.IPSeconds}}" required></label></p>
+<p><label>同じIPの許容投稿数<input type="number" name="content_ip_posts" min="1" max="1000" value="{{.State.Settings.ContentRates.IPPosts}}" required></label></p>
+<p><label>同じCookieの集計期間（秒）<input type="number" name="content_cookie_seconds" min="1" max="600" value="{{.State.Settings.ContentRates.CookieSeconds}}" required></label></p>
+<p><label>同じCookieの許容投稿数<input type="number" name="content_cookie_posts" min="1" max="1000" value="{{.State.Settings.ContentRates.CookiePosts}}" required></label></p>
+</div><p>初期値はIPが60秒に20件、Cookieが60秒に1件です。直近の投稿を数え、上限を超えると待ち時間を返します。設定変更で履歴をリセットしません。再起動時は直近の公開投稿から履歴を復元します。明示的な要求IDによる受理済み投稿の再送は件数に加算しません。</p></section>
 <section class="admin-panel" id="report-interval"><h2>削除依頼の送信間隔</h2><p><label>同じブラウザーからの送信間隔（分）<input type="number" name="report_interval_minutes" min="1" max="1440" value="{{.State.Settings.ReportIntervalMinutes}}" required><small class="field-hint">初期値は10分です。同じ回線全体では、この期間に3件まで受け付けます。受付済み依頼の照会は別枠です。</small></label></p></section>
 <section class="admin-panel"><h2>通報による自動停止</h2>{{if .State.ReportBoard}}<p>通報受付板：{{.State.ReportBoard}}</p>{{else}}<p>自動通報は起動設定で無効になっています。以下の条件は有効化後に使います。</p>{{end}}<div class="field-grid">
 <p><label>通報を集計する期間（分）<input type="number" name="window_minutes" min="1" max="10080" value="{{.State.Settings.Reports.WindowMinutes}}" required><small class="field-hint">この期間内に集まった票だけを数えます。例：1440分は24時間です。</small></label></p>

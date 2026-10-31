@@ -12,6 +12,7 @@
 | --- | --- |
 | HTTP検査・一覧・ログの処理 | [WAF](#waf) |
 | CPU・メモリ・帯域・閲覧・保存 | [資源・帯域・保存](#資源帯域保存) |
+| Webの取得条件・HTTP圧縮 | [HTTP配信と圧縮](#http配信と圧縮) |
 | 圧縮データの復号 | [復号処理](#復号処理) |
 | 投稿の処理量・遅延・復旧 | [投稿処理](#投稿処理) |
 | Web脆弱性・投稿入力・稼働設定 | [セキュリティの検証記録](#セキュリティの検証記録) |
@@ -37,19 +38,36 @@
 | [帯域別の構成](bandwidth-sizing.json) | 100・200・400・1000Mbpsの配信と投稿併行。旧版での構成目安 |
 | [非必須HTTPログ](http-log-posting.json) | ログ滞留への追従と投稿の比較 |
 | [保存圧縮](storage-compression.json) | WAL・snapshotの圧縮、混合負荷、I/O競合、不採用候補 |
-| [HTTP配信codec](http-codec-current.json) | HTTP圧縮のcache missとサーバー内復号の単体比較。実HTTPは含まない |
-| [Zstandardの高圧縮化](high-compression.md)・[全測定](high-compression.json) | 列ごとの符号化精度選択、保存候補の最大2worker比較、gzipレベル9との単体比較とWAF有効の実HTTPS |
 | [512MiBでの受付回復](memory512-recovery.md)・[全記録](memory512-recovery.json) | 未回収ヒープと作業予約を考慮した早期GC、WAF有効の実HTTPS3試行、実メモリ圧迫と強制再起動 |
 | [閲覧処理の追加最適化](reading-optimization.md)・[全試行](reading-optimization.json) | 公開HTML・一覧のETag共有、DATヘッダ解析、単体・実HTTPS・投稿併行と復旧 |
 | [CPU・Mutex・GCの追加検証](cpu-mutex-gc-optimization.md)・[全試行](cpu-mutex-gc-optimization.json)・[反映記録](cpu-mutex-gc-deployment.md) | 2→4CPUの1.6倍目標、閲覧の達成と投稿の未達、共有SSD競合・全試作・GC/Mutex/CPU診断 |
 | [閲覧のCPU・メモリ比較](reading-resource-scaling.md)・[全試行](reading-resource-scaling.json) | サイト共通ロックの共有化、一覧の経路短縮、Go生成器、2/4CPU・512MiB/2GiB・作業集合・継続負荷 |
 | [Zstandard設定比較](zstd-same-settings.json) | 同じ圧縮設定での候補比較。全11候補を不採用 |
 
+## HTTP配信と圧縮
+
+現在の受付条件は[Webの取得条件](../features/reading.md#webの取得条件)、実装は[Zstandardの符号化](../encoding.md#zstandardの符号化)を参照してください。以下は各変更時点の検証記録です。
+
+| 記録 | 測定対象 |
+| --- | --- |
+| [Web取得の圧縮対応必須化](web-compression-required.md) | Web・管理GET/HEADの406、専ブラのidentity/304/206、HTTP/1.1・HTTP/2の実TLS取得、edge・healthcheck |
+| [大きい高エントロピーDAT](zstd-entropy-20261101.md)・[全標本](zstd-entropy-20261101.json) | 保存9の4byte候補の費用・探索間隔、サイズ削減を超える時間/CPU劣化の除外、同一バイナリ展開・旧版互換性 |
+| [同じ圧縮byteでの速度改善](zstd-speed-20261101.md)・[全標本](zstd-speed-20261101.json) | 重複する保存候補の除外、一様本文の直接RLE、同じ出力byte・CPU/RSS・独立復号 |
+| [一致探索と保存RLEの改善](zstd-ratio-20261031.md)・[全標本](zstd-ratio-20261031.json) | 25本文の新旧比較、CPU/RSS、短い一致の直近2候補、保存RLE、独立復号と旧版readerでの保存互換性 |
+| [小さいHTTP本文と候補表の追加改善](zstd-small-http-extra.md)・[全標本](zstd-small-http-extra.json) | 4byte参照とRLE、FSE構築前の下限判定、全一致repeatの再比較削減、サイズ・経過時間・総CPU |
+| [HTTPの定義済みFSE表](zstd-predefined-http.md)・[全標本](zstd-predefined-http.json) | 符号表ヘッダーを省く選択、同一17本文のサイズ・経過時間・総CPU、保存88出力のbyte一致 |
+| [HTTPのliteralヘッダー削減](zstd-http-literals.md)・[全標本](zstd-http-literals.json) | 前回改善版からの圧縮率と時間、短いヘッダー・単一stream、保存68出力のbyte一致。稼働反映は含まない |
+| [小さいHTTP本文のZstandard圧縮](zstd-small-http.md)・[全標本](zstd-small-http.json) | 公開URLで取得した同一本文17件の圧縮サイズ・生成時間。圧縮単体の変更前後比較で、稼働反映・通信時間は含まない |
+| [HTTP配信codec](http-codec-current.json) | HTTP圧縮のcache missとサーバー内復号の単体比較。実HTTPは含まない |
+| [Zstandardの高圧縮化](high-compression.md)・[全測定](high-compression.json) | 列ごとの符号化精度選択、保存候補の最大2worker比較、gzipレベル9との単体比較とWAF有効の実HTTPS |
+
 ## 復号処理
 
 | 記録 | 測定対象 |
 | --- | --- |
 | [1件のJSON内の並列符号化・復号](json-single-parallel.md)・[全試行](json-single-parallel.json) | 大きい配列を含む保存DTOの一件内分担、共有worker枠、1/2/4CPUと同時要求、byte・厳密検査・独自復号順序の維持 |
+| [Zstandard復号の長さ計算](zstd-length-decode.md)・[全標本](zstd-length-decode.json) | literal・参照長の分離、前回版との1コア比較、保存frameの測定変動と不採用案 |
+| [小さいZstandard frameの復号](zstd-small-frame-decode.md)・[全標本](zstd-small-frame-decode.json) | 32KiB以下の表構築と単一stream読取り、実本文と保存frame、1コアの経過時間・総CPU。大frameの高速化は未確認 |
 | [Zstandard復号・第1回](zstd-decode.json) | 復号の単体測定 |
 | [第2回](zstd-decode-second.json)・[第3回](zstd-decode-third.json)・[第4回](zstd-decode-fourth.json) | 各段階の復号比較、入力・設定別の時間と割当量 |
 | [第5回](zstd-decode-fifth.json) | 復号表の作業領域とHuffman先読みの改善。既存の配信・保存用入力を比較 |
@@ -66,6 +84,8 @@ codec単体の値には、実ディスクのWrite/Syncや通信時間を含み�
 
 | 記録 | 測定対象 |
 | --- | --- |
+| [制限判定と投稿経路の処理削減](posting-processing.md)・[全試行](posting-processing.json) | 通常の制限を維持した予約・窓待ち・厳密JSON・HTMLの処理削減。比較時だけ頻度制限を解除した2/4CPUの実HTTPS、I/O変動とtmpfs比較 |
+| [間隔の空いた返信の待ち短縮](posting-idle-latency.md)・[全30試行](posting-idle-latency.json) | 低頻度返信の収集待ち省略、専ブラ・Webの実HTTPS、集中投稿の悪化試行と回線更新停止後の比較・通常再起動 |
 | [並列準備とスレッド別候補索引](posting-multicore.md)・[全56試行](posting-multicore.json) | worker待合せと候補走査の削減、2/4CPU最終比較、非同期検証の不採用、混合負荷とSIGKILL復旧 |
 | [文字コード最適化後の投稿](textcodec-posting.md)・[全試行](textcodec-posting.json) | 1/2/4CPUの実HTTPS、同期I/Oによる遅い試行の診断、160投稿/秒＋400閲覧/秒での拒否・未発行・復旧 |
 | [保存同期の回数削減](posting-sync-wait.md)・[全試行](posting-sync-wait.json) | 確認操作と保存候補の枠の分離、主要Sync回数、通常版の速度・遅延、不採用案・最終版・SIGKILL復旧 |

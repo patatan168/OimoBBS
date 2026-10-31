@@ -22,13 +22,12 @@ try {
  }
  /** 実時間の待機や本番用時計の差し替えを避け、生存している期限切れセッションへ切り替える。 */
  async function expire(value=process.env.OIMO_EXPIRED_COOKIE){await page.context().addCookies([{name:'oimo_admin',value,url:base+'/'}]);}
- await login();await page.goto(base+'/reauth?return_to=%2Fboards');await reauth('/boards');
+ await login();await page.goto(base+'/reauth?return_to=%2Fboards%2Fnew');await reauth('/boards/new');
  const form=page.locator('form[action="/admin/boards"]');assert.ok(await form.count());
- await form.locator('..').locator('summary').click();
  await form.locator('[name="key"]').fill('mustnotcreate');await form.locator('[name="name"]').fill('期限切れで作成されない板');
  await expire();
  // 画面の入力を残したまま期限が切れても、送信を実行せず本人確認へ案内する。
- const [response]=await Promise.all([page.waitForResponse(r=>r.url()===base+'/boards'&&r.request().method()==='POST'),form.getByRole('button',{name:'板を追加',exact:true}).click()]);
+ const [response]=await Promise.all([page.waitForResponse(r=>r.url()===base+'/boards'&&r.request().method()==='POST'),form.getByRole('button',{name:'この内容で板を追加',exact:true}).click()]);
  assert.equal(response.status(),403);assert.ok((await page.locator('main').innerText()).includes('自動で再実行しません'));
  await page.waitForLoadState('load');
  if(process.env.OIMO_REAUTH_SCREENSHOTS){await page.setViewportSize({width:390,height:900});await page.screenshot({path:`${process.env.OIMO_REAUTH_SCREENSHOTS}/expired-operation-390.png`,fullPage:true});}

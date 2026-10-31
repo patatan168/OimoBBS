@@ -46,6 +46,7 @@ services:
     healthcheck:
       test: ["CMD", "oimobbs", "healthcheck", "--config", "/etc/oimobbs/config.json"]
       interval: 15s
+      start_interval: 1s
       timeout: 7s
       retries: 3
       start_period: 30s

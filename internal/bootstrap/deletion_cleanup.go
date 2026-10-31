@@ -119,7 +119,7 @@ func validateDeletionTasks(state store.ControlState, key uint64) error {
 		if e := strictjson.Decode(state.Rows["deletion:"+v.Deletion.String()].Value, &deletion); e != nil {
 			return e
 		}
-		if seen[v.Deletion] || (v.Kind == "base_delta" && deletion.Kind != "redact") || (v.Kind == "live" && deletion.Kind != "hide" && deletion.Kind != "expire" && deletion.Kind != "pressure") || v.CopyID != fmt.Sprintf("thread:%d", key) || deletion.Thread != domain.U64(key) || (deletion.Phase != "applied" && deletion.Phase != "cleaning") {
+		if seen[v.Deletion] || (v.Kind == "base_delta" && deletion.Kind != "redact") || (v.Kind == "live" && deletion.Kind != "hide" && deletion.Kind != "expire" && deletion.Kind != "pressure" && deletion.Kind != "closure") || v.CopyID != fmt.Sprintf("thread:%d", key) || deletion.Thread != domain.U64(key) || (deletion.Phase != "applied" && deletion.Phase != "cleaning") {
 			return store.ErrCorrupt
 		}
 		seen[v.Deletion] = true

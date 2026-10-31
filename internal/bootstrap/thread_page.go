@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"fmt"
 	"html"
+	"html/template"
 	"net/http"
 	"net/url"
 	"oimobbs/internal/compat"
@@ -21,6 +22,7 @@ type threadRow struct {
 	Name, Mail, Date, Body string
 }
 type threadPage struct {
+	RenderedRows      template.HTML
 	Title, Key, Board string
 	MoveTarget        string
 	Count             uint32
@@ -116,11 +118,7 @@ func (repo *Repository) threadPage(w http.ResponseWriter, r *http.Request, owner
 		if _, e = compat.SelectPosts(selection, int(snapshot.PostCount), page+1); e == nil {
 			view.Next = fmt.Sprintf("%s?page=%d", path, page+1)
 		}
-		var body bytes.Buffer
-		if e = threadTemplate.Execute(&body, view); e != nil {
-			return nil, e
-		}
-		return body.Bytes(), nil
+		return renderThreadPage(view)
 	})
 	if e != nil {
 		threadError(w, r, 503, "現在閲覧できません。")

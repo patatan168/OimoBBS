@@ -11,6 +11,7 @@ import (
 	"oimobbs/internal/webui"
 	"slices"
 	"strings"
+	"time"
 )
 
 type adminBoardsPage struct {
@@ -18,6 +19,8 @@ type adminBoardsPage struct {
 	Rows                  []AdminBoard
 	Next                  string
 	Editing               bool
+	Closing               bool
+	ClosedAt              *domain.Time
 	Metadata              bool
 	Creating              bool
 	Aliases               []string
@@ -95,4 +98,25 @@ func (p adminBoardsPage) ReadingAction() string {
 // MetadataAction は板IDで固定した名前・キー変更画面への経路を返す。
 func (p adminBoardsPage) MetadataAction() string {
 	return strings.TrimSuffix(p.Action, "/settings") + "/metadata"
+}
+
+// ClosureAction は板の閉鎖確認画面への固定経路を返す。
+func (p adminBoardsPage) ClosureAction() string {
+	return strings.TrimSuffix(p.Action, "/settings") + "/close"
+}
+
+// ClosureTime は閉鎖日時を日本時間で表示する。
+func (p adminBoardsPage) ClosureTime() string {
+	if p.ClosedAt == nil {
+		return ""
+	}
+	return time.Unix(0, int64(*p.ClosedAt)).In(domain.JST).Format("2006年1月2日 15:04")
+}
+
+// ClosureDeadline は通常ログの削除期限を日本時間で表示する。
+func (p adminBoardsPage) ClosureDeadline() string {
+	if p.ClosedAt == nil {
+		return ""
+	}
+	return time.Unix(0, int64(boardClosureDeadline(*p.ClosedAt))).In(domain.JST).Format("2006年1月2日 15:04")
 }

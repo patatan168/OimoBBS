@@ -65,6 +65,7 @@ var auditFieldLabels = map[string]string{
 	"board_directory.name":            "板の表示名",
 	"board_directory.key":             "板の公開キー",
 	"board_directory.aliases":         "板の旧キー",
+	"board_directory.closed_at_ns":    "板の閉鎖日時",
 	"board_directory.status":          "板の公開状態",
 }
 
@@ -94,7 +95,9 @@ var auditDescriptions = map[string]string{
 	"network_fetch_failed":              "取得の失敗を記録しました。前回成功した分類表は維持します。",
 	"site_name_update":                  "掲示板全体の表示名を保存しました。",
 	"board_settings_update":             "対象の板の設定を保存しました。",
+	"board_close":                       "板を閉鎖し、公開閲覧と投稿を停止しました。ログは保持期限に従い、容量不足時には優先して回収します。",
 	"board_metadata_update":             "板の表示名・公開キーと、保持する旧キーを保存しました。",
+	"content_rate_enable":               "同一内容の投稿制限に対応する保存形式へ更新しました。",
 	"operations_update":                 "保存整理・通報・配信などの運用設定を保存しました。",
 	"reading_access_update":             "閲覧または管理画面の接続条件を保存しました。",
 	"global_rules_update":               "掲示板全体に適用する投稿規制を追加・解除しました。",

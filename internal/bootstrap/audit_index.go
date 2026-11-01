@@ -127,7 +127,7 @@ func (r *Repository) catchUpAudit(ctx context.Context, budget *store.HistoryBudg
 				if known && prior != fingerprint {
 					return store.ErrCorrupt
 				}
-				visible := !at.Before(cutoff)
+				visible := !at.Before(cutoff) && auditVisible(entry)
 				if !known && visible && (index.count >= 100000 || index.bytes+len(raw) > 64<<20) {
 					return errAuditIndexFull
 				}
@@ -228,7 +228,7 @@ func (r *Repository) collectAuditRows(ctx context.Context, q auditQuery) ([]audi
 			if e := ctx.Err(); e != nil {
 				return nil, e
 			}
-			if row.at.Before(q.From) || !row.at.Before(q.To) || !auditMatches(entry, q) {
+			if !auditVisible(entry) || row.at.Before(q.From) || !row.at.Before(q.To) || !auditMatches(entry, q) {
 				continue
 			}
 			selected = append(selected, auditSnapshotRow{row, entry.Action})

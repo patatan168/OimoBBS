@@ -10,6 +10,9 @@ import (
 	"time"
 )
 
+// requiredGCCheckpoint は再開位置の保存専用。旧readerも監査要約へ転記しないsystem操作名を使う。
+const requiredGCCheckpoint = "required_original_gc_checkpoint"
+
 // EnableRequiredOriginalReclamation は受理原本の公開回収を有効にし、最低reader48を先行保存する。
 // 原本の自動走査設定を耐久保存し、毎分の案件整理から一回128原本まで回収する。
 // 再送は進捗を初期化しない。独立backup/全保存コピー回収を有効にした意味ではない。
@@ -142,6 +145,6 @@ func (r *Repository) stepRequiredGCJobLocked(ctx context.Context) (int, bool, er
 	if reflect.DeepEqual(before, next) {
 		return removed, false, nil
 	}
-	e = r.saveRequiredGCJob(next, "required_original_gc_progress")
+	e = r.saveRequiredGCJob(next, requiredGCCheckpoint)
 	return removed, e == nil, e
 }

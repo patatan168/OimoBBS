@@ -49,7 +49,7 @@ func (r *Repository) resumeSnapshotAudit(ctx context.Context, owner domain.ID, k
 		if err != nil {
 			return auditTransfer{}, err
 		}
-		if entry.Sequence > proof.Sequence || at.Before(cutoff) || at.UnixNano() < int64(proof.Since) {
+		if !auditVisible(entry) || entry.Sequence > proof.Sequence || at.Before(cutoff) || at.UnixNano() < int64(proof.Since) {
 			continue
 		}
 		raw, err := json.Marshal(entry)

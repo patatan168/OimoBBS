@@ -159,6 +159,10 @@ func (h *adminHandler) renderAudit(w http.ResponseWriter, r *http.Request, s adm
 	values.Set("limit", strconv.Itoa(page.Limit))
 	options := []auditOption{}
 	for action, label := range auditLabels {
+		// 旧条件の再取得だけは選択を残す。通常の候補へ内部進捗を出さない。
+		if action == "required_original_gc_progress" && action != page.Action {
+			continue
+		}
 		options = append(options, auditOption{action, label})
 	}
 	sort.Slice(options, func(i, j int) bool { return options[i].Code < options[j].Code })

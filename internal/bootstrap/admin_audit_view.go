@@ -99,7 +99,7 @@ func (r *Repository) auditActorOptions(s adminauth.Session, page AuditPage) ([]a
 		for _, rows := range r.auditIndex.days {
 			for _, row := range rows {
 				entry := row.entry
-				if entry.ActorID == nil || row.at.Before(from) || !row.at.Before(to) || !auditMatches(entry, q) {
+				if !auditVisible(entry) || entry.ActorID == nil || row.at.Before(from) || !row.at.Before(to) || !auditMatches(entry, q) {
 					continue
 				}
 				kind := "管理者"

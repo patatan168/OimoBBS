@@ -71,7 +71,7 @@ type auditQuery struct {
 }
 type auditSnapshot struct {
 	query   auditQuery
-	rows    []AuditEntry
+	rows    []auditSnapshotRow
 	expires time.Time
 }
 
@@ -235,7 +235,7 @@ func (r *Repository) auditPageSnapshot(ctx context.Context, s adminauth.Session,
 		if !retainSnapshot {
 			return AuditPage{}, nil
 		}
-		rows, e := r.collectAudit(ctx, q)
+		rows, e := r.collectAuditRows(ctx, q)
 		if e != nil {
 			if errors.Is(e, errAuditCatchUp) {
 				return AuditPage{}, &adminFailure{status: 503, code: "AUDIT_CATCH_UP_PENDING"}
@@ -243,14 +243,11 @@ func (r *Repository) auditPageSnapshot(ctx context.Context, s adminauth.Session,
 			if errors.Is(e, errAuditIndexFull) {
 				return AuditPage{}, &adminFailure{status: 503, code: "AUDIT_INDEX_FULL"}
 			}
-			if errors.Is(e, store.ErrHistoryBudget) {
-				return AuditPage{}, &adminFailure{status: 503, code: "AUDIT_RANGE_TOO_LARGE"}
-			}
 			return AuditPage{}, e
 		}
 		snap = auditSnapshot{q, rows, now.Add(10 * time.Minute)}
 		if len(rows) > q.Limit && retainSnapshot {
-			if len(r.auditSnapshots) >= 8 {
+			if len(r.auditSnapshots) >= 8 || !auditSnapshotsFit(r.auditSnapshots, rows) {
 				return AuditPage{}, &adminFailure{status: 503, code: "AUDIT_SNAPSHOTS_FULL"}
 			}
 			var secret [32]byte
@@ -271,7 +268,11 @@ func (r *Repository) auditPageSnapshot(ctx context.Context, s adminauth.Session,
 		return AuditPage{}, nil
 	}
 	end := min(index+snap.query.Limit, len(snap.rows))
-	page := AuditPage{Entries: append([]AuditEntry{}, snap.rows[index:end]...), From: snap.query.From.UTC().Format(time.RFC3339Nano), To: snap.query.To.UTC().Format(time.RFC3339Nano), Total: uint32(len(snap.rows))}
+	entries := make([]AuditEntry, 0, end-index)
+	for _, row := range snap.rows[index:end] {
+		entries = append(entries, row.summary())
+	}
+	page := AuditPage{Entries: entries, From: snap.query.From.UTC().Format(time.RFC3339Nano), To: snap.query.To.UTC().Format(time.RFC3339Nano), Total: uint32(len(snap.rows))}
 	page.Boards = slices.Clone(snap.query.Boards)
 	page.Action, page.Limit = snap.query.Action, snap.query.Limit
 	if snap.query.Board != (domain.ID{}) {

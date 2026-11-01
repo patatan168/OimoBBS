@@ -50,7 +50,7 @@ func TestAuditActorOptionsScopeAndSelection(t *testing.T) {
 	now := time.Now()
 	page.From, page.To = now.Add(-time.Hour).Format(time.RFC3339Nano), now.Add(time.Hour).Format(time.RFC3339Nano)
 	page.Board, page.Actor, page.Action = b.ID.String(), admin.String(), "rule_create"
-	entries := []auditIndexedEntry{
+	entries := []*auditIndexedEntry{
 		{entry: AuditEntry{Owner: b.ID, Board: &b.ID, ActorID: &admin, ActorKind: "administrator", Action: "rule_create"}, at: now},
 		{entry: AuditEntry{Owner: b.ID, Board: &b.ID, ActorID: &capID, ActorKind: "cap", Action: "cap_command_delete"}, at: now},
 		{entry: AuditEntry{Owner: b.ID, Board: &b.ID, ActorID: &capID, ActorKind: "cap", Action: "cap_command_delete_applied"}, at: now},
@@ -58,7 +58,7 @@ func TestAuditActorOptionsScopeAndSelection(t *testing.T) {
 		{entry: AuditEntry{Owner: b.ID, ActorID: &old}, at: now.Add(-2 * time.Hour)},
 	}
 	repo.mu.Lock()
-	repo.auditIndex.days = map[string][]auditIndexedEntry{now.Format("20060102"): entries}
+	repo.auditIndex.days = map[string][]*auditIndexedEntry{now.Format("20060102"): entries}
 	repo.mu.Unlock()
 	options, err := repo.auditActorOptions(s, page)
 	if err != nil || len(options) != 2 {
@@ -96,8 +96,8 @@ func TestAuditActorOptionsScopeAndSelection(t *testing.T) {
 	repo.mu.Lock()
 	day := now.Format("20060102")
 	repo.auditIndex.days[day] = append(repo.auditIndex.days[day],
-		auditIndexedEntry{entry: AuditEntry{Owner: b.ID, Board: &b.ID, ActorID: &s.Admin, ActorKind: "admin"}, at: now},
-		auditIndexedEntry{entry: AuditEntry{Owner: b.ID, Board: &b.ID, ActorID: &limited.ID, ActorKind: "admin"}, at: now})
+		&auditIndexedEntry{entry: AuditEntry{Owner: b.ID, Board: &b.ID, ActorID: &s.Admin, ActorKind: "admin"}, at: now},
+		&auditIndexedEntry{entry: AuditEntry{Owner: b.ID, Board: &b.ID, ActorID: &limited.ID, ActorKind: "admin"}, at: now})
 	repo.mu.Unlock()
 	labelFor := func(session adminauth.Session, id domain.ID) string {
 		t.Helper()

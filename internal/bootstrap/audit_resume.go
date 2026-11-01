@@ -13,23 +13,35 @@ import (
 
 // resumeSnapshotAudit は索引の最初の走査前だけ呼ぶ。部分的な復元では公開一覧を返さない。
 func (r *Repository) resumeSnapshotAudit(ctx context.Context, owner domain.ID, kind string, log *store.ControlLog, budget *store.HistoryBudget, archiveBudget *int64, cutoff time.Time) (auditTransfer, error) {
-	anchor, ok := r.anchors[owner]
-	if !ok {
-		return auditTransfer{}, store.ErrCorrupt
-	}
-	proof, entries, err := r.loadAuditProof(ctx, owner, kind, archiveBudget)
-	if err != nil {
-		return auditTransfer{}, err
-	}
-	if proof == nil {
-		return auditTransfer{}, store.ErrCorrupt
-	}
-	if _, err = verifySnapshotAudit(ctx, log, anchor, *proof, entries, budget); err != nil {
-		return auditTransfer{}, err
-	}
 	index := r.auditIndex
+	verification := index.resuming[owner]
+	if verification == nil {
+		anchor, ok := r.anchors[owner]
+		if !ok {
+			return auditTransfer{}, store.ErrCorrupt
+		}
+		proof, entries, err := r.loadAuditProof(ctx, owner, kind, archiveBudget)
+		if err != nil {
+			return auditTransfer{}, err
+		}
+		if proof == nil {
+			return auditTransfer{}, store.ErrCorrupt
+		}
+		verification, err = newSnapshotAuditVerification(ctx, log, anchor, *proof, entries)
+		if err != nil {
+			return auditTransfer{}, err
+		}
+		if index.resuming == nil {
+			index.resuming = map[domain.ID]*snapshotAuditVerification{}
+		}
+		index.resuming[owner] = verification
+	}
+	if _, err := verification.advance(ctx, log, budget); err != nil {
+		return auditTransfer{}, err
+	}
+	proof, entries := verification.proof, verification.entries
 	for _, saved := range entries {
-		if err = ctx.Err(); err != nil {
+		if err := ctx.Err(); err != nil {
 			return auditTransfer{}, err
 		}
 		entry := saved.Summary
@@ -37,7 +49,7 @@ func (r *Repository) resumeSnapshotAudit(ctx context.Context, owner domain.ID, k
 		if err != nil {
 			return auditTransfer{}, err
 		}
-		if entry.Sequence > anchor.Sequence || at.Before(cutoff) || at.UnixNano() < int64(anchor.Proof.Since) {
+		if entry.Sequence > proof.Sequence || at.Before(cutoff) || at.UnixNano() < int64(proof.Since) {
 			continue
 		}
 		raw, err := json.Marshal(entry)
@@ -56,10 +68,16 @@ func (r *Repository) resumeSnapshotAudit(ctx context.Context, owner domain.ID, k
 			return auditTransfer{}, errAuditIndexFull
 		}
 		day := at.UTC().Format("20060102")
-		index.days[day] = append(index.days[day], auditIndexedEntry{entry, at, len(raw)})
+		index.days[day] = append(index.days[day], &auditIndexedEntry{entry, at, len(raw)})
 		index.known[id] = hash
 		index.count++
 		index.bytes += len(raw)
 	}
-	return anchor.Proof, nil
+	for id, action := range verification.actions {
+		index.rememberOperation(AuditEntry{Owner: id.owner, ID: id.id, Action: "other_admin_operation"}, action)
+	}
+	// 照合済みのdeltaを再走査せず、その直後から通常の取込へ接続する。
+	*index.cursors[owner] = verification.cursor
+	delete(index.resuming, owner)
+	return proof, nil
 }

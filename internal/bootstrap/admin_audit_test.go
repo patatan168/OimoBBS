@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"oimobbs/internal/domain"
 	"oimobbs/internal/postcapture"
+	"oimobbs/internal/store"
 	"os"
 	"path/filepath"
 	"strings"
@@ -293,9 +294,87 @@ func TestAuditTimeWindowAndSnapshotCapacity(t *testing.T) {
 	if res.StatusCode != 503 || !strings.Contains(body, "AUDIT_SNAPSHOTS_FULL") {
 		t.Fatal("snapshot overflow", res.StatusCode)
 	}
+	res, body = client.request("GET", "/audit?limit=1", "", nil)
+	if res.StatusCode != 503 || !strings.Contains(body, "有効期限が切れるまで最大10分") || strings.Contains(body, "板や期間") {
+		t.Fatal("snapshot recovery advice", res.StatusCode, body)
+	}
+	if !strings.Contains(body, `aria-label="記録の絞り込み"`) || !strings.Contains(body, `value="1"`) || strings.Contains(body, `id="audit-results-heading"`) {
+		t.Fatal("snapshot failure lost filters or displayed a successful result", body)
+	}
 	// 上限到達で既存cursorを勝手に追い出さない。
 	res, _, _ = client.audit(url.Values{"cursor": {first.Next}}.Encode())
 	if res.StatusCode != 200 {
 		t.Fatal("live snapshot evicted")
 	}
+}
+
+// TestAdminAuditLargeResultPaging は未選択の2,000件・2MiB超の一覧を、実HTTPで欠落なくページ送りする。
+func TestAdminAuditLargeResultPaging(t *testing.T) {
+	_, repo := adminFixture(t)
+	defer repo.Close()
+	client := newAdminClient(t, repo)
+	defer client.server.Close()
+	if client.login(adminTestSecret) != 303 {
+		t.Fatal("login")
+	}
+	func() {
+		repo.mu.Lock()
+		defer repo.mu.Unlock()
+		value := repo.site.State().Rows["site:state"].Value
+		targets := make([]string, 32)
+		for i := range targets {
+			targets[i] = domain.NewID().String()
+		}
+		for range 2001 {
+			if err := appendControl(repo.site, "site_name_update", []store.Mutation{mutation("site", "state", value, nil)}, targets); err != nil {
+				t.Fatal(err)
+			}
+		}
+	}()
+	response, first, body := client.audit("")
+	if response.StatusCode != 200 || first.Total <= 2000 || len(first.Entries) != 50 || first.Next == "" {
+		t.Fatal("unfiltered API result", response.StatusCode, body)
+	}
+	response, body = client.request("GET", "/audit", "", nil)
+	if response.StatusCode != 200 || !strings.Contains(body, `class="audit-table"`) || !strings.Contains(body, "次のページ") {
+		t.Fatal("unfiltered HTML result", response.StatusCode, body)
+	}
+	// 取得後の追記は既存の一覧へ割り込まず、新しい取得だけに現れる。
+	newer := appendAuditResumeTail(t, repo)
+	seen := map[domain.ID]bool{}
+	totalBytes := 0
+	page := first
+	for {
+		if page.Total != first.Total || len(page.Entries) > 50 {
+			t.Fatal("page size or total changed", page.Total, len(page.Entries))
+		}
+		for _, entry := range page.Entries {
+			if seen[entry.ID] || entry.ID == newer.ID {
+				t.Fatal("duplicate or later entry in fixed snapshot", entry.ID)
+			}
+			seen[entry.ID] = true
+			raw, err := json.Marshal(entry)
+			if err != nil {
+				t.Fatal(err)
+			}
+			totalBytes += len(raw)
+		}
+		if page.Next == "" {
+			break
+		}
+		response, page, body = client.audit(url.Values{"cursor": {page.Next}}.Encode())
+		if response.StatusCode != 200 {
+			t.Fatal("next page", response.StatusCode, body)
+		}
+	}
+	if len(seen) != int(first.Total) || totalBytes <= 2<<20 {
+		t.Fatal("missing entries or insufficient size", len(seen), first.Total, totalBytes)
+	}
+	response, latest, body := client.audit("")
+	if response.StatusCode != 200 || latest.Total != first.Total+1 || latest.Entries[0].ID != newer.ID {
+		t.Fatal("new snapshot missing later entry", response.StatusCode, body)
+	}
+	t.Logf("unfiltered %d entries, %d JSON bytes, default 50-entry pages: no omissions or duplicates", first.Total, totalBytes)
+	client.server.Close()
+	runAuditPagingBrowser(t, repo, latest.Total)
 }

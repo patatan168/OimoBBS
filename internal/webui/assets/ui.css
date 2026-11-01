@@ -66,8 +66,9 @@ pre { white-space:pre-wrap; overflow-wrap:anywhere; font:inherit; max-width:100%
 .filter-field input { background:var(--paper); }
 .field-hint { display:block; font-size:12px; font-weight:400; margin-top:6px; }
 .site-footer { max-width:1120px; padding:20px 24px; margin:auto; color:var(--muted); font-size:12px; }
-.skip-link { position:fixed; top:-100px; left:12px; z-index:10; padding:8px 16px; background:var(--paper); }
-.skip-link:focus { top:8px; }
+/* 画面外への移動だけに頼らず、非フォーカス時は描画領域を切り抜く。Tabでの本文移動は保つ。 */
+.skip-link { position:fixed; top:8px; left:12px; z-index:10; padding:8px 16px; background:var(--paper); }
+.skip-link:not(:focus) { width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); clip-path:inset(50%); white-space:nowrap; }
 /* 操作と値を分け、長いIDや説明も自分の領域で折り返す。 */
 dl { display:grid; grid-template-columns:minmax(120px,1fr) minmax(0,3fr); border:1px solid var(--line); border-radius:10px; background:var(--paper); overflow:hidden; }
 dt,dd { padding:12px 16px; margin:0; border-bottom:1px solid var(--line); }

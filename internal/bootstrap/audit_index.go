@@ -25,13 +25,14 @@ type auditIndexedEntry struct {
 	bytes int
 }
 type auditIndex struct {
+	resuming     map[domain.ID]*snapshotAuditVerification
 	details      map[auditIdentity]string
 	proved       map[domain.ID]auditTransfer
 	transfers    map[domain.ID]*auditTransfer
 	since        time.Time
 	known        map[auditIdentity][32]byte
 	cursors      map[domain.ID]*store.HistoryCursor
-	days         map[string][]auditIndexedEntry
+	days         map[string][]*auditIndexedEntry
 	count, bytes int
 }
 
@@ -65,7 +66,7 @@ func (r *Repository) catchUpAudit(ctx context.Context, budget *store.HistoryBudg
 		return err
 	}
 	if r.auditIndex == nil {
-		r.auditIndex = &auditIndex{proved: map[domain.ID]auditTransfer{}, since: time.Now().Add(-auditRetention), transfers: map[domain.ID]*auditTransfer{}, known: map[auditIdentity][32]byte{}, cursors: map[domain.ID]*store.HistoryCursor{}, days: map[string][]auditIndexedEntry{}}
+		r.auditIndex = &auditIndex{proved: map[domain.ID]auditTransfer{}, since: time.Now().Add(-auditRetention), transfers: map[domain.ID]*auditTransfer{}, known: map[auditIdentity][32]byte{}, cursors: map[domain.ID]*store.HistoryCursor{}, days: map[string][]*auditIndexedEntry{}}
 	}
 	index := r.auditIndex
 	cutoff := time.Now().Add(-auditRetention)
@@ -140,7 +141,7 @@ func (r *Repository) catchUpAudit(ctx context.Context, budget *store.HistoryBudg
 				}
 				if !known && visible {
 					day := at.Format("20060102")
-					index.days[day] = append(index.days[day], auditIndexedEntry{entry, at, len(raw)})
+					index.days[day] = append(index.days[day], &auditIndexedEntry{entry, at, len(raw)})
 					index.known[identity] = fingerprint
 					index.count++
 					index.bytes += len(raw)
@@ -207,47 +208,51 @@ func auditMatches(entry AuditEntry, q auditQuery) bool {
 	return false
 }
 
-// collectAudit は日別索引から期間候補を選び、完全な検索結果だけ返す。
-func (r *Repository) collectAudit(ctx context.Context, q auditQuery) ([]AuditEntry, error) {
+// collectAuditRows は固定一覧に使う不変の索引参照だけを選び、ページ作成前に全要約を複製しない。
+func (r *Repository) collectAuditRows(ctx context.Context, q auditQuery) ([]auditSnapshotRow, error) {
 	budget := store.HistoryBudget{Bytes: 64 << 20, Frames: 200000}
 	if e := r.catchUpAudit(ctx, &budget); e != nil {
-		if errors.Is(e, store.ErrHistoryBudget) {
+		if onlyAuditHistoryBudget(e) {
 			return nil, errAuditCatchUp
 		}
 		return nil, e
 	}
-	selected := []auditIndexedEntry{}
-	size := 0
+	selected := []auditSnapshotRow{}
 	first, last := q.From.UTC().Format("20060102"), q.To.UTC().Format("20060102")
 	for day, rows := range r.auditIndex.days {
 		if day < first || day > last {
 			continue
 		}
 		for _, row := range rows {
-			row.entry = r.auditIndex.describeEntry(row.entry)
+			entry := r.auditIndex.describeEntry(row.entry)
 			if e := ctx.Err(); e != nil {
 				return nil, e
 			}
-			if row.at.Before(q.From) || !row.at.Before(q.To) || !auditMatches(row.entry, q) {
+			if row.at.Before(q.From) || !row.at.Before(q.To) || !auditMatches(entry, q) {
 				continue
 			}
-			size += row.bytes
-			if len(selected) >= 2000 || size > 2<<20 {
-				return nil, store.ErrHistoryBudget
-			}
-			selected = append(selected, row)
+			selected = append(selected, auditSnapshotRow{row, entry.Action})
 		}
 	}
 	sort.Slice(selected, func(i, j int) bool {
-		a, b := selected[i], selected[j]
+		a, b := selected[i].record, selected[j].record
 		if !a.at.Equal(b.at) {
 			return a.at.After(b.at)
 		}
 		return a.entry.ID.String() < b.entry.ID.String()
 	})
+	return selected, nil
+}
+
+// collectAudit は内部の整合性検証向けに完全な要約を作る。HTTPはページ分だけを展開する。
+func (r *Repository) collectAudit(ctx context.Context, q auditQuery) ([]AuditEntry, error) {
+	selected, err := r.collectAuditRows(ctx, q)
+	if err != nil {
+		return nil, err
+	}
 	rows := make([]AuditEntry, 0, len(selected))
 	for _, row := range selected {
-		rows = append(rows, row.entry)
+		rows = append(rows, row.summary())
 	}
 	return rows, nil
 }

@@ -71,39 +71,65 @@ func auditPrefixDigest(ctx context.Context, proof auditTransfer, entries map[dom
 // anchorは切替前の元WAL照合で確定し、snapshotと一緒に永続化されたものだけを渡す。
 // 任意の候補metadataを信用するAPIではなく、稼働Repositoryへの接続は別工程。
 func verifySnapshotAudit(ctx context.Context, log *store.ControlLog, anchor candidateOwner, proof auditTransfer, entries map[domain.ID]auditStoredEntry, budget *store.HistoryBudget) (AuditTransferOwner, error) {
-	result := AuditTransferOwner{Owner: anchor.Owner, Kind: anchor.Kind, SourceSeq: log.State().Seq}
+	verification, err := newSnapshotAuditVerification(ctx, log, anchor, proof, entries)
+	if err != nil {
+		return AuditTransferOwner{}, err
+	}
+	return verification.advance(ctx, log, budget)
+}
+
+// snapshotAuditVerification は検証済みの境界・要約とdeltaの再開位置を一組で保持する。
+// 所有mutex内だけで使用し、検証完了まで一覧へ公開しない。
+type snapshotAuditVerification struct {
+	anchor     candidateOwner
+	proof      auditTransfer
+	entries    map[domain.ID]auditStoredEntry
+	cursor     store.HistoryCursor
+	calculated auditTransfer
+	actions    map[auditIdentity]string
+}
+
+// newSnapshotAuditVerification はsnapshotとの束縛と二つの要約prefixを照合する。
+func newSnapshotAuditVerification(ctx context.Context, log *store.ControlLog, anchor candidateOwner, proof auditTransfer, entries map[domain.ID]auditStoredEntry) (*snapshotAuditVerification, error) {
 	h := log.HistoryHeader()
 	snapshot, ok := log.SnapshotIdentity()
 	if (anchor.Kind != "site" && anchor.Kind != "board") || !ok || h.BaseSeq == 0 || h != anchor.header() || snapshot.Seq != anchor.Sequence || snapshot.Length != anchor.Length || snapshot.SHA != anchor.SHA {
-		return result, store.ErrCorrupt
+		return nil, store.ErrCorrupt
 	}
 	base := anchor.Proof
 	now := time.Now()
 	for _, p := range []auditTransfer{base, proof} {
 		raw, err := json.Marshal(p)
 		if err != nil {
-			return result, err
+			return nil, err
 		}
 		day := time.Unix(0, int64(p.Imported)).UTC().Format("20060102")
 		if err = validateAuditTransfer(anchor.Owner, anchor.Kind, day, nil, raw); err != nil {
-			return result, err
+			return nil, err
 		}
 		if p.Imported > domain.Time(now.UnixNano()) || p.Since > domain.Time(now.Add(-auditRetention).UnixNano()) {
-			return result, errors.New("audit transfer clock regression")
+			return nil, errors.New("audit transfer clock regression")
 		}
 	}
 	if base.Sequence != anchor.Sequence || uint64(base.Generation) >= h.Generation || proof.Generation != base.Generation || proof.BaseSeq != base.BaseSeq || proof.Since != base.Since || proof.Imported < base.Imported || proof.Sequence < base.Sequence || proof.Sequence > log.State().Seq {
-		return result, store.ErrCorrupt
+		return nil, store.ErrCorrupt
 	}
 	if err := verifyAuditPrefixEntries(ctx, base, entries); err != nil {
-		return result, err
+		return nil, err
 	}
 	if err := verifyAuditPrefixEntries(ctx, proof, entries); err != nil {
-		return result, err
+		return nil, err
 	}
-	calculated := base
-	var cursor store.HistoryCursor
-	err := log.VisitDeltaFrom(ctx, &cursor, budget, func(rec store.Record, op store.ControlOperation) error {
+	return &snapshotAuditVerification{anchor: anchor, proof: proof, entries: entries, calculated: base, actions: map[auditIdentity]string{}}, nil
+}
+
+// advance は成功済みframeの位置とchainを残し、有界な再取得でも同じprefixを読み直さない。
+func (v *snapshotAuditVerification) advance(ctx context.Context, log *store.ControlLog, budget *store.HistoryBudget) (AuditTransferOwner, error) {
+	anchor, proof, entries := v.anchor, v.proof, v.entries
+	result := AuditTransferOwner{Owner: anchor.Owner, Kind: anchor.Kind, SourceSeq: log.State().Seq}
+	calculated := &v.calculated
+	base := anchor.Proof
+	err := log.VisitDeltaFrom(ctx, &v.cursor, budget, func(rec store.Record, op store.ControlOperation) error {
 		if op.Seq > proof.Sequence {
 			return errAuditProofEnd
 		}
@@ -126,6 +152,9 @@ func verifySnapshotAudit(ctx context.Context, log *store.ControlLog, anchor cand
 				return errors.New("audit delta entry mismatch")
 			}
 			imported = &entry
+			if _, known := auditSourceActions[op.Actor.Reason]; entry.Action == "other_admin_operation" && known {
+				v.actions[auditIdentity{entry.Owner, entry.ID}] = op.Actor.Reason
+			}
 		}
 		return calculated.advance(rec, op, imported)
 	})

@@ -113,6 +113,18 @@ func (h *adminHandler) audit(w http.ResponseWriter, r *http.Request, s adminauth
 		timing.auditQuery = time.Since(queryStart)
 	}
 	if e != nil {
+		var failure *adminFailure
+		if r.URL.Path == "/audit" && errors.As(e, &failure) && failure.code == "AUDIT_SNAPSHOTS_FULL" {
+			page := AuditPage{From: q.From.UTC().Format(time.RFC3339Nano), To: q.To.UTC().Format(time.RFC3339Nano), Limit: q.Limit, Boards: q.Boards, Action: q.Action}
+			if q.Board != (domain.ID{}) {
+				page.Board = q.Board.String()
+			}
+			if q.Actor != (domain.ID{}) {
+				page.Actor = q.Actor.String()
+			}
+			h.renderAudit(w, r, s, page, "", failure.status, auditSnapshotsFullMessage)
+			return
+		}
 		h.auditFailure(w, r, e)
 		return
 	}
@@ -123,6 +135,11 @@ func (h *adminHandler) audit(w http.ResponseWriter, r *http.Request, s adminauth
 	if renderAdminAssetOnly(w, r, auditTemplate, auditView{}) {
 		return
 	}
+	h.renderAudit(w, r, s, page, cursor, http.StatusOK, "")
+}
+
+// renderAudit は取得失敗でも検索条件を残し、空の成功結果として表示しない。
+func (h *adminHandler) renderAudit(w http.ResponseWriter, r *http.Request, s adminauth.Session, page AuditPage, cursor string, status int, message string) {
 	viewStart := time.Now()
 	values, _ := url.ParseQuery(r.URL.RawQuery)
 	if cursor != "" {
@@ -179,7 +196,7 @@ func (h *adminHandler) audit(w http.ResponseWriter, r *http.Request, s adminauth
 		rows = append(rows, row)
 	}
 	var buf bytes.Buffer
-	if e = executeAdminTemplate(w, &buf, auditTemplate, auditView{Page: page, Values: values, Options: options, Rows: rows, Next: next, Boards: boards, Actors: actors, FromLabel: auditTimeLabel(page.From), ToLabel: auditTimeLabel(page.To)}); e != nil {
+	if e = executeAdminTemplate(w, &buf, auditTemplate, auditView{Message: message, Page: page, Values: values, Options: options, Rows: rows, Next: next, Boards: boards, Actors: actors, FromLabel: auditTimeLabel(page.From), ToLabel: auditTimeLabel(page.To)}); e != nil {
 		http.Error(w, "画面を表示できません。", 500)
 		return
 	}
@@ -187,7 +204,7 @@ func (h *adminHandler) audit(w http.ResponseWriter, r *http.Request, s adminauth
 		timing.auditView = time.Since(viewStart)
 	}
 	w.Header().Set("Content-Type", "text/html; charset=UTF-8")
-	w.WriteHeader(200)
+	w.WriteHeader(status)
 	_, _ = w.Write(buf.Bytes())
 }
 
@@ -254,6 +271,7 @@ type auditRow struct {
 	FieldLabels                                          []string
 }
 type auditView struct {
+	Message            string
 	Actors             []auditOption
 	FromLabel, ToLabel string
 	Boards             []boardOption
@@ -266,7 +284,9 @@ type auditView struct {
 
 var auditTemplate = webui.Template("audit")
 
-// auditFailure は期限切れcursorと容量制限を、秘密を含まない再取得案内へ変換する。
+const auditSnapshotsFullMessage = "ページ送り用の一覧が上限に達しました。有効期限が切れるまで最大10分待ってから、再取得してください。"
+
+// auditFailure は原因別に有効な回復手順を示し、検索条件を再取得先へ保持する。
 func (h *adminHandler) auditFailure(w http.ResponseWriter, r *http.Request, e error) {
 	if r.URL.Path == "/api/v1/audit" {
 		h.failure(w, r, e)
@@ -274,20 +294,26 @@ func (h *adminHandler) auditFailure(w http.ResponseWriter, r *http.Request, e er
 	}
 	var f *adminFailure
 	if errors.As(e, &f) {
+		title := "管理操作の記録を取得できません"
+		back := "/audit"
 		message := "検索条件を確認してください。期間は直近180日以内で、開始日時を終了日時より前に指定してください。"
 		if f.status == 409 {
 			message = "一覧の有効期限が切れたか、ページ情報が無効です。条件を指定して再取得してください。"
 		}
 		if f.status == 503 {
-			message = "監査一覧の取得上限に達しました。板や期間を絞るか、10分後に再取得してください。"
+			message = "現在、管理操作の記録を取得できません。時間を置いて再取得してください。"
 		}
-		if f.code == "AUDIT_CATCH_UP_PENDING" {
+		switch f.code {
+		case "AUDIT_CATCH_UP_PENDING":
+			title = "管理操作の記録を準備しています"
 			message = "記録の準備が途中です。再取得すると続きから準備します。"
-		}
-		if f.code == "AUDIT_INDEX_FULL" {
+			back = r.URL.RequestURI()
+		case "AUDIT_SNAPSHOTS_FULL":
+			message = auditSnapshotsFullMessage
+		case "AUDIT_INDEX_FULL":
 			message = "監査記録の検索上限に達しました。サーバー管理者による確認が必要です。"
 		}
-		writeAdminPage(w, f.status, adminPage{Title: "管理操作の記録を取得できません", Message: message, BackPath: "/audit"})
+		writeAdminPage(w, f.status, adminPage{Title: title, Message: message, BackPath: back})
 		return
 	}
 	h.failure(w, r, e)

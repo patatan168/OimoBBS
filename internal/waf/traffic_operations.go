@@ -28,6 +28,8 @@ type workState struct {
 // WorkStats は処理別の稼働数と拒否件数。IPや要求内容を含めない。
 type WorkStats struct {
 	Active      int    `json:"active"`
+	Waiting     int    `json:"waiting"`
+	Queued      uint64 `json:"queued"`
 	RateLimited uint64 `json:"rate_limited"`
 	Overloaded  uint64 `json:"overloaded"`
 }

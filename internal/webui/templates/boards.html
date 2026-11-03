@@ -20,7 +20,7 @@
 <p><label>URLに使う板キー<input name="key" value="{{.Values.Get "key"}}" placeholder="例：chat" pattern="[a-z][a-z0-9_]{0,31}" maxlength="32" required {{if not .CreateReady}}disabled{{end}}></label><span class="field-hint">例：<code>chat</code> → <code>{{.PublicURL}}/chat/</code><br>英小文字で始まる英数字・下線で、32文字以内です。</span></p>
 <details class="admin-help"><summary>使えないキーについて</summary><p><code>test</code>・<code>web</code>・<code>admin</code>と、他の板で使用中のキー・旧キーは使えません。</p></details>
 <p><label>投稿できる人<select name="posting_mode" {{if not .CreateReady}}disabled{{end}}><option value="anyone" {{if ne (.Values.Get "posting_mode") "cap_only"}}selected{{end}}>通常板（一般の利用者）</option><option value="cap_only" {{if eq (.Values.Get "posting_mode") "cap_only"}}selected{{end}}>CAP専用板（CAPを持つ人）</option></select></label><span class="field-hint">CAP専用板を選ぶ場合は、追加後にこの板のCAPを発行してください。</span></p>
-<button type="submit" {{if not .CreateReady}}disabled{{end}}>この内容で板を追加</button> <a href="{{adminBase}}/boards">板一覧に戻る</a>
+<button type="submit" {{if not .CreateReady}}disabled{{end}}>この内容で板を追加</button> <a class="tonal-link" href="{{adminBase}}/boards">板一覧に戻る</a>
 </form>
 {{else if .Closing}}
 <section class="admin-panel"><h2>{{.Name}}（{{.BoardKey}}）</h2>
@@ -30,7 +30,7 @@
 {{else}}
 <p>閉鎖すると、板一覧・検索から外れ、Web・専用ブラウザからの閲覧と、スレッド作成・返信を停止します。旧URLからも利用できません。閉鎖は取り消せません。</p>
 <p>ログは既存の保持期限で順次削除し、閉鎖から6ヶ月後までに削除します。容量不足の場合は、閉鎖した板のログを最優先で回収します。案件として保全中の記録と独立したバックアップは、それぞれの保持条件に従います。</p>
-{{if not .CreateReady}}<p><a href="{{adminBase}}/reauth?return_to={{urlquery .Action}}">再認証して板を閉鎖する</a></p>{{end}}
+{{if not .CreateReady}}<p><a class="tonal-link" href="{{adminBase}}/reauth?return_to={{urlquery .Action}}">再認証して板を閉鎖する</a></p>{{end}}
 <form method="post" action="{{adminURL .Action}}">
 <input type="hidden" name="csrf" value="{{.Values.Get "csrf"}}">
 <input type="hidden" name="revision" value="{{.Values.Get "revision"}}">
@@ -39,12 +39,12 @@
 <p><code>{{.BoardKey}}</code> と入力して確定してください。</p>
 <button type="submit" {{if not .CreateReady}}disabled{{end}}>この板を閉鎖する</button>
 </form>
-{{end}}<p><a href="{{adminBase}}/boards">板一覧に戻る</a></p>
+{{end}}<p><a class="tonal-link" href="{{adminBase}}/boards">板一覧に戻る</a></p>
 </section>
 {{else if .Metadata}}
 <section class="admin-panel"><h2>板名・キーを変更</h2>
 <p>板キーはURLに使います。変更後も旧キーから同じ板を閲覧・投稿できます。旧キーは他の板では使えません。投稿・スレッド・管理権限は同じ板に残ります。</p>
-{{if not .CreateReady}}<p>保存するには<a href="{{adminBase}}/reauth?return_to={{urlquery .Action}}">管理者の再認証</a>を行ってください。</p>{{end}}
+{{if not .CreateReady}}<p>保存するには管理者の再認証を行ってください。</p><p><a class="tonal-link" href="{{adminBase}}/reauth?return_to={{urlquery .Action}}">管理者の再認証</a></p>{{end}}
 <form method="post" action="{{adminURL .Action}}">
 <input type="hidden" name="csrf" value="{{.Values.Get "csrf"}}">
 <input type="hidden" name="revision" value="{{.Values.Get "revision"}}">
@@ -59,7 +59,7 @@
 {{else if .Editing}}
 {{if .ClosedAt}}<section class="board-closed-notice"><p role="status" id="board-closed-title">この板は閉鎖済みのため、設定は変更できません。</p><details><summary>閉鎖日時・ログの削除期限</summary><p>閉鎖日時：{{.ClosureTime}}<br>通常のログの最終削除期限：{{.ClosureDeadline}}</p></details></section>{{end}}
 {{if and .BoardKey (not .ClosedAt)}}<p class="board-secondary-action"><a class="tonal-link" href="{{adminURL (.CapThreadURL .BoardKey)}}">CAP専用スレッドを作成</a></p>{{end}}
-{{if and (not .ClosedAt) (eq (.Values.Get "create_policy") "cap_only") (eq (.Values.Get "reply_policy") "cap_only")}}<p>この板はCAP専用板です。<a href="{{adminBase}}/caps">キャップ管理</a>で、この板を担当するCAPに「スレッド作成」「返信」の権限を設定してください。</p>{{end}}
+{{if and (not .ClosedAt) (eq (.Values.Get "create_policy") "cap_only") (eq (.Values.Get "reply_policy") "cap_only")}}<p>この板はCAP専用板です。キャップ管理で、この板を担当するCAPに「スレッド作成」「返信」の権限を設定してください。</p><p><a class="tonal-link" href="{{adminBase}}/caps">キャップ管理</a></p>{{end}}
 {{if .ClosedAt}}<p class="field-hint">以下は閉鎖時の設定です。内容の確認のみできます。サイズはShift_JIS互換のバイト数です。</p>{{else}}<details class="board-setting-help"><summary>設定の適用時期・サイズについて</summary><p>保存後に処理する投稿から適用します。既存の投稿本文やスレッドの表示条件は変わりません。サイズはShift_JIS互換のバイト数です。</p></details>{{end}}
 <nav class="settings-nav" aria-label="板設定の項目"><a href="#board-posting">投稿受付</a><a href="#board-names">名前・メール</a><a href="#board-publishing">公開・通報</a><a href="#board-identity">ID・ワッチョイ</a><a href="#board-limits">文字数・行数</a><a href="#board-network">回線・国</a></nav>
 <form class="settings-form" {{if not .ClosedAt}}data-settings-form{{end}} method="post" action="{{adminURL (.Action)}}">
@@ -90,7 +90,7 @@
 </p><p><label>本文の行数上限
 <input type="number" name="body_lines" value="{{.Values.Get "body_lines"}}" min="2" max="1000" step="2" required></label>
 </p></div></details>
-<p class="field-hint">匿名Cookieは全投稿で必須です。投稿間隔・Cookie待機時間は<a href="{{adminBase}}/abuse-guard">全板共通の荒らし対策</a>で調整します。閲覧できる人は<a href="{{adminURL (.ReadingAction)}}">閲覧権限</a>で設定します。</p>
+<p class="field-hint">匿名Cookieは全投稿で必須です。投稿間隔・Cookie待機時間は全板共通の荒らし対策で、閲覧できる人は閲覧権限で設定します。</p><div class="action-group"><a class="tonal-link" href="{{adminBase}}/abuse-guard">全板共通の荒らし対策</a><a class="tonal-link" href="{{adminURL (.ReadingAction)}}">閲覧権限</a></div>
 <details {{if .Message}}open{{end}} class="settings-section" id="board-network"><summary>投稿できる回線・国を絞る（詳細設定）</summary><p class="field-hint">許可を外すと、対象の回線・国からの投稿を拒否します。共有回線の利用者にも適用されます。</p><fieldset id="network-permissions"><legend>板全体の投稿許可</legend>
 <input type="hidden" name="access_options" value="1"><input type="hidden" name="country_scope" value="{{range .CountryCodes}}{{.}} {{end}}">
 <p>チェックあり＝許可、チェックなし＝拒否です。スレ立てと返信の両方へ、保存後すぐに適用します。</p>
@@ -100,10 +100,10 @@
 <h3>登録国・地域</h3><label class="check-option"><input type="checkbox" name="permit_foreign" {{if eq (.Values.Get "japan_only") "false"}}checked{{end}}><span>国外からの投稿を許可する</span></label>
 <p class="field-hint">オフにすると、国別のチェックにかかわらず国外を拒否します。日本の許可は下のJPで設定します。</p>
 <details><summary>国ごとの許可を設定する</summary><p>初期状態は全て許可です。拒否したい国のチェックを外してください。コードはIPの登録国を表します。</p><div class="permission-grid country-options country-permissions" data-filter-list data-filter-empty="一致する国がありません。国名や2文字のコードで検索してください。">{{range .CountryCodes}}<label class="check-option" data-country-row><input type="checkbox" name="allow_country" value="{{.}}" {{if $.CountryAllowed .}}checked{{end}}><span class="country-label"><span class="country-name" data-country-code="{{.}}"></span><code class="country-code">{{.}}</code></span></label>{{end}}</div></details>
-<p>認証済みキャップは、この板全体の回線・国の制限を免除します。個別の本文規制などは適用されます。<a href="{{adminBase}}/networks#network-access">回線分類で判定データを確認</a>できます。</p>
+<p>認証済みキャップは、この板全体の回線・国の制限を免除します。個別の本文規制などは適用されます。</p><p><a class="tonal-link" href="{{adminBase}}/networks#network-access">回線分類で判定データを確認</a></p>
 <p class="field-hint">国を制限しているときに登録国が不明の場合や、VPN判定データが未取得の場合は投稿を停止します。登録国は所在地の保証ではなく、VPN判定は既知リストに掲載された範囲が対象です。回線・国・VPNの全ての許可条件を満たす必要があります。</p>
 </fieldset></details>
-<fieldset class="settings-section" id="board-identity"><legend>4. ID・ワッチョイ（新規スレッドの既定）</legend><p>共通の自動取得表と運営の上書きは <a href="{{adminBase}}/networks">回線分類</a> から操作できます。</p>
+<fieldset class="settings-section" id="board-identity"><legend>4. ID・ワッチョイ（新規スレッドの既定）</legend><p>共通の自動取得表と運営の上書きは回線分類から操作できます。</p><p><a class="tonal-link" href="{{adminBase}}/networks">回線分類</a></p>
 {{$id := .Values.Get "id_mode"}}<label>ID表示<select name="id_mode">{{range choices "id"}}<option value="{{.Value}}" {{if eq $id .Value}}selected{{end}}>{{.Label}}</option>{{end}}</select></label>
 <input type="hidden" name="display_selection" value="1">{{$display := displayMode (.Values.Get "slip_mode") false (eq (.Values.Get "require_public_ip") "true")}}<label>回線表示（意味・コマンド）<select name="slip_mode">{{range $mode := .SlipModes}}<option value="{{$mode}}" {{if eq $display $mode}}selected{{end}}>{{choiceLabel "slip" $mode}}（!slip:{{$mode}}）</option>{{end}}</select></label>
 
@@ -134,7 +134,7 @@
 {{else}}
 {{if .CanCreate}}<p class="action-group"><a class="action-button" href="{{adminBase}}/boards/new">新しい板を追加</a></p>{{end}}
 <ul class="card-list" data-filter-list>{{range .Rows}}
-<li><div class="admin-record-header"><h2><a href="{{adminBase}}/boards/{{.ID}}/settings">{{.Name}}</a></h2><span class="admin-badge">{{.Key}}</span>{{if .ClosedAt}}<span class="admin-badge admin-badge-off">閉鎖済み</span>{{end}}</div>
+<li><div class="admin-record-header"><h2>{{.Name}}</h2><span class="admin-badge">{{.Key}}</span>{{if .ClosedAt}}<span class="admin-badge admin-badge-off">閉鎖済み</span>{{end}}</div>
 {{if .ClosedAt}}<p class="field-hint">設定は変更できません。保存済みの設定と閉鎖状態を確認できます。</p>{{end}}
 <div class="action-group"><a class="tonal-link" href="{{adminBase}}/boards/{{.ID}}/threads">レス削除・投稿者規制</a><a class="tonal-link" href="{{adminBase}}/boards/{{.ID}}/settings">{{if .ClosedAt}}設定・閉鎖状態を確認{{else}}板設定{{end}}</a>{{if .ClosedAt}}<span class="tonal-link board-link-disabled" role="link" aria-disabled="true">投稿規制</span>{{else}}<a class="tonal-link" href="{{adminBase}}/boards/{{.ID}}/rules">投稿規制</a>{{end}}</div>
 <details class="admin-help"><summary>閲覧権限・表示・CAPの操作</summary><div class="action-group">
@@ -143,7 +143,7 @@
 </li>{{else}}
 <li>板がありません。
 </li>{{end}}
-</ul>{{if .Next}}<p><a href="{{adminURL (.Next)}}">次のページ</a></p>{{end}}{{end}}
+</ul>{{if .Next}}<p><a class="tonal-link" href="{{adminURL (.Next)}}">次のページ</a></p>{{end}}{{end}}
 </main>{{template "footer" .}}
 </body>
 </html>

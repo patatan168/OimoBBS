@@ -73,4 +73,4 @@ PC・スマホ共通で、権限のない項目はHTMLに出力しません。�
 
 管理ページのCSS/JSも、表示元HTMLと同じ認証・権限の条件を検査します。各画面で必要な資産だけを読み込み、管理用資産の共有キャッシュは許可しません。
 
-認可・保存条件は[管理認証・権限・CAP](features/administration.md#管理者の役割と追加権限)、検査手順は[検証方法](testing/README.md#管理者権限)を参照してください。
+認可・保存条件は[管理認証・権限・CAP](features/administration.md#管理者の役割と追加権限)、検査手順は[検証方法](testing/authentication.md#管理者権限)を参照してください。

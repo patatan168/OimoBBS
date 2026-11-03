@@ -89,20 +89,28 @@
 .admin-shortcuts nav { margin-bottom:0; }
 @media (max-width:700px) { .admin-shortcuts { grid-template-columns:minmax(0,1fr); } }
 
+/* 画面移動は落ち着いた面と枠で揃え、保存・確定の塗りボタンを目立たせる。 */
+.admin :is(main nav a,.board-settings-tabs a,a.tonal-link,.action-group a):where(:not(.action-button,[aria-disabled="true"])) { max-width:100%; color:var(--ink); background:var(--surface); border-color:var(--line); border-radius:8px; text-align:center; line-height:1.5; }
+.admin :is(main nav a,.board-settings-tabs a,a.tonal-link,.action-group a):where(:not(.action-button,[aria-disabled="true"])):hover { color:var(--on-tonal); background:var(--tonal); border-color:var(--accent); }
+.admin main nav a[aria-current="page"] { color:var(--on-tonal); background:var(--tonal); border-color:var(--accent); }
+.admin .action-group .row-primary { padding:12px 14px; border:1px solid var(--line); justify-content:flex-start; text-align:left; }
+.admin .admin-record-link { padding:12px 14px; border:1px solid var(--line); border-radius:8px; color:var(--ink); background:var(--surface); }
+.admin .admin-record-link:hover { color:var(--on-tonal); background:var(--tonal); border-color:var(--accent); }
 
 /* 同じ板の設定を直接切り替え、長いフォームでも対象と現在地を見失わないようにする。 */
 .board-context { position:sticky; top:0; z-index:10; width:min(calc(100% - 48px),1120px); margin:16px auto 0; padding:12px; border:1px solid var(--line); border-radius:10px; background:var(--paper); box-shadow:0 2px 8px #0000000a; }
 .board-context-heading { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px 16px; }
 .board-target { display:flex; align-items:center; flex-wrap:wrap; gap:6px 10px; min-width:0; }
-.board-target > span:first-child,.board-target > code,.board-target > a { font-size:12px; color:var(--muted); }
+.board-target > span:first-child,.board-target > code { font-size:12px; color:var(--muted); }
 .board-target-name { font-size:15px; overflow-wrap:anywhere; }
-.board-target > a { padding:4px; }
+.board-target > a { padding:8px 12px; font-size:12px; }
 .board-current { margin:0; color:var(--muted); font-size:12px; }
 .board-current strong { color:var(--ink); }
 .board-context .board-settings-tabs { display:flex; flex-wrap:wrap; gap:6px; margin:8px 0 0; }
 .board-settings-tabs > :is(a,span) { flex-shrink:0; display:inline-flex; align-items:center; justify-content:center; min-height:44px; padding:8px 12px; border:1px solid var(--line); border-radius:6px; font-size:13px; font-weight:600; white-space:nowrap; }
 .board-settings-tabs a[aria-current="page"] { background:var(--tonal); color:var(--on-tonal); border-color:var(--accent); box-shadow:inset 0 -3px var(--accent); }
-.board-settings-tabs .board-tab-danger { color:var(--error); border-color:var(--error); }
+.admin .board-settings-tabs .board-tab-danger { color:var(--error); border-color:var(--error); }
+.admin .board-settings-tabs .board-tab-danger:hover { color:var(--error); background:var(--error-bg); border-color:var(--error); }
 .board-tab-disabled { color:var(--muted); background:var(--surface); cursor:not-allowed; }
 @media (max-width:700px) { .board-context { width:calc(100% - 24px); padding:10px; margin-top:12px; } }
 @media print { .board-context { position:static; } .board-settings-tabs { display:none!important; } }

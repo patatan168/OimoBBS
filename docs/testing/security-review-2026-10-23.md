@@ -86,7 +86,7 @@ mise exec -- go test -race ./internal/bootstrap -run '^TestWSTG' -count=1
 mise exec -- bash scripts/check-security-continuous.sh
 ```
 
-ブラウザ試験を含める場合は、[ブラウザ環境の指定](README.md#管理認証のブラウザ検査)を行う。全製品の通常試験・全race・静的検査は [共通チェック](README.md#実装全体を確認するとき)で再実行できる。
+ブラウザ試験を含める場合は、[ブラウザ環境の指定](authentication.md#管理認証のブラウザ検査)を行う。全製品の通常試験・全race・静的検査は [共通チェック](README.md#実装全体を確認するとき)で再実行できる。
 
 ## 未検証と限界
 

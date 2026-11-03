@@ -1,0 +1,8 @@
+# 送信元の停止中も受信先で中断出力と期限切れ世代を回収する。
+[Unit]
+Description=OimoBBS received encrypted backup expiry timer
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=5min
+[Install]
+WantedBy=timers.target

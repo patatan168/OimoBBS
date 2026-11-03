@@ -13,7 +13,7 @@
 <section class="admin-panel"><h2>特定の投稿者に対応する</h2>
 <p>対象の板で「管理人用スレッド一覧」→「レス閲覧・規制」を開き、対象レスの「このレスの記録を確認・規制」から進んでください。記録を確認するには追加権限と再認証が必要です。</p>
 <p>「この内部ID」を選ぶと、対象を自動入力した投稿規制の確認画面へ進めます。</p>
-{{if adminCan "/boards"}}<p><a href="{{adminBase}}/boards">板を選んで個別対応する</a></p>{{end}}
+{{if adminCan "/boards"}}<p><a class="tonal-link" href="{{adminBase}}/boards">板を選んで個別対応する</a></p>{{end}}
 </section>
 {{if .State.Enabled}}<section class="admin-panel admin-danger" aria-labelledby="revoke-all-heading"><h2 id="revoke-all-heading">全Cookieを失効する</h2>
 <p>全利用者の現在の匿名Cookieを無効にします。世代を更新するため、取り消せません。</p>
@@ -23,6 +23,6 @@
 <p><label class="check-option"><input type="checkbox" name="confirm" value="all" required {{if eq (.Fields.Get "confirm") "all"}}checked{{end}}><span>全員にCookieの再発行が必要になることを確認しました</span></label></p>
 <p><button type="submit">全Cookieを失効する</button></p>
 </form>
-<p class="field-hint">操作には10分以内の再認証が必要です。<a href="{{adminBase}}/reauth?return_to=%2Fanonymous">パスワードを再確認する</a></p>
+<p class="field-hint">操作には10分以内の再認証が必要です。</p><p><a class="tonal-link" href="{{adminBase}}/reauth?return_to=%2Fanonymous">パスワードを再確認する</a></p>
 </section>{{end}}
 </main>{{template "footer" .}}</body></html>

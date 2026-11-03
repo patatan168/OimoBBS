@@ -5,10 +5,12 @@ cd "$(dirname "$0")/.."
 test "$(go version | cut -d' ' -f3)" = go1.27.3
 case "${1:-}" in ''|--fuzz-only) ;; *) exit 2 ;; esac
 if [ "${1:-}" != --fuzz-only ]; then
-go test -race ./internal/adminauth ./internal/securityaudit ./internal/publicedge ./internal/sealedbackup ./internal/delivery
-go test -race ./internal/bootstrap -run 'TestSecurityTransportHeaders|TestHTTPPathSecurityBoundary|TestAdminBrowserBoundaryBeforeLoginNonce|TestAdministratorBrowserFormOriginPolicy|TestAdminHTTPPrivilegeBoundaries|TestPrivateReportsRequireExplicitPermission|TestAdminQueuedSessionLogout|TestAdminPasskeyLoginCredentialOwnership|TestWSTG|TestProxy|TestNetworkFetch|TestSnapshotAssignedBoardCategory' -timeout=10m
+go test -race ./internal/waf ./internal/adminauth ./internal/securityaudit ./internal/publicedge ./internal/sealedbackup ./internal/delivery
+go test -race ./cmd/oimobbs -run 'TestPublicListener|TestAdminListener|TestEdgeListener'
+go test -race ./internal/bootstrap -run 'TestSecurityTransportHeaders|TestHTTPPathSecurityBoundary|TestAdminBrowserBoundaryBeforeLoginNonce|TestAdministratorBrowserFormOriginPolicy|TestAdminHTTPPrivilegeBoundaries|TestPrivateReportsRequireExplicitPermission|TestAdminQueuedSessionLogout|TestAdminPasskeyLoginCredentialOwnership|TestWSTG|TestProxy|TestNetworkFetch|TestSnapshotAssignedBoardCategory|TestWAFIngress|TestWAFTraffic|TestMemoryRejectsUnreceivedBody' -timeout=10m
 go vet ./cmd/... ./internal/... ./tools/...
 python3 scripts/check-deps.py
+python3 -m unittest discover -s scripts -p 'test_probe*.py'
 python3 tools/designcheck/check.py
 fi
 for target in \

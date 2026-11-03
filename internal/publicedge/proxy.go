@@ -16,6 +16,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"oimobbs/internal/delivery"
@@ -40,6 +41,7 @@ func handler(origin string, upstream *url.URL, transport http.RoundTripper, admi
 		return nil, errors.New("fixed HTTPS origins required")
 	}
 	proxy := &httputil.ReverseProxy{Transport: transport, ErrorLog: log.New(io.Discard, "", 0), ErrorHandler: func(w http.ResponseWriter, r *http.Request, e error) {
+		delivery.RejectUnreadBody(w, r)
 		http.Error(w, "公開サーバーへ接続できません。", 503)
 	}}
 	proxy.Rewrite = func(p *httputil.ProxyRequest) {
@@ -76,6 +78,7 @@ func handler(origin string, upstream *url.URL, transport http.RoundTripper, admi
 			w.Header().Set("Strict-Transport-Security", "max-age=31536000")
 		}
 		if r.TLS == nil || !sameOriginHost(r.Host, base) || !canonicalPath(r) {
+			delivery.RejectUnreadBody(w, r)
 			http.Error(w, "要求を確認してください。", 400)
 			return
 		}
@@ -84,6 +87,7 @@ func handler(origin string, upstream *url.URL, transport http.RoundTripper, admi
 			return
 		}
 		if strings.HasPrefix(r.URL.Path, "/api/") || r.URL.Path == "/login" || r.URL.Path == "/reauth" {
+			delivery.RejectUnreadBody(w, r)
 			http.NotFound(w, r)
 			return
 		}
@@ -94,17 +98,20 @@ func handler(origin string, upstream *url.URL, transport http.RoundTripper, admi
 				allow += ", PATCH"
 			}
 			w.Header().Set("Allow", allow)
+			delivery.RejectUnreadBody(w, r)
 			http.Error(w, "許可されない操作です。", 405)
 			return
 		}
 		client, e := netip.ParseAddrPort(r.RemoteAddr)
 		local, ok := r.Context().Value(http.LocalAddrContextKey).(net.Addr)
 		if e != nil || !client.Addr().IsValid() || client.Port() == 0 || !ok {
+			delivery.RejectUnreadBody(w, r)
 			http.Error(w, "接続元を確認できません。", 400)
 			return
 		}
 		dest, e := netip.ParseAddrPort(local.String())
 		if e != nil || dest.Port() == 0 {
+			delivery.RejectUnreadBody(w, r)
 			http.Error(w, "接続先を確認できません。", 400)
 			return
 		}
@@ -113,12 +120,51 @@ func handler(origin string, upstream *url.URL, transport http.RoundTripper, admi
 			limit = 256 << 10
 		}
 		if r.ContentLength > limit {
+			delivery.RejectUnreadBody(w, r)
 			http.Error(w, "本文が大きすぎます。", 413)
 			return
 		}
 		r.Body = http.MaxBytesReader(w, r.Body, limit)
-		gate.Wrap(proxy).ServeHTTP(w, r)
+		forward := proxy
+		if r.ProtoMajor == 1 && (r.ContentLength != 0 || len(r.TransferEncoding) != 0) {
+			// 要求ごとの応答hookだけを変え、共有Transportと設定は読み取り専用で使う。
+			private := *proxy
+			private.ModifyResponse = func(res *http.Response) error {
+				if res.StatusCode >= 400 {
+					// hop headerの除去後に指定し、利用者側で未送信本文の破棄を待たせない。
+					res.Header.Set("Connection", "close")
+					res.Body = &rejectedResponseBody{ReadCloser: res.Body, stop: func() { delivery.RejectUnreadBody(w, r) }}
+				}
+				return nil
+			}
+			forward = &private
+		}
+		gate.Wrap(forward).ServeHTTP(w, r)
 	}), nil
+}
+
+// rejectedResponseBody はエラー応答を読み終えてから利用者の未送信本文を打ち切る。
+// HTTP/2 TransportのBody.Closeが送信完了を待つ前に受信を解放する。
+// 先に打ち切ると保存側streamが取消され、応答本文も途中で切れるため順序を守る。
+type rejectedResponseBody struct {
+	io.ReadCloser
+	stop func()
+	once sync.Once
+}
+
+// Read は応答の終端または読取失敗で、受信待ちを一度だけ解放する。
+func (b *rejectedResponseBody) Read(p []byte) (int, error) {
+	n, err := b.ReadCloser.Read(p)
+	if err != nil {
+		b.once.Do(b.stop)
+	}
+	return n, err
+}
+
+// Close は利用者への転送失敗時も受信を解放してから保存側streamを終了する。
+func (b *rejectedResponseBody) Close() error {
+	b.once.Do(b.stop)
+	return b.ReadCloser.Close()
 }
 
 // sameOriginHost はHTTPS既定portとASCIIの大小文字だけを正規化し、別originを拒否する。
@@ -189,6 +235,10 @@ func Serve(ctx context.Context, c Config) error {
 		return err
 	}
 	listener, err = delivery.LimitListenerBySource(listener, 256, 16)
+	if err != nil {
+		return err
+	}
+	listener, err = delivery.LimitConnectionRate(listener, delivery.PublicConnectionRate())
 	if err != nil {
 		return err
 	}

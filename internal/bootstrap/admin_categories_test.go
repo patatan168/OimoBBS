@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -328,7 +329,7 @@ func TestBoardCategoriesLargePage(t *testing.T) {
 	if err := categoriesTemplate.Execute(&body, page); err != nil {
 		t.Fatal(err)
 	}
-	if strings.Count(body.String(), "<details open") != 1 || !strings.Contains(body.String(), `<option value="" selected>未分類`) {
+	if strings.Count(body.String(), "<details open") != 1 || !regexp.MustCompile(`<option value(?:="")? selected>未分類`).MatchString(body.String()) {
 		t.Fatal("failed assignment hidden or lost")
 	}
 	page.Values.Set("category", page.View.Categories[0].ID.String())

@@ -36,6 +36,13 @@ type HistoryCursor struct {
 	pending []Frame
 }
 
+// Clone は未処理frameの消費位置を分離し、保存成功後だけ走査位置を採用できるコピーを返す。
+// frameの内容は読取り専用で共有する。呼出元は同じ所有ワーカー内で使う。
+func (c HistoryCursor) Clone() HistoryCursor {
+	c.pending = append([]Frame(nil), c.pending...)
+	return c
+}
+
 // VisitCommittedFrom は前回成功した位置以降を読む。callbackは再実行に耐える保存処理にする。
 func (c *ControlLog) VisitCommittedFrom(ctx context.Context, cursor *HistoryCursor, budget *HistoryBudget, visit func(Record, ControlOperation) error) error {
 	if c.header.BaseSeq != 0 {

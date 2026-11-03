@@ -1,6 +1,11 @@
 // 個別frameの復旧契約を変えず、同じスレッドへの連続した返信を一括同期する。
 package store
 
+import (
+	"crypto/sha256"
+	"oimobbs/internal/domain"
+)
+
 // CommitStats はこのスレッドWALの保存呼出し数を返す。current/親同期は含まない。
 func (t *ThreadLog) CommitStats() CommitStats { return t.writer.Stats() }
 
@@ -10,7 +15,7 @@ func (t *ThreadLog) AppendBatch(frames [][]byte) CommitResult {
 	if len(frames) == 0 || len(frames) > MaxCommitFrames {
 		return CommitResult{NotWritten, ErrCorrupt}
 	}
-	next := t.state
+	candidate := domain.NewThreadBatch(t.state)
 	var records []ThreadRecord
 	var size int64
 	for _, prepared := range frames {
@@ -21,12 +26,16 @@ func (t *ThreadLog) AppendBatch(frames [][]byte) CommitResult {
 		if e != nil {
 			return CommitResult{NotWritten, ErrCorrupt}
 		}
-		next, e = applyFrame(next, f)
+		added, e := applyCandidateFrame(candidate, f, sha256.Sum256(prepared))
 		if e != nil {
 			return CommitResult{NotWritten, e}
 		}
-		records = append(records, frameRecords(f)...)
+		records = append(records, added...)
 		size += int64(len(prepared))
+	}
+	next, err := candidate.Finish()
+	if err != nil {
+		return CommitResult{NotWritten, err}
 	}
 	if err := t.Flush(); err != nil {
 		return CommitResult{Unknown, err}

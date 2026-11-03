@@ -8,6 +8,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"crypto/x509/pkix"
+	"encoding/json"
 	"encoding/pem"
 	"io"
 	"math/big"
@@ -117,6 +118,14 @@ func TestPublicServeLifecycle(t *testing.T) {
 		t.Fatal(err)
 	}
 	r.Close()
+	healthConfig := filepath.Join(t.TempDir(), "health.json")
+	raw, err := json.Marshal(cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(healthConfig, raw, 0600); err != nil {
+		t.Fatal(err)
+	}
 	for range 2 {
 		ctx, cancel := context.WithCancel(t.Context())
 		done := make(chan error, 1)
@@ -149,6 +158,10 @@ func TestPublicServeLifecycle(t *testing.T) {
 		if !ready {
 			cancel()
 			t.Fatal("not ready")
+		}
+		if err := runHealthcheck([]string{"--config", healthConfig}, io.Discard); err != nil {
+			cancel()
+			t.Fatal("public storage healthcheck", err)
 		}
 		rotate(2)
 		client.CloseIdleConnections()

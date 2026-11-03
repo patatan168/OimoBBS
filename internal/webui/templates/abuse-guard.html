@@ -51,9 +51,9 @@
 <div class="field-grid">{{range slice .Fields 15 16}}<label>{{.Label}} <input type="number" name="{{.Name}}" min="{{.Min}}" max="{{.Max}}" value="{{$.Values.Get .Name}}" required><small class="field-hint">{{.Hint}}</small></label>{{end}}</div>
 <p>Cookie発行後の待ち時間は、発行から投稿可能になるまでの時間です。匿名Cookieはすべての投稿で必須です。</p>
 </fieldset>
-{{template "settings-review" .}}<button type="submit">全板共通の設定を保存</button> <a href="{{adminBase}}/abuse-guard">最新の設定を読み直す</a></form>
-<section><h2>既存の対策を調整</h2><p><a href="{{adminBase}}/operations">通報の集計期間・成立票数・停止時間</a> · <a href="{{adminBase}}/anonymous">Cookieの失効・再発行</a> · <a href="{{adminBase}}/networks">共通の回線分類</a> · <a href="{{adminBase}}/auto-reports">自動停止と通報の確認</a> · <a href="{{adminBase}}/boards">対象を指定した個別規制</a></p></section>
-<section><h2>直近の検出（最大100件）</h2><p><a href="{{adminBase}}/waf-events">本文例・拒否・7日間の保存履歴はWAF検出・拒否ログへ</a></p><p>再起動で検出一覧は消えます。判定に使う投稿履歴は保存済み投稿から復旧します。本文・接続元・Cookieはこの一覧に保存しません。</p>{{range .Events}}<article class="card"><p><time>{{.At}}</time> {{.Reason}}：{{.Count}}件 {{if .Rejected}}拒否{{else}}検出のみ{{end}}</p><p>板ID {{.Board}} · スレッド {{.Thread}} · レス {{.PostNumber}}</p></article>{{else}}<p>検出記録はありません。</p>{{end}}</section>
+{{template "settings-review" .}}<button type="submit">全板共通の設定を保存</button> <a class="tonal-link" href="{{adminBase}}/abuse-guard">最新の設定を読み直す</a></form>
+<section><h2>既存の対策を調整</h2><p class="action-group"><a class="tonal-link" href="{{adminBase}}/operations">通報の集計期間・成立票数・停止時間</a> <a class="tonal-link" href="{{adminBase}}/anonymous">Cookieの失効・再発行</a> <a class="tonal-link" href="{{adminBase}}/networks">共通の回線分類</a> <a class="tonal-link" href="{{adminBase}}/auto-reports">自動停止と通報の確認</a> <a class="tonal-link" href="{{adminBase}}/boards">対象を指定した個別規制</a></p></section>
+<section><h2>直近の検出（最大100件）</h2><p><a class="tonal-link" href="{{adminBase}}/waf-events">本文例・拒否・7日間の保存履歴はWAF検出・拒否ログへ</a></p><p>再起動で検出一覧は消えます。判定に使う投稿履歴は保存済み投稿から復旧します。本文・接続元・Cookieはこの一覧に保存しません。</p>{{range .Events}}<article class="card"><p><time>{{.At}}</time> {{.Reason}}：{{.Count}}件 {{if .Rejected}}拒否{{else}}検出のみ{{end}}</p><p>板ID {{.Board}} · スレッド {{.Thread}} · レス {{.PostNumber}}</p></article>{{else}}<p>検出記録はありません。</p>{{end}}</section>
 </main>{{template "footer" .}}</body></html>
 
 {{define "page-assets"}}{{template "stylesheet" "admin-settings.css"}}{{template "stylesheet" "admin-bot.css"}}{{template "javascript" "admin-settings.js"}}{{end}}

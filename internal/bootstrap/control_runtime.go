@@ -70,7 +70,6 @@ func (r *Repository) loadControlAnchors() error {
 	}
 	defer clear(key[:])
 	site := siteID(r.site.State())
-	budget := store.HistoryBudget{Bytes: 64 << 20, Frames: 200000}
 	archiveBudget := int64(64 << 20)
 	load := func(kind string, log *store.ControlLog) error {
 		h := log.HistoryHeader()
@@ -83,13 +82,24 @@ func (r *Repository) loadControlAnchors() error {
 			return err
 		}
 		r.anchors[h.Owner] = a.Owner
-		report, err := r.verifyAuditOwner(context.Background(), h.Owner, kind, log, &budget, &archiveBudget)
+		proof, entries, err := r.loadAuditProof(context.Background(), h.Owner, kind, &archiveBudget)
+		if err != nil {
+			return err
+		}
+		if proof == nil {
+			return store.ErrCorrupt
+		}
+		verification, report, err := verifyStartupSnapshotAuditState(context.Background(), log, a.Owner, *proof, entries, store.HistoryBudget{Bytes: 64 << 20, Frames: 200000})
 		if err != nil {
 			return err
 		}
 		if uint64(report.VerifiedSeq) < h.BaseSeq {
 			return errors.New("snapshot audit boundary is not preserved")
 		}
+		if r.auditVerified == nil {
+			r.auditVerified = map[domain.ID]*snapshotAuditVerification{}
+		}
+		r.auditVerified[h.Owner] = verification
 		return nil
 	}
 	if err = load("site", r.site); err != nil {
@@ -101,4 +111,27 @@ func (r *Repository) loadControlAnchors() error {
 		}
 	}
 	return nil
+}
+
+// verifyStartupSnapshotAudit は検証位置を維持して分割走査し、全証明を照合してから起動を許可する。
+// 進捗のない上限超過や破損・取消は返し、検査の省略や無限の再試行は行わない。
+func verifyStartupSnapshotAudit(ctx context.Context, log *store.ControlLog, anchor candidateOwner, proof auditTransfer, entries map[domain.ID]auditStoredEntry, limit store.HistoryBudget) (AuditTransferOwner, error) {
+	_, report, err := verifyStartupSnapshotAuditState(ctx, log, anchor, proof, entries, limit)
+	return report, err
+}
+
+// verifyStartupSnapshotAuditState は検証済みのcursorと要約を返し、最初の監査取得での再走査を省く。
+func verifyStartupSnapshotAuditState(ctx context.Context, log *store.ControlLog, anchor candidateOwner, proof auditTransfer, entries map[domain.ID]auditStoredEntry, limit store.HistoryBudget) (*snapshotAuditVerification, AuditTransferOwner, error) {
+	verification, err := newSnapshotAuditVerification(ctx, log, anchor, proof, entries)
+	if err != nil {
+		return nil, AuditTransferOwner{}, err
+	}
+	for {
+		before := verification.calculated.Sequence
+		budget := limit
+		report, err := verification.advance(ctx, log, &budget)
+		if err == nil || !onlyAuditHistoryBudget(err) || verification.calculated.Sequence <= before {
+			return verification, report, err
+		}
+	}
 }

@@ -4,6 +4,7 @@ import http.cookies
 import json
 import secrets
 import subprocess
+import time
 import urllib.parse
 import uuid
 
@@ -24,7 +25,7 @@ def initialize(image, volume, config, certificate, key):
     return password
 
 
-def enable(port, password, posting_rate=0, posting_concurrent=0, posting_client_rate=0):
+def enable(port, password, posting_rate=0, posting_concurrent=0, posting_client_rate=0, *, preserve_traffic_defaults=False, pause_network_refresh=False, setup_metadata=None):
     """認証・CSRF・再認証・CASを経て検査と頻度制限を保存し、確認した設定を返す。"""
     cookies = {}
     connection = http.client.HTTPConnection("127.0.0.1", port, timeout=30)
@@ -33,6 +34,7 @@ def enable(port, password, posting_rate=0, posting_concurrent=0, posting_client_
     def request(method, path, body=None, headers=None, expected=200):
         """隔離管理サーバーへ要求し、Cookieを更新して期待した状態だけを返す。"""
         chosen = dict(headers or {})
+        chosen["Accept-Encoding"] = "gzip"
         if method != "GET":
             chosen["Origin"] = origin
         if cookies:
@@ -45,7 +47,9 @@ def enable(port, password, posting_rate=0, posting_concurrent=0, posting_client_
                 for key, cookie in http.cookies.SimpleCookie(value).items():
                     cookies[key] = cookie.value
         if response.status != expected:
-            raise RuntimeError(f"isolated WAF setup {path}: HTTP {response.status}")
+            raise RuntimeError(f"isolated WAF setup {path}: HTTP {response.status}" + (f" {raw[:160]!r}" if path == "/api/v1/networks" else ""))
+        from codec_probe_decode import decode
+        raw = decode(response.getheader("Content-Encoding"), raw)
         return dict((k.lower(), v) for k, v in response.getheaders()), raw
 
     try:
@@ -57,12 +61,18 @@ def enable(port, password, posting_rate=0, posting_concurrent=0, posting_client_
         headers, _ = request("GET", "/api/v1/reauth")
         request("POST", "/api/v1/reauth", json.dumps({"password": password}),
                 {"Content-Type": "application/json", "X-CSRF-Token": headers["x-csrf-token"]})
+        if pause_network_refresh:
+            network = pause_network_updates(request)
+            if setup_metadata is not None:
+                setup_metadata["network"] = network
         headers, raw = request("GET", "/api/v1/waf")
         policy = json.loads(raw)["data"]["settings"]
         policy["enabled"] = True
         # 頻度による拒否と検査費用を区別し、既存の同時処理枠は維持する。
-        policy["traffic"].update({"enabled": True, "client_rate": 10000, "client_burst": 100000,
-                                  "global_rate": 100000, "global_burst": 200000})
+        policy["traffic"]["enabled"] = True
+        if not preserve_traffic_defaults:
+            policy["traffic"].update({"client_rate": 10000, "client_burst": 100000,
+                                      "global_rate": 100000, "global_burst": 200000})
         if posting_rate:
             policy["traffic"]["posting"].update({"global_rate": posting_rate, "global_burst": max(120, 2 * posting_rate)})
         if posting_client_rate:
@@ -79,3 +89,26 @@ def enable(port, password, posting_rate=0, posting_concurrent=0, posting_client_
         return saved["settings"]
     finally:
         connection.close()
+
+
+def pause_network_updates(request):
+    """隔離サイトの自動取得だけを管理APIで止め、開始済み取得の完了も確認する。"""
+    headers, raw = request("GET", "/api/v1/networks")
+    config = json.loads(raw)["data"]["config"]
+    fields = {"action": "settings", "csrf": headers["x-csrf-token"],
+              "revision": headers["etag"], "request_id": uuid.uuid4().hex,
+              "enabled": "false", "interval_hours": str(config["interval_hours"]),
+              "dns_mode": config["dns_mode"]}
+    request("POST", "/networks", urllib.parse.urlencode(fields).encode(),
+            {"Content-Type": "application/x-www-form-urlencoded"})
+    until = time.monotonic() + 30
+    while True:
+        _, raw = request("GET", "/api/v1/networks")
+        view = json.loads(raw)["data"]
+        if view["config"]["enabled"]:
+            raise RuntimeError("isolated network refresh did not pause")
+        if not view["running"]:
+            return {"enabled": False, "running": False, "loaded_rows": view["count"]}
+        if time.monotonic() >= until:
+            raise RuntimeError("isolated network refresh still running")
+        time.sleep(.1)

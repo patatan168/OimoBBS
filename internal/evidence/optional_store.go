@@ -158,7 +158,7 @@ func openOptionalStore(root string, site domain.ID, key ed25519.PrivateKey, chec
 			s.Close()
 			return nil, err
 		}
-		j, err := OpenJournal(filepath.Join(root, entry.Name()), s.owner, day, 10, s.key, s.validate)
+		j, err := OpenJournalConcurrent(filepath.Join(root, entry.Name()), s.owner, day, 10, s.key, s.validate)
 		if err != nil {
 			s.Close()
 			return nil, err

@@ -29,10 +29,12 @@ def web_post(probe, number, key, namespace, verify_number=True, coding="gzip"):
     stages = []
     probe.local.post_stages = stages
     route = "/web/post?bbs=probe&key=" + key
-    code, _, page, ms = probe.request("GET", route)
+    code, received, page, ms = probe.request("GET", route, headers={"Accept-Encoding": "gzip"})
     stages.append({"stage": "form", "http_ms": ms, "status": code})
     if code != 200:
         raise RuntimeError("web form unavailable")
+    from codec_probe_decode import decode
+    page = decode(received.get("content-encoding"), page)
     fields = Fields(page).values
     fields.update({"FROM": getattr(probe, "posting_name", "性能試験"), "mail": "sage", "MESSAGE": f"Web混合負荷 {namespace} {number}",
                    "oimo_request_id": f"{namespace}-{number:08d}"})
@@ -41,6 +43,8 @@ def web_post(probe, number, key, namespace, verify_number=True, coding="gzip"):
     for _ in range(3):
         code, received, page, ms = probe.request("POST", route, urllib.parse.urlencode(fields).encode(), headers)
         stages.append({"stage": "submit" if code == 303 else "confirmation", "http_ms": ms, "status": code})
+        if code in (429, 503):
+            stages[-1]["rejection"] = page.decode("utf-8", errors="replace")[:160]
         if code == 303:
             location = urllib.parse.urlsplit(received["location"])
             match = re.fullmatch(r"/test/read.cgi/probe/(\d+)/l50", location.path)
@@ -50,7 +54,6 @@ def web_post(probe, number, key, namespace, verify_number=True, coding="gzip"):
             allowed = "identity" if coding == "identity" else coding + ",identity;q=0"
             code, received, page, ms = probe.request("GET", location.path, headers={"Accept-Encoding": allowed})
             stages.append({"stage": "redirect", "http_ms": ms, "status": code})
-            from codec_probe_decode import decode
             page = decode(received.get("content-encoding"), page)
             expected_coding = None if coding == "identity" else coding
             if code != 200 or received.get("content-encoding") != expected_coding or b'<main' not in page:

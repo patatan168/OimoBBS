@@ -2,8 +2,8 @@
 <!doctype html><html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>掲示板全体の投稿規制 — OimoBBS管理</title>{{template "admin-assets" .}}</head>
 <body class="admin">{{template "admin-header" .}}<main id="main" tabindex="-1">
 <h1>掲示板全体の投稿規制</h1><p>新設する板も含め、すべての板に適用します。板ごとの規制も引き続き適用されます。NGワードは投稿前に照合します。</p>
-<p><a href="{{adminBase}}/waf-events">WAF検出・拒否ログへ</a> · <a href="{{adminBase}}/abuse-guard">投稿間隔・類似文・埋め立ての設定へ</a></p>
-{{if not .Fresh}}<p class="notice">追加・解除には再認証が必要です。<a href="{{adminBase}}/reauth?return_to=%2Fglobal-rules">再認証する</a></p>{{end}}
+<p class="action-group"><a class="tonal-link" href="{{adminBase}}/waf-events">WAF検出・拒否ログへ</a> <a class="tonal-link" href="{{adminBase}}/abuse-guard">投稿間隔・類似文・埋め立ての設定へ</a></p>
+{{if not .Fresh}}<p class="notice">追加・解除には再認証が必要です。</p><p><a class="tonal-link" href="{{adminBase}}/reauth?return_to=%2Fglobal-rules">再認証する</a></p>{{end}}
 {{if .Message}}<p role="alert">{{.Message}}</p>{{end}}
 {{template "registered-rule-list" .Listing}}
 <details id="add-rule" class="card" {{if .Fields.Get "value"}}open{{end}}><summary>規制を追加する（NGワード・条件・期間）</summary><form method="post" action="{{adminBase}}/global-rules">

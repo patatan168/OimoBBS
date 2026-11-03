@@ -3,8 +3,6 @@ package bootstrap
 
 import (
 	"context"
-	"crypto/sha256"
-	"encoding/json"
 	"errors"
 	"oimobbs/internal/domain"
 	"oimobbs/internal/store"
@@ -112,43 +110,7 @@ func (r *Repository) catchUpAudit(ctx context.Context, budget *store.HistoryBudg
 			progress = &p
 			index.transfers[owner] = progress
 		}
-		e := log.VisitDeltaFrom(ctx, cursor, budget, func(rec store.Record, op store.ControlOperation) error {
-			var imported *AuditEntry
-			at := time.Unix(0, int64(op.Committed)).UTC()
-			entry, ok := auditSummary(owner, kind, rec, op)
-			if ok && op.Committed >= progress.Since {
-				raw, e := json.Marshal(entry)
-				if e != nil {
-					return e
-				}
-				identity := auditIdentity{entry.Owner, entry.ID}
-				fingerprint := sha256.Sum256(raw)
-				prior, known := index.known[identity]
-				if known && prior != fingerprint {
-					return store.ErrCorrupt
-				}
-				visible := !at.Before(cutoff) && auditVisible(entry)
-				if !known && visible && (index.count >= 100000 || index.bytes+len(raw) > 64<<20) {
-					return errAuditIndexFull
-				}
-				if e = sink.put(entry); e != nil {
-					return e
-				}
-				r.checkpoint("audit:durable")
-				imported = &entry
-				if visible {
-					index.rememberOperation(entry, op.Actor.Reason)
-				}
-				if !known && visible {
-					day := at.Format("20060102")
-					index.days[day] = append(index.days[day], &auditIndexedEntry{entry, at, len(raw)})
-					index.known[identity] = fingerprint
-					index.count++
-					index.bytes += len(raw)
-				}
-			}
-			return progress.advance(rec, op, imported)
-		})
+		e := r.catchUpAuditBatch(ctx, owner, kind, log, cursor, progress, &sink, budget, cutoff)
 		if e != nil && !errors.Is(e, store.ErrHistoryBudget) {
 			return e
 		}

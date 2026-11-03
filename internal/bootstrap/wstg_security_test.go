@@ -3,6 +3,7 @@ package bootstrap
 
 import (
 	"bufio"
+	"compress/gzip"
 	"fmt"
 	"io"
 	"net"
@@ -150,7 +151,7 @@ func TestWSTGAdminRawHTTPBoundary(t *testing.T) {
 			}
 		})
 	}
-	status, body := wstgRawHTTP(t, c, "GET /api/v1/site HTTP/1.1\r\nHost: "+host+"\r\nCookie: "+cookie+"\r\nConnection: close\r\n\r\n")
+	status, body := wstgRawHTTP(t, c, "GET /api/v1/site HTTP/1.1\r\nHost: "+host+"\r\nCookie: "+cookie+"\r\nAccept-Encoding: gzip\r\nConnection: close\r\n\r\n")
 	if status != 200 || !strings.Contains(body, site.Name) {
 		t.Fatalf("raw HTTP control failed: %d", status)
 	}
@@ -179,7 +180,16 @@ func wstgRawHTTP(t *testing.T, c *adminClient, raw string) (int, string) {
 		t.Fatal(err)
 	}
 	defer response.Body.Close()
-	body, err := io.ReadAll(response.Body)
+	var reader io.Reader = response.Body
+	if response.Header.Get("Content-Encoding") == "gzip" {
+		decoded, err := gzip.NewReader(response.Body)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer decoded.Close()
+		reader = decoded
+	}
+	body, err := io.ReadAll(reader)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -51,8 +51,8 @@
 <dl class="admin-status-grid"><div><dt>自動実行</dt><dd class="admin-status-copy"><span class="admin-badge">{{if .Maintenance.Enabled}}有効{{else}}無効{{end}}</span></dd></div><div><dt>実行状態</dt><dd class="admin-status-copy"><span class="admin-badge {{if .Maintenance.Failed}}admin-badge-alert{{end}}">{{if .Maintenance.Running}}整理中{{else if .Maintenance.Failed}}前回の処理でエラー{{else if .Maintenance.Completed}}待機中{{else}}未実行{{end}}</span></dd></div></dl>
 {{if .Maintenance.Completed}}<details><summary>前回の整理結果</summary><dl><dt>前回の完了日時（UTC）</dt><dd>{{.Maintenance.Completed}}</dd><dt>確認したスレッド</dt><dd>{{.Maintenance.Scanned}}</dd><dt>圧縮したスレッド</dt><dd>{{.Maintenance.Compacted}}</dd><dt>回収した旧ファイル</dt><dd>{{.Maintenance.Reclaimed}}</dd><dt>容量不足で延期した圧縮</dt><dd>{{.Maintenance.Deferred}}</dd><dt>投稿遅延で延期した圧縮</dt><dd>{{.Maintenance.LatencyDeferred}}</dd><dt>混雑で延期した板</dt><dd>{{.Maintenance.BusyBoards}}</dd><dt>巡回結果</dt><dd>{{.Maintenance.StopLabel}}</dd><dt>処理時間</dt><dd>{{.Maintenance.DurationMillis}} ms</dd></dl></details>{{end}}
 {{if .Maintenance.CapacityKnown}}<dl><dt>前回確認した空き容量</dt><dd>{{.Maintenance.AvailableMiB}} MiB</dd><dt>現在の整理用予約</dt><dd>{{.Maintenance.ReservedMiB}} MiB</dd></dl>{{end}}
-<p>投稿内容を保持したまま、保存領域を整理します。設定は<a href="{{adminBase}}/operations">運用設定</a>で変更できます。</p>
-<p><a href="{{adminBase}}/maintenance">状態を更新する</a></p>
+<p>投稿内容を保持したまま、保存領域を整理します。設定は運用設定で変更できます。</p><p><a class="tonal-link" href="{{adminBase}}/operations">運用設定</a></p>
+<p><a class="tonal-link" href="{{adminBase}}/maintenance">状態を更新する</a></p>
 </section>
 {{end}}
 {{if .Settings}}
@@ -68,13 +68,13 @@
 <p><label>サイト名 
 <input name="name" value="{{.Name}}" maxlength="128" required></label>
 </p>
-<button type="submit">保存</button> <a href="{{adminBase}}/">最新の設定を読み直す</a>
+<button type="submit">保存</button> <a class="tonal-link" href="{{adminBase}}/">最新の設定を読み直す</a>
 </form>
 <form method="post" action="{{adminBase}}/logout">
 <input type="hidden" name="csrf" value="{{.LogoutCSRF}}">
 <button type="submit">ログアウト</button>
 </form>{{else if not .Login}}
-<p><a href="{{if .Reauth}}{{adminBase}}/{{else if .ActionLabel}}{{adminBase}}/{{else if .BackPath}}{{adminURL .BackPath}}{{else}}{{adminBase}}/{{end}}">{{if .Reauth}}再認証をやめてサイト設定へ戻る{{else}}戻る{{end}}</a>
+<p><a class="tonal-link" href="{{if .Reauth}}{{adminBase}}/{{else if .ActionLabel}}{{adminBase}}/{{else if .BackPath}}{{adminURL .BackPath}}{{else}}{{adminBase}}/{{end}}">{{if .Reauth}}再認証をやめてサイト設定へ戻る{{else}}戻る{{end}}</a>
 </p>{{end}}
 </main>{{template "footer" .}}
 </body>

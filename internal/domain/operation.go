@@ -223,12 +223,19 @@ func (p Policy) Validate() error {
 
 // Apply は全操作を候補状態で検算する。失敗時に元の状態を変更しない。
 func Apply(old *Thread, o Operation, dat []byte) (*Thread, error) {
+	return apply(old, o, dat, true)
+}
+
+// apply は私的な一括候補だけで履歴領域を再利用する。通常のApplyは常に複製する。
+func apply(old *Thread, o Operation, dat []byte, cloneHistory bool) (*Thread, error) {
 	if e := o.validateCommon(old); e != nil {
 		return nil, e
 	}
 	n := &Thread{}
 	if old != nil {
 		*n = *old
+	}
+	if old != nil && cloneHistory {
 		// 一操作の追記は最大3レス。clone直後のappendによる全履歴の再確保を避ける。
 		extra := 0
 		if o.Type == "append" || o.Type == "stop" {

@@ -1,0 +1,263 @@
+{
+  "date": "2026-11-03",
+  "baseline_revision": "3e5ccda817a99aee397b66859d6cf7cdcba06696",
+  "scope": "same stopped backup; isolated loopback mTLS and fixed Japanese IP fixture; source and policies unchanged; shared host and SSD, CPU and memory without explicit limit",
+  "input_backup_sha256": "7107a18b3b710c61d4f402c8529020ada07a9016e65bbf3a52d8b969f7dad51d",
+  "input_backup_bytes": 482539520,
+  "startup_trials": [
+    {
+      "trial": 1,
+      "variant": "baseline",
+      "container_start_to_http200_seconds": 30.7368,
+      "process_start_to_ready_log_seconds": 29.68,
+      "peak_rss_kib": 605124,
+      "rss_kib": 605124,
+      "menu_matches": true,
+      "source": "same stopped full backup; local mTLS with fixed public IP fixture"
+    },
+    {
+      "trial": 2,
+      "variant": "candidate",
+      "container_start_to_http200_seconds": 26.4129,
+      "process_start_to_ready_log_seconds": 25.9306,
+      "peak_rss_kib": 622228,
+      "rss_kib": 622228,
+      "menu_matches": true,
+      "source": "same stopped full backup; local mTLS with fixed public IP fixture"
+    },
+    {
+      "trial": 3,
+      "variant": "candidate",
+      "container_start_to_http200_seconds": 30.6898,
+      "process_start_to_ready_log_seconds": 29.3771,
+      "peak_rss_kib": 606500,
+      "rss_kib": 606500,
+      "menu_matches": true,
+      "source": "same stopped full backup; local mTLS with fixed public IP fixture"
+    },
+    {
+      "trial": 4,
+      "variant": "baseline",
+      "container_start_to_http200_seconds": 30.7197,
+      "process_start_to_ready_log_seconds": 29.4808,
+      "peak_rss_kib": 619408,
+      "rss_kib": 619408,
+      "menu_matches": true,
+      "source": "same stopped full backup; local mTLS with fixed public IP fixture"
+    },
+    {
+      "trial": 5,
+      "variant": "baseline",
+      "container_start_to_http200_seconds": 30.8652,
+      "process_start_to_ready_log_seconds": 29.5715,
+      "peak_rss_kib": 630536,
+      "rss_kib": 630536,
+      "menu_matches": true,
+      "source": "same stopped full backup; local mTLS with fixed public IP fixture"
+    },
+    {
+      "trial": 6,
+      "variant": "candidate",
+      "container_start_to_http200_seconds": 26.4358,
+      "process_start_to_ready_log_seconds": 25.8794,
+      "peak_rss_kib": 616504,
+      "rss_kib": 616504,
+      "menu_matches": true,
+      "source": "same stopped full backup; local mTLS with fixed public IP fixture"
+    }
+  ],
+  "startup_summary": {
+    "baseline": {
+      "median_http200_seconds": 30.7368,
+      "median_process_ready_seconds": 29.5715,
+      "max_peak_rss_kib": 630536
+    },
+    "candidate": {
+      "median_http200_seconds": 26.4358,
+      "median_process_ready_seconds": 25.9306,
+      "max_peak_rss_kib": 622228
+    },
+    "http_reduction_percent": 13.992998620546048
+  },
+  "volume_copy_trials": [
+    {
+      "trial": 1,
+      "variant": "baseline",
+      "source_content_mode_uid_gid_matched": true,
+      "seconds": 32.687398074078374,
+      "phases_seconds": {
+        "capture_and_verify": 14.319911198108457,
+        "restore_and_verify": 18.367488418938592
+      },
+      "bytes": 482539520,
+      "sha256": "7107a18b3b710c61d4f402c8529020ada07a9016e65bbf3a52d8b969f7dad51d",
+      "entries": 649
+    },
+    {
+      "trial": 2,
+      "variant": "candidate",
+      "source_content_mode_uid_gid_matched": true,
+      "source_volume": "oimobbs-audit-first-access-e5e2ebe-20261103",
+      "target_volume": "oimobbs-deploy-copy-20261103-2",
+      "image_id": "sha256:e04e653f90d5ace1ccb88f6d5502c2937c92fc0d2bfa56c2e37ca801e8309f74",
+      "bytes": 482539520,
+      "sha256": "7107a18b3b710c61d4f402c8529020ada07a9016e65bbf3a52d8b969f7dad51d",
+      "entries": 649,
+      "complete_backup_and_restore_verified": true,
+      "phases_seconds": {
+        "capture_restore_and_backup_sync": 16.505252501927316,
+        "restored_content_mode_owner_verification": 12.738271650043316,
+        "backup_readback_verification": 0.2984399370616302
+      },
+      "seconds": 29.542079965933226
+    },
+    {
+      "trial": 3,
+      "variant": "candidate",
+      "source_content_mode_uid_gid_matched": true,
+      "source_volume": "oimobbs-audit-first-access-e5e2ebe-20261103",
+      "target_volume": "oimobbs-deploy-copy-20261103-3",
+      "image_id": "sha256:e04e653f90d5ace1ccb88f6d5502c2937c92fc0d2bfa56c2e37ca801e8309f74",
+      "bytes": 482539520,
+      "sha256": "7107a18b3b710c61d4f402c8529020ada07a9016e65bbf3a52d8b969f7dad51d",
+      "entries": 649,
+      "complete_backup_and_restore_verified": true,
+      "phases_seconds": {
+        "capture_restore_and_backup_sync": 17.03122037393041,
+        "restored_content_mode_owner_verification": 13.221912818029523,
+        "backup_readback_verification": 0.29800867196172476
+      },
+      "seconds": 30.55128016299568
+    },
+    {
+      "trial": 4,
+      "variant": "baseline",
+      "source_content_mode_uid_gid_matched": true,
+      "seconds": 31.7788763390854,
+      "phases_seconds": {
+        "capture_and_verify": 14.213733615004458,
+        "restore_and_verify": 17.565144016989507
+      },
+      "bytes": 482539520,
+      "sha256": "7107a18b3b710c61d4f402c8529020ada07a9016e65bbf3a52d8b969f7dad51d",
+      "entries": 649
+    },
+    {
+      "trial": 5,
+      "variant": "baseline",
+      "source_content_mode_uid_gid_matched": true,
+      "seconds": 31.30139935889747,
+      "phases_seconds": {
+        "capture_and_verify": 14.818248175899498,
+        "restore_and_verify": 16.483152676024474
+      },
+      "bytes": 482539520,
+      "sha256": "7107a18b3b710c61d4f402c8529020ada07a9016e65bbf3a52d8b969f7dad51d",
+      "entries": 649
+    },
+    {
+      "trial": 6,
+      "variant": "candidate",
+      "source_content_mode_uid_gid_matched": true,
+      "source_volume": "oimobbs-audit-first-access-e5e2ebe-20261103",
+      "target_volume": "oimobbs-deploy-copy-20261103-6",
+      "image_id": "sha256:e04e653f90d5ace1ccb88f6d5502c2937c92fc0d2bfa56c2e37ca801e8309f74",
+      "bytes": 482539520,
+      "sha256": "7107a18b3b710c61d4f402c8529020ada07a9016e65bbf3a52d8b969f7dad51d",
+      "entries": 649,
+      "complete_backup_and_restore_verified": true,
+      "phases_seconds": {
+        "capture_restore_and_backup_sync": 15.413226054050028,
+        "restored_content_mode_owner_verification": 12.971989304991439,
+        "backup_readback_verification": 0.29493221500888467
+      },
+      "seconds": 28.680267757037655
+    }
+  ],
+  "volume_copy_summary": {
+    "baseline": 31.7788763390854,
+    "candidate": 29.542079965933226,
+    "reduction_percent": 7.038626379627832
+  },
+  "parallel_copy_tool_adopted": false,
+  "normal_update_volume_policy": "same volume; complete stopped backup is still required; isolated restore rehearsal before shutdown",
+  "source_sha256": {
+    "internal/evidence/journal.go": "0b4ac1be2d1e7c3de588730e5e6a0ca11479a8c8f3a75f62754aad23419c7c11",
+    "internal/evidence/optional_store.go": "1917a3d1cad019f6afd5373052e5cfe93e4a5455887cce0002a952113f3c1060",
+    "internal/evidence/journal_concurrent_test.go": "70df5cef8aa4496c5be0fe901f7750b8349cc823664c919a39009c739215fbcf",
+    "internal/evidence/journal_test.go": "4c644c4738f728fd04335af2cafa8e995045b91cdf255c11e7b254d7523bacb6"
+  },
+  "candidate_binary_sha256": "da1936c96ad769454659e18d9ea0cc93d000bcc7108cc193669aa0543fe8a836",
+  "raw_reports": [
+    {
+      "path": "var/testing/recovery-startup-20261103/http-comparison.json",
+      "sha256": "32d9616e5c393e9e6bab1118bcfb80cd4ae62092a51709920ccea5661b8c91df"
+    },
+    {
+      "path": "var/testing/recovery-startup-20261103/http-comparison-summary.json",
+      "sha256": "09de59f7df563ace1886f46ab9e97cbc9514990fad3afaca658f314bdc77b30e"
+    },
+    {
+      "path": "var/testing/recovery-startup-20261103/volume-comparison.json",
+      "sha256": "9531e488a8d306a26e46001f3b3b7f5c60f7185b9d6120e0b0ef30c312ae1e70"
+    },
+    {
+      "path": "var/testing/recovery-startup-20261103/volume-summary.json",
+      "sha256": "538cf7ce5b4bb53083e1275b3cfff0f16660402f1868356c7fef761b2867c125"
+    },
+    {
+      "path": "var/testing/recovery-startup-20261103/profile-phases.log",
+      "sha256": "afff9eec383dc50b40a2dcb0c0ff3c25c2ab449d6df74565411014065ff2770b"
+    },
+    {
+      "path": "var/testing/recovery-startup-20261103/total-comparison.json",
+      "sha256": "31b64051e83d568d6d82c0c35340dce837faf65f495f7a48af58c815a411f947"
+    }
+  ],
+  "not_verified": [
+    "production attack load",
+    "production posting",
+    "authenticated production admin changes",
+    "power loss and physical media failure",
+    "startup under other CPU/memory limits"
+  ],
+  "full_workflow_trials": [
+    {
+      "variant": "baseline",
+      "seconds_to_public_http200": 63.971135215018876,
+      "stop_seconds": 0.1513720880029723,
+      "backup_and_verification_seconds": 14.437822747975588,
+      "restore_and_verification_seconds": 18.41533577896189,
+      "new_container_to_http200_seconds": 30.966604600078426,
+      "same_volume": false,
+      "complete_backup": {
+        "path": "/home/patatan/OimoBBS/var/testing/recovery-startup-20261103/total-baseline/before-data.tar",
+        "sha256": "b7c91cca85234554a6ba0da222542cdb638b1f6fea1c8854f8a833e860f5c49a",
+        "bytes": 482537984,
+        "entries": 649
+      },
+      "menu_matches": true,
+      "restarts": 0,
+      "oom": false
+    },
+    {
+      "variant": "candidate",
+      "seconds_to_public_http200": 47.40729658200871,
+      "stop_seconds": 0.6490076389163733,
+      "backup_and_verification_seconds": 15.481182087096386,
+      "restore_and_verification_seconds": 1.0919757187366486e-06,
+      "new_container_to_http200_seconds": 31.277105764020234,
+      "same_volume": true,
+      "complete_backup": {
+        "path": "/home/patatan/OimoBBS/var/testing/recovery-startup-20261103/total-candidate/before-data.tar",
+        "sha256": "2bc1de1e402309fcb210b4a925a37a7ba1249ea5e99626939663da24eeda0029",
+        "bytes": 482537984,
+        "entries": 649
+      },
+      "menu_matches": true,
+      "restarts": 0,
+      "oom": false
+    }
+  ],
+  "full_workflow_scope": "one isolated before/after pair; same starting backup; former deployed binary warmed up then stopped; complete stopped backup in both cases; candidate restart uses the same volume"
+}

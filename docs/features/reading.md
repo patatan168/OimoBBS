@@ -45,7 +45,7 @@ Web・管理画面のGET/HEADは、`Accept-Encoding` でgzipまたはzstdを正�
 - `/{board}/subject.txt`、`/{board}/SETTING.TXT`、`/{board}/head.txt`
 - `/{board}/dat/{key}.dat`、`/test/bbs.cgi`
 
-UA・Range・条件付き取得の指定だけではWeb経路を例外にしません。POSTなどGET/HEAD以外にはこの条件を加えません。組込みの `healthcheck` はgzip対応を宣言して取得し、edge自身の `/_edge/health` も利用できます。Webの手動確認には `curl --compressed` などを使います。
+UA・Range・条件付き取得の指定だけではWeb経路を例外にしません。POSTなどGET/HEAD以外にはこの条件を加えません。組込みの `healthcheck` はgzip対応を宣言してトップページと保存状態の監視URLを取得します。edge自身の `/_edge/health` は保存側へ転送せず、別に利用できます。[監視の手順](../operations.md#稼働状態と保存停止を確認する)を参照してください。Webの手動確認には `curl --compressed` などを使います。
 
 #### DATの差分とETag
 

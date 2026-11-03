@@ -1,0 +1,13 @@
+# 受信先だけで期限を回収する。Userと保存先はSSH受信に使う所有者・directoryへ合わせる。
+[Unit]
+Description=OimoBBS received encrypted backup expiry
+[Service]
+Type=oneshot
+User=oimo-backup
+ExecStart=/usr/local/bin/oimoseal sweep --root /srv/oimo-backup-receive
+UMask=0077
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/srv/oimo-backup-receive
+PrivateTmp=true
+TimeoutStartSec=5min

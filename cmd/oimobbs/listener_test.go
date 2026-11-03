@@ -105,3 +105,70 @@ func TestEdgeListenerRejectsUntrustedPeerBeforeTLS(t *testing.T) {
 		}
 	}
 }
+
+func TestPublicListenerReconnectRate(t *testing.T) {
+	for _, edge := range []bool{false, true} {
+		t.Run(map[bool]string{false: "direct", true: "authenticated-edge"}[edge], func(t *testing.T) {
+			cfg := bootstrap.Config{}
+			if edge {
+				cfg.Edge = &bootstrap.EdgeConfig{}
+				cfg.TrustedProxies = []string{"192.0.2.1/32"}
+			}
+			raw := &sourceTestListener{}
+			for range 65 {
+				raw.connections = append(raw.connections, &sourceTestConn{ip: "192.0.2.1"})
+			}
+			overflow := raw.connections[64]
+			raw.connections = append(raw.connections, &sourceTestConn{ip: "192.0.2.2"})
+			listener, err := limitPublicListener(raw, cfg)
+			if err != nil {
+				t.Fatal(err)
+			}
+			for range 65 {
+				conn, err := listener.Accept()
+				if err != nil {
+					t.Fatal(err)
+				}
+				conn.Close()
+			}
+			if edge && len(raw.connections) != 1 || !edge && len(raw.connections) != 0 {
+				t.Fatal("reconnect protection or authenticated aggregation changed", edge, len(raw.connections))
+			}
+			if !edge && !overflow.closed {
+				t.Fatal("source reconnect overflow not closed")
+			}
+		})
+	}
+}
+
+func TestAdminListenerReconnectRate(t *testing.T) {
+	for _, transport := range []string{"direct_https", "loopback_tunnel"} {
+		t.Run(transport, func(t *testing.T) {
+			cfg := bootstrap.Config{}
+			cfg.Admin.Transport = transport
+			raw := &sourceTestListener{}
+			for range 9 {
+				raw.connections = append(raw.connections, &sourceTestConn{ip: "192.0.2.1"})
+			}
+			raw.connections = append(raw.connections, &sourceTestConn{ip: "192.0.2.2"})
+			listener, err := limitAdminListener(raw, cfg)
+			if err != nil {
+				t.Fatal(err)
+			}
+			for range 9 {
+				conn, err := listener.Accept()
+				if err != nil {
+					t.Fatal(err)
+				}
+				conn.Close()
+			}
+			want := 1
+			if transport == "direct_https" {
+				want = 0
+			}
+			if len(raw.connections) != want {
+				t.Fatal("admin rate or tunnel aggregation changed", len(raw.connections), want)
+			}
+		})
+	}
+}

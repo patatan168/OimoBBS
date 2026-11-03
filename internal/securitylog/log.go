@@ -11,6 +11,7 @@ import (
 	"sort"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -71,21 +72,31 @@ type message struct {
 
 // Log は固定長の待機列と単一writerで時間別ファイルを更新する。
 type Log struct {
-	dir      string
-	queue    chan message
-	mu       sync.Mutex
-	closed   bool
-	done     chan struct{}
-	err      error
-	overflow map[string]Row
+	dir       string
+	queue     chan message
+	mu        sync.Mutex
+	closed    bool
+	done      chan struct{}
+	err       error
+	overflow  map[string]Row
+	admission Admission
+	wake      chan struct{}
+	urgent    atomic.Int64
 }
 
 // Open は保存先を作り、書込み所有goroutineを起動する。既存ログはView時に読み込む。
 func Open(dir string) (*Log, error) {
+	return OpenWithAdmission(dir, nil)
+}
+
+// OpenWithAdmission は保存先と有限列を作り、背景保存の開始だけを指定のI/O枠へ委ねる。
+// Addは保存待ちをせず、表示・終了・列の逼迫で優先待機を解除する。
+// admission指定時は、大きいsnapshotを枠取得前に最大100ms収集する。
+func OpenWithAdmission(dir string, admission Admission) (*Log, error) {
 	if err := os.MkdirAll(dir, 0700); err != nil {
 		return nil, err
 	}
-	l := &Log{dir: dir, queue: make(chan message, 256), done: make(chan struct{}), overflow: map[string]Row{}}
+	l := &Log{dir: dir, queue: make(chan message, 256), done: make(chan struct{}), overflow: map[string]Row{}, admission: admission, wake: make(chan struct{}, 1)}
 	if err := l.prune(time.Now()); err != nil {
 		return nil, err
 	}
@@ -116,6 +127,7 @@ func (l *Log) Add(e Event) {
 	e.Path = Excerpt(e.Path)
 	l.mu.Lock()
 	defer l.mu.Unlock()
+	defer l.signalAdmission()
 	if l.closed {
 		return
 	}
@@ -145,6 +157,8 @@ func (l *Log) Close() error {
 	if l == nil {
 		return nil
 	}
+	doneFlush := l.requireFlush()
+	defer doneFlush()
 	l.mu.Lock()
 	first := !l.closed
 	l.closed = true
@@ -161,6 +175,8 @@ func (l *Log) Close() error {
 
 // flush は表示前の保存完了を待つ。Closeと競合しても終了通知で待機を解く。
 func (l *Log) flush() error {
+	doneFlush := l.requireFlush()
+	defer doneFlush()
 	l.mu.Lock()
 	closed := l.closed
 	l.mu.Unlock()
@@ -295,8 +311,12 @@ func (l *Log) run() {
 	var cache bucketRows
 	for {
 		first := <-l.queue
-		batch := []message{first}
-		for len(batch) < 256 {
+		batch := l.gather(first, &cache)
+		release, admissionErr := l.acquire()
+		if admissionErr != nil {
+			l.err = admissionErr
+		}
+		for len(batch) < 256 && batch[len(batch)-1].barrier == nil && !batch[len(batch)-1].stop {
 			select {
 			case m := <-l.queue:
 				batch = append(batch, m)
@@ -356,6 +376,9 @@ func (l *Log) run() {
 		if len(changed) > 0 {
 			cache.clear()
 		}
+		if admissionErr != nil {
+			changed = nil
+		}
 		for name, rows := range changed {
 			info, err := saveSnapshot(filepath.Join(l.dir, name+".json"), rows)
 			if err != nil {
@@ -364,10 +387,15 @@ func (l *Log) run() {
 				cache.remember(name, rows, info)
 			}
 		}
-		if err := l.prune(time.Now()); err != nil {
-			l.err = err
+		if admissionErr == nil {
+			if err := l.prune(time.Now()); err != nil {
+				l.err = err
+			}
 		}
 		cache.expire(time.Now())
+		if release != nil {
+			release()
+		}
 		for _, m := range batch {
 			if m.barrier != nil {
 				m.barrier <- l.err

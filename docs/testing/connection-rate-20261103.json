@@ -1,0 +1,2137 @@
+{
+  "date": "2026-11-03",
+  "scope": "isolated direct TLS HTTP/1.1, 2CPU 512MiB, synthetic input; no production/WAN/distributed attack guarantee",
+  "baseline_source": "f8fd49c2dfafbb0564a917e147d9b0c496b20833",
+  "baseline_image_revision": "e5e2ebe17c766a82e1a8e2fec97dafb64028a631",
+  "candidate_comparison_note": "First three pairs use the public limiter; final adds the separate admin HTTPS limiter and passes the same workload. No public limiter changes between these images.",
+  "source_sha256": {
+    "internal/delivery/connection_rate.go": "b38f4698c75b791993cd671ef897b296b1e11c5d08b0a7ff6ec4ce4f6eeeeda0",
+    "internal/delivery/connection_rate_test.go": "c71a7031eeba8214a30d6cae265861ddfad74a1c5da3ec1f6a964b369efe34be",
+    "cmd/oimobbs/listener.go": "466efbf4d02611bf972e12cac1092eadeb3e79a378091e0fc200105e392de51c",
+    "cmd/oimobbs/listener_test.go": "4b388476520c95fffa5757e45ae7a3137448a261cc31fc6fd0e0c446316baaf1",
+    "cmd/oimobbs/validation.go": "399d99633a59ec43eb020c7234658606410be84b6429a16484e69bfbe5a44051",
+    "internal/publicedge/proxy.go": "50148f3ef7f0f38ce432cc2a482c8d96bb02d01e9c339e6dd2c9d2d49b05fa44",
+    "scripts/probe_attack_mix.py": "cf7f1d58f04c7ba8e37fbcdbe6fe39b849d8662cbd4442ae84442d655777dec5",
+    "scripts/probe-thread-resources.py": "c0c2ef7b0c6a032cf8219e05bfe4b00fec2e44c30ff58877d77ee476560d337a",
+    "scripts/test_probe_attack_mix.py": "0a755a2ddd309568d23b360f0e35577464c69ce51e590ec1b16a164e7c5eca98",
+    "scripts/check-security-continuous.sh": "b43e6913ca5298478e97d48c67ec9aafbb053bb81cfc12fb9edbd5af045df5c9"
+  },
+  "final_binary_sha256": {
+    "oimobbs": "67224d2f56ee84af22fab2122525acd0c3342f2ab8c4406b6881f57a9a0f3bf4",
+    "oimoedge": "7d8384963722c8798215edd6c84cde8fc83dac931176939023c7f2065977b8cd"
+  },
+  "trials": [
+    {
+      "trial": "baseline-1",
+      "raw_report": "var/dos-20261103/baseline-1.json",
+      "raw_sha256": "dd566fee77a01734c82d2ebf4ba84eb8ebdeaf2e99641b023d8548ba599836d0",
+      "image": "sha256:d02307ef56bc9d8f068d2959d4c23fd51b19712cfa8197401901e0fb63ab733e",
+      "conditions": {
+        "normal_posts_per_second": 20,
+        "normal_actors": 20,
+        "recovery_seconds": 5,
+        "normal_arrivals": "evenly spaced",
+        "initial_flood_upload_pause_ms": 0,
+        "legacy_web_mix": "80/20",
+        "valid_flood_per_second": 100,
+        "flood_workers": 8,
+        "slow_body_connections": 16,
+        "slow_header_connections": 64,
+        "attacker_ips": 4,
+        "normal_threads": 4,
+        "tls_churn_per_second": 400,
+        "tls_churn_workers": 16,
+        "early_rejection_max_ms": 1000,
+        "normal_issue_lag_limit_ms": 1000,
+        "normal_scheduled_p95_limit_ms": 1000,
+        "flood_accepted_limit": 155.0,
+        "minimum_flood_supply_fraction": 0.95
+      },
+      "cpu_max": "200000 100000",
+      "memory_max": "536870912",
+      "ok": false,
+      "checks": {
+        "normal_posts": true,
+        "normal_latency": true,
+        "integrity": true,
+        "no_oom": true,
+        "flood_limited": true,
+        "flood_supplied": true,
+        "slow_rejection": true,
+        "slow_closed": true,
+        "tls_churn_supplied": true,
+        "tls_churn_limited": false,
+        "tls_churn_no_timeout": true
+      },
+      "normal": {
+        "planned": 440,
+        "sent": 440,
+        "success": 440,
+        "acknowledged": 440,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 330.97144996281713,
+        "scheduled_p95_ms": 331.2153769657016,
+        "issuance_wait_p95_ms": 0.10432302951812744
+      },
+      "normal_by_phase": {
+        "normal": {
+          "planned": 100,
+          "sent": 100,
+          "success": 100,
+          "acknowledged": 100,
+          "completion_errors_after_ack": 0,
+          "errors": 0,
+          "skipped": 0,
+          "http_p95_ms": 694.1771059064195,
+          "scheduled_p95_ms": 694.4949669996276,
+          "issuance_wait_p95_ms": 0.11136499233543873
+        },
+        "attack": {
+          "planned": 240,
+          "sent": 240,
+          "success": 240,
+          "acknowledged": 240,
+          "completion_errors_after_ack": 0,
+          "errors": 0,
+          "skipped": 0,
+          "http_p95_ms": 308.8265940314159,
+          "scheduled_p95_ms": 309.0413899626583,
+          "issuance_wait_p95_ms": 0.09261199738830328
+        },
+        "recovery": {
+          "planned": 100,
+          "sent": 100,
+          "success": 100,
+          "acknowledged": 100,
+          "completion_errors_after_ack": 0,
+          "errors": 0,
+          "skipped": 0,
+          "http_p95_ms": 28.77728792373091,
+          "scheduled_p95_ms": 28.8939030142501,
+          "issuance_wait_p95_ms": 0.09961600881069899
+        }
+      },
+      "attacks": {
+        "valid_flood": {
+          "planned": 1200,
+          "sent": 1200,
+          "skipped": 0,
+          "acknowledged": 139,
+          "status": {
+            "200": 139,
+            "429": 1057,
+            "None": 4
+          },
+          "timeouts": 0,
+          "early_429": 0,
+          "slow_429": 0,
+          "early_rejections": 0,
+          "slow_rejections": 0,
+          "max_elapsed_ms": 463.50096503738314
+        },
+        "slow_body": {
+          "planned": 16,
+          "sent": 16,
+          "skipped": 0,
+          "acknowledged": 0,
+          "status": {
+            "429": 8,
+            "None": 8
+          },
+          "timeouts": 0,
+          "early_429": 8,
+          "slow_429": 0,
+          "early_rejections": 8,
+          "slow_rejections": 0,
+          "max_elapsed_ms": 10063.825194025412
+        },
+        "slow_header": {
+          "planned": 64,
+          "sent": 64,
+          "skipped": 0,
+          "acknowledged": 0,
+          "status": {
+            "None": 64
+          },
+          "timeouts": 0,
+          "early_429": 0,
+          "slow_429": 0,
+          "early_rejections": 0,
+          "slow_rejections": 0,
+          "max_elapsed_ms": 5150.428976980038
+        },
+        "tls_churn": {
+          "planned": 4800,
+          "sent": 4800,
+          "skipped": 0,
+          "tls_connected": 4800,
+          "timeouts": 0,
+          "connection_end": {}
+        }
+      },
+      "resources": {
+        "cpu_seconds": 14.763079,
+        "oom_kill_delta": 0,
+        "io_pressure_ms": 1677.185,
+        "write_bytes": 13905920
+      },
+      "phase_resources": [
+        {
+          "name": "normal",
+          "seconds": 4.999152814038098,
+          "cpu_seconds": 0.949116,
+          "io_pressure_ms": 628.491
+        },
+        {
+          "name": "attack",
+          "seconds": 11.999711868935265,
+          "cpu_seconds": 13.246485,
+          "io_pressure_ms": 1033.978
+        },
+        {
+          "name": "recovery",
+          "seconds": 4.999496942968108,
+          "cpu_seconds": 0.567416,
+          "io_pressure_ms": 14.716
+        }
+      ],
+      "memory_peak_bytes": 235847680,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "integrity": {
+        "ok": true,
+        "threads": [
+          {
+            "key": "1793683381",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 116,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "b21ffa8f0a7bd9e53d76ac642e2a589893fa020f3adfacba5aaa4a9af5e81de0"
+          },
+          {
+            "key": "1793683382",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 116,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "d400ce00af6ad8ce039cb73e276392336bfc1b8319d043a4de25de5c57376c87"
+          },
+          {
+            "key": "1793683383",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 116,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "c4924074084321d824a72988ae2c066bb6340ce1e377a7b8c193a31c47d869d3"
+          },
+          {
+            "key": "1793683384",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 116,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "d3fa41948e47a73b3494d467fdc5e1bae679aa397b6bc02e6595b5f7ffe6e1ba"
+          },
+          {
+            "key": "1793683385",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 141,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "02510f576a1112a24c287640f9ab12c58e0ecad8ef8b016937cd48f3d873b4f7"
+          }
+        ],
+        "unavailable_threads": 0,
+        "read_retries": 0,
+        "read_retry_window_seconds": 5
+      },
+      "security_log": {
+        "files": 1,
+        "file_bytes": 131498,
+        "reason_counts": [
+          {
+            "source": "flood",
+            "reason": "スレッドの占有",
+            "rejected": false,
+            "count": 16
+          },
+          {
+            "source": "flood",
+            "reason": "スレッドへの集中投稿",
+            "rejected": false,
+            "count": 105
+          },
+          {
+            "source": "flood",
+            "reason": "同一投稿者・接続元の連投",
+            "rejected": false,
+            "count": 69
+          },
+          {
+            "source": "similar",
+            "reason": "類似本文の連投",
+            "rejected": false,
+            "count": 1
+          },
+          {
+            "source": "waf",
+            "reason": "path",
+            "rejected": true,
+            "count": 1
+          },
+          {
+            "source": "waf",
+            "reason": "traffic_limit",
+            "rejected": true,
+            "count": 1055
+          }
+        ]
+      }
+    },
+    {
+      "trial": "candidate-1",
+      "raw_report": "var/dos-20261103/candidate-1.json",
+      "raw_sha256": "f891acab6baeb406db6358136c8a7337ff99aebf0b8a34acac957db986817abd",
+      "image": "sha256:a1c49a55c754ab318f26b974ab48298bf7b35d2a707d3263ac831f3fe0bcc899",
+      "conditions": {
+        "normal_posts_per_second": 20,
+        "normal_actors": 20,
+        "recovery_seconds": 5,
+        "normal_arrivals": "evenly spaced",
+        "initial_flood_upload_pause_ms": 0,
+        "legacy_web_mix": "80/20",
+        "valid_flood_per_second": 100,
+        "flood_workers": 8,
+        "slow_body_connections": 16,
+        "slow_header_connections": 64,
+        "attacker_ips": 4,
+        "normal_threads": 4,
+        "tls_churn_per_second": 400,
+        "tls_churn_workers": 16,
+        "early_rejection_max_ms": 1000,
+        "normal_issue_lag_limit_ms": 1000,
+        "normal_scheduled_p95_limit_ms": 1000,
+        "flood_accepted_limit": 155.0,
+        "minimum_flood_supply_fraction": 0.95
+      },
+      "cpu_max": "200000 100000",
+      "memory_max": "536870912",
+      "ok": true,
+      "checks": {
+        "normal_posts": true,
+        "normal_latency": true,
+        "integrity": true,
+        "no_oom": true,
+        "flood_limited": true,
+        "flood_supplied": true,
+        "slow_rejection": true,
+        "slow_closed": true,
+        "tls_churn_supplied": true,
+        "tls_churn_limited": true,
+        "tls_churn_no_timeout": true
+      },
+      "normal": {
+        "planned": 440,
+        "sent": 440,
+        "success": 440,
+        "acknowledged": 440,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 278.7715640151873,
+        "scheduled_p95_ms": 279.0902538690716,
+        "issuance_wait_p95_ms": 0.10562001261860132
+      },
+      "normal_by_phase": {
+        "normal": {
+          "planned": 100,
+          "sent": 100,
+          "success": 100,
+          "acknowledged": 100,
+          "completion_errors_after_ack": 0,
+          "errors": 0,
+          "skipped": 0,
+          "http_p95_ms": 29.45486898534,
+          "scheduled_p95_ms": 29.580067028291523,
+          "issuance_wait_p95_ms": 0.10803190525621176
+        },
+        "attack": {
+          "planned": 240,
+          "sent": 240,
+          "success": 240,
+          "acknowledged": 240,
+          "completion_errors_after_ack": 0,
+          "errors": 0,
+          "skipped": 0,
+          "http_p95_ms": 287.1434970293194,
+          "scheduled_p95_ms": 287.4270979082212,
+          "issuance_wait_p95_ms": 0.09893998503684998
+        },
+        "recovery": {
+          "planned": 100,
+          "sent": 100,
+          "success": 100,
+          "acknowledged": 100,
+          "completion_errors_after_ack": 0,
+          "errors": 0,
+          "skipped": 0,
+          "http_p95_ms": 293.2477879803628,
+          "scheduled_p95_ms": 293.36225101724267,
+          "issuance_wait_p95_ms": 0.12260698713362217
+        }
+      },
+      "attacks": {
+        "valid_flood": {
+          "planned": 1200,
+          "sent": 1199,
+          "skipped": 1,
+          "acknowledged": 141,
+          "status": {
+            "200": 141,
+            "429": 263,
+            "None": 795
+          },
+          "timeouts": 0,
+          "early_429": 0,
+          "slow_429": 0,
+          "early_rejections": 0,
+          "slow_rejections": 0,
+          "max_elapsed_ms": 627.0489409798756
+        },
+        "slow_body": {
+          "planned": 16,
+          "sent": 16,
+          "skipped": 0,
+          "acknowledged": 0,
+          "status": {
+            "429": 8,
+            "None": 8
+          },
+          "timeouts": 0,
+          "early_429": 8,
+          "slow_429": 0,
+          "early_rejections": 8,
+          "slow_rejections": 0,
+          "max_elapsed_ms": 10100.31638701912
+        },
+        "slow_header": {
+          "planned": 64,
+          "sent": 64,
+          "skipped": 0,
+          "acknowledged": 0,
+          "status": {
+            "None": 64
+          },
+          "timeouts": 0,
+          "early_429": 0,
+          "slow_429": 0,
+          "early_rejections": 0,
+          "slow_rejections": 0,
+          "max_elapsed_ms": 5165.756457019597
+        },
+        "tls_churn": {
+          "planned": 4800,
+          "sent": 4800,
+          "skipped": 0,
+          "tls_connected": 255,
+          "timeouts": 0,
+          "connection_end": {
+            "ConnectionResetError": 380,
+            "SSLZeroReturnError": 4165
+          }
+        }
+      },
+      "resources": {
+        "cpu_seconds": 4.811635,
+        "oom_kill_delta": 0,
+        "io_pressure_ms": 1490.368,
+        "write_bytes": 18726912
+      },
+      "phase_resources": [
+        {
+          "name": "normal",
+          "seconds": 5.000086591113359,
+          "cpu_seconds": 0.522875,
+          "io_pressure_ms": 12.387
+        },
+        {
+          "name": "attack",
+          "seconds": 12.00137541408185,
+          "cpu_seconds": 3.835136,
+          "io_pressure_ms": 663.986
+        },
+        {
+          "name": "recovery",
+          "seconds": 4.99765194603242,
+          "cpu_seconds": 0.440068,
+          "io_pressure_ms": 737.964
+        }
+      ],
+      "memory_peak_bytes": 206061568,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "integrity": {
+        "ok": true,
+        "threads": [
+          {
+            "key": "1793683408",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 116,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "e61c08c08cad4801933fa39db370615044462ffbdaed22e297794e996aa0d31f"
+          },
+          {
+            "key": "1793683409",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 116,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "56e51597d7912a6a100194018b441a67bd45358d7aae4bb288c04820fb736204"
+          },
+          {
+            "key": "1793683410",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 116,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "459c379e169e55d8769eb4647ece919c2c2fe2ff51cdf6c21e3fdf758c59560f"
+          },
+          {
+            "key": "1793683411",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 116,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "5ca7b02849711fde8b8a8527c07aed5c90dedb0a80c983399fca22d17b1d773f"
+          },
+          {
+            "key": "1793683412",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 143,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "8265a6adefb98993648a184164c2a75f3c32b37b9f691692c94556330adecd0f"
+          }
+        ],
+        "unavailable_threads": 0,
+        "read_retries": 0,
+        "read_retry_window_seconds": 5
+      },
+      "security_log": {
+        "files": 1,
+        "file_bytes": 132707,
+        "reason_counts": [
+          {
+            "source": "flood",
+            "reason": "スレッドの占有",
+            "rejected": false,
+            "count": 16
+          },
+          {
+            "source": "flood",
+            "reason": "スレッドへの集中投稿",
+            "rejected": false,
+            "count": 107
+          },
+          {
+            "source": "flood",
+            "reason": "同一投稿者・接続元の連投",
+            "rejected": false,
+            "count": 69
+          },
+          {
+            "source": "similar",
+            "reason": "類似本文の連投",
+            "rejected": false,
+            "count": 1
+          },
+          {
+            "source": "waf",
+            "reason": "path",
+            "rejected": true,
+            "count": 1
+          },
+          {
+            "source": "waf",
+            "reason": "traffic_limit",
+            "rejected": true,
+            "count": 261
+          }
+        ]
+      }
+    },
+    {
+      "trial": "candidate-2",
+      "raw_report": "var/dos-20261103/candidate-2.json",
+      "raw_sha256": "386abd0127f5d0b6d7c60f038d74c12da9f70a39f033ef10d5aa1ef43e6221f3",
+      "image": "sha256:a1c49a55c754ab318f26b974ab48298bf7b35d2a707d3263ac831f3fe0bcc899",
+      "conditions": {
+        "normal_posts_per_second": 20,
+        "normal_actors": 20,
+        "recovery_seconds": 5,
+        "normal_arrivals": "evenly spaced",
+        "initial_flood_upload_pause_ms": 0,
+        "legacy_web_mix": "80/20",
+        "valid_flood_per_second": 100,
+        "flood_workers": 8,
+        "slow_body_connections": 16,
+        "slow_header_connections": 64,
+        "attacker_ips": 4,
+        "normal_threads": 4,
+        "tls_churn_per_second": 400,
+        "tls_churn_workers": 16,
+        "early_rejection_max_ms": 1000,
+        "normal_issue_lag_limit_ms": 1000,
+        "normal_scheduled_p95_limit_ms": 1000,
+        "flood_accepted_limit": 155.0,
+        "minimum_flood_supply_fraction": 0.95
+      },
+      "cpu_max": "200000 100000",
+      "memory_max": "536870912",
+      "ok": true,
+      "checks": {
+        "normal_posts": true,
+        "normal_latency": true,
+        "integrity": true,
+        "no_oom": true,
+        "flood_limited": true,
+        "flood_supplied": true,
+        "slow_rejection": true,
+        "slow_closed": true,
+        "tls_churn_supplied": true,
+        "tls_churn_limited": true,
+        "tls_churn_no_timeout": true
+      },
+      "normal": {
+        "planned": 440,
+        "sent": 440,
+        "success": 440,
+        "acknowledged": 440,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 202.97561609186232,
+        "scheduled_p95_ms": 203.284487943165,
+        "issuance_wait_p95_ms": 0.2311950083822012
+      },
+      "normal_by_phase": {
+        "normal": {
+          "planned": 100,
+          "sent": 100,
+          "success": 100,
+          "acknowledged": 100,
+          "completion_errors_after_ack": 0,
+          "errors": 0,
+          "skipped": 0,
+          "http_p95_ms": 29.21023196540773,
+          "scheduled_p95_ms": 29.44327495060861,
+          "issuance_wait_p95_ms": 0.23453193716704845
+        },
+        "attack": {
+          "planned": 240,
+          "sent": 240,
+          "success": 240,
+          "acknowledged": 240,
+          "completion_errors_after_ack": 0,
+          "errors": 0,
+          "skipped": 0,
+          "http_p95_ms": 32.31021203100681,
+          "scheduled_p95_ms": 32.469623954966664,
+          "issuance_wait_p95_ms": 0.09873602539300919
+        },
+        "recovery": {
+          "planned": 100,
+          "sent": 100,
+          "success": 100,
+          "acknowledged": 100,
+          "completion_errors_after_ack": 0,
+          "errors": 0,
+          "skipped": 0,
+          "http_p95_ms": 595.3000480076298,
+          "scheduled_p95_ms": 595.5434540519491,
+          "issuance_wait_p95_ms": 0.2416160423308611
+        }
+      },
+      "attacks": {
+        "valid_flood": {
+          "planned": 1200,
+          "sent": 1200,
+          "skipped": 0,
+          "acknowledged": 139,
+          "status": {
+            "200": 139,
+            "429": 264,
+            "None": 797
+          },
+          "timeouts": 0,
+          "early_429": 0,
+          "slow_429": 0,
+          "early_rejections": 0,
+          "slow_rejections": 0,
+          "max_elapsed_ms": 197.15939403977245
+        },
+        "slow_body": {
+          "planned": 16,
+          "sent": 16,
+          "skipped": 0,
+          "acknowledged": 0,
+          "status": {
+            "429": 8,
+            "None": 8
+          },
+          "timeouts": 0,
+          "early_429": 8,
+          "slow_429": 0,
+          "early_rejections": 8,
+          "slow_rejections": 0,
+          "max_elapsed_ms": 10057.347395922989
+        },
+        "slow_header": {
+          "planned": 64,
+          "sent": 64,
+          "skipped": 0,
+          "acknowledged": 0,
+          "status": {
+            "None": 64
+          },
+          "timeouts": 0,
+          "early_429": 0,
+          "slow_429": 0,
+          "early_rejections": 0,
+          "slow_rejections": 0,
+          "max_elapsed_ms": 5189.106764970347
+        },
+        "tls_churn": {
+          "planned": 4800,
+          "sent": 4800,
+          "skipped": 0,
+          "tls_connected": 255,
+          "timeouts": 0,
+          "connection_end": {
+            "ConnectionResetError": 277,
+            "SSLZeroReturnError": 4268
+          }
+        }
+      },
+      "resources": {
+        "cpu_seconds": 5.07625,
+        "oom_kill_delta": 0,
+        "io_pressure_ms": 606.248,
+        "write_bytes": 25067520
+      },
+      "phase_resources": [
+        {
+          "name": "normal",
+          "seconds": 4.999520511017181,
+          "cpu_seconds": 0.517438,
+          "io_pressure_ms": 12.165
+        },
+        {
+          "name": "attack",
+          "seconds": 12.002307713963091,
+          "cpu_seconds": 4.030887,
+          "io_pressure_ms": 25.141
+        },
+        {
+          "name": "recovery",
+          "seconds": 4.996796234045178,
+          "cpu_seconds": 0.500769,
+          "io_pressure_ms": 539.712
+        }
+      ],
+      "memory_peak_bytes": 215384064,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "integrity": {
+        "ok": true,
+        "threads": [
+          {
+            "key": "1793683441",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 116,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "0e48b7da147b55cc2ed05229df01fc2e7a801c6898bed4c84e5f855ac73f2a86"
+          },
+          {
+            "key": "1793683442",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 116,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "96b8920b01bf933d44455487dd64bfc22a23c50d880b1125dd42d002d885a478"
+          },
+          {
+            "key": "1793683443",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 116,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "9d3ebe4ffbef992ec19abcb89f1ffd47d476c89fbc0892b8d1a91a6ec0609b45"
+          },
+          {
+            "key": "1793683444",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 116,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "18c973fa54a40dbbc6e13a34d9ecdf4eb46b4b2a82079711652254ce46023c12"
+          },
+          {
+            "key": "1793683445",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 141,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "ecb0180bba2a5fbb1cbb675e3a3138928ea6a8a7995bb2e58ecfc1020efb49fa"
+          }
+        ],
+        "unavailable_threads": 0,
+        "read_retries": 0,
+        "read_retry_window_seconds": 5
+      },
+      "security_log": {
+        "files": 1,
+        "file_bytes": 131489,
+        "reason_counts": [
+          {
+            "source": "flood",
+            "reason": "スレッドの占有",
+            "rejected": false,
+            "count": 16
+          },
+          {
+            "source": "flood",
+            "reason": "スレッドへの集中投稿",
+            "rejected": false,
+            "count": 105
+          },
+          {
+            "source": "flood",
+            "reason": "同一投稿者・接続元の連投",
+            "rejected": false,
+            "count": 69
+          },
+          {
+            "source": "similar",
+            "reason": "類似本文の連投",
+            "rejected": false,
+            "count": 1
+          },
+          {
+            "source": "waf",
+            "reason": "path",
+            "rejected": true,
+            "count": 1
+          },
+          {
+            "source": "waf",
+            "reason": "traffic_limit",
+            "rejected": true,
+            "count": 262
+          }
+        ]
+      }
+    },
+    {
+      "trial": "baseline-2",
+      "raw_report": "var/dos-20261103/baseline-2.json",
+      "raw_sha256": "728ee2fa001d26f66efc3cd0d56d539408270e546f72740d95fe50885467edd6",
+      "image": "sha256:d02307ef56bc9d8f068d2959d4c23fd51b19712cfa8197401901e0fb63ab733e",
+      "conditions": {
+        "normal_posts_per_second": 20,
+        "normal_actors": 20,
+        "recovery_seconds": 5,
+        "normal_arrivals": "evenly spaced",
+        "initial_flood_upload_pause_ms": 0,
+        "legacy_web_mix": "80/20",
+        "valid_flood_per_second": 100,
+        "flood_workers": 8,
+        "slow_body_connections": 16,
+        "slow_header_connections": 64,
+        "attacker_ips": 4,
+        "normal_threads": 4,
+        "tls_churn_per_second": 400,
+        "tls_churn_workers": 16,
+        "early_rejection_max_ms": 1000,
+        "normal_issue_lag_limit_ms": 1000,
+        "normal_scheduled_p95_limit_ms": 1000,
+        "flood_accepted_limit": 155.0,
+        "minimum_flood_supply_fraction": 0.95
+      },
+      "cpu_max": "200000 100000",
+      "memory_max": "536870912",
+      "ok": false,
+      "checks": {
+        "normal_posts": true,
+        "normal_latency": true,
+        "integrity": true,
+        "no_oom": true,
+        "flood_limited": true,
+        "flood_supplied": true,
+        "slow_rejection": true,
+        "slow_closed": true,
+        "tls_churn_supplied": true,
+        "tls_churn_limited": false,
+        "tls_churn_no_timeout": true
+      },
+      "normal": {
+        "planned": 440,
+        "sent": 440,
+        "success": 440,
+        "acknowledged": 440,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 298.6268550157547,
+        "scheduled_p95_ms": 298.9106309833005,
+        "issuance_wait_p95_ms": 0.11123099830001593
+      },
+      "normal_by_phase": {
+        "normal": {
+          "planned": 100,
+          "sent": 100,
+          "success": 100,
+          "acknowledged": 100,
+          "completion_errors_after_ack": 0,
+          "errors": 0,
+          "skipped": 0,
+          "http_p95_ms": 29.677110956981778,
+          "scheduled_p95_ms": 29.786520986817777,
+          "issuance_wait_p95_ms": 0.13464398216456175
+        },
+        "attack": {
+          "planned": 240,
+          "sent": 240,
+          "success": 240,
+          "acknowledged": 240,
+          "completion_errors_after_ack": 0,
+          "errors": 0,
+          "skipped": 0,
+          "http_p95_ms": 344.3818408995867,
+          "scheduled_p95_ms": 344.6692628785968,
+          "issuance_wait_p95_ms": 0.1037518959492445
+        },
+        "recovery": {
+          "planned": 100,
+          "sent": 100,
+          "success": 100,
+          "acknowledged": 100,
+          "completion_errors_after_ack": 0,
+          "errors": 0,
+          "skipped": 0,
+          "http_p95_ms": 298.6268550157547,
+          "scheduled_p95_ms": 298.9106309833005,
+          "issuance_wait_p95_ms": 0.19358086865395308
+        }
+      },
+      "attacks": {
+        "valid_flood": {
+          "planned": 1200,
+          "sent": 1198,
+          "skipped": 2,
+          "acknowledged": 140,
+          "status": {
+            "200": 140,
+            "429": 1053,
+            "None": 5
+          },
+          "timeouts": 0,
+          "early_429": 0,
+          "slow_429": 0,
+          "early_rejections": 0,
+          "slow_rejections": 0,
+          "max_elapsed_ms": 588.958587963134
+        },
+        "slow_body": {
+          "planned": 16,
+          "sent": 16,
+          "skipped": 0,
+          "acknowledged": 0,
+          "status": {
+            "429": 8,
+            "None": 8
+          },
+          "timeouts": 0,
+          "early_429": 8,
+          "slow_429": 0,
+          "early_rejections": 8,
+          "slow_rejections": 0,
+          "max_elapsed_ms": 10108.044521999545
+        },
+        "slow_header": {
+          "planned": 64,
+          "sent": 64,
+          "skipped": 0,
+          "acknowledged": 0,
+          "status": {
+            "None": 64
+          },
+          "timeouts": 0,
+          "early_429": 0,
+          "slow_429": 0,
+          "early_rejections": 0,
+          "slow_rejections": 0,
+          "max_elapsed_ms": 5164.673961000517
+        },
+        "tls_churn": {
+          "planned": 4800,
+          "sent": 4800,
+          "skipped": 0,
+          "tls_connected": 4800,
+          "timeouts": 0,
+          "connection_end": {}
+        }
+      },
+      "resources": {
+        "cpu_seconds": 14.752086,
+        "oom_kill_delta": 0,
+        "io_pressure_ms": 977.143,
+        "write_bytes": 34168832
+      },
+      "phase_resources": [
+        {
+          "name": "normal",
+          "seconds": 4.999061316018924,
+          "cpu_seconds": 0.516462,
+          "io_pressure_ms": 14.428
+        },
+        {
+          "name": "attack",
+          "seconds": 11.999487955938093,
+          "cpu_seconds": 13.801027,
+          "io_pressure_ms": 209.069
+        },
+        {
+          "name": "recovery",
+          "seconds": 4.999391483026557,
+          "cpu_seconds": 0.417837,
+          "io_pressure_ms": 699.799
+        }
+      ],
+      "memory_peak_bytes": 290754560,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "integrity": {
+        "ok": true,
+        "threads": [
+          {
+            "key": "1793683476",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 116,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "f479e140f9dfc819df7a1572f25a12db8f1478193df07ed657ff9ec4b849497a"
+          },
+          {
+            "key": "1793683477",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 116,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "4353e20690a5683c12fee91596daa740fdb1b424f00f99af1557b1d00faca994"
+          },
+          {
+            "key": "1793683478",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 116,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "68e8a93f49dc06d451c9715b313818918444c20449b22a74b04eb55e2e603505"
+          },
+          {
+            "key": "1793683479",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 116,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "7d557c73f932449724f3a275170844ddf1b55b328e960273d617e8bd33ec5d72"
+          },
+          {
+            "key": "1793683480",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 142,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "f4c8c6584833a05d52ab22474cd6a0597f007439b4e9b693e32d10fcdca21433"
+          }
+        ],
+        "unavailable_threads": 0,
+        "read_retries": 0,
+        "read_retry_window_seconds": 5
+      },
+      "security_log": {
+        "files": 1,
+        "file_bytes": 132111,
+        "reason_counts": [
+          {
+            "source": "flood",
+            "reason": "スレッドの占有",
+            "rejected": false,
+            "count": 16
+          },
+          {
+            "source": "flood",
+            "reason": "スレッドへの集中投稿",
+            "rejected": false,
+            "count": 106
+          },
+          {
+            "source": "flood",
+            "reason": "同一投稿者・接続元の連投",
+            "rejected": false,
+            "count": 69
+          },
+          {
+            "source": "similar",
+            "reason": "類似本文の連投",
+            "rejected": false,
+            "count": 1
+          },
+          {
+            "source": "waf",
+            "reason": "path",
+            "rejected": true,
+            "count": 1
+          },
+          {
+            "source": "waf",
+            "reason": "traffic_limit",
+            "rejected": true,
+            "count": 1051
+          }
+        ]
+      }
+    },
+    {
+      "trial": "baseline-3",
+      "raw_report": "var/dos-20261103/baseline-3.json",
+      "raw_sha256": "854fd4a6301e4ff75e3c2d0e653bb19e9aec82e73553119c2f218711b13aaf13",
+      "image": "sha256:d02307ef56bc9d8f068d2959d4c23fd51b19712cfa8197401901e0fb63ab733e",
+      "conditions": {
+        "normal_posts_per_second": 20,
+        "normal_actors": 20,
+        "recovery_seconds": 5,
+        "normal_arrivals": "evenly spaced",
+        "initial_flood_upload_pause_ms": 0,
+        "legacy_web_mix": "80/20",
+        "valid_flood_per_second": 100,
+        "flood_workers": 8,
+        "slow_body_connections": 16,
+        "slow_header_connections": 64,
+        "attacker_ips": 4,
+        "normal_threads": 4,
+        "tls_churn_per_second": 400,
+        "tls_churn_workers": 16,
+        "early_rejection_max_ms": 1000,
+        "normal_issue_lag_limit_ms": 1000,
+        "normal_scheduled_p95_limit_ms": 1000,
+        "flood_accepted_limit": 155.0,
+        "minimum_flood_supply_fraction": 0.95
+      },
+      "cpu_max": "200000 100000",
+      "memory_max": "536870912",
+      "ok": false,
+      "checks": {
+        "normal_posts": true,
+        "normal_latency": true,
+        "integrity": true,
+        "no_oom": true,
+        "flood_limited": true,
+        "flood_supplied": true,
+        "slow_rejection": true,
+        "slow_closed": true,
+        "tls_churn_supplied": true,
+        "tls_churn_limited": false,
+        "tls_churn_no_timeout": true
+      },
+      "normal": {
+        "planned": 440,
+        "sent": 440,
+        "success": 440,
+        "acknowledged": 440,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 32.54813503008336,
+        "scheduled_p95_ms": 32.667972962372005,
+        "issuance_wait_p95_ms": 0.10377890430390835
+      },
+      "normal_by_phase": {
+        "normal": {
+          "planned": 100,
+          "sent": 100,
+          "success": 100,
+          "acknowledged": 100,
+          "completion_errors_after_ack": 0,
+          "errors": 0,
+          "skipped": 0,
+          "http_p95_ms": 30.068473075516522,
+          "scheduled_p95_ms": 30.165130039677024,
+          "issuance_wait_p95_ms": 0.1126100542023778
+        },
+        "attack": {
+          "planned": 240,
+          "sent": 240,
+          "success": 240,
+          "acknowledged": 240,
+          "completion_errors_after_ack": 0,
+          "errors": 0,
+          "skipped": 0,
+          "http_p95_ms": 36.92725603468716,
+          "scheduled_p95_ms": 37.01503295451403,
+          "issuance_wait_p95_ms": 0.08959497790783644
+        },
+        "recovery": {
+          "planned": 100,
+          "sent": 100,
+          "success": 100,
+          "acknowledged": 100,
+          "completion_errors_after_ack": 0,
+          "errors": 0,
+          "skipped": 0,
+          "http_p95_ms": 29.223988065496087,
+          "scheduled_p95_ms": 29.35281104873866,
+          "issuance_wait_p95_ms": 0.10483397636562586
+        }
+      },
+      "attacks": {
+        "valid_flood": {
+          "planned": 1200,
+          "sent": 1200,
+          "skipped": 0,
+          "acknowledged": 139,
+          "status": {
+            "200": 139,
+            "429": 1061
+          },
+          "timeouts": 0,
+          "early_429": 0,
+          "slow_429": 0,
+          "early_rejections": 0,
+          "slow_rejections": 0,
+          "max_elapsed_ms": 194.95377398561686
+        },
+        "slow_body": {
+          "planned": 16,
+          "sent": 16,
+          "skipped": 0,
+          "acknowledged": 0,
+          "status": {
+            "429": 8,
+            "None": 8
+          },
+          "timeouts": 0,
+          "early_429": 8,
+          "slow_429": 0,
+          "early_rejections": 8,
+          "slow_rejections": 0,
+          "max_elapsed_ms": 10122.509319917299
+        },
+        "slow_header": {
+          "planned": 64,
+          "sent": 64,
+          "skipped": 0,
+          "acknowledged": 0,
+          "status": {
+            "None": 64
+          },
+          "timeouts": 0,
+          "early_429": 0,
+          "slow_429": 0,
+          "early_rejections": 0,
+          "slow_rejections": 0,
+          "max_elapsed_ms": 5188.797047012486
+        },
+        "tls_churn": {
+          "planned": 4800,
+          "sent": 4800,
+          "skipped": 0,
+          "tls_connected": 4800,
+          "timeouts": 0,
+          "connection_end": {}
+        }
+      },
+      "resources": {
+        "cpu_seconds": 14.900054,
+        "oom_kill_delta": 0,
+        "io_pressure_ms": 60.504,
+        "write_bytes": 40009728
+      },
+      "phase_resources": [
+        {
+          "name": "normal",
+          "seconds": 4.999908884987235,
+          "cpu_seconds": 0.513884,
+          "io_pressure_ms": 10.916
+        },
+        {
+          "name": "attack",
+          "seconds": 11.99975124397315,
+          "cpu_seconds": 13.816589,
+          "io_pressure_ms": 35.614
+        },
+        {
+          "name": "recovery",
+          "seconds": 4.999699076055549,
+          "cpu_seconds": 0.568871,
+          "io_pressure_ms": 13.974
+        }
+      ],
+      "memory_peak_bytes": 247959552,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "integrity": {
+        "ok": true,
+        "threads": [
+          {
+            "key": "1793683511",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 116,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "d2465eecbaf444dadb84cf0dd98519d5c4e0d0f8f58e5e3c65df3948978466e9"
+          },
+          {
+            "key": "1793683512",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 116,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "4d3920fae49740f2bd96b805368b50898359b30ef53413ded5cb44d156f58c38"
+          },
+          {
+            "key": "1793683513",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 116,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "c81f962f0cabfd756922ce373f3c8bf6a5052a0536bbd5abe40dfa42b8d95f4e"
+          },
+          {
+            "key": "1793683514",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 116,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "2e559b1bd4905abdbbd4363895caa0ae84c7b76f83c9406f3faee826f6e997ed"
+          },
+          {
+            "key": "1793683515",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 141,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "9d79caefdfac168de87495b2dc0b8cdee75a4194ef2bfcab83b68bce5863b7a9"
+          }
+        ],
+        "unavailable_threads": 0,
+        "read_retries": 0,
+        "read_retry_window_seconds": 5
+      },
+      "security_log": {
+        "files": 1,
+        "file_bytes": 131468,
+        "reason_counts": [
+          {
+            "source": "flood",
+            "reason": "スレッドの占有",
+            "rejected": false,
+            "count": 16
+          },
+          {
+            "source": "flood",
+            "reason": "スレッドへの集中投稿",
+            "rejected": false,
+            "count": 105
+          },
+          {
+            "source": "flood",
+            "reason": "同一投稿者・接続元の連投",
+            "rejected": false,
+            "count": 69
+          },
+          {
+            "source": "similar",
+            "reason": "類似本文の連投",
+            "rejected": false,
+            "count": 1
+          },
+          {
+            "source": "waf",
+            "reason": "path",
+            "rejected": true,
+            "count": 1
+          },
+          {
+            "source": "waf",
+            "reason": "traffic_limit",
+            "rejected": true,
+            "count": 1059
+          }
+        ]
+      }
+    },
+    {
+      "trial": "candidate-3",
+      "raw_report": "var/dos-20261103/candidate-3.json",
+      "raw_sha256": "caf95a6a3c131e1fdf89a9cd1b072a03172cc5021b4bc63acc50c58e35ba1bbc",
+      "image": "sha256:a1c49a55c754ab318f26b974ab48298bf7b35d2a707d3263ac831f3fe0bcc899",
+      "conditions": {
+        "normal_posts_per_second": 20,
+        "normal_actors": 20,
+        "recovery_seconds": 5,
+        "normal_arrivals": "evenly spaced",
+        "initial_flood_upload_pause_ms": 0,
+        "legacy_web_mix": "80/20",
+        "valid_flood_per_second": 100,
+        "flood_workers": 8,
+        "slow_body_connections": 16,
+        "slow_header_connections": 64,
+        "attacker_ips": 4,
+        "normal_threads": 4,
+        "tls_churn_per_second": 400,
+        "tls_churn_workers": 16,
+        "early_rejection_max_ms": 1000,
+        "normal_issue_lag_limit_ms": 1000,
+        "normal_scheduled_p95_limit_ms": 1000,
+        "flood_accepted_limit": 155.0,
+        "minimum_flood_supply_fraction": 0.95
+      },
+      "cpu_max": "200000 100000",
+      "memory_max": "536870912",
+      "ok": true,
+      "checks": {
+        "normal_posts": true,
+        "normal_latency": true,
+        "integrity": true,
+        "no_oom": true,
+        "flood_limited": true,
+        "flood_supplied": true,
+        "slow_rejection": true,
+        "slow_closed": true,
+        "tls_churn_supplied": true,
+        "tls_churn_limited": true,
+        "tls_churn_no_timeout": true
+      },
+      "normal": {
+        "planned": 440,
+        "sent": 440,
+        "success": 440,
+        "acknowledged": 440,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 297.24219301715493,
+        "scheduled_p95_ms": 297.54674795549363,
+        "issuance_wait_p95_ms": 0.10426610242575407
+      },
+      "normal_by_phase": {
+        "normal": {
+          "planned": 100,
+          "sent": 100,
+          "success": 100,
+          "acknowledged": 100,
+          "completion_errors_after_ack": 0,
+          "errors": 0,
+          "skipped": 0,
+          "http_p95_ms": 30.117928981781006,
+          "scheduled_p95_ms": 30.211822013370693,
+          "issuance_wait_p95_ms": 0.1079019857570529
+        },
+        "attack": {
+          "planned": 240,
+          "sent": 240,
+          "success": 240,
+          "acknowledged": 240,
+          "completion_errors_after_ack": 0,
+          "errors": 0,
+          "skipped": 0,
+          "http_p95_ms": 305.6730889948085,
+          "scheduled_p95_ms": 305.95615797210485,
+          "issuance_wait_p95_ms": 0.09458907879889011
+        },
+        "recovery": {
+          "planned": 100,
+          "sent": 100,
+          "success": 100,
+          "acknowledged": 100,
+          "completion_errors_after_ack": 0,
+          "errors": 0,
+          "skipped": 0,
+          "http_p95_ms": 302.84240492619574,
+          "scheduled_p95_ms": 303.1435670563951,
+          "issuance_wait_p95_ms": 0.1047719269990921
+        }
+      },
+      "attacks": {
+        "valid_flood": {
+          "planned": 1200,
+          "sent": 1200,
+          "skipped": 0,
+          "acknowledged": 141,
+          "status": {
+            "200": 141,
+            "429": 266,
+            "None": 793
+          },
+          "timeouts": 0,
+          "early_429": 0,
+          "slow_429": 0,
+          "early_rejections": 0,
+          "slow_rejections": 0,
+          "max_elapsed_ms": 493.50793298799545
+        },
+        "slow_body": {
+          "planned": 16,
+          "sent": 16,
+          "skipped": 0,
+          "acknowledged": 0,
+          "status": {
+            "429": 8,
+            "None": 8
+          },
+          "timeouts": 0,
+          "early_429": 8,
+          "slow_429": 0,
+          "early_rejections": 8,
+          "slow_rejections": 0,
+          "max_elapsed_ms": 10148.240201058798
+        },
+        "slow_header": {
+          "planned": 64,
+          "sent": 64,
+          "skipped": 0,
+          "acknowledged": 0,
+          "status": {
+            "None": 64
+          },
+          "timeouts": 0,
+          "early_429": 0,
+          "slow_429": 0,
+          "early_rejections": 0,
+          "slow_rejections": 0,
+          "max_elapsed_ms": 5162.161385989748
+        },
+        "tls_churn": {
+          "planned": 4800,
+          "sent": 4800,
+          "skipped": 0,
+          "tls_connected": 255,
+          "timeouts": 0,
+          "connection_end": {
+            "ConnectionResetError": 315,
+            "SSLZeroReturnError": 4230
+          }
+        }
+      },
+      "resources": {
+        "cpu_seconds": 4.895402,
+        "oom_kill_delta": 0,
+        "io_pressure_ms": 1174.72,
+        "write_bytes": 20840448
+      },
+      "phase_resources": [
+        {
+          "name": "normal",
+          "seconds": 4.99889407295268,
+          "cpu_seconds": 0.51932,
+          "io_pressure_ms": 19.268
+        },
+        {
+          "name": "attack",
+          "seconds": 12.000142795965075,
+          "cpu_seconds": 3.922954,
+          "io_pressure_ms": 453.376
+        },
+        {
+          "name": "recovery",
+          "seconds": 4.996820316999219,
+          "cpu_seconds": 0.444204,
+          "io_pressure_ms": 689.498
+        }
+      ],
+      "memory_peak_bytes": 216289280,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "integrity": {
+        "ok": true,
+        "threads": [
+          {
+            "key": "1793683539",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 116,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "e15e77d1b10e0a6dd87ca30e33f6d946837b67e93abd97acf7b50054d375f636"
+          },
+          {
+            "key": "1793683540",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 116,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "c94f14d2c22f04b9bb7121863fd867b0efd6e0dd9663bf46dbfcfc5531e1eeec"
+          },
+          {
+            "key": "1793683541",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 116,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "e60f3a218333cdf4886555d97f26bb6dd4009b0d2f27983936b1ed6d3b041eec"
+          },
+          {
+            "key": "1793683542",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 116,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "dbb3e2f302e621b6a8d022a29c78d89260f6168abd5706a8399215ab310484d4"
+          },
+          {
+            "key": "1793683543",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 143,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "5da42c190390c6099e4f60908da57747eae0899fdae665ce544da8643b4f6d38"
+          }
+        ],
+        "unavailable_threads": 0,
+        "read_retries": 0,
+        "read_retry_window_seconds": 5
+      },
+      "security_log": {
+        "files": 1,
+        "file_bytes": 132681,
+        "reason_counts": [
+          {
+            "source": "flood",
+            "reason": "スレッドの占有",
+            "rejected": false,
+            "count": 16
+          },
+          {
+            "source": "flood",
+            "reason": "スレッドへの集中投稿",
+            "rejected": false,
+            "count": 107
+          },
+          {
+            "source": "flood",
+            "reason": "同一投稿者・接続元の連投",
+            "rejected": false,
+            "count": 69
+          },
+          {
+            "source": "similar",
+            "reason": "類似本文の連投",
+            "rejected": false,
+            "count": 1
+          },
+          {
+            "source": "waf",
+            "reason": "path",
+            "rejected": true,
+            "count": 1
+          },
+          {
+            "source": "waf",
+            "reason": "traffic_limit",
+            "rejected": true,
+            "count": 264
+          }
+        ]
+      }
+    },
+    {
+      "trial": "candidate-final",
+      "raw_report": "var/dos-20261103/candidate-final.json",
+      "raw_sha256": "55e31ee8d546dbe44df8f27f093814fdc7c27eda4b022c505000c8f92ed87fed",
+      "image": "sha256:94884fadaac003a65692a00b05ab3986563348749f920f3e9e4fb9328aec1747",
+      "conditions": {
+        "normal_posts_per_second": 20,
+        "normal_actors": 20,
+        "recovery_seconds": 5,
+        "normal_arrivals": "evenly spaced",
+        "initial_flood_upload_pause_ms": 0,
+        "legacy_web_mix": "80/20",
+        "valid_flood_per_second": 100,
+        "flood_workers": 8,
+        "slow_body_connections": 16,
+        "slow_header_connections": 64,
+        "attacker_ips": 4,
+        "normal_threads": 4,
+        "tls_churn_per_second": 400,
+        "tls_churn_workers": 16,
+        "early_rejection_max_ms": 1000,
+        "normal_issue_lag_limit_ms": 1000,
+        "normal_scheduled_p95_limit_ms": 1000,
+        "flood_accepted_limit": 155.0,
+        "minimum_flood_supply_fraction": 0.95
+      },
+      "cpu_max": "200000 100000",
+      "memory_max": "536870912",
+      "ok": true,
+      "checks": {
+        "normal_posts": true,
+        "normal_latency": true,
+        "integrity": true,
+        "no_oom": true,
+        "flood_limited": true,
+        "flood_supplied": true,
+        "slow_rejection": true,
+        "slow_closed": true,
+        "tls_churn_supplied": true,
+        "tls_churn_limited": true,
+        "tls_churn_no_timeout": true
+      },
+      "normal": {
+        "planned": 440,
+        "sent": 440,
+        "success": 440,
+        "acknowledged": 440,
+        "completion_errors_after_ack": 0,
+        "errors": 0,
+        "skipped": 0,
+        "http_p95_ms": 399.88874504342675,
+        "scheduled_p95_ms": 400.00020898878574,
+        "issuance_wait_p95_ms": 0.10951003059744835
+      },
+      "normal_by_phase": {
+        "normal": {
+          "planned": 100,
+          "sent": 100,
+          "success": 100,
+          "acknowledged": 100,
+          "completion_errors_after_ack": 0,
+          "errors": 0,
+          "skipped": 0,
+          "http_p95_ms": 29.089936055243015,
+          "scheduled_p95_ms": 29.20631505548954,
+          "issuance_wait_p95_ms": 0.11501996777951717
+        },
+        "attack": {
+          "planned": 240,
+          "sent": 240,
+          "success": 240,
+          "acknowledged": 240,
+          "completion_errors_after_ack": 0,
+          "errors": 0,
+          "skipped": 0,
+          "http_p95_ms": 399.88874504342675,
+          "scheduled_p95_ms": 400.00020898878574,
+          "issuance_wait_p95_ms": 0.09942788165062666
+        },
+        "recovery": {
+          "planned": 100,
+          "sent": 100,
+          "success": 100,
+          "acknowledged": 100,
+          "completion_errors_after_ack": 0,
+          "errors": 0,
+          "skipped": 0,
+          "http_p95_ms": 629.824138013646,
+          "scheduled_p95_ms": 630.07071998436,
+          "issuance_wait_p95_ms": 0.10818999726325274
+        }
+      },
+      "attacks": {
+        "valid_flood": {
+          "planned": 1200,
+          "sent": 1195,
+          "skipped": 5,
+          "acknowledged": 139,
+          "status": {
+            "200": 139,
+            "429": 261,
+            "None": 795
+          },
+          "timeouts": 0,
+          "early_429": 0,
+          "slow_429": 0,
+          "early_rejections": 0,
+          "slow_rejections": 0,
+          "max_elapsed_ms": 534.622557926923
+        },
+        "slow_body": {
+          "planned": 16,
+          "sent": 16,
+          "skipped": 0,
+          "acknowledged": 0,
+          "status": {
+            "429": 8,
+            "None": 8
+          },
+          "timeouts": 0,
+          "early_429": 8,
+          "slow_429": 0,
+          "early_rejections": 8,
+          "slow_rejections": 0,
+          "max_elapsed_ms": 10063.02007602062
+        },
+        "slow_header": {
+          "planned": 64,
+          "sent": 64,
+          "skipped": 0,
+          "acknowledged": 0,
+          "status": {
+            "None": 64
+          },
+          "timeouts": 0,
+          "early_429": 0,
+          "slow_429": 0,
+          "early_rejections": 0,
+          "slow_rejections": 0,
+          "max_elapsed_ms": 5163.481005001813
+        },
+        "tls_churn": {
+          "planned": 4800,
+          "sent": 4800,
+          "skipped": 0,
+          "tls_connected": 255,
+          "timeouts": 0,
+          "connection_end": {
+            "ConnectionResetError": 524,
+            "SSLZeroReturnError": 4021
+          }
+        }
+      },
+      "resources": {
+        "cpu_seconds": 4.486801,
+        "oom_kill_delta": 0,
+        "io_pressure_ms": 2040.89,
+        "write_bytes": 10940416
+      },
+      "phase_resources": [
+        {
+          "name": "normal",
+          "seconds": 4.998347365995869,
+          "cpu_seconds": 0.527828,
+          "io_pressure_ms": 12.638
+        },
+        {
+          "name": "attack",
+          "seconds": 12.001493540010415,
+          "cpu_seconds": 3.333246,
+          "io_pressure_ms": 1354.115
+        },
+        {
+          "name": "recovery",
+          "seconds": 4.99732733797282,
+          "cpu_seconds": 0.623501,
+          "io_pressure_ms": 674.137
+        }
+      ],
+      "memory_peak_bytes": 227581952,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "integrity": {
+        "ok": true,
+        "threads": [
+          {
+            "key": "1793683665",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 116,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "76a4f241d37036cc800666bf56e6145810a2f5bdba74a0b974a7d57d78e3a732"
+          },
+          {
+            "key": "1793683666",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 116,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "a36bfb19d7f66f304ebfef0ed177412755aeb6bbf43159cec40ce495380e59e6"
+          },
+          {
+            "key": "1793683667",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 116,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "298ae070ab62f10acd60bd3ef1d350b4c86bfe517a92188ec6122fdd26d1e5ec"
+          },
+          {
+            "key": "1793683668",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 116,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "989cd8f4305d583dbdda46a2d3777a25a330a5642d44078d6867f62a40edc08c"
+          },
+          {
+            "key": "1793683669",
+            "read_status": 200,
+            "read_attempts": 1,
+            "available": true,
+            "lines": 141,
+            "invalid_bodies": 0,
+            "invalid_names": 0,
+            "missing_acknowledged": [],
+            "stored_without_acknowledgement": [],
+            "duplicates": [],
+            "prefix_ok": true,
+            "sha256": "1d2124e0d52d4d689736c71666ae7c780e9bbf19320dcc3f6cd04f43898757e3"
+          }
+        ],
+        "unavailable_threads": 0,
+        "read_retries": 0,
+        "read_retry_window_seconds": 5
+      },
+      "security_log": {
+        "files": 1,
+        "file_bytes": 131483,
+        "reason_counts": [
+          {
+            "source": "flood",
+            "reason": "スレッドの占有",
+            "rejected": false,
+            "count": 16
+          },
+          {
+            "source": "flood",
+            "reason": "スレッドへの集中投稿",
+            "rejected": false,
+            "count": 105
+          },
+          {
+            "source": "flood",
+            "reason": "同一投稿者・接続元の連投",
+            "rejected": false,
+            "count": 69
+          },
+          {
+            "source": "similar",
+            "reason": "類似本文の連投",
+            "rejected": false,
+            "count": 1
+          },
+          {
+            "source": "waf",
+            "reason": "path",
+            "rejected": true,
+            "count": 1
+          },
+          {
+            "source": "waf",
+            "reason": "traffic_limit",
+            "rejected": true,
+            "count": 259
+          }
+        ]
+      }
+    }
+  ],
+  "not_verified": [
+    "long distributed attacks",
+    "shared NAT heavy new connections",
+    "WAN and OS backlog/bandwidth exhaustion",
+    "full real mTLS edge attack mix",
+    "production deployment",
+    "all-package tests/fuzz/vulnerability rescan"
+  ]
+}

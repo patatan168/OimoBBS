@@ -4,6 +4,7 @@ package bootstrap
 import (
 	"net/http"
 	"net/url"
+	"oimobbs/internal/delivery"
 	"oimobbs/internal/waf"
 )
 
@@ -43,8 +44,6 @@ func wafHostMatches(host string, origin *url.URL) bool {
 func (r *Repository) rejectWAF(w http.ResponseWriter, req *http.Request) {
 	r.wafBlocked.Add(1)
 	w.Header().Set("Cache-Control", "no-store")
-	if req.ProtoMajor == 1 && (req.ContentLength != 0 || len(req.TransferEncoding) != 0) {
-		w.Header().Set("Connection", "close")
-	}
+	delivery.RejectUnreadBody(w, req)
 	http.Error(w, "この要求は許可されていません。", http.StatusForbidden)
 }

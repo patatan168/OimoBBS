@@ -121,18 +121,28 @@ func cloneThreadRecord(record ThreadRecord) ThreadRecord {
 // applyFrameRecords は全操作の厳密検査と適用を一度で行い、検証済み操作から非公開索引を作る。
 // hashは呼出中不変の正規frame全体のSHA。成功前の候補・記録は所有状態へ反映しない。
 func applyFrameRecords(old *domain.Thread, f Frame, hash domain.Hash) (*domain.Thread, []ThreadRecord, error) {
-	candidate := old
+	candidate := domain.NewThreadBatch(old)
+	records, err := applyCandidateFrame(candidate, f, hash)
+	if err != nil {
+		return nil, nil, err
+	}
+	next, err := candidate.Finish()
+	return next, records, err
+}
+
+// applyCandidateFrame は元frameの全操作と採番を照合し、未公開の群だけへ適用する。
+// frame境界の不一致を含め、失敗した候補を呼出元で保存・公開してはならない。
+func applyCandidateFrame(candidate *domain.ThreadBatch, f Frame, hash domain.Hash) ([]ThreadRecord, error) {
 	records := make([]ThreadRecord, 0, len(f.Records))
 	for i, r := range f.Records {
-		next, op, err := domain.ApplyEncoded(candidate, r.JSON, r.DAT)
+		op, err := candidate.ApplyEncoded(r.JSON, r.DAT)
 		if err != nil {
-			return nil, nil, err
+			return nil, err
 		}
 		if uint64(op.Revision) != f.FirstSeq+uint64(i) || len(f.Records) > 1 && op.Type != "append" {
-			return nil, nil, ErrCorrupt
+			return nil, ErrCorrupt
 		}
-		candidate = next
 		records = append(records, ThreadRecord{r.ID, op.Revision, hash, op.Type, op.Committed, op.Dedup})
 	}
-	return candidate, records, nil
+	return records, nil
 }

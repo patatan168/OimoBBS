@@ -301,7 +301,7 @@ def restart_and_verify(probe, keys, restart_server, timeout_seconds=60):
     ready = False
     while time.monotonic() - started < timeout_seconds:
         try:
-            if probe.request("GET", "/")[0] == 200:
+            if probe.request("GET", "/bbsmenu.json")[0] == 200:
                 ready = True
                 break
         except (OSError, http.client.HTTPException):

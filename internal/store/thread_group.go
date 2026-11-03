@@ -226,13 +226,14 @@ func (g *ThreadCommitGroup) prepare(batches []ThreadAppend) ([]threadGroupPlan, 
 // prepareThreadGroup は従来と同じframe適用・符号化を使い、未公開の末尾候補を作る。
 func prepareThreadGroup(batch ThreadAppend) (threadGroupPlan, error) {
 	plan := threadGroupPlan{log: batch.Log, state: batch.Log.state}
+	candidate := domain.NewThreadBatch(batch.Log.state)
 	for _, raw := range batch.Frames {
 		frame, err := decodeFrameLayout(raw)
 		if err != nil {
 			return plan, err
 		}
 		var records []ThreadRecord
-		plan.state, records, err = applyFrameRecords(plan.state, frame, sha256.Sum256(raw))
+		records, err = applyCandidateFrame(candidate, frame, sha256.Sum256(raw))
 		if err != nil {
 			// 型検査が先に失敗しても、不正JSONの破損分類を失わない。
 			if syntax := validateFrameJSON(frame); syntax != nil {
@@ -241,6 +242,11 @@ func prepareThreadGroup(batch ThreadAppend) (threadGroupPlan, error) {
 			return plan, err
 		}
 		plan.records = append(plan.records, records...)
+	}
+	var err error
+	plan.state, err = candidate.Finish()
+	if err != nil {
+		return plan, err
 	}
 	block, err := EncodeWALBlock(batch.Frames)
 	plan.bytes = block

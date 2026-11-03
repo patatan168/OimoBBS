@@ -40,7 +40,7 @@ func TestWebCompressionRequired(t *testing.T) {
 		return w
 	}
 	before := repo.feedCompression.Status().Builds
-	for _, path := range []string{"/", "/compress/", "/search", "/reports", "/web/terms", "/web/post?bbs=compress", "/robots.txt", "/web/assets/ui.js", fmt.Sprintf("/test/read.cgi/compress/%d/", result.Key)} {
+	for _, path := range []string{"/", HealthcheckPath, "/compress/", "/search", "/reports", "/web/terms", "/web/post?bbs=compress", "/robots.txt", "/web/assets/ui.js", fmt.Sprintf("/test/read.cgi/compress/%d/", result.Key)} {
 		for _, method := range []string{"GET", "HEAD"} {
 			w := request(method, path, "", "", "bytes=0-")
 			if w.Code != 406 || w.Body.Len() != 0 || w.Header().Get("Cache-Control") != "no-store" || len(w.Result().Cookies()) != 0 {

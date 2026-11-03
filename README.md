@@ -44,13 +44,9 @@ bash scripts/setup.sh --allow-http --url http://127.0.0.1:8080 --start
 | 閲覧・書き込み・削除依頼・回答の確認 | [掲示板の使い方](docs/user-guide.md) |
 | 管理画面の使い方・操作記録の検索 | [管理画面ガイド](docs/admin-guide.md) |
 | 日常管理・停止・更新・バックアップ・復旧 | [運用手順](docs/operations.md) |
-| 投稿ログの取得・CSV列・署名ZIP | [提出用ログの取得](docs/admin-guide.md#提出用ログを取得する)・[提出ファイルの仕様](docs/features/records.md#提出用ファイル) |
-| スレッドのアーカイブ・削除・保存容量の回収 | [記録・削除・保持期限](docs/features/records.md) |
 | 設定場所・初期値・反映時点 | [設定一覧](docs/configuration.md) |
-| 管理者のロール・担当板・追加権限 | [管理者の権限](docs/admin-permissions.md) |
 | 投稿・閲覧・規制・記録の仕組み | [仕様の全体像](docs/specification.md) |
-| CPU・メモリへの自動追従、圧縮・JSONの仕組み | [資源管理](docs/features/resources.md)・[符号化・圧縮・並列処理](docs/encoding.md) |
-| HTTP要求の追加検査・大量アクセス制限 | [WAF](docs/waf.md) |
+| 実装・検証・測定結果 | [内部設計](docs/architecture.md)・[検証方法](docs/testing/README.md)・[検証記録](docs/testing/measurements.md) |
 
 [文書一覧](docs/README.md)にすべての手順と仕様をまとめています。管理画面の「マニュアル」でも、画面に沿った操作手順を確認できます。
 

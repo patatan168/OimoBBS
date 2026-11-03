@@ -20,7 +20,6 @@ import (
 	"time"
 
 	"oimobbs/internal/bootstrap"
-	"oimobbs/internal/delivery"
 	"oimobbs/internal/postcapture"
 )
 
@@ -158,11 +157,7 @@ func serveConfiguredWithNetworkClient(ctx context.Context, cfg bootstrap.Config,
 		if err != nil {
 			return err
 		}
-		if cfg.Admin.Transport == "direct_https" {
-			adminSocket, err = delivery.LimitListenerBySource(adminSocket, 64, 8)
-		} else {
-			adminSocket, err = delivery.LimitListener(adminSocket, 64)
-		}
+		adminSocket, err = limitAdminListener(adminSocket, cfg)
 		if err != nil {
 			return err
 		}
@@ -296,16 +291,14 @@ func runHealthcheck(args []string, diagnostics io.Writer) error {
 		transport.TLSClientConfig = &tls.Config{MinVersion: tls.VersionTLS12, RootCAs: roots}
 	}
 	client := &http.Client{Transport: transport, Timeout: 5 * time.Second, CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}
-	response, err := client.Get(cfg.Public.BaseURL + "/")
-	if err != nil {
-		return err
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	for _, path := range []string{"/", bootstrap.HealthcheckPath} {
+		if err := checkHealthURL(ctx, client, cfg.Public.BaseURL, path); err != nil {
+			return err
+		}
 	}
-	defer response.Body.Close()
-	if response.StatusCode != 200 {
-		return fmt.Errorf("healthcheck: HTTP %d", response.StatusCode)
-	}
-	_, err = io.Copy(io.Discard, response.Body)
-	return err
+	return nil
 }
 
 // validationOutput は起動ログと定期作成JSONの並行書込みを直列化する。

@@ -3,7 +3,7 @@
 <html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>WAF — OimoBBS管理</title>{{template "admin-assets" .}}</head>
 <body class="admin">{{template "admin-header" .}}
 <main id="main" tabindex="-1">
-<h1>WAF</h1><p><a href="{{adminBase}}/waf-events">WAF検出・拒否ログを見る（7日間保存）</a></p>
+<h1>WAF</h1><p><a class="tonal-link" href="{{adminBase}}/waf-events">WAF検出・拒否ログを見る（7日間保存）</a></p>
 <p>要求の検査とアクセス量の制限を管理します。現在の状態を確認し、必要な上限だけを調整してください。</p>
 <nav class="action-group" aria-label="WAFページ内の移動"><a href="#waf-settings">設定</a><a href="#waf-status">稼働状況</a><a href="#waf-scope">検査の範囲</a></nav>
 <section class="admin-panel" aria-labelledby="waf-current-heading"><div class="admin-section-heading"><h2 id="waf-current-heading">{{template "shield-icon"}}現在の稼働状況</h2><a class="tonal-link" href="{{adminBase}}/waf">最新の状況を取得</a></div>
@@ -91,7 +91,7 @@
 <p>WAF専用のIP・Cookie・本文・攻撃文字列は保存しません。WAFがOFFなら、この画面の頻度・同時処理の上限も停止します。認証、利用者の投稿間隔、板の接続許可、運用設定の通信量・処理数の上限は継続します。初期状態はOFFです。</p>
 <p>永久BANは行いません。回線帯域が埋まる規模の攻撃は上流側の対策が必要です。</p>
 </details></section>
-<p><a href="{{adminBase}}/operations">運用設定へ戻る</a></p>
+<p><a class="tonal-link" href="{{adminBase}}/operations">運用設定へ戻る</a></p>
 </main>{{template "footer" .}}</body></html>
 
 {{define "page-assets"}}{{template "stylesheet" "admin-settings.css"}}{{template "stylesheet" "protection.css"}}{{template "stylesheet" "admin-waf.css"}}{{template "javascript" "admin-waf.js"}}{{template "javascript" "admin-settings.js"}}{{end}}

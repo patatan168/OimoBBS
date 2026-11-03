@@ -97,7 +97,15 @@ class Probe:
         cookies = getattr(state, "cookies", {})
         if cookies:
             chosen["Cookie"] = "; ".join(k + "=" + v for k, v in cookies.items())
-        conn.request(method, path, body, chosen)
+        pause = getattr(state, "upload_pause_seconds", 0)
+        if pause and method == "POST" and isinstance(body, bytes):
+            chosen["Content-Length"] = str(len(body))
+            conn.request(method, path, headers=chosen)
+            time.sleep(pause)
+            conn.send(body)
+            state.upload_pause_seconds = 0
+        else:
+            conn.request(method, path, body, chosen)
         response = conn.getresponse()
         data = response.read()
         for key, value in response.getheaders():
@@ -127,7 +135,10 @@ class Probe:
         for _ in range(3):
             status, received, data, part = self.request("POST", "/test/bbs.cgi", body, headers)
             elapsed += part
-            self.local.post_stages.append({"stage": "confirmation" if b"2ch_X:cookie" in data else "submit", "http_ms": part})
+            stage = {"stage": "confirmation" if b"2ch_X:cookie" in data else "submit", "http_ms": part, "status": status}
+            if status in (429, 503):
+                stage["rejection"] = data.decode("utf-8", errors="replace")[:160]
+            self.local.post_stages.append(stage)
             if b"2ch_X:cookie" not in data:
                 break
         if status != 200:
@@ -275,7 +286,25 @@ def main():
     parser.add_argument("--posting-capacity-subject-every", type=int, default=0, help="並行閲覧のN回ごとにsubject.txtを取得する。0は従来のDAT/Webだけ")
     parser.add_argument("--collect-profiles", action="store_true", help="診断用イメージだけが出力する/data/profilesを停止後に収集する")
     parser.add_argument("--collect-server-log", action="store_true", help="隔離サーバーの診断出力を停止後に保存する")
+    parser.add_argument("--attack-mix", action="store_true", help="既定WAFで正常投稿に大量投稿・低速本文・低速ヘッダーを混ぜ、正常性と早期拒否を照合する")
+    parser.add_argument("--attack-tls-churn", action="store_true", help="攻撃混在に同一IPから毎秒400回のTLS再接続を12秒追加する")
+    parser.add_argument("--attack-normal-rate", type=int, choices=(10, 20), default=10, help="攻撃混在中の正常投稿/秒。10は既定枠内、20は同時枠超過を含む境界確認")
+    parser.add_argument("--attack-capacity-pulse", action="store_true", help="攻撃開始時に8接続の本文を250ms遅らせ、正常投稿の1秒分と同時枠を競合させる")
+    parser.add_argument("--attack-recovery-seconds", type=int, choices=(5, 15, 30, 60, 120), default=5, help="攻撃終了後の正常投稿継続秒数。再悪化や周期的な遅れは60・120秒でも確認する")
+    parser.add_argument("--attack-pause-network-refresh", action="store_true", help="隔離サイトの回線情報自動更新を止め、既存取得の終了後に測定する")
     args = parser.parse_args()
+    if args.attack_tls_churn and not args.attack_mix:
+        parser.error("--attack-tls-churn requires --attack-mix")
+    if args.attack_pause_network_refresh and not args.attack_mix:
+        parser.error("--attack-pause-network-refresh requires --attack-mix")
+    if args.attack_recovery_seconds != 5 and not args.attack_mix:
+        parser.error("--attack-recovery-seconds requires --attack-mix")
+    if args.attack_capacity_pulse and not args.attack_mix:
+        parser.error("--attack-capacity-pulse requires --attack-mix")
+    if args.attack_normal_rate != 10 and not args.attack_mix:
+        parser.error("--attack-normal-rate requires --attack-mix")
+    if args.attack_mix and (not args.waf or args.reading_only or args.peak_mix or args.posting_capacity_rate or args.crash_recovery or args.live_updates or args.new_codecs or args.waf_posting_rate or args.waf_posting_concurrent or args.waf_posting_client_rate):
+        parser.error("--attack-mix requires --waf, default WAF limits and an exclusive load mode")
     if args.reading_only and (args.peak_mix or args.posting_capacity_rate or args.live_updates or args.new_codecs):
         parser.error("--reading-only cannot be combined with another load mode")
     if args.reading_kinds != ["dat", "html", "subject"] and not args.reading_only:
@@ -321,8 +350,8 @@ def main():
         parser.error("peak capacity requires --peak-mix, --peak-post-workers 5 and at most 20 capacity workers")
     if not 1 <= args.io_contention_workers <= 8 or args.io_contention_workers != 1 and not args.io_contention:
         parser.error("I/O contention workers must be 1..8 and require --io-contention")
-    if args.io_contention and not args.peak_mix:
-        parser.error("io contention requires peak mix")
+    if args.io_contention and not (args.peak_mix or args.attack_mix):
+        parser.error("io contention requires peak mix or attack mix")
     if (args.peak_full_coding != "identity" or args.peak_full_conditional) and not args.peak_mix:
         parser.error("full coding/conditional comparison requires peak mix")
     if args.peak_web_coding != "gzip" and not args.peak_mix:
@@ -365,6 +394,7 @@ def main():
         try:
             password = None
             waf_settings = None
+            setup_metadata = {}
             if args.waf:
                 from probe_waf import initialize
                 password = initialize(image, name + "-data", config, certificate, key)
@@ -391,7 +421,7 @@ def main():
                 probe.io_contention_workers = args.io_contention_workers
             for attempt in range(100):
                 try:
-                    if probe.request("GET", "/")[0] == 200:
+                    if probe.request("GET", "/bbsmenu.json")[0] == 200:
                         break
                 except (OSError, http.client.HTTPException):
                     probe.local = threading.local()
@@ -400,10 +430,29 @@ def main():
                 raise RuntimeError("isolated server did not start")
             if args.waf:
                 from probe_waf import enable
-                waf_settings = enable(admin_port, password, args.waf_posting_rate, args.waf_posting_concurrent, args.waf_posting_client_rate)
+                waf_settings = enable(admin_port, password, args.waf_posting_rate, args.waf_posting_concurrent, args.waf_posting_client_rate, preserve_traffic_defaults=args.attack_mix, pause_network_refresh=args.attack_pause_network_refresh, setup_metadata=setup_metadata)
                 password = None
                 if probe.request("GET", "/.git/config")[0] != 403:
                     raise RuntimeError("isolated public WAF did not block secret-file probe")
+            if args.attack_mix:
+                probe.attack_tls_churn = args.attack_tls_churn
+                probe.attack_capacity_pulse = args.attack_capacity_pulse
+                probe.attack_recovery_seconds = args.attack_recovery_seconds
+                from probe_attack_mix import measure
+                result = {"image": image, "waf": waf_settings, "setup": setup_metadata, "cpu_max": (group / "cpu.max").read_text().strip(),
+                          "memory_max": (group / "memory.max").read_text().strip(),
+                          **measure(probe, counters, args.attack_normal_rate, waf_settings["traffic"]["posting"]), "samples": probe.samples,
+                          "memory_peak_bytes": int((group / "memory.peak").read_text()),
+                          "memory_events": (group / "memory.events").read_text()}
+                output = pathlib.Path(args.output)
+                with output.open("x") as file:
+                    json.dump(result, file, indent=2)
+                output.chmod(0o600)
+                report_written = True
+                print(json.dumps({k: v for k, v in result.items() if k not in {"samples", "events"}}, indent=2), flush=True)
+                if not result["ok"]:
+                    raise RuntimeError("attack mix acceptance failed; inspect saved report")
+                return
             if args.posting_capacity_rate:
                 from probe_posting_capacity import measure
                 result = {"image": image, "waf": waf_settings,
@@ -613,6 +662,15 @@ def main():
                     with pathlib.Path(str(report) + ".server.log").open("x") as log:
                         subprocess.run(["docker", "logs", name], stdout=log, stderr=subprocess.STDOUT, check=True)
                     pathlib.Path(str(report) + ".server.log").chmod(0o600)
+                if args.attack_mix and report_written:
+                    # 新規volumeの合成ログだけを停止後に照合し、本文例は集計結果へ保存しない。
+                    from probe_recovery_latency import security_log_summary
+                    security_dir = folder / "security-events"
+                    command("docker", "cp", f"{name}:/data/site/security-events", str(security_dir))
+                    saved = json.loads(report.read_text())
+                    saved["security_log"] = security_log_summary(security_dir)
+                    report.write_text(json.dumps(saved, indent=2) + "\n")
+                    report.chmod(0o600)
                 if args.collect_profiles:
                     command("docker", "cp", f"{name}:/data/profiles", str(report) + ".profiles")
                 if args.optional_log_stats and report_written:

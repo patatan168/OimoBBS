@@ -92,6 +92,10 @@ func (repo *Repository) SiteWebHandler(observer *evidence.HTTPObserver) http.Han
 		if repo.closedBoardWebGate(w, r) || repo.hiddenBoardWebGate(w, r) {
 			return
 		}
+		if r.URL.Path == HealthcheckPath {
+			repo.healthcheckPage(w, r)
+			return
+		}
 		if r.URL.Path == "/web/terms" {
 			repo.publicConsentPage(w, r)
 			return

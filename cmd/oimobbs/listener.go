@@ -9,7 +9,7 @@ import (
 	"oimobbs/internal/delivery"
 )
 
-// limitPublicListener は直結では接続元64枠、認証edgeでは既存の全体枠を使う。
+// limitPublicListener は直結では接続元64枠と新規接続頻度、認証edgeでは既存の全体枠を使う。
 // edgeの利用者別制限はmTLS検証後に確定したendpointへ要求層で適用する。
 func limitPublicListener(listener net.Listener, cfg bootstrap.Config) (net.Listener, error) {
 	if cfg.Edge != nil {
@@ -26,7 +26,24 @@ func limitPublicListener(listener net.Listener, cfg bootstrap.Config) (net.Liste
 		}
 		return delivery.LimitListener(&edgePeerListener{Listener: listener, prefixes: prefixes}, 4096)
 	}
-	return delivery.LimitListenerBySource(listener, 4096, 64)
+	bounded, err := delivery.LimitListenerBySource(listener, 4096, 64)
+	if err != nil {
+		return nil, err
+	}
+	return delivery.LimitConnectionRate(bounded, delivery.PublicConnectionRate())
+}
+
+// limitAdminListener は管理の直結HTTPSだけに回線別同時枠とTLS前の頻度上限を適用する。
+// ローカルの管理トンネルは全体同時枠だけとし、集約元を利用者として数えない。
+func limitAdminListener(listener net.Listener, cfg bootstrap.Config) (net.Listener, error) {
+	if cfg.Admin.Transport != "direct_https" {
+		return delivery.LimitListener(listener, 64)
+	}
+	bounded, err := delivery.LimitListenerBySource(listener, 64, 8)
+	if err != nil {
+		return nil, err
+	}
+	return delivery.LimitConnectionRate(bounded, delivery.ConnectionRate{GlobalRate: 32, GlobalBurst: 64, SourceRate: 4, SourceBurst: 8})
 }
 
 type edgePeerListener struct {

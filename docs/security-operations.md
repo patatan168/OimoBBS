@@ -67,7 +67,9 @@ systemd設定例は [監視サービス](../deploy/oimobbs-security-monitor.serv
 
 オンラインバックアップの設定・作成は[運用手順](operations.md#バックアップ)を参照してください。稼働用の定期バックアップ構成では12時間ごとに作成し、本文の元の保持期限と最長24時間のコピー期限を維持します。一般のセットアップスクリプトは、この定期作成や暗号化を自動登録しません。
 
-[seal_online_backup.py](../tools/seal_online_backup.py) は作成・隔離再生の成功を確認して、コピーと鍵束を暗号化します。暗号化はX25519、HKDF-SHA256、AES-256-GCMの64KiB単位と認証済み終端を使う独自の `OIMOSEAL1` 形式です。改変・順序変更・切詰め・鍵違いを拒否します。
+[oimoseal](../cmd/oimoseal/backup_commands.go) の `sync` は作成・隔離再生の成功記録を読み、`pack` がコピーと鍵束を再検証して暗号化します。暗号化・tar作成・送受信の管理・期限回収はGoで実装し、この経路でPythonや外部tarコマンドは使いません。暗号化はX25519、HKDF-SHA256、AES-256-GCMの64KiB単位と認証済み終端を使う独自の `OIMOSEAL1` 形式です。改変・順序変更・切詰め・鍵違いを拒否します。
+
+暗号文を同期・設置してから、完成記録を一時ファイルへ書いて同期し、置換します。保存先ディレクトリの同期まで成功した場合だけ、完成報告・転送へ進みます。既存暗号文を再利用・転送する前には、全体のSHA-256を完成記録と照合します。不一致・欠落・壊れた完成記録は、Dockerの完成ログに残る未期限切れのコピーを再検証・再暗号化します。再作成できない不正な組は転送せずエラーにします。全体照合により、保存量に比例した読込みが増えます。秘密鍵による復号検証は暗号化ホストでは行いません。[途中停止・保存失敗](testing/sealed-backup-resilience.md)と[復号・転送再試行の追加検証](testing/sealed-restore-resilience.md)を参照してください。
 
 ```sh
 CGO_ENABLED=0 go build -o ./bin/oimoseal ./cmd/oimoseal
@@ -76,11 +78,29 @@ CGO_ENABLED=0 go build -o ./bin/oimoseal ./cmd/oimoseal
   --input backup.tar --output backup.tar.seal
 ./bin/oimoseal open --key /private/recovery-identity/private.key \
   --input backup.tar.seal --output restored.tar
+./bin/oimoseal sync --container oimobbs-validation-bbs-1 \
+  --image oimobbs-validation:local --source var/security/online-backup \
+  --output var/security/encrypted-backups \
+  --destination backup-host:/srv/oimo-backup-receive
 ```
+
+`sync` の送信元にはDocker CLIと、転送する場合はOpenSSHクライアントが必要です。指定イメージにも `oimoseal pack` と保存形式に対応する `oimobbs` を含めます。`source/encryption/public.key` は32byteの公開鍵とし、コピー・鍵束とともにコンテナの実行UIDが所有します。ファイルは0600、ディレクトリは0700を使い、暗号文の出力先はホスト側の実行ユーザー、受信先はSSHユーザーが所有します。復号秘密鍵は元コピーの領域に置きません。定期実行は[service例](../deploy/oimobbs-sealed-backup.service.example)を使います。
+
+復号結果は全chunkと終端の認証、ファイルの同期・Closeを終えてから最終名へ排他的に設置します。強制終了時の一時ファイルは0600で、同じ出力名の次回実行時に排他を取って回収します。同名出力の処理中は待機せずエラーを返し、別名の出力は並行できます。排他用の空の0600ファイル `.oimoseal-<hash>-lock` は保持します。既存の最終出力は上書きしません。
+
+最終名設置後のディレクトリ同期に失敗した場合は、完全なファイルが残っていてもエラーを返します。終了コードを確認し、再検証する場合は新しい出力名を使います。出力先にはファイルの排他・hardlink・ディレクトリ同期に対応する保存先を使います。
 
 復号秘密鍵をアプリや暗号化処理へ渡さず、暗号文と別に保管します。ホスト喪失に備える場合は別ホストへ保管してください。暗号化後も元の期限で回収します。
 
-`seal_online_backup.py` の `--destination SSH設定alias:/absolute/directory` でSFTP転送を指定できます。登録済みホスト鍵を検査し、受信側でも期限情報に基づいて回収します。
+`sync` の `--destination SSH設定alias:/absolute/directory` で原子的な世代設置を伴うSSH転送を指定できます。受信先にはGo版 `oimoseal` を事前に `/usr/local/bin/oimoseal` へ配置し、SSHコマンド実行を許可します。異なる設置先は `--receiver /absolute/path/oimoseal` で指定します。受信先にPython・Docker・tarコマンドは不要です。SFTP専用アカウントでは利用できません。既存のOpenSSH設定を使い、任意の設定ファイルは `--ssh-config` で選べます。登録済みホスト鍵を厳格に検査し、復号秘密鍵は送りません。
+
+既存の暗号文と完成記録だけを送る場合は `oimoseal send --input /private/backup.seal --manifest /private/backup.json --destination backup-host:/srv/oimo-backup-receive` を使います。`receive` はこの送信処理から呼び出します。
+
+受信先の親directoryをSSHユーザー所有の0700で用意します。暗号文と完成記録は受信先の一時directoryへ保存し、長さ・全体hash・期限を照合して、両fileとdirectoryを同期します。その後 `backup-<ID>-<SHA256>/` へrenameし、親を同期してから完了を通知します。完成世代の中身は `archive.seal` と `manifest.json` です。期限内の以前の世代は上書きしません。受信中断や応答消失後の再送、設置済み世代の再検証にも対応します。
+
+転送の再試行は、Dockerの完成ログではなく保存済みの期限内の完成記録からも行います。Dockerログ取得は30秒までとし、取得失敗時も検証済みの既存コピーの転送・期限回収へ進んだ後、ログ取得のエラーを返します。受信した暗号文のhash一致と、復号秘密鍵での認証復号は別に確認します。
+
+送信元が停止しても期限を守るため、受信先にも[独立した回収timer](../deploy/oimobbs-backup-receive-gc.timer.example)を設定し、`/usr/local/bin/oimoseal sweep --root /srv/oimo-backup-receive` を実行します。暗号文・完成記録・世代の保存配置は従来と同じです。Python版からは送信元・受信先の実行バイナリとserviceを一緒に更新します。旧scpの平置き `.seal/.json` は回収対象外なので、既存手順で期限管理してください。Go版の実SSH・Docker検証範囲は[Goへの統合](testing/sealed-backup-go.md)を参照してください。
 
 ### 復旧
 

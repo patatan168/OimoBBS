@@ -2,26 +2,37 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"flag"
 	"fmt"
 	"io"
 	"oimobbs/internal/sealedbackup"
 	"os"
+	"os/signal"
 	"path/filepath"
 	"syscall"
 )
 
 func main() {
-	if err := run(os.Args[1:]); err != nil {
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+	stopInput := context.AfterFunc(ctx, func() { _ = os.Stdin.Close() })
+	defer stopInput()
+	if err := runContext(ctx, os.Args[1:], os.Stdin, os.Stdout); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 }
 
-func run(args []string) error {
+func run(args []string) error { return runContext(context.Background(), args, os.Stdin, os.Stdout) }
+func runContext(ctx context.Context, args []string, in io.Reader, out io.Writer) error {
 	if len(args) == 0 {
-		return errors.New("usage: oimoseal generate --output <new-directory> | seal/open --key <file> --input <file> --output <new-file>")
+		return errors.New("usage: oimoseal generate|seal|open|pack|sync|send|receive|sweep [options]")
+	}
+	switch args[0] {
+	case "receive", "sweep", "send", "sync", "pack":
+		return runBackupCommand(ctx, args[0], args[1:], in, out)
 	}
 	f := flag.NewFlagSet(args[0], flag.ContinueOnError)
 	output := f.String("output", "", "新規出力path")
@@ -56,7 +67,7 @@ func run(args []string) error {
 				return err
 			}
 		}
-		return nil
+		return syncOutputDirectory(filepath.Dir(*output))
 	}
 	if (args[0] != "seal" && args[0] != "open") || *input == "" || *key == "" {
 		return errors.New("seal/open require key and input")
@@ -74,13 +85,15 @@ func run(args []string) error {
 		return err
 	}
 	defer clear(k)
-	src := os.Stdin
+	var src io.Reader = in
+	var inputFile *os.File
 	if *input != "-" {
-		src, err = os.Open(*input)
+		inputFile, err = os.Open(*input)
 		if err != nil {
 			return err
 		}
-		defer src.Close()
+		defer inputFile.Close()
+		src = inputFile
 	}
 	transform := func(w io.Writer) error {
 		if args[0] == "seal" {
@@ -92,24 +105,7 @@ func run(args []string) error {
 		if args[0] != "seal" {
 			return errors.New("decryption requires an exclusive output file")
 		}
-		return transform(os.Stdout)
+		return transform(out)
 	}
 	return newFile(*output, transform)
-}
-
-// newFile は所有者限定で排他的に作成し、失敗時の部分出力を削除する。
-func newFile(path string, write func(io.Writer) error) error {
-	f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0600)
-	if err != nil {
-		return err
-	}
-	err = write(f)
-	if err == nil {
-		err = f.Sync()
-	}
-	err = errors.Join(err, f.Close())
-	if err != nil {
-		os.Remove(path)
-	}
-	return err
 }

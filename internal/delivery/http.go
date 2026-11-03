@@ -18,6 +18,7 @@ type Response struct {
 	scheduler       *Scheduler
 	ip              netip.Addr
 	ctx             context.Context
+	request         *http.Request
 	started         bool
 	terminal        error
 	failureResponse bool
@@ -31,7 +32,7 @@ func (s *Scheduler) Wrap(next http.Handler) http.Handler {
 		if e != nil || err != nil || ip.Zone() != "" {
 			panic(http.ErrAbortHandler)
 		}
-		out := &Response{ResponseWriter: w, scheduler: s, ip: ip.Unmap(), ctx: r.Context()}
+		out := &Response{ResponseWriter: w, scheduler: s, ip: ip.Unmap(), ctx: r.Context(), request: r}
 		next.ServeHTTP(out, r)
 		if out.terminal != nil && !out.failureResponse {
 			panic(http.ErrAbortHandler)
@@ -175,6 +176,9 @@ func (w *Response) fail(cause error) {
 	}
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	w.Header().Set("Retry-After", "1")
+	if w.request != nil {
+		RejectUnreadBody(w.ResponseWriter, w.request)
+	}
 	body := []byte("現在混雑しています。\n")
 	permit, e := w.reserve(w.headerBytes(503) + len(body))
 	if e != nil {

@@ -7,4 +7,4 @@
 <form method="post" action="{{adminBase}}/terms"><input type="hidden" name="csrf" value="{{.CSRF}}"><input type="hidden" name="revision" value="{{.State.ETag}}"><input type="hidden" name="request_id" value="{{.RequestID}}">
 <p><label>Cookieの使用について<textarea name="cookie_notice" rows="6" cols="60" required>{{.State.Consent.CookieNotice}}</textarea></label></p>
 <p><label>利用規約<textarea name="terms_text" rows="18" cols="60" required>{{.State.Consent.TermsText}}</textarea></label></p>
-<p>HTMLは使えません。Cookie説明は4KiB、利用規約は24KiBまでです。変更日は自動で設定します。</p><button type="submit">保存</button></form><p><a href="{{adminBase}}/">サイト設定に戻る</a></p></main>{{template "footer" .}}</body></html>
+<p>HTMLは使えません。Cookie説明は4KiB、利用規約は24KiBまでです。変更日は自動で設定します。</p><button type="submit">保存</button></form><p><a class="tonal-link" href="{{adminBase}}/">サイト設定に戻る</a></p></main>{{template "footer" .}}</body></html>

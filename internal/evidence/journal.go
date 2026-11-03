@@ -59,7 +59,14 @@ type Journal struct {
 
 // OpenJournal は保存済み全イベントの署名・source・連続seq・前hashを照合する。
 func OpenJournal(dir string, owner domain.ID, day uint64, keyID uint32, key ed25519.PrivateKey, validate PayloadValidator) (*Journal, error) {
-	return openJournalInspected(dir, owner, day, keyID, key, validate, nil)
+	return openJournalInspected(dir, owner, day, keyID, key, validate, nil, false)
+}
+
+// OpenJournalConcurrent は独立した新規行の署名・本文検査をCPU数以内で分担して復旧する。
+// validateは並行呼出し可能とする。連番・前hash・更新や削除は全検査後に順序どおり照合する。
+// 保持するblockと修復・同期の条件はOpenJournalと同じで、検査を省略しない。
+func OpenJournalConcurrent(dir string, owner domain.ID, day uint64, keyID uint32, key ed25519.PrivateKey, validate PayloadValidator) (*Journal, error) {
+	return openJournalInspected(dir, owner, day, keyID, key, validate, nil, true)
 }
 
 // OpenJournalInspected は全署名・連鎖・業務検査とreader/時計境界を、一回の読込で照合する。
@@ -69,10 +76,10 @@ func OpenJournalInspected(dir string, owner domain.ID, day uint64, keyID uint32,
 	if inspect == nil {
 		return nil, store.ErrCorrupt
 	}
-	return openJournalInspected(dir, owner, day, keyID, key, validate, inspect)
+	return openJournalInspected(dir, owner, day, keyID, key, validate, inspect, true)
 }
 
-func openJournalInspected(dir string, owner domain.ID, day uint64, keyID uint32, key ed25519.PrivateKey, validate PayloadValidator, inspect func(JournalInspection) error) (*Journal, error) {
+func openJournalInspected(dir string, owner domain.ID, day uint64, keyID uint32, key ed25519.PrivateKey, validate PayloadValidator, inspect func(JournalInspection) error, concurrent bool) (*Journal, error) {
 	date := fmt.Sprint(day)
 	if _, e := time.Parse("20060102", date); e != nil || len(date) != 8 || owner == (domain.ID{}) || keyID == 0 || len(key) != ed25519.PrivateKeySize || validate == nil {
 		return nil, errors.New("invalid journal parameters")
@@ -92,7 +99,7 @@ func openJournalInspected(dir string, owner domain.ID, day uint64, keyID uint32,
 	var log *store.ControlLog
 	var e error
 	if inspect == nil {
-		log, e = store.OpenControl(dir, 8, owner, day, j.validateValue)
+		log, e = store.OpenControlRecovery(dir, 8, owner, day, j.validateValue, store.ControlRecoveryOptions{ParallelNewValues: concurrent})
 	} else {
 		log, e = store.OpenControlRecovery(dir, 8, owner, day, j.validateValue, store.ControlRecoveryOptions{ParallelNewValues: true, Inspect: func(state store.ControlState) error {
 			if err := j.replayState(state); err != nil {

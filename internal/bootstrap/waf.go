@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"oimobbs/internal/adminauth"
+	"oimobbs/internal/delivery"
 	"oimobbs/internal/domain"
 	"oimobbs/internal/identity"
 	"oimobbs/internal/store"
@@ -239,8 +240,16 @@ func (r *Repository) trafficHandler(next http.Handler, admin bool) http.Handler 
 		if err != nil {
 			ip, _ = netip.ParseAddr(req.RemoteAddr)
 		}
-		release, decision := guard.AcquireOperation(ip, wafOperation(req, admin, base), trafficNow())
+		op := wafOperation(req, admin, base)
+		var release func()
+		var decision waf.TrafficDecision
+		if op == waf.Posting {
+			release, decision = guard.AcquirePosting(req.Context(), ip, trafficNow())
+		} else {
+			release, decision = guard.AcquireOperation(ip, op, trafficNow())
+		}
 		if decision.Status != 0 {
+			delivery.RejectUnreadBody(w, req)
 			r.recordWAF(req, "traffic_limit")
 			w.Header().Set("Cache-Control", "no-store")
 			w.Header().Set("Retry-After", strconv.Itoa(decision.RetryAfter))

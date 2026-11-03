@@ -11,7 +11,7 @@
 <li class="passkey-row"><span class="passkey-row-icon">{{template "passkey-icon"}}</span><div class="passkey-row-copy"><h3>{{.Name}}</h3><p>登録日 <span>{{.Created}}</span></p></div>{{if $.Reauthenticated}}<button class="passkey-remove" type="button" data-passkey-remove="{{.ID}}" aria-label="{{.Name}}のパスキーを削除">削除</button>{{end}}</li>
 {{else}}<li class="passkey-empty"><span class="passkey-emblem">{{template "passkey-icon"}}</span><h3>まだパスキーがありません</h3><p>お使いの端末やセキュリティキーを登録すると、<br>パスワードを入力せずにログインできます。</p></li>{{end}}</ul></section>
 {{if .Reauthenticated}}<section class="passkey-panel passkey-add" aria-labelledby="passkey-add-title"><h2 id="passkey-add-title">新しいパスキーを追加</h2><p>あとで見分けられる名前を付けてください。</p><form data-passkey-register><label>パスキーの名前<input name="name" maxlength="128" required placeholder="例：普段使うスマートフォン"></label><button class="passkey-button" type="submit">{{template "passkey-icon"}}<span>パスキーを登録</span></button></form></section>{{end}}
-<section class="passkey-panel" data-otp-manager data-csrf="{{.OTPCSRF}}"><h2>認証アプリのOTP</h2><p>{{if .OTPEnabled}}登録済み{{else}}未登録{{end}}。6桁のコードは30秒ごとに変わります。</p>{{if .Reauthenticated}}{{if .OTPEnabled}}<button type="button" data-otp-remove>OTPを解除する</button>{{else}}<button type="button" data-otp-begin>認証アプリへ登録する</button><div data-otp-setup hidden><p>認証アプリでQRコードを読み取るか、「手動入力」で追加してください。種類は時刻ベース、6桁、30秒です。登録用キーはこの画面だけに表示します。</p><img data-otp-qr alt="認証アプリ登録用QRコード"><p><strong>登録用キー：</strong><code data-otp-secret></code></p><p><a data-otp-uri>対応する認証アプリで開く</a></p><form data-otp-finish><label>アプリの6桁のコード<input name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required></label><button type="submit">コードを確認して登録</button></form><p>登録が完了すると全端末でログアウトします。使用したコードは再利用できないため、次のコードでログインしてください。</p></div>{{end}}{{else}}<p>登録・解除の前に<a href="{{adminBase}}/reauth?return_to=%2Fpasskeys">再認証</a>してください。</p>{{end}}</section>
+<section class="passkey-panel" data-otp-manager data-csrf="{{.OTPCSRF}}"><h2>認証アプリのOTP</h2><p>{{if .OTPEnabled}}登録済み{{else}}未登録{{end}}。6桁のコードは30秒ごとに変わります。</p>{{if .Reauthenticated}}{{if .OTPEnabled}}<button type="button" data-otp-remove>OTPを解除する</button>{{else}}<button type="button" data-otp-begin>認証アプリへ登録する</button><div data-otp-setup hidden><p>認証アプリでQRコードを読み取るか、「手動入力」で追加してください。種類は時刻ベース、6桁、30秒です。登録用キーはこの画面だけに表示します。</p><img data-otp-qr alt="認証アプリ登録用QRコード"><p><strong>登録用キー：</strong><code data-otp-secret></code></p><p><a class="tonal-link" data-otp-uri>対応する認証アプリで開く</a></p><form data-otp-finish><label>アプリの6桁のコード<input name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required></label><button type="submit">コードを確認して登録</button></form><p>登録が完了すると全端末でログアウトします。使用したコードは再利用できないため、次のコードでログインしてください。</p></div>{{end}}{{else}}<p>登録・解除の前に再認証してください。</p><p><a class="tonal-link" href="{{adminBase}}/reauth?return_to=%2Fpasskeys">再認証</a></p>{{end}}</section>
 <section class="passkey-panel" data-auth-policy data-csrf="{{.OTPCSRF}}">
 <h2>このアカウントのログイン制限</h2>
 {{if .StrongReauthenticated}}
@@ -23,7 +23,7 @@
 {{else}}
 <p>パスキーまたはパスワード＋OTPだけを受け付ける</p>
 <p data-auth-policy-state>現在の設定：<strong>{{if .PasswordDisabled}}有効{{else}}無効{{end}}</strong></p>
-<p>変更するには<a href="{{adminBase}}/reauth?return_to=%2Fpasskeys">パスキーまたはパスワードとOTPで再認証</a>してください。</p>
+<p>変更するには再認証してください。</p><p><a class="tonal-link" href="{{adminBase}}/reauth?return_to=%2Fpasskeys">パスキーまたはパスワードとOTPで再認証</a></p>
 {{end}}
 </section>
 <p class="passkey-status" role="status" data-passkey-status aria-live="polite"></p></div>

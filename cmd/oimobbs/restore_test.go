@@ -61,14 +61,25 @@ func TestEdgeHealthcheckUsesPublicOrigin(t *testing.T) {
 	if e != nil {
 		t.Fatal(e)
 	}
-	var served atomic.Bool
+	var served atomic.Uint32
 	front := httptest.NewUnstartedServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Header.Get("Accept-Encoding") != "gzip" {
 			w.WriteHeader(http.StatusNotAcceptable)
 			return
 		}
-		served.Store(true)
+		switch r.URL.Path {
+		case "/":
+			served.Or(1)
+		case bootstrap.HealthcheckPath:
+			served.Or(2)
+		default:
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
 		w.WriteHeader(200)
+		if r.URL.Path == bootstrap.HealthcheckPath {
+			_, _ = w.Write([]byte("ok\n"))
+		}
 	}))
 	front.TLS = &tls.Config{Certificates: []tls.Certificate{pair}, MinVersion: tls.VersionTLS12}
 	front.StartTLS()
@@ -82,7 +93,7 @@ func TestEdgeHealthcheckUsesPublicOrigin(t *testing.T) {
 		t.Fatal(e)
 	}
 	var diagnostics bytes.Buffer
-	if e = runHealthcheck([]string{"--config", configFile}, &diagnostics); e != nil || !served.Load() {
+	if e = runHealthcheck([]string{"--config", configFile}, &diagnostics); e != nil || served.Load() != 3 {
 		t.Fatal(e, diagnostics.String())
 	}
 }

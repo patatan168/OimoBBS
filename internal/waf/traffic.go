@@ -67,6 +67,9 @@ type TrafficGuard struct {
 	work                 [workCount]workState
 	workLimits           [workCount]workLimit
 	workStats            [workCount]WorkStats
+	postingWaiters       map[netip.Prefix]int
+	postingChanged       chan struct{}
+	postingWaiting       atomic.Int64
 }
 
 // Configure は実行中の枠・消費済みトークンを維持して設定を交換する。不正設定はpanicする。
@@ -95,6 +98,7 @@ func (g *TrafficGuard) Configure(settings TrafficSettings, now time.Time) {
 	g.search.tokens = math.Min(g.search.tokens, float64(settings.SearchGlobalBurst))
 	g.configureWork(settings, now)
 	g.settings = settings
+	g.notifyPostingLocked()
 }
 
 // Acquire は枠を一度だけ取得する。拒否ではトークンを消費せず、IP停止期限も作らない。
@@ -112,12 +116,18 @@ func (g *TrafficGuard) Acquire(ip netip.Addr, search bool, now time.Time) (func(
 func (g *TrafficGuard) AcquireOperation(ip netip.Addr, op Operation, now time.Time) (func(), TrafficDecision) {
 	g.mu.Lock()
 	defer g.mu.Unlock()
+	release, decision, _ := g.acquireOperation(ip, op, now, false)
+	return release, decision
+}
+
+// acquireOperation はguardの排他内で判定し、指定時だけ投稿の全体同時枠競合を保留する。
+func (g *TrafficGuard) acquireOperation(ip netip.Addr, op Operation, now time.Time, wait bool) (func(), TrafficDecision, bool) {
 	s := g.settings
 	if !s.Enabled {
-		return func() {}, TrafficDecision{}
+		return func() {}, TrafficDecision{}, false
 	}
 	if !ip.IsValid() || ip.Zone() != "" || op >= operationEnd {
-		return nil, g.reject(http.StatusServiceUnavailable, 1)
+		return nil, g.reject(http.StatusServiceUnavailable, 1), false
 	}
 	ip = ip.Unmap()
 	bits := 64
@@ -136,11 +146,14 @@ func (g *TrafficGuard) AcquireOperation(ip netip.Addr, op Operation, now time.Ti
 	search := op == Search
 	work := int(op) - int(Posting)
 	if decision := g.globalLimit(search); decision.Status != 0 {
-		return nil, g.reject(decision.Status, decision.RetryAfter)
+		return nil, g.reject(decision.Status, decision.RetryAfter), false
 	}
 	if work >= 0 {
 		if d := g.globalWorkLimit(work, now); d.Status != 0 {
-			return nil, g.rejectWork(work, d)
+			if wait && work == 0 && g.postingCanWait(key, now) {
+				return nil, d, true
+			}
+			return nil, g.rejectWork(work, d), false
 		}
 	}
 
@@ -149,7 +162,7 @@ func (g *TrafficGuard) AcquireOperation(ip netip.Addr, op Operation, now time.Ti
 		client = g.clients[key]
 		if client == nil {
 			if len(g.clients) >= trafficClientLimit {
-				return nil, g.reject(http.StatusServiceUnavailable, 1)
+				return nil, g.reject(http.StatusServiceUnavailable, 1), false
 			}
 			client = &trafficClient{}
 			g.clients[key] = client
@@ -158,11 +171,11 @@ func (g *TrafficGuard) AcquireOperation(ip netip.Addr, op Operation, now time.Ti
 		client.requests.refill(now, s.ClientRate, s.ClientBurst)
 		client.search.refill(now, s.SearchRate, s.SearchBurst)
 		if decision := g.clientLimit(client, search); decision.Status != 0 {
-			return nil, g.reject(decision.Status, decision.RetryAfter)
+			return nil, g.reject(decision.Status, decision.RetryAfter), false
 		}
 		if work >= 0 {
 			if d := g.clientWorkLimit(client, work, now); d.Status != 0 {
-				return nil, g.rejectWork(work, d)
+				return nil, g.rejectWork(work, d), false
 			}
 		}
 	}
@@ -187,7 +200,7 @@ func (g *TrafficGuard) AcquireOperation(ip netip.Addr, op Operation, now time.Ti
 		}
 		g.searchActive.Add(1)
 	}
-	// 解放は設定とトークンを変更しない。受付のmutexを待たず、重複呼出しだけをCASで防ぐ。
+	// 解放は設定とトークンを変更しない。待機のある投稿だけ通知の排他を取り、重複はCASで防ぐ。
 	var released atomic.Bool
 	return func() {
 		if !released.CompareAndSwap(false, true) {
@@ -206,7 +219,12 @@ func (g *TrafficGuard) AcquireOperation(ip netip.Addr, op Operation, now time.Ti
 			client.active.Add(-1)
 		}
 		g.active.Add(-1)
-	}, TrafficDecision{}
+		if work == 0 && g.postingWaiting.Load() != 0 {
+			g.mu.Lock()
+			g.notifyPostingLocked()
+			g.mu.Unlock()
+		}
+	}, TrafficDecision{}, false
 }
 
 // globalLimit は回線の記憶より先に全体枠を確認し、拒否する新規回線を記憶しない。
@@ -274,6 +292,7 @@ func (g *TrafficGuard) Stats() TrafficStats {
 	stats.Clients = len(g.clients)
 	stats.Active, stats.SearchActive = int(g.active.Load()), int(g.searchActive.Load())
 	stats.Posting, stats.Reports, stats.Authentication = g.workStats[0], g.workStats[1], g.workStats[2]
+	stats.Posting.Waiting = int(g.postingWaiting.Load())
 	stats.Posting.Active, stats.Reports.Active, stats.Authentication.Active = int(g.work[0].active.Load()), int(g.work[1].active.Load()), int(g.work[2].active.Load())
 	return stats
 }

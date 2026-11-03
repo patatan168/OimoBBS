@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log/slog"
 	"net/http"
+	"oimobbs/internal/delivery"
 	"oimobbs/internal/platform"
 	"os"
 	"runtime"
@@ -68,6 +69,7 @@ func (r *Repository) memoryHandler(next http.Handler) http.Handler {
 		// 新しい入力が全予算を使い、既に受け付けた投稿・生成が進めなくなることを防ぐ。
 		release, ok := r.reserveMemoryWithProgress(working, progress)
 		if !ok {
+			delivery.RejectUnreadBody(w, req)
 			w.Header().Set("Retry-After", "1")
 			http.Error(w, "混み合っています。しばらくしてからお試しください。", http.StatusServiceUnavailable)
 			return

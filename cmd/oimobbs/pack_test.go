@@ -109,7 +109,8 @@ func TestPackCLI(t *testing.T) {
 	if e = r.Close(); e != nil {
 		t.Fatal(e)
 	}
-	for _, a := range [][]string{{"pack"}, {"pack", "compact"}, {"pack", "compact", "--board", board.ID.String(), "--thread", "0"}, append(append([]string{}, args...), "--level", "2"), append(append([]string{}, args...), "--apply")} {
+	// 新規サイトはpack対応済みなので、--applyは後続の成功ケースで検査する。
+	for _, a := range [][]string{{"pack"}, {"pack", "compact"}, {"pack", "compact", "--board", board.ID.String(), "--thread", "0"}, append(append([]string{}, args...), "--level", "2")} {
 		out.Reset()
 		if e = run(a, &out, &diag); e == nil || out.Len() != 0 {
 			t.Fatal("invalid success", a, e)

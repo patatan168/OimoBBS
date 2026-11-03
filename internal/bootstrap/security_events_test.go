@@ -180,7 +180,10 @@ func TestSecuritySimilarLogHasBothBodies(t *testing.T) {
 	server := formServer(t, repo, siteID(repo.site.State()), a.ID, true)
 	defer server.Close()
 	fields := url.Values{"bbs": {a.Key}, "subject": {"同じ文"}, "MESSAGE": {"何度も繰り返し投稿する宣伝の長い文章です"}, "oimo_request_id": {domain.NewID().String()}}
-	for range 2 {
+	// 同一内容の件数制限とは別に、異なる類似本文の検出を検査する。
+	body := fields.Get("MESSAGE")
+	for _, suffix := range []string{"甲", "乙"} {
+		fields.Set("MESSAGE", body+suffix)
 		fields.Set("oimo_request_id", domain.NewID().String())
 		got, err := sendForm(server, fields)
 		if err != nil || !got.Accepted {
@@ -193,6 +196,7 @@ func TestSecuritySimilarLogHasBothBodies(t *testing.T) {
 	}
 	settings.Similar.Mode = "reject"
 	saveGuardSettings(t, c, settings, "security-similar-log-002")
+	fields.Set("MESSAGE", body+"丙")
 	fields.Set("oimo_request_id", domain.NewID().String())
 	got, err := sendForm(server, fields)
 	if err != nil || got.Accepted {

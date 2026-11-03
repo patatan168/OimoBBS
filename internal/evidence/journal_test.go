@@ -133,10 +133,12 @@ func TestJournalRejectsIndividuallySignedBrokenChain(t *testing.T) {
 			if e = j.Close(); e != nil {
 				t.Fatal(e)
 			}
-			opened, e := OpenJournal(path, owner, 20260928, 10, key, testValidator)
-			if e == nil {
-				opened.Close()
-				t.Fatal("broken chain accepted")
+			for _, open := range []func(string, domain.ID, uint64, uint32, ed25519.PrivateKey, PayloadValidator) (*Journal, error){OpenJournal, OpenJournalConcurrent} {
+				opened, e := open(path, owner, 20260928, 10, key, testValidator)
+				if e == nil {
+					opened.Close()
+					t.Fatal("broken chain accepted")
+				}
 			}
 		})
 	}

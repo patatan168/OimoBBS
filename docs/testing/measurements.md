@@ -12,10 +12,11 @@
 | --- | --- |
 | HTTP検査・一覧・ログの処理 | [WAF](#waf) |
 | CPU・メモリ・帯域・閲覧・保存 | [資源・帯域・保存](#資源帯域保存) |
+| バックアップ・保存障害・再起動復旧 | [保存・バックアップ・復旧](#保存バックアップ復旧) |
 | Webの取得条件・HTTP圧縮 | [HTTP配信と圧縮](#http配信と圧縮) |
 | 圧縮データの復号 | [復号処理](#復号処理) |
 | 投稿の処理量・遅延・復旧 | [投稿処理](#投稿処理) |
-| 管理操作記録のページ送り・照合再開 | [管理操作の記録](#管理操作の記録) |
+| 管理操作記録の初回表示・ページ送り・照合再開 | [管理操作の記録](#管理操作の記録) |
 | Web脆弱性・投稿入力・稼働設定 | [セキュリティの検証記録](#セキュリティの検証記録) |
 | 更新時の退避・復元・公開確認 | [稼働反映の記録](#稼働反映の記録) |
 
@@ -23,6 +24,9 @@
 
 | 記録 | 測定対象 |
 | --- | --- |
+| [TLS前の新規接続頻度](connection-rate-20261103.md)・[全試行](connection-rate-20261103.json) | 2CPU・512MiB、TLS再接続毎秒400回と大量投稿・低速通信を混在。正常20投稿/秒の保存、TLS前の切断、CPU、HTTP/1・HTTP/2の既存接続継続 |
+| [投稿枠の短時間待機](posting-admission-wait-20261102.md)・[全試行](posting-admission-wait-20261102.json) | 投稿の同時上限を維持した最大500msの有限待機。20投稿/秒と短い枠競合の実HTTPS比較、待機・取消・回線別切替の検査 |
+| [攻撃混在と未受信本文の早期拒否](attack-mix-20261102.md)・[全試行](attack-mix-20261102.json) | 既定WAFで大量投稿・低速本文・低速ヘッダーを混在。正常10投稿/秒の全件保存、20投稿/秒の失敗、実TLS中継とHTTP/2の回帰検査 |
 | [入口のヘッダー・Host・宣言本文長](waf-ingress.md)・[検査記録](waf-ingress.json) | 制御文字・UA・量の上限、実HTTP/1とHTTP/2、本文未読の早期拒否、race・fuzz・単体コスト |
 | [WAF・一覧・非必須ログの並行処理](ingress-egress-optimization.md)・[全10試行](ingress-egress-optimization.json) | WAFの枠解放、一覧の要約取得、ログ計算の並行化。投稿・閲覧の同時負荷、512MiB、強制再起動、ログ欠測を含む |
 | [クエリ解析前の制限と管理画面](waf-query-ui.json) | 128項目の境界、拒否時の割当量、通常閲覧の実HTTP比較、画面幅・JavaScript無効時の検証 |
@@ -31,6 +35,7 @@
 
 | 記録 | 測定対象 |
 | --- | --- |
+| [起動と更新時の停止時間](restart-recovery-20261103.md)・[全試行](restart-recovery-20261103.json) | 同じ完全バックアップによる実mTLS起動、HTTPログ復旧の並列検証、停止中の退避・復元費用と同じvolumeでの通常更新 |
 | [回線分類更新](network-update-optimization.md)・[全試行](network-update-optimization.json) | Zstandard・分類専用2MiB枠・取得/国別解析/行検証の並列化。固定feedの単一コア・1/2/4CPU・ヒープ目安と復旧 |
 | [固定投稿上限の撤去とWAF回線別スイッチ](server-scaling.json) | 1/4CPUの実HTTPS、過負荷・併用・再起動照合。遅延悪化・拒否を含む |
 | [CPU・メモリの自動調整](adaptive-resources.json) | 資源予算、圧迫時の受付制限・回復、実HTTPS投稿 |
@@ -44,6 +49,19 @@
 | [CPU・Mutex・GCの追加検証](cpu-mutex-gc-optimization.md)・[全試行](cpu-mutex-gc-optimization.json)・[反映記録](cpu-mutex-gc-deployment.md) | 2→4CPUの1.6倍目標、閲覧の達成と投稿の未達、共有SSD競合・全試作・GC/Mutex/CPU診断 |
 | [閲覧のCPU・メモリ比較](reading-resource-scaling.md)・[全試行](reading-resource-scaling.json) | サイト共通ロックの共有化、一覧の経路短縮、Go生成器、2/4CPU・512MiB/2GiB・作業集合・継続負荷 |
 | [Zstandard設定比較](zstd-same-settings.json) | 同じ圧縮設定での候補比較。全11候補を不採用 |
+
+## 保存・バックアップ・復旧
+
+再実行する検査は[保存・復旧の検証手順](storage.md)を参照してください。
+
+| 記録 | 確認範囲 |
+| --- | --- |
+| [共有WALの復旧とI/O障害](recovery-resilience.md) | 復旧中の連続SIGKILL、書込・同期失敗、実HTTPSのACK後停止 |
+| [保存停止のヘルスチェック](storage-healthcheck.md) | 保存先異常の検知、別板の継続、再起動、実TLS・edge・CLI |
+| [暗号化バックアップのGo統合](sealed-backup-go.md) | sync/pack/send/receive/sweep、実SIGKILL、隔離SSHとDockerでの復号・署名照合 |
+| [完成記録と暗号文の再作成](sealed-backup-resilience.md) | 書込・同期失敗、途中停止と再開。旧Python実装時点の記録 |
+| [復号・転送再試行](sealed-restore-resilience.md) | 復号途中の停止、hash不一致、元ログ消失後の再送。旧Python実装時点の記録 |
+| [受信側の原子的な設置](atomic-backup-receive.md) | 実SSHの連続切断、ACK消失、再送、認証復号、期限回収の再開。旧Python実装時点の記録 |
 
 ## HTTP配信と圧縮
 
@@ -83,20 +101,23 @@ codec単体の値には、実ディスクのWrite/Syncや通信時間を含み�
 
 ## 投稿処理
 
+[遅延・回復と集中投稿](#遅延回復と集中投稿) / [同期I/Oと保存待ち](#同期ioと保存待ち) / [JSONと文字コード](#jsonと文字コード) / [CPU並列化と処理量](#cpu並列化と処理量)
+
+### 遅延・回復と集中投稿
+
 | 記録 | 測定対象 |
 | --- | --- |
-| [制限判定と投稿経路の処理削減](posting-processing.md)・[全試行](posting-processing.json) | 通常の制限を維持した予約・窓待ち・厳密JSON・HTMLの処理削減。比較時だけ頻度制限を解除した2/4CPUの実HTTPS、I/O変動とtmpfs比較 |
+| [投稿回復の再悪化と同期I/O](posting-recovery-regression-20261103.md)・[全診断・時系列](posting-recovery-regression-20261103.json) | 120秒の実投稿観測、攻撃なし対照、単独fsyncとext4・journal・SATAの同時採取。13秒の復帰・再悪化・初期失敗を含む |
+| [投稿集中後の応答速度の回復](posting-burst-recovery-20261103.md)・[全比較・診断](posting-burst-recovery-20261103.json) | 検出ログを投稿優先の背景I/O枠へ接続。20投稿/秒・集中終了後30秒の比較、再悪化・未達・不採用候補を含む |
+| [一括投稿の履歴検算](posting-peak-20261102.md)・[全試行](posting-peak-20261102.json) | 未公開群の履歴複製と個別WALの再解析を削減。2/4CPUの固定投稿・集中条件、保存待ちの悪化を含む全試行、閲覧併行と強制再起動 |
 | [間隔の空いた返信の待ち短縮](posting-idle-latency.md)・[全30試行](posting-idle-latency.json) | 低頻度返信の収集待ち省略、専ブラ・Webの実HTTPS、集中投稿の悪化試行と回線更新停止後の比較・通常再起動 |
-| [並列準備とスレッド別候補索引](posting-multicore.md)・[全56試行](posting-multicore.json) | worker待合せと候補走査の削減、2/4CPU最終比較、非同期検証の不採用、混合負荷とSIGKILL復旧 |
-| [文字コード最適化後の投稿](textcodec-posting.md)・[全試行](textcodec-posting.json) | 1/2/4CPUの実HTTPS、同期I/Oによる遅い試行の診断、160投稿/秒＋400閲覧/秒での拒否・未発行・復旧 |
-| [保存同期の回数削減](posting-sync-wait.md)・[全試行](posting-sync-wait.json) | 確認操作と保存候補の枠の分離、主要Sync回数、通常版の速度・遅延、不採用案・最終版・SIGKILL復旧 |
-| [固定スキーマJSON符号化](posting-json.md)・[全試行](posting-json.json) | journalの専用符号化、旧JSON/frameとのbyte一致、1/2/4CPUの実HTTPS・混合負荷・SIGKILL復旧 |
-| [投稿JSONの符号化・検証の追加改善](posting-json-second.md)・[全試行](posting-json-second.json) | 保存DTOの生成符号化、厳密構文検査の走査削減、CPU時間と保存待ち・混合負荷の拒否を分けた比較 |
-| [投稿JSONの型検査と復号の統合](posting-json-third.md)・[全試行](posting-json-third.json) | 構文・型付き復号・bool補完の重複走査削減、差分fuzz、実HTTPSのCPU時間・混合負荷・SIGKILL復旧 |
-| [保存JSONの専用復号と単一スレッド投稿](posting-json-typed.md)・[全15試行](posting-json-typed.json) | 保存型の生成復号、1CPU・GOMAXPROCS=1のCPU単価と完了速度、JSON CPU診断、503・準備失敗と通常ディスクの変動を含む |
-| [検出ログの重複復号と投稿CPU](posting-cpu-lanes.md)・[全試行](posting-cpu-lanes.json) | writer専用の単一時間帯再利用、1/2/4CPUの実HTTPS、2→4CPUの伸びと絶対速度を分けた比較、通常ディスク・混合負荷 |
 | [周期保守による停止連鎖の回避](posting-maintenance-stalls.md)・[全試行](posting-maintenance-stalls.json) | 共通ロックを保持した投稿列待ちの再現、混雑板の保守延期、同じWAF枠での投稿・閲覧・再起動照合 |
-| [復旧の再停止とI/O障害](recovery-resilience.md)・[検査・全HTTP試行](recovery-resilience.json) | 一致済み本文を保持する再実行、全Sync/Close後の復旧元削除、6回連続SIGKILL、容量・I/O障害注入、512MiBの実HTTPS復旧 |
+
+### 同期I/Oと保存待ち
+
+| 記録 | 測定対象 |
+| --- | --- |
+| [保存同期の回数削減](posting-sync-wait.md)・[全試行](posting-sync-wait.json) | 確認操作と保存候補の枠の分離、主要Sync回数、通常版の速度・遅延、不採用案・最終版・SIGKILL復旧 |
 | [投稿WALの書き込み量を減らす](posting-io-mitigation.md)・[全試行](posting-io-mitigation.json) | 必須記録WALの圧縮範囲、書込み量の軽減、速度改善の未確認、通常・混合・SIGKILL復旧 |
 | [投稿の同期待ちへの適応](posting-io-adaptive.md)・[全試行](posting-io-adaptive.json) | 実Sync時間に応じた収集、隔離した同期遅延での回数・処理量、通常HTTPS・混合負荷・復旧 |
 | [収集待ち拡張の再検討（不採用）](posting-io-collection.md)・[全20試行](posting-io-collection.json) | 32/64msへの拡張と少量投稿の保護を比較。再試行で遅延・未発行が再発し、製品コードは元へ復元 |
@@ -104,15 +125,34 @@ codec単体の値には、実ディスクのWrite/Syncや通信時間を含み�
 | [保存待ち中の本文準備（不採用）](posting-io-bodyprepare.md)・[全14試行](posting-io-bodyprepare.json) | 準備記録の実Syncに本文の検証・圧縮を重ねる試作。追加遅延下の小幅改善、通常比較、実Syncとの重複、混合負荷の再試行 |
 | [SATA設定と保存待ち（不採用）](posting-io-device-policy.md)・[全16試行](posting-io-device-policy.json) | 省電力・キュー深さ・組合せの一時比較。実fsyncの長い待ちと未発行が残り、全設定を元へ復元 |
 | [保存待ちとcheckpointの削減](posting-io-checkpoint.md)・[全試行](posting-io-checkpoint.json) | 本文まとめ書き、実frame数のcheckpoint予算、終了時の残作業を含む同期診断、HTTPS・SIGKILL復旧 |
+| [投稿保存の安定化・初期比較](posting-stability.json) | 保存と回復の比較 |
+| [投稿保存の安定化・追加比較](posting-sustain.json) | 保存・再送索引・独立WAL同期・ログの比較と失敗試行 |
+| [共有WALの実用化](shared-wal-practical.md)・[全試行](shared-wal-practical.json) | CPU重複処理の削減、有界バイナリ形式、継続・混合・復旧の比較 |
+
+### JSONと文字コード
+
+| 記録 | 測定対象 |
+| --- | --- |
+| [文字コード最適化後の投稿](textcodec-posting.md)・[全試行](textcodec-posting.json) | 1/2/4CPUの実HTTPS、同期I/Oによる遅い試行の診断、160投稿/秒＋400閲覧/秒での拒否・未発行・復旧 |
+| [固定スキーマJSON符号化](posting-json.md)・[全試行](posting-json.json) | journalの専用符号化、旧JSON/frameとのbyte一致、1/2/4CPUの実HTTPS・混合負荷・SIGKILL復旧 |
+| [投稿JSONの符号化・検証の追加改善](posting-json-second.md)・[全試行](posting-json-second.json) | 保存DTOの生成符号化、厳密構文検査の走査削減、CPU時間と保存待ち・混合負荷の拒否を分けた比較 |
+| [投稿JSONの型検査と復号の統合](posting-json-third.md)・[全試行](posting-json-third.json) | 構文・型付き復号・bool補完の重複走査削減、差分fuzz、実HTTPSのCPU時間・混合負荷・SIGKILL復旧 |
+| [保存JSONの専用復号と単一スレッド投稿](posting-json-typed.md)・[全15試行](posting-json-typed.json) | 保存型の生成復号、1CPU・GOMAXPROCS=1のCPU単価と完了速度、JSON CPU診断、503・準備失敗と通常ディスクの変動を含む |
+| [投稿JSONの検査](posting-tuning.json) | 重複検査の削減、実HTTPS比較、収集待ちの不採用候補 |
+
+### CPU並列化と処理量
+
+| 記録 | 測定対象 |
+| --- | --- |
+| [制限判定と投稿経路の処理削減](posting-processing.md)・[全試行](posting-processing.json) | 通常の制限を維持した予約・窓待ち・厳密JSON・HTMLの処理削減。比較時だけ頻度制限を解除した2/4CPUの実HTTPS、I/O変動とtmpfs比較 |
+| [並列準備とスレッド別候補索引](posting-multicore.md)・[全56試行](posting-multicore.json) | worker待合せと候補走査の削減、2/4CPU最終比較、非同期検証の不採用、混合負荷とSIGKILL復旧 |
+| [検出ログの重複復号と投稿CPU](posting-cpu-lanes.md)・[全試行](posting-cpu-lanes.json) | writer専用の単一時間帯再利用、1/2/4CPUの実HTTPS、2→4CPUの伸びと絶対速度を分けた比較、通常ディスク・混合負荷 |
+| [復旧の再停止とI/O障害](recovery-resilience.md)・[検査・全HTTP試行](recovery-resilience.json) | 一致済み本文を保持する再実行、全Sync/Close後の復旧元削除、6回連続SIGKILL、容量・I/O障害注入、512MiBの実HTTPS復旧 |
 | [単一コアを含む投稿処理](posting-single-core-optimization.md)・[全試行](posting-single-core-optimization.json) | 厳密JSON復号・署名記録・更新HTMLを省CPU化。2→4CPUは1.6倍未達、絶対性能・継続負荷・復旧を別に記録 |
 | [投稿シーケンス変更の再挑戦](posting-pipeline-optimization.md)・[全38試行](posting-pipeline-optimization.json) | 部分待合せ・検証統合・保存中のCPU構築・PGO・収集待ち0を比較。1.6倍未達、全候補不採用・稼働版維持 |
 | [投稿の限界処理件数](posting-capacity.json) | 改善前の固定予定投稿、WAF・メモリ・分散先の比較 |
 | [投稿の頭打ち診断](posting-bottleneck.json) | CPU・保存待ち・要求発行待ちの診断 |
-| [投稿JSONの検査](posting-tuning.json) | 重複検査の削減、実HTTPS比較、収集待ちの不採用候補 |
 | [投稿準備の並列化](posting-parallel.json) | 不採用にした試作版の単体・実HTTP比較 |
-| [投稿保存の安定化・初期比較](posting-stability.json) | 保存と回復の比較 |
-| [投稿保存の安定化・追加比較](posting-sustain.json) | 保存・再送索引・独立WAL同期・ログの比較と失敗試行 |
-| [共有WALの実用化](shared-wal-practical.md)・[全試行](shared-wal-practical.json) | CPU重複処理の削減、有界バイナリ形式、継続・混合・復旧の比較 |
 | [投稿のCPU・メモリ増設](posting-resource-scaling.md)・[全試行](posting-resource-scaling.json) | 独立検証・署名・符号化・本文準備の並行化、1/2/4CPUと1/2/4GiB、継続・混合・復旧 |
 | [投稿の継続最適化と復旧](posting-cpu-continuation.md)・[全試行](posting-cpu-continuation.json) | 所有列・WAL圧縮・起動の並列化、1.45倍の検証と継続負荷・再起動、全試作を含む |
 | [投稿の追加CPU並行化](posting-cpu-parallelism.md)・[全試行](posting-cpu-parallelism.json) | 候補再利用・保存層の独立検証、2/4CPU比較と1.5倍目標の未達、試作・診断・復旧を含む |
@@ -123,6 +163,7 @@ codec単体の値には、実ディスクのWrite/Syncや通信時間を含み�
 
 | 記録 | 確認範囲 |
 | --- | --- |
+| [初回復元の10秒タイムアウト](audit-first-access.md) | 同一バックアップの隔離HTTP比較、64件ずつの同期保存と起動時検証の引継ぎ、7,988件の要約・期限一致、中断・再起動・race |
 | [大量記録のページ送りと照合再開](audit-pagination.md) | 条件未選択の2,002件・2MiB超を実HTTPで全ページ取得、snapshot後の予算中断からの再開、Chromium、固定一覧・権限・race |
 
 ## セキュリティの検証記録
@@ -137,6 +178,7 @@ codec単体の値には、実ディスクのWrite/Syncや通信時間を含み�
 
 | 記録 | 確認範囲 |
 | --- | --- |
+| [管理画面のボタン整理・監査修正（2026-11-03）](admin-audit-deployment-20261103.md) | 起動時の走査予算超過、初回索引復元、2回の停止時間、復元照合、公開経路、定期バックアップ |
 | [高圧縮化・512MiB対策の稼働反映](compression-memory512-deployment.md) | 全データ退避・復元一致、新旧起動確認、実HTTPSの圧縮・ETag更新、設定と保持データの照合 |
 | [投稿準備・入口WAF](posting-waf-deployment.md)・[反映結果](posting-waf-deployment.json) | 全データ退避・隔離での新旧起動、BBSのみ置換、保存値・公開経路・UA境界・ブラウザーの確認 |
 | [CPU・Mutex・GC最適化](cpu-mutex-gc-deployment.md) | 更新時の退避・復元、保存データ、公開・管理画面の確認 |

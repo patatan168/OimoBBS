@@ -43,12 +43,14 @@ func (g *RequestGate) Wrap(next http.Handler) http.Handler {
 			}
 		}
 		if size > 16<<10 {
+			RejectUnreadBody(w, r)
 			http.Error(w, "要求ヘッダが大きすぎます。", 431)
 			return
 		}
 		host, _, e := net.SplitHostPort(r.RemoteAddr)
 		ip, err := netip.ParseAddr(host)
 		if e != nil || err != nil || ip.Zone() != "" {
+			RejectUnreadBody(w, r)
 			http.Error(w, "接続元を確認できません。", 400)
 			return
 		}
@@ -56,12 +58,14 @@ func (g *RequestGate) Wrap(next http.Handler) http.Handler {
 		g.mu.Lock()
 		if g.closed {
 			g.mu.Unlock()
+			RejectUnreadBody(w, r)
 			w.Header().Set("Retry-After", "1")
 			http.Error(w, "停止処理中です。", 503)
 			return
 		}
 		if g.total >= g.global || g.ips[ip] >= g.perIP {
 			g.mu.Unlock()
+			RejectUnreadBody(w, r)
 			w.Header().Set("Retry-After", "1")
 			http.Error(w, "現在混雑しています。", 503)
 			return

@@ -188,6 +188,19 @@ func TestCommittedCursorCompressedBatchResume(t *testing.T) {
 	if err = log.VisitCommittedFrom(t.Context(), &cursor, &budget, visit); !errors.Is(err, ErrHistoryBudget) || next != 4 {
 		t.Fatal(next, err)
 	}
+	// 保存前の候補cursorが圧縮block内のframeを消費しても、元の未処理分を残す。
+	candidate := cursor.Clone()
+	candidateNext := next
+	budget = HistoryBudget{Frames: 2}
+	if err = log.VisitCommittedFrom(t.Context(), &candidate, &budget, func(_ Record, op ControlOperation) error {
+		if op.Seq != candidateNext {
+			t.Fatalf("candidate seq=%d want=%d", op.Seq, candidateNext)
+		}
+		candidateNext++
+		return nil
+	}); !errors.Is(err, ErrHistoryBudget) || candidateNext != 6 {
+		t.Fatal(candidateNext, err)
+	}
 	// blockは既に読んでおり、残った論理frameを処理するための追加byte予算は不要。
 	budget = HistoryBudget{Frames: 2}
 	if err = log.VisitCommittedFrom(t.Context(), &cursor, &budget, visit); !errors.Is(err, ErrHistoryBudget) || next != 6 {

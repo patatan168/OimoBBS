@@ -5,6 +5,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/json"
+	"errors"
 	"time"
 
 	"oimobbs/internal/domain"
@@ -15,6 +16,13 @@ import (
 func (r *Repository) resumeSnapshotAudit(ctx context.Context, owner domain.ID, kind string, log *store.ControlLog, budget *store.HistoryBudget, archiveBudget *int64, cutoff time.Time) (auditTransfer, error) {
 	index := r.auditIndex
 	verification := index.resuming[owner]
+	if verification == nil {
+		verification = r.auditVerified[owner]
+		delete(r.auditVerified, owner)
+		if verification != nil && verification.anchor.header() != log.HistoryHeader() {
+			verification = nil
+		}
+	}
 	if verification == nil {
 		anchor, ok := r.anchors[owner]
 		if !ok {
@@ -31,11 +39,18 @@ func (r *Repository) resumeSnapshotAudit(ctx context.Context, owner domain.ID, k
 		if err != nil {
 			return auditTransfer{}, err
 		}
-		if index.resuming == nil {
-			index.resuming = map[domain.ID]*snapshotAuditVerification{}
-		}
-		index.resuming[owner] = verification
 	}
+	// 起動時の検証を引き継ぐ場合も、時計の後退と保持境界を再確認する。
+	now := time.Now()
+	for _, proof := range []auditTransfer{verification.anchor.Proof, verification.proof} {
+		if proof.Imported > domain.Time(now.UnixNano()) || proof.Since > domain.Time(now.Add(-auditRetention).UnixNano()) {
+			return auditTransfer{}, errors.New("audit transfer clock regression")
+		}
+	}
+	if index.resuming == nil {
+		index.resuming = map[domain.ID]*snapshotAuditVerification{}
+	}
+	index.resuming[owner] = verification
 	if _, err := verification.advance(ctx, log, budget); err != nil {
 		return auditTransfer{}, err
 	}

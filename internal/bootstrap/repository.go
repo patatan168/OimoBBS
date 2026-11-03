@@ -115,6 +115,7 @@ type Repository struct {
 	anchors                      map[domain.ID]candidateOwner
 	auditSnapshots               map[string]auditSnapshot
 	auditIndex                   *auditIndex
+	auditVerified                map[domain.ID]*snapshotAuditVerification
 	denialCount                  int
 	reportRates                  map[string]reportRateWindow
 	adminAuth                    *adminauth.Manager
@@ -259,7 +260,7 @@ func openLockedPostingRepository(cfg Config, lock *os.File, checkpoint func(stri
 	if err = repo.loadSlipPolicy(); err != nil {
 		return nil, err
 	}
-	repo.securityLog, err = securitylog.Open(filepath.Join(cfg.DataDir, "security-events"))
+	repo.securityLog, err = securitylog.OpenWithAdmission(filepath.Join(cfg.DataDir, "security-events"), repo.postingIO.beginOptionalWithPressure)
 	if err != nil {
 		return nil, err
 	}

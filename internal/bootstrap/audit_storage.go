@@ -173,32 +173,82 @@ func (s *auditSink) close() error {
 	s.path = ""
 	return e
 }
+
+// put は単独の要約も同じ重複照合と同期保存の経路へ渡す。
 func (s *auditSink) put(entry AuditEntry) error {
-	at, e := time.Parse(time.RFC3339Nano, entry.Committed)
-	if e != nil {
-		return e
-	}
-	day := at.UTC().Format("20060102")
-	if e = s.open(entry.Owner, entry.OwnerKind, day); e != nil {
-		return e
-	}
-	value := auditStoredEntry{1, "control_summary", domain.Time(at.UnixNano() + int64(auditRetention)), entry}
-	raw, e := json.Marshal(value)
-	if e != nil {
-		return e
-	}
-	state := s.log.State()
-	if prior, ok := state.Rows["audit_entry:"+entry.ID.String()]; ok {
-		if !bytes.Equal(prior.Value, raw) || prior.Expires == nil || *prior.Expires != value.Expires {
-			return store.ErrCorrupt
+	return s.putBatch([]AuditEntry{entry})
+}
+
+// putBatch は所有者・日付ごとにまとめ、最大64件を一回のSyncで確定する。
+func (s *auditSink) putBatch(entries []AuditEntry) error {
+	for start := 0; start < len(entries); {
+		first := entries[start]
+		at, err := time.Parse(time.RFC3339Nano, first.Committed)
+		if err != nil {
+			return err
 		}
+		day := at.UTC().Format("20060102")
+		end := start + 1
+		for end < len(entries) && end-start < store.MaxCommitFrames {
+			next := entries[end]
+			nextAt, err := time.Parse(time.RFC3339Nano, next.Committed)
+			if err != nil {
+				return err
+			}
+			if next.Owner != first.Owner || next.OwnerKind != first.OwnerKind || nextAt.UTC().Format("20060102") != day {
+				break
+			}
+			end++
+		}
+		if err := s.open(first.Owner, first.OwnerKind, day); err != nil {
+			return err
+		}
+		if err := s.appendBatch(entries[start:end]); err != nil {
+			return err
+		}
+		start = end
+	}
+	return nil
+}
+
+// appendBatch は既存と同じIDの内容・期限を検査し、新規の独立行だけを同期保存する。
+func (s *auditSink) appendBatch(entries []AuditEntry) error {
+	state := s.log.State()
+	frames := make([][]byte, 0, len(entries))
+	pending := map[string]store.ControlRow{}
+	for _, entry := range entries {
+		at, err := time.Parse(time.RFC3339Nano, entry.Committed)
+		if err != nil {
+			return err
+		}
+		value := auditStoredEntry{1, "control_summary", domain.Time(at.UnixNano() + int64(auditRetention)), entry}
+		raw, err := json.Marshal(value)
+		if err != nil {
+			return err
+		}
+		key := "audit_entry:" + entry.ID.String()
+		prior, exists := state.Rows[key]
+		if !exists {
+			prior, exists = pending[key]
+		}
+		if exists {
+			if !bytes.Equal(prior.Value, raw) || prior.Expires == nil || *prior.Expires != value.Expires {
+				return store.ErrCorrupt
+			}
+			continue
+		}
+		frame, err := controlFrame(state, entry.ID, domain.Time(at.UnixNano()), "audit_import", []store.Mutation{mutation("audit_entry", entry.ID.String(), value, &value.Expires)}, []string{})
+		if err != nil {
+			return err
+		}
+		frames = append(frames, frame)
+		pending[key] = store.ControlRow{Value: raw, Expires: &value.Expires}
+		state.Seq++
+	}
+	if len(frames) == 0 {
 		return nil
 	}
-	frame, e := controlFrame(state, entry.ID, domain.Time(at.UnixNano()), "audit_import", []store.Mutation{mutation("audit_entry", entry.ID.String(), value, &value.Expires)}, []string{})
-	if e != nil {
-		return e
-	}
-	result := s.log.Append(frame)
+	result := s.log.AppendBatch(frames)
 	if result.Status != store.Durable {
 		return errors.Join(errors.New("audit import not durable"), result.Err)
 	}

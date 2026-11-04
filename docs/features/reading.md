@@ -29,6 +29,8 @@
 
 #### Webの取得条件
 
+公開Web・公開パス配下の管理画面・直接HTTPSの管理画面は、全メソッドでHTTP/2またはHTTP/3を必須とします。HTTP/1.0・HTTP/1.1は本文なしの505（`Cache-Control: no-store`）で拒否します。edgeも利用者側の接続で検査し、保存側へのHTTP/2中継によって制限を回避させません。管理専用SSHトンネルの内部（`loopback_tunnel`）はHTTP/1.1を引き続き許可します。
+
 Web・管理画面のGET/HEADは、`Accept-Encoding` でgzipまたはzstdを正のq値で受け入れることを必須とします。トップ・板・検索・Webスレッド・投稿フォーム・robots・静的資産と、直接接続・公開パス配下の管理画面が対象です。
 
 | 圧縮の受け入れ宣言 | 受付 |
@@ -39,13 +41,13 @@ Web・管理画面のGET/HEADは、`Accept-Encoding` でgzipまたはzstdを正�
 
 拒否は本文生成やログインnonce発行より先に行います。対象のGET/HEADには `Vary: Accept-Encoding` を付けます。これは圧縮対応の宣言を求める受付条件で、応答形式は引き続きq値や本文サイズに従います。identityを優先する要求や小さい本文にはidentityを返す場合があります。
 
-専ブラ用の次のURLは例外です。
+専ブラ用の次のURLは、HTTP世代と圧縮受け入れ宣言の両方で例外です。管理マウント配下は、同じ形のパスでも例外にしません。
 
 - `/bbsmenu.html`、`/bbsmenu.json`
 - `/{board}/subject.txt`、`/{board}/SETTING.TXT`、`/{board}/head.txt`
 - `/{board}/dat/{key}.dat`、`/test/bbs.cgi`
 
-UA・Range・条件付き取得の指定だけではWeb経路を例外にしません。POSTなどGET/HEAD以外にはこの条件を加えません。組込みの `healthcheck` はgzip対応を宣言してトップページと保存状態の監視URLを取得します。edge自身の `/_edge/health` は保存側へ転送せず、別に利用できます。[監視の手順](../operations.md#稼働状態と保存停止を確認する)を参照してください。Webの手動確認には `curl --compressed` などを使います。
+UA・Range・条件付き取得の指定だけではWeb経路を例外にしません。POSTなどGET/HEAD以外にもHTTP世代の条件を適用し、圧縮受け入れ宣言の条件はGET/HEADに適用します。組込みの `healthcheck` はHTTP/2とgzip対応を使ってトップページと保存状態の監視URLを取得します。edge自身の `/_edge/health` もHTTP/2・HTTP/3が必要で、保存側へは転送しません。[監視の手順](../operations.md#稼働状態と保存停止を確認する)を参照してください。Webの手動確認には `curl --http2 --compressed` などを使います。
 
 #### DATの差分とETag
 

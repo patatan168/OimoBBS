@@ -41,6 +41,9 @@ func TestHealthcheckRequiresStorageReadiness(t *testing.T) {
 				mu.Lock()
 				paths = append(paths, r.URL.Path)
 				mu.Unlock()
+				if r.ProtoMajor != 2 {
+					t.Error("healthcheck did not negotiate HTTP/2", r.Proto)
+				}
 				if r.Header.Get("Accept-Encoding") != "gzip" {
 					w.WriteHeader(406)
 					return
@@ -59,6 +62,7 @@ func TestHealthcheckRequiresStorageReadiness(t *testing.T) {
 				io.WriteString(w, tc.body)
 			}))
 			front.TLS = &tls.Config{Certificates: []tls.Certificate{pair}, MinVersion: tls.VersionTLS12}
+			front.EnableHTTP2 = true
 			front.StartTLS()
 			defer front.Close()
 			cfg.Public.BaseURL = front.URL

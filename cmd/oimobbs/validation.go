@@ -20,6 +20,7 @@ import (
 	"time"
 
 	"oimobbs/internal/bootstrap"
+	"oimobbs/internal/httptransport"
 	"oimobbs/internal/postcapture"
 )
 
@@ -164,6 +165,22 @@ func serveConfiguredWithNetworkClient(ctx context.Context, cfg bootstrap.Config,
 		defer adminSocket.Close()
 		defer adminServer.Close()
 	}
+	// 保存側のmTLS待受はTCPのままにし、HTTP/3は外側の公開入口で扱う。
+	var h3 *httptransport.HTTP3
+	reason := "認証edgeの保存側はTCPを使用"
+	if cfg.Edge == nil {
+		h3, reason, err = httptransport.Prepare(server, socket.Addr(), cfg.Public.BaseURL, cfg.Public.HTTP3, 256, 16)
+		if err != nil {
+			return err
+		}
+	}
+	if h3 != nil {
+		defer h3.Close()
+		if err = repo.EnableHTTP3(); err != nil {
+			return err
+		}
+	}
+	fmt.Fprintln(out, "HTTP/3:", reason)
 	maintenanceContext, stopMaintenance := context.WithCancel(ctx)
 	expiryDone := make(chan struct{})
 	var expiryErr error
@@ -197,6 +214,14 @@ func serveConfiguredWithNetworkClient(ctx context.Context, cfg bootstrap.Config,
 			<-backupDone
 			if !errors.Is(backupErr, context.Canceled) {
 				resultErr = errors.Join(resultErr, backupErr)
+			}
+		}()
+	}
+	if h3 != nil {
+		go func() {
+			if err := h3.Serve(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+				_ = h3.Close()
+				fmt.Fprintln(out, "HTTP/3停止（HTTP/2継続）:", err)
 			}
 		}()
 	}
@@ -239,7 +264,7 @@ func serveConfiguredWithNetworkClient(ctx context.Context, cfg bootstrap.Config,
 	stopMaintenance()
 	shutdown, cancel := context.WithTimeout(context.Background(), 25*time.Second)
 	defer cancel()
-	err = errors.Join(err, server.Shutdown(shutdown))
+	err = errors.Join(err, httptransport.Shutdown(shutdown, server, h3))
 	if adminServer != nil {
 		err = errors.Join(err, adminServer.Shutdown(shutdown))
 	}
@@ -267,7 +292,7 @@ func runHealthcheck(args []string, diagnostics io.Writer) error {
 	if host == "" || host == "0.0.0.0" || host == "::" {
 		host = "127.0.0.1"
 	}
-	transport := &http.Transport{DialContext: func(ctx context.Context, network, _ string) (net.Conn, error) {
+	transport := &http.Transport{ForceAttemptHTTP2: true, DialContext: func(ctx context.Context, network, _ string) (net.Conn, error) {
 		return (&net.Dialer{Timeout: 3 * time.Second}).DialContext(ctx, network, net.JoinHostPort(host, port))
 	}}
 	defer transport.CloseIdleConnections()

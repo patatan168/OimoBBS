@@ -39,6 +39,7 @@ func TestAdminPathForwardingKeepsPublicBoundaries(t *testing.T) {
 		{"GET", "/api/v1/site", 0, 404}, {"GET", "/login", 0, 404},
 	} {
 		r := httptest.NewRequest(tc.method, "https://bbs.example"+tc.route, strings.NewReader(strings.Repeat("x", tc.size)))
+		r.Proto, r.ProtoMajor, r.ProtoMinor = "HTTP/2.0", 2, 0
 		r.RemoteAddr = "192.0.2.10:12345"
 		r.Header.Set("X-Oimo-Client-IP", "127.0.0.1")
 		r = r.WithContext(context.WithValue(r.Context(), http.LocalAddrContextKey, &net.TCPAddr{IP: net.ParseIP("198.51.100.1"), Port: 443}))

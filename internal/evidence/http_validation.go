@@ -75,10 +75,10 @@ func validateConnectionObservation(v HTTPObservation) error {
 	if v.Schema != "http-observation-v4" || v.SiteID == (domain.ID{}) || v.InstanceID == (domain.ID{}) || v.BootID == (domain.ID{}) || v.ConnectionID == (domain.ID{}) || v.RequestID == (domain.ID{}) {
 		return ErrHTTPObservation
 	}
-	if !validEndpoint(v.Peer) || !validEndpoint(v.Local) || v.Transport != "tcp" {
+	if !validEndpoint(v.Peer) || !validEndpoint(v.Local) {
 		return ErrHTTPObservation
 	}
-	if v.HTTPVersion != "HTTP/1.0" && v.HTTPVersion != "HTTP/1.1" && v.HTTPVersion != "HTTP/2.0" {
+	if !validHTTPTransport(v) {
 		return ErrHTTPObservation
 	}
 	if !validateProxyObservation(v) {
@@ -151,7 +151,7 @@ func observationMissing(v HTTPObservation) []MissingField {
 	return result
 }
 func socketEndpoint(address net.Addr) (Endpoint, error) {
-	if address == nil || address.Network() != "tcp" {
+	if address == nil || (address.Network() != "tcp" && address.Network() != "udp") {
 		return Endpoint{}, ErrHTTPObservation
 	}
 	parsed, e := netip.ParseAddrPort(address.String())
@@ -209,4 +209,12 @@ func validAuthority(host string) bool {
 		}
 	}
 	return true
+}
+
+// validHTTPTransport はUDPのHTTP/3にTLS1.3を必須とし、従来TCPの観測値も検証する。
+func validHTTPTransport(v HTTPObservation) bool {
+	if v.Transport == "udp" {
+		return v.HTTPVersion == "HTTP/3.0" && v.TLSVersion != nil && *v.TLSVersion == tls.VersionTLS13
+	}
+	return v.Transport == "tcp" && (v.HTTPVersion == "HTTP/1.0" || v.HTTPVersion == "HTTP/1.1" || v.HTTPVersion == "HTTP/2.0")
 }

@@ -3,13 +3,17 @@ package bootstrap
 
 import (
 	"context"
+	"crypto/x509"
+	"encoding/pem"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"oimobbs/internal/domain"
 	"oimobbs/internal/evidence"
+	"oimobbs/internal/httptransport"
 	"oimobbs/internal/postcapture"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"testing"
@@ -17,7 +21,27 @@ import (
 )
 
 func TestSiteWebBoardsAndIsolation(t *testing.T) {
+	for _, proto := range []int{1} {
+		t.Run(strconv.Itoa(proto), func(t *testing.T) { testSiteWebBoardsAndIsolation(t, proto, nil) })
+	}
+}
+
+func testSiteWebBoardsAndIsolation(t *testing.T, proto int, configureClient func(*httptest.Server) func()) {
 	cfg := testConfig(t)
+	if proto >= 3 {
+		cert := httptest.NewTLSServer(nil)
+		pair := cert.TLS.Certificates[0]
+		cert.Close()
+		key, err := x509.MarshalPKCS8PrivateKey(pair.PrivateKey)
+		if err != nil {
+			t.Fatal(err)
+		}
+		cfg.Public.BaseURL = "https://127.0.0.1:9080"
+		cfg.Public.TLSCert = filepath.Join(filepath.Dir(cfg.DataDir), "cert.pem")
+		cfg.Public.TLSKey = filepath.Join(filepath.Dir(cfg.DataDir), "key.pem")
+		mustWrite(t, cfg.Public.TLSCert, pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: pair.Certificate[0]}))
+		mustWrite(t, cfg.Public.TLSKey, pem.EncodeToMemory(&pem.Block{Type: "PRIVATE KEY", Bytes: key}))
+	}
 	report, e := Initialize(cfg, "掲示板一覧")
 	if e != nil {
 		t.Fatal(e)
@@ -27,16 +51,46 @@ func TestSiteWebBoardsAndIsolation(t *testing.T) {
 		t.Fatal(e)
 	}
 	defer func() { repo.Close() }()
-	start := func() *httptest.Server {
+	start := func() *siteTransportServer {
 		observer, e := evidence.NewHTTPObserver(report.SiteID, domain.NewID(), "site-test")
 		if e != nil {
 			t.Fatal(e)
 		}
-		s := httptest.NewUnstartedServer(repo.SiteWebHandler(observer))
+		handled := make(chan struct{}, 1)
+		app := repo.SiteWebHandler(observer)
+		s := httptest.NewUnstartedServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			defer func() { handled <- struct{}{} }()
+			app.ServeHTTP(w, r)
+		}))
 		s.Config.ConnContext = observer.ConnContext
-		s.Start()
+		var stop func()
+		if proto >= 3 {
+			cert := httptest.NewTLSServer(nil)
+			s.TLS = cert.TLS.Clone()
+			cert.Close()
+			s.Config.TLSConfig = s.TLS
+			s.Config.ReadHeaderTimeout = 5 * time.Second
+			s.Config.ReadTimeout = 10 * time.Second
+			s.Config.WriteTimeout = 30 * time.Second
+			h3, reason, err := httptransport.Prepare(s.Config, s.Listener.Addr(), "https://"+s.Listener.Addr().String(), true, 64, 16)
+			if err != nil || h3 == nil {
+				t.Fatalf("HTTP/3: %s %v", reason, err)
+			}
+			if err := repo.EnableHTTP3(); err != nil {
+				t.Fatal(err)
+			}
+			go h3.Serve()
+			s.StartTLS()
+			if configureClient == nil {
+				t.Fatal("HTTP/3 reference client is required")
+			}
+			closeClient := configureClient(s)
+			stop = func() { closeClient(); h3.Close() }
+		} else {
+			s.Start()
+		}
 		s.Client().CheckRedirect = func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }
-		return s
+		return &siteTransportServer{Server: s, stop: stop, handled: handled}
 	}
 	server := start()
 	defer func() { server.Close() }()
@@ -65,10 +119,15 @@ func TestSiteWebBoardsAndIsolation(t *testing.T) {
 			t.Fatal(e)
 		}
 		defer response.Body.Close()
+		if response.ProtoMajor != min(proto, 3) {
+			t.Fatalf("wrong protocol: %s", response.Proto)
+		}
 		raw, e := io.ReadAll(response.Body)
 		if e != nil {
 			t.Fatal(e)
 		}
+		// HTTP/3では本文受領とhandler終了が別なので、試験時計を変更する前に完了を待つ。
+		<-server.handled
 		for _, c := range response.Cookies() {
 			cookies[c.Name] = c
 		}
@@ -258,4 +317,18 @@ func TestSiteWebBoardsAndIsolation(t *testing.T) {
 	if !strings.Contains(body, "beta-only") {
 		t.Fatal("other board disappeared")
 	}
+}
+
+// siteTransportServer は再起動試験でUDP接続も保存領域より先に閉じる。
+type siteTransportServer struct {
+	*httptest.Server
+	stop    func()
+	handled <-chan struct{}
+}
+
+func (s *siteTransportServer) Close() {
+	if s.stop != nil {
+		s.stop()
+	}
+	s.Server.Close()
 }

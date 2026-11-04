@@ -2,6 +2,7 @@
   "schema_version": 1,
   "data_dir": "./var/site",
   "public": {
+    "http3": false,
     "listen": "0.0.0.0:443",
     "base_url": "https://bbs.example.com",
     "tls_cert_file": "./tls/fullchain.pem",

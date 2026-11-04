@@ -84,4 +84,4 @@ mise exec -- go test -race ./internal/compat ./internal/publicedge ./internal/we
 mise exec -- go run ./tools/webassets -check
 ```
 
-Web・管理画面の受付条件、専ブラのidentity/304/206、HTTP/1.1・HTTP/2の実TLS通信を検査します。実ブラウザや稼働サーバーの確認は別に行います。[圧縮対応必須化の検証記録](web-compression-required.md)と[圧縮の測定記録](measurements.md#http配信と圧縮)から、対象・比較元・未確認の範囲を確認できます。
+Web・管理画面の受付条件、専ブラのidentity/304/206、HTTP/1.1・HTTP/2の実TLS通信を検査します。旧HTTPの拒否とSSHトンネル内部の例外は[HTTP世代の検証記録](web-http-protocol.md)、圧縮条件は[圧縮対応必須化の検証記録](web-compression-required.md)を参照してください。実ブラウザや稼働サーバーの確認は別に行います。過去の比較条件は[圧縮の測定記録](measurements.md#http配信と圧縮)に記載しています。

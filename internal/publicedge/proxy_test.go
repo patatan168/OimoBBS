@@ -32,6 +32,7 @@ func TestPublicEdgeBoundaryAndMetadata(t *testing.T) {
 	}
 	for _, route := range []string{"/login", "/api/v1/administrators", "/./login", "/%6cogin", "//login"} {
 		r := httptest.NewRequest("GET", "https://bbs.example"+route, nil)
+		r.Proto, r.ProtoMajor, r.ProtoMinor = "HTTP/2.0", 2, 0
 		r.RemoteAddr = "192.0.2.10:12345"
 		w := httptest.NewRecorder()
 		h.ServeHTTP(w, r)

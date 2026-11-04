@@ -17,6 +17,11 @@ race_package_list=$(go list "${package_patterns[@]}")
 mapfile -t race_packages < <(printf '%s\n' "$race_package_list" | sed '/^oimobbs\/internal\/bootstrap$/d')
 go test -race -timeout=60m "${race_packages[@]}"
 python3 scripts/check-bootstrap-race.py
+# 外部QUIC clientは一時moduleだけに追加し、製品の依存と検証環境を分ける。
+python3 scripts/quic-reference.py test -- -race -timeout=5m \
+  ./internal/quicv1 ./internal/http3native ./internal/httptransport ./internal/publicedge \
+  ./internal/evidence ./internal/bootstrap ./cmd/oimobbs ./tools/httptransportbench \
+  -run 'HTTP3|QUIC|QPACK|Prepared|Buffered|ControlFlood|WrongALPN|FirstData|Concurrent.*(Response|Bodies)|RequestFields|SiteWeb.*BoardsAndIsolation|ClientTrace'
 go vet "${package_patterns[@]}"
 python3 -B scripts/test_update_dependencies.py
 python3 -B scripts/test_deploy_software_update.py

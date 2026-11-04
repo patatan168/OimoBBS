@@ -28,6 +28,11 @@ type hostInspection struct {
 	names    []string
 }
 
+type hostLookupCandidate struct {
+	name  string
+	class NetworkClass
+}
+
 // DNSStatus は有効なキャッシュの状態だけを返す。外部照会は行わない。
 func (c *HostCache) DNSStatus(ip netip.Addr) HostDNSStatus {
 	value, ok := c.cached(ip)
@@ -66,25 +71,18 @@ func inspectHost(ctx context.Context, resolver HostResolver, ip netip.Addr) host
 	return inspectHostNames(ctx, resolver, ip, names)
 }
 
-// inspectHostNames は複数PTRの一つでも確認できれば採用し、未確定の照会が残る場合は不整合と断定しない。
+// inspectHostNames は既知サービスから正引き確認し、未確定の照会が残る場合は不整合と断定しない。
 func inspectHostNames(ctx context.Context, resolver HostResolver, ip netip.Addr, names []string) hostInspection {
 	out := hostInspection{status: HostDNSUnchecked}
-	for _, raw := range names {
-		name := strings.ToLower(strings.TrimSuffix(raw, "."))
-		if validDNSHostname(name) {
-			out.names = append(out.names, name)
-		}
+	candidates := hostLookupCandidates(ip, names)
+	for _, candidate := range candidates {
+		out.names = append(out.names, candidate.name)
 	}
 	slices.Sort(out.names)
-	out.names = slices.Compact(out.names)
+	out.reverse = len(candidates) > 0
 	uncertain := false
-	for _, raw := range names {
-		name := strings.ToLower(strings.TrimSuffix(raw, "."))
-		if !validDNSHostname(name) {
-			continue
-		}
-		out.reverse = true
-		status := inspectForward(ctx, resolver, ip, name)
+	for _, candidate := range candidates {
+		status := inspectForward(ctx, resolver, ip, candidate.name)
 		if status == HostDNSUnchecked {
 			uncertain = true
 			continue
@@ -93,11 +91,11 @@ func inspectHostNames(ctx context.Context, resolver HostResolver, ip netip.Addr,
 			continue
 		}
 		if out.hostname == "" {
-			out.hostname = name
+			out.hostname = candidate.name
 		}
-		if class, ok := serviceHostClass(ip, name); ok {
-			out.hostname = name
-			out.class = class
+		if candidate.class.CIDR != "" {
+			out.hostname = candidate.name
+			out.class = candidate.class
 			out.status = HostDNSConfirmed
 			return out
 		}
@@ -110,12 +108,38 @@ func inspectHostNames(ctx context.Context, resolver HostResolver, ip netip.Addr,
 	return out
 }
 
-// inspectForward はPTRの正引き一致・確定不一致・一時障害を有界に確認する。
+// hostLookupCandidates は正規化したPTRの重複を除き、既知名を先にする。各区分内の回答順は維持する。
+// 分類は候補にすぎず、正引きが元IPに一致するまでinspectHostNamesで採用しない。
+func hostLookupCandidates(ip netip.Addr, names []string) []hostLookupCandidate {
+	seen := make(map[string]bool, len(names))
+	var known, generic []hostLookupCandidate
+	for _, raw := range names {
+		name := strings.ToLower(strings.TrimSuffix(raw, "."))
+		if !validDNSHostname(name) || seen[name] {
+			continue
+		}
+		seen[name] = true
+		class, ok := serviceHostClass(ip, name)
+		candidate := hostLookupCandidate{name: name, class: class}
+		if ok {
+			known = append(known, candidate)
+		} else {
+			generic = append(generic, candidate)
+		}
+	}
+	return append(known, generic...)
+}
+
+// inspectForward は元IPと同じfamilyだけを正引きし、一致・確定不一致・一時障害を有界に確認する。
 func inspectForward(ctx context.Context, resolver HostResolver, ip netip.Addr, name string) HostDNSStatus {
 	if _, err := netip.ParseAddr(name); err == nil {
 		return HostDNSMismatch
 	}
-	ips, err := resolver.LookupNetIP(ctx, "ip", name)
+	network := "ip6"
+	if ip.Is4() {
+		network = "ip4"
+	}
+	ips, err := resolver.LookupNetIP(ctx, network, name)
 	if err != nil {
 		if definitiveDNSAbsence(err) {
 			return HostDNSMismatch
@@ -133,7 +157,7 @@ func inspectForward(ctx context.Context, resolver HostResolver, ip netip.Addr, n
 	return HostDNSMismatch
 }
 
-// serviceHostClass は正引き確認済みの名前だけをサービス別の表示へ対応づける。
+// serviceHostClass はサービス別の分類候補を返す。正引き一致の確認は呼出元の責務。
 func serviceHostClass(ip netip.Addr, name string) (NetworkClass, bool) {
 	for i, pattern := range hostPatterns {
 		if pattern.MatchString(name) {

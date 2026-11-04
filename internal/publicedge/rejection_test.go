@@ -22,7 +22,7 @@ import (
 func TestEdgeRejectsUnreceivedBody(t *testing.T) {
 	upstream, _ := url.Parse("https://backend.invalid:8443")
 	h, err := Handler("https://bbs.example", upstream, transportFunc(func(r *http.Request) (*http.Response, error) {
-		if r.URL.Path == "/unavailable" {
+		if r.URL.Path == "/unavailable/subject.txt" {
 			return nil, fmt.Errorf("upstream unavailable")
 		}
 		t.Error("拒否要求が転送された")
@@ -39,7 +39,7 @@ func TestEdgeRejectsUnreceivedBody(t *testing.T) {
 		method, path, host string
 		size, status       int
 	}{
-		{"POST", "/", "foreign.invalid", 65536, 400}, {"POST", "/login", "bbs.example", 65536, 404}, {"PATCH", "/", "bbs.example", 65536, 405}, {"POST", "/", "bbs.example", 65537, 413}, {"POST", "/unavailable", "bbs.example", 65536, 503},
+		{"POST", "/", "foreign.invalid", 65536, 400}, {"POST", "/login", "bbs.example", 65536, 505}, {"PATCH", "/test/bbs.cgi", "bbs.example", 65536, 405}, {"POST", "/test/bbs.cgi", "bbs.example", 65537, 413}, {"POST", "/unavailable/subject.txt", "bbs.example", 65536, 503},
 	} {
 		t.Run(fmt.Sprint(tc.status), func(t *testing.T) {
 			config := server.Client().Transport.(*http.Transport).TLSClientConfig.Clone()

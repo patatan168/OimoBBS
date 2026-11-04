@@ -218,7 +218,7 @@ func TestBoardMetadataAliasesKeepHiddenBoardGate(t *testing.T) {
 	for _, key := range []string{"original", "renamed"} {
 		for _, path := range []string{"/test/read.cgi/" + key + "/1/", "/web/post?bbs=" + key} {
 			w := httptest.NewRecorder()
-			public.Handler.ServeHTTP(w, webReadTestRequest("GET", cfg.Public.BaseURL+path, nil))
+			public.Handler.ServeHTTP(w, modernWebReadTestRequest("GET", cfg.Public.BaseURL+path, nil))
 			if w.Code != 403 {
 				t.Fatal("hidden board bypass", path, w.Code)
 			}

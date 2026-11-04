@@ -31,10 +31,7 @@ func optionalProductServer(t *testing.T, repo *Repository) *httptest.Server {
 	if e != nil {
 		t.Fatal(e)
 	}
-	s := httptest.NewUnstartedServer(public.Handler)
-	s.Config.ConnContext = public.ConnContext
-	s.Start()
-	return s
+	return modernHTTPTestServer(t, public)
 }
 
 func optionalProductRecords(t *testing.T, cfg Config, site domain.ID) []evidence.OptionalRecord {

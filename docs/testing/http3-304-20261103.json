@@ -1,0 +1,620 @@
+{
+  "schema_version": 1,
+  "date_jst": "2026-11-03",
+  "source_commit": "b1bc0acaeac8a5731625880742cae5d74fb0d688",
+  "decision": "No runtime change. Removing the second write-deadline setting did not improve measured CPU or latency and changed timeout semantics; rejected. Current library settings cannot enable QPACK dynamic tables.",
+  "primary_sources": [
+    "https://quic-go.net/docs/http3/qpack/",
+    "https://github.com/quic-go/qpack/issues/33"
+  ],
+  "phases": {
+    "baseline": {
+      "environment": {
+        "requests": 100000,
+        "rounds": 5,
+        "workloads": "304",
+        "trace": false,
+        "cpu_limit": 2,
+        "memory_bytes": 536870912,
+        "host": "Linux-6.12.90+deb12.1-amd64-x86_64-with-glibc2.36",
+        "go_version": "go version go1.27.3 linux/amd64",
+        "git_head": "b1bc0acaeac8a5731625880742cae5d74fb0d688",
+        "source_sha256": {
+          "go.mod": "6c62f0a42948bcc0bcdfd48a8f34de0f9df1d370e87e725c71149ecd85dd504a",
+          "go.sum": "092e28d6f7b1fad0a7e94e225b73184f6c00c23e870fccc3d3742013fdefe1e6",
+          "tools/httptransportbench/main.go": "b7ad322088f3a4dd39d9024c7b9daaebf2cdb2fceeafd7574276d2a5fcdd69a6",
+          "internal/httptransport/http3.go": "f93176eaba2ee2286385acc984f99e164c46b841833bbc52fb258b894cc790a5",
+          "internal/httptransport/http3_lifecycle.go": "607a1e8a13a6fff51a5fe4efc2e7f6813264d04aaea29a187b4d82db6177144a",
+          "internal/delivery/quic_admission.go": "6b6137dbfef058ab4e64641302c66978adabb92af88c62ab04c48636e75afc18"
+        },
+        "binary_sha256": "472fb7398b51382035af6a7611dbcf5c55c791dc0c3915237efee2df703c8bfc",
+        "network_scope": "isolated Docker bridge, virtual eth0 counters; no WAN, packet loss or RTT emulation"
+      },
+      "runs": [
+        {
+          "round": 1,
+          "protocol": "h2",
+          "name": "304",
+          "issued": 100000,
+          "success": 100000,
+          "errors": 0,
+          "seconds": 3.640203156,
+          "requests_per_second": 27470.994258980856,
+          "p50_ms": 0.266969,
+          "p95_ms": 0.475815,
+          "body_bytes_per_request": 0,
+          "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "server_cpu_ms": 6118.321,
+          "client_cpu_ms": 4992.811000000001,
+          "server_tx_bytes": 7663129,
+          "server_rx_bytes": 10597190,
+          "server_tx_packets": 72545,
+          "server_rx_packets": 102927
+        },
+        {
+          "round": 1,
+          "protocol": "h3",
+          "name": "304",
+          "issued": 100000,
+          "success": 100000,
+          "errors": 0,
+          "seconds": 4.496494266,
+          "requests_per_second": 22239.547986560246,
+          "p50_ms": 0.33448,
+          "p95_ms": 0.604654,
+          "body_bytes_per_request": 0,
+          "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "server_cpu_ms": 7172.397999999999,
+          "client_cpu_ms": 7288.557,
+          "server_tx_bytes": 13891110,
+          "server_rx_bytes": 14931902,
+          "server_tx_packets": 96487,
+          "server_rx_packets": 92230
+        },
+        {
+          "round": 2,
+          "protocol": "h3",
+          "name": "304",
+          "issued": 100000,
+          "success": 100000,
+          "errors": 0,
+          "seconds": 4.438120616,
+          "requests_per_second": 22532.059998434255,
+          "p50_ms": 0.32976,
+          "p95_ms": 0.594174,
+          "body_bytes_per_request": 0,
+          "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "server_cpu_ms": 7103.012000000001,
+          "client_cpu_ms": 7167.169,
+          "server_tx_bytes": 13892059,
+          "server_rx_bytes": 14969767,
+          "server_tx_packets": 96494,
+          "server_rx_packets": 92711
+        },
+        {
+          "round": 2,
+          "protocol": "h2",
+          "name": "304",
+          "issued": 100000,
+          "success": 100000,
+          "errors": 0,
+          "seconds": 3.665393593,
+          "requests_per_second": 27282.19970454889,
+          "p50_ms": 0.268492,
+          "p95_ms": 0.480413,
+          "body_bytes_per_request": 0,
+          "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "server_cpu_ms": 6153.835,
+          "client_cpu_ms": 5027.213000000001,
+          "server_tx_bytes": 7669749,
+          "server_rx_bytes": 10592570,
+          "server_tx_packets": 72612,
+          "server_rx_packets": 102896
+        },
+        {
+          "round": 3,
+          "protocol": "h2",
+          "name": "304",
+          "issued": 100000,
+          "success": 100000,
+          "errors": 0,
+          "seconds": 3.701378049,
+          "requests_per_second": 27016.964675363804,
+          "p50_ms": 0.271397,
+          "p95_ms": 0.484722,
+          "body_bytes_per_request": 0,
+          "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "server_cpu_ms": 6199.666,
+          "client_cpu_ms": 5033.27,
+          "server_tx_bytes": 7642845,
+          "server_rx_bytes": 10596608,
+          "server_tx_packets": 72366,
+          "server_rx_packets": 102955
+        },
+        {
+          "round": 3,
+          "protocol": "h3",
+          "name": "304",
+          "issued": 100000,
+          "success": 100000,
+          "errors": 0,
+          "seconds": 4.380141855,
+          "requests_per_second": 22830.310823346612,
+          "p50_ms": 0.327215,
+          "p95_ms": 0.577261,
+          "body_bytes_per_request": 0,
+          "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "server_cpu_ms": 7038.528,
+          "client_cpu_ms": 7107.4130000000005,
+          "server_tx_bytes": 13963390,
+          "server_rx_bytes": 14984335,
+          "server_tx_packets": 97234,
+          "server_rx_packets": 92925
+        },
+        {
+          "round": 4,
+          "protocol": "h3",
+          "name": "304",
+          "issued": 100000,
+          "success": 100000,
+          "errors": 0,
+          "seconds": 4.44160401,
+          "requests_per_second": 22514.388895285603,
+          "p50_ms": 0.330242,
+          "p95_ms": 0.600075,
+          "body_bytes_per_request": 0,
+          "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "server_cpu_ms": 7073.521,
+          "client_cpu_ms": 7156.563,
+          "server_tx_bytes": 14029472,
+          "server_rx_bytes": 14970699,
+          "server_tx_packets": 97010,
+          "server_rx_packets": 92734
+        },
+        {
+          "round": 4,
+          "protocol": "h2",
+          "name": "304",
+          "issued": 100000,
+          "success": 100000,
+          "errors": 0,
+          "seconds": 3.738173358,
+          "requests_per_second": 26751.033305074452,
+          "p50_ms": 0.274092,
+          "p95_ms": 0.489561,
+          "body_bytes_per_request": 0,
+          "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "server_cpu_ms": 6270.3910000000005,
+          "client_cpu_ms": 5116.397,
+          "server_tx_bytes": 7654396,
+          "server_rx_bytes": 10592714,
+          "server_tx_packets": 72474,
+          "server_rx_packets": 102896
+        },
+        {
+          "round": 5,
+          "protocol": "h2",
+          "name": "304",
+          "issued": 100000,
+          "success": 100000,
+          "errors": 0,
+          "seconds": 3.7465517630000003,
+          "requests_per_second": 26691.210031468072,
+          "p50_ms": 0.274173,
+          "p95_ms": 0.490623,
+          "body_bytes_per_request": 0,
+          "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "server_cpu_ms": 6301.063999999999,
+          "client_cpu_ms": 5136.862,
+          "server_tx_bytes": 7660801,
+          "server_rx_bytes": 10603406,
+          "server_tx_packets": 72505,
+          "server_rx_packets": 103060
+        },
+        {
+          "round": 5,
+          "protocol": "h3",
+          "name": "304",
+          "issued": 100000,
+          "success": 100000,
+          "errors": 0,
+          "seconds": 4.686127166,
+          "requests_per_second": 21339.583083776688,
+          "p50_ms": 0.344589,
+          "p95_ms": 0.649521,
+          "body_bytes_per_request": 0,
+          "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "server_cpu_ms": 7289.631,
+          "client_cpu_ms": 7384.811000000001,
+          "server_tx_bytes": 13791921,
+          "server_rx_bytes": 14805551,
+          "server_tx_packets": 94540,
+          "server_rx_packets": 90412
+        }
+      ],
+      "median": {
+        "h2": {
+          "wire_bytes_per_request": 182.60319,
+          "server_cpu_us_per_request": 61.99666,
+          "p95_ms": 0.484722,
+          "requests_per_second": 27016.964675363804,
+          "tx_packets_per_request": 0.72505,
+          "rx_packets_per_request": 1.02927
+        },
+        "h3": {
+          "wire_bytes_per_request": 288.61826,
+          "server_cpu_us_per_request": 71.03012000000001,
+          "p95_ms": 0.600075,
+          "requests_per_second": 22514.388895285603,
+          "tx_packets_per_request": 0.96494,
+          "rx_packets_per_request": 0.92711
+        }
+      },
+      "issued": 1000000,
+      "success": 1000000,
+      "errors": 0
+    },
+    "candidate": {
+      "environment": {
+        "requests": 100000,
+        "rounds": 5,
+        "workloads": "304",
+        "trace": false,
+        "cpu_limit": 2,
+        "memory_bytes": 536870912,
+        "host": "Linux-6.12.90+deb12.1-amd64-x86_64-with-glibc2.36",
+        "go_version": "go version go1.27.3 linux/amd64",
+        "git_head": "b1bc0acaeac8a5731625880742cae5d74fb0d688",
+        "source_sha256": {
+          "go.mod": "6c62f0a42948bcc0bcdfd48a8f34de0f9df1d370e87e725c71149ecd85dd504a",
+          "go.sum": "092e28d6f7b1fad0a7e94e225b73184f6c00c23e870fccc3d3742013fdefe1e6",
+          "tools/httptransportbench/main.go": "c3f53a190e5a74e79bd94d937a3c804a13c2b5d19eb74eb54e795d0b0b9b8b21",
+          "internal/httptransport/http3.go": "08a3dc0e05bfcd8fec4b9d417678d70c4ec317dff324443896279b1680801aa4",
+          "internal/httptransport/http3_lifecycle.go": "607a1e8a13a6fff51a5fe4efc2e7f6813264d04aaea29a187b4d82db6177144a",
+          "internal/delivery/quic_admission.go": "6b6137dbfef058ab4e64641302c66978adabb92af88c62ab04c48636e75afc18"
+        },
+        "binary_sha256": "0bee820c682e82f307c4c5523da9635d8cf473422002d7ebc6292c385ee480db",
+        "network_scope": "isolated Docker bridge, virtual eth0 counters; no WAN, packet loss or RTT emulation"
+      },
+      "runs": [
+        {
+          "round": 1,
+          "protocol": "h2",
+          "name": "304",
+          "issued": 100000,
+          "success": 100000,
+          "errors": 0,
+          "seconds": 3.708849898,
+          "requests_per_second": 26962.536298361676,
+          "p50_ms": 0.271468,
+          "p95_ms": 0.484953,
+          "body_bytes_per_request": 0,
+          "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "server_cpu_ms": 6214.59,
+          "client_cpu_ms": 5037.3769999999995,
+          "server_tx_bytes": 7631231,
+          "server_rx_bytes": 10599821,
+          "server_tx_packets": 72178,
+          "server_rx_packets": 102969
+        },
+        {
+          "round": 1,
+          "protocol": "h3",
+          "name": "304",
+          "issued": 100000,
+          "success": 100000,
+          "errors": 0,
+          "seconds": 4.505104415,
+          "requests_per_second": 22197.04379482179,
+          "p50_ms": 0.334049,
+          "p95_ms": 0.614063,
+          "body_bytes_per_request": 0,
+          "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "server_cpu_ms": 7106.482999999999,
+          "client_cpu_ms": 7176.254,
+          "server_tx_bytes": 13849621,
+          "server_rx_bytes": 14880636,
+          "server_tx_packets": 95929,
+          "server_rx_packets": 91467
+        },
+        {
+          "round": 2,
+          "protocol": "h3",
+          "name": "304",
+          "issued": 100000,
+          "success": 100000,
+          "errors": 0,
+          "seconds": 4.481807034,
+          "requests_per_second": 22312.42872381105,
+          "p50_ms": 0.333568,
+          "p95_ms": 0.601169,
+          "body_bytes_per_request": 0,
+          "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "server_cpu_ms": 7122.084999999999,
+          "client_cpu_ms": 7206.576,
+          "server_tx_bytes": 13853350,
+          "server_rx_bytes": 14909047,
+          "server_tx_packets": 95966,
+          "server_rx_packets": 91861
+        },
+        {
+          "round": 2,
+          "protocol": "h2",
+          "name": "304",
+          "issued": 100000,
+          "success": 100000,
+          "errors": 0,
+          "seconds": 3.709722842,
+          "requests_per_second": 26956.191677674662,
+          "p50_ms": 0.271919,
+          "p95_ms": 0.485223,
+          "body_bytes_per_request": 0,
+          "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "server_cpu_ms": 6239.7390000000005,
+          "client_cpu_ms": 5102.664,
+          "server_tx_bytes": 7684557,
+          "server_rx_bytes": 10600170,
+          "server_tx_packets": 72811,
+          "server_rx_packets": 103010
+        },
+        {
+          "round": 3,
+          "protocol": "h2",
+          "name": "304",
+          "issued": 100000,
+          "success": 100000,
+          "errors": 0,
+          "seconds": 3.684323613,
+          "requests_per_second": 27142.02401959309,
+          "p50_ms": 0.270225,
+          "p95_ms": 0.480013,
+          "body_bytes_per_request": 0,
+          "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "server_cpu_ms": 6202.552,
+          "client_cpu_ms": 5045.757,
+          "server_tx_bytes": 7617523,
+          "server_rx_bytes": 10583516,
+          "server_tx_packets": 72058,
+          "server_rx_packets": 102759
+        },
+        {
+          "round": 3,
+          "protocol": "h3",
+          "name": "304",
+          "issued": 100000,
+          "success": 100000,
+          "errors": 0,
+          "seconds": 4.451393101,
+          "requests_per_second": 22464.877338632512,
+          "p50_ms": 0.331485,
+          "p95_ms": 0.594136,
+          "body_bytes_per_request": 0,
+          "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "server_cpu_ms": 7084.776,
+          "client_cpu_ms": 7183.553,
+          "server_tx_bytes": 13913544,
+          "server_rx_bytes": 14951000,
+          "server_tx_packets": 96582,
+          "server_rx_packets": 92480
+        },
+        {
+          "round": 4,
+          "protocol": "h3",
+          "name": "304",
+          "issued": 100000,
+          "success": 100000,
+          "errors": 0,
+          "seconds": 4.546135203,
+          "requests_per_second": 21996.706110722327,
+          "p50_ms": 0.336194,
+          "p95_ms": 0.627139,
+          "body_bytes_per_request": 0,
+          "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "server_cpu_ms": 7164.766,
+          "client_cpu_ms": 7262.545,
+          "server_tx_bytes": 13946409,
+          "server_rx_bytes": 14870240,
+          "server_tx_packets": 95856,
+          "server_rx_packets": 91345
+        },
+        {
+          "round": 4,
+          "protocol": "h2",
+          "name": "304",
+          "issued": 100000,
+          "success": 100000,
+          "errors": 0,
+          "seconds": 3.758212104,
+          "requests_per_second": 26608.397086893103,
+          "p50_ms": 0.275375,
+          "p95_ms": 0.498649,
+          "body_bytes_per_request": 0,
+          "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "server_cpu_ms": 6318.066,
+          "client_cpu_ms": 5164.331,
+          "server_tx_bytes": 7679366,
+          "server_rx_bytes": 10608873,
+          "server_tx_packets": 72806,
+          "server_rx_packets": 103144
+        },
+        {
+          "round": 5,
+          "protocol": "h2",
+          "name": "304",
+          "issued": 100000,
+          "success": 100000,
+          "errors": 0,
+          "seconds": 3.772446698,
+          "requests_per_second": 26507.995474930365,
+          "p50_ms": 0.276217,
+          "p95_ms": 0.496836,
+          "body_bytes_per_request": 0,
+          "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "server_cpu_ms": 6314.117,
+          "client_cpu_ms": 5131.253,
+          "server_tx_bytes": 7637525,
+          "server_rx_bytes": 10593420,
+          "server_tx_packets": 72280,
+          "server_rx_packets": 102907
+        },
+        {
+          "round": 5,
+          "protocol": "h3",
+          "name": "304",
+          "issued": 100000,
+          "success": 100000,
+          "errors": 0,
+          "seconds": 4.755479179,
+          "requests_per_second": 21028.375109199485,
+          "p50_ms": 0.348859,
+          "p95_ms": 0.670574,
+          "body_bytes_per_request": 0,
+          "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "server_cpu_ms": 7382.320000000001,
+          "client_cpu_ms": 7430.505,
+          "server_tx_bytes": 13801998,
+          "server_rx_bytes": 14786074,
+          "server_tx_packets": 94700,
+          "server_rx_packets": 90144
+        }
+      ],
+      "median": {
+        "h2": {
+          "wire_bytes_per_request": 182.31052,
+          "server_cpu_us_per_request": 62.39739000000001,
+          "p95_ms": 0.485223,
+          "requests_per_second": 26956.191677674662,
+          "tx_packets_per_request": 0.7228,
+          "rx_packets_per_request": 1.02969
+        },
+        "h3": {
+          "wire_bytes_per_request": 287.62397,
+          "server_cpu_us_per_request": 71.22084999999998,
+          "p95_ms": 0.614063,
+          "requests_per_second": 22197.04379482179,
+          "tx_packets_per_request": 0.95929,
+          "rx_packets_per_request": 0.91467
+        }
+      },
+      "issued": 1000000,
+      "success": 1000000,
+      "errors": 0
+    }
+  },
+  "diagnostic": {
+    "performance_values_excluded": true,
+    "http2_header_payload_bytes_distribution": {
+      "request": {
+        "71": 1,
+        "10": 1,
+        "7": 99
+      },
+      "response": {
+        "121": 1,
+        "8": 100
+      }
+    },
+    "http3_headers": {
+      "request": {
+        "count": 101,
+        "encoded_payload_bytes": {
+          "75": 101
+        },
+        "sample_headers": [
+          {
+            "name": ":authority",
+            "value": "172.22.0.2:8443"
+          },
+          {
+            "name": ":method",
+            "value": "GET"
+          },
+          {
+            "name": ":path",
+            "value": "/dat"
+          },
+          {
+            "name": ":scheme",
+            "value": "https"
+          },
+          {
+            "name": "if-none-match",
+            "value": "\"bench-identity\""
+          },
+          {
+            "name": "accept-encoding",
+            "value": "identity"
+          },
+          {
+            "name": "user-agent",
+            "value": "OimoBBS isolated transport benchmark"
+          }
+        ]
+      },
+      "response": {
+        "count": 101,
+        "encoded_payload_bytes": {
+          "59": 101
+        },
+        "sample_headers": [
+          {
+            "name": ":status",
+            "value": "304"
+          },
+          {
+            "name": "cache-control",
+            "value": "no-cache"
+          },
+          {
+            "name": "date",
+            "value": "Tue, 03 Nov 2026 08:42:56 GMT"
+          },
+          {
+            "name": "etag",
+            "value": "\"bench-identity\""
+          },
+          {
+            "name": "x-content-type-options",
+            "value": "nosniff"
+          },
+          {
+            "name": "strict-transport-security",
+            "value": "max-age=31536000"
+          },
+          {
+            "name": "vary",
+            "value": "Accept-Encoding"
+          }
+        ]
+      }
+    },
+    "event_count": 775
+  },
+  "candidate": {
+    "path": "internal/httptransport/http3.go",
+    "change": "Remove the tcp.WriteTimeout SetWriteDeadline block in withDeadlines; preserve the write deadline configured at stream admission",
+    "adopted": false,
+    "reason": "No measured improvement; also makes the response budget include header reception time."
+  },
+  "log_sha256": {
+    "var/http3-304-20261103-frame-diagnostics/r1-h2.stderr": "9f82bf75c372e0534c1d1a90dd99634c32e705725624a810783104f97d98daac",
+    "var/http3-304-20261103-frame-diagnostics/r1-h3-trace/client-1.qlog": "e3565b0318e7b55396bdaa87c14559b7d7565e1a101498b9ff0be54503b0e94d",
+    "var/http3-304-20261103-baseline/final-tests.log": "6bd28d4b572566c57c8faaed8e38bdea64d5b524886ea40b1a33bf20b7422967",
+    "var/http3-304-20261103-baseline/final-vet.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "verification": {
+    "trace_race_repetitions": 10,
+    "runtime_source_matches_initial_commit": true,
+    "source_sha256": {
+      "tools/httptransportbench/main.go": "c3f53a190e5a74e79bd94d937a3c804a13c2b5d19eb74eb54e795d0b0b9b8b21",
+      "tools/httptransportbench/trace_test.go": "0375a8ba3ea7f066f0c18a360ba9863473eb56a7b0193051c0a9f2caad371393",
+      "scripts/probe-http3.py": "880acc510a025b5e8ac984e25cbf7448289323eb82874688fe1a216848e20b0e"
+    },
+    "logs": {
+      "var/http3-304-20261103-report/tests.log": "08a2f7a22727745fd3af610193e9b4741e929912e9034cf3a8f300a776504a39",
+      "var/http3-304-20261103-report/vet.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "var/http3-304-20261103-report/trace-race.log": "5d37ab10f54d7aeab794191a6d1f8464eb9cbd2f024463262f9782f03c670818",
+      "var/http3-304-20261103-report/deps.log": "72272b8414689e4ffbc09ab9ceaeee48ec8532337ed0d636eab270a55d46a1d8"
+    }
+  }
+}

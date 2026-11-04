@@ -61,11 +61,7 @@ func (repo *Repository) legacyMenu(w http.ResponseWriter, r *http.Request, title
 	repo.writeFeed(w, r, "text/html; charset=Shift_JIS", body, e)
 }
 func legacyFeedPath(path string) bool {
-	p := strings.Split(path, "/")
-	if len(p) == 3 {
-		return p[2] == "subject.txt" || p[2] == "SETTING.TXT" || p[2] == "head.txt"
-	}
-	return len(p) == 4 && p[2] == "dat" && strings.HasSuffix(p[3], ".dat")
+	return compat.LegacyFeedPath(path)
 }
 func (repo *Repository) legacyFeed(w http.ResponseWriter, r *http.Request, board publicBoard) {
 	var denied bool

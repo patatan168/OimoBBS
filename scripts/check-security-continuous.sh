@@ -21,7 +21,17 @@ for target in \
   './internal/compat FuzzRange' \
   './internal/store FuzzFrame' \
   './internal/store FuzzDecodePackChunk' \
-  './internal/zstddecode FuzzDecode'; do
+  './internal/zstddecode FuzzDecode' \
+  './internal/quicv1 FuzzPacketHeader' \
+  './internal/quicv1 FuzzReassembly' \
+  './internal/quicv1 FuzzReassemblySequence' \
+  './internal/quicv1 FuzzQUICFrames' \
+  './internal/quicv1 FuzzDestinationControl' \
+  './internal/quicv1 FuzzKeyUpdateSequence' \
+  './internal/quicv1 FuzzSendStateSequence' \
+  './internal/quicv1 FuzzVarint' \
+  './internal/http3native FuzzQPACKDecode' \
+  './internal/http3native FuzzQPACKInstructions'; do
   read -r package fuzz <<< "$target"
   go test "$package" -run '^$' -fuzz "^${fuzz}$" -fuzztime="${OIMO_FUZZ_SECONDS:-20}s" -parallel=2
 done

@@ -52,7 +52,7 @@ func TestAdminListHTML(t *testing.T) {
 			t.Fatal(err, created)
 		}
 	}
-	nextRE := regexp.MustCompile(`<a href="([^"]+)">次のページ</a>`)
+	nextRE := regexp.MustCompile(`<a[[:space:]][^>]*href="([^"]+)"[^>]*>次のページ</a>`)
 	for _, path := range []string{"/boards", "/administrators", strings.TrimPrefix(rulesPath, "/api/v1"), fmt.Sprintf("/boards/%s/threads", board.ID)} {
 		t.Run(path, func(t *testing.T) {
 			first, page := c.request("GET", path+"?limit=1", "", nil)
@@ -87,7 +87,11 @@ func TestAdminListHTML(t *testing.T) {
 	}
 	// 古いHTMLのcursorも、取得結果が変わったら409になる。
 	res, body = c.request("GET", "/boards?limit=1", "", nil)
-	next := html.UnescapeString(nextRE.FindStringSubmatch(body)[1])
+	match := nextRE.FindStringSubmatch(body)
+	if len(match) != 2 {
+		t.Fatal("missing pagination link", res.StatusCode, body)
+	}
+	next := html.UnescapeString(match[1])
 	if _, err = repo.CreateBoard(t.Context(), "third", "一覧3"); err != nil {
 		t.Fatal(err)
 	}

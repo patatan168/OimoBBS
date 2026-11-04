@@ -1,0 +1,127 @@
+// 実QUICクライアントからHTTPを伴わない制御入力を送り、接続ごとの上限を検査する。
+package http3native
+
+import (
+	"context"
+	"crypto/tls"
+	"errors"
+	"io"
+	"net"
+	"net/http"
+	"net/http/httptest"
+	"oimobbs/internal/quicv1"
+	"strings"
+	"testing"
+	"time"
+
+	quic "github.com/quic-go/quic-go"
+)
+
+func TestControlFloodIsBounded(t *testing.T) {
+	for _, mode := range []string{"unknown-streams", "decoder-cancellations"} {
+		t.Run(mode, func(t *testing.T) {
+			_, origin := nativeServer(t, http.HandlerFunc(func(http.ResponseWriter, *http.Request) { t.Error("control input reached HTTP handler") }))
+			ctx, cancel := context.WithTimeout(t.Context(), 3*time.Second)
+			defer cancel()
+			client, err := quic.DialAddr(ctx, strings.TrimPrefix(origin, "https://"), &tls.Config{InsecureSkipVerify: true, NextProtos: []string{"h3"}}, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer client.CloseWithError(0, "")
+			if mode == "unknown-streams" {
+				for range 17 {
+					stream, err := client.OpenUniStreamSync(ctx)
+					if err != nil {
+						break
+					}
+					_, _ = stream.Write([]byte{0x21})
+					_ = stream.Close()
+				}
+			} else {
+				stream, err := client.OpenUniStreamSync(ctx)
+				if err != nil {
+					t.Fatal(err)
+				}
+				_, _ = stream.Write(append([]byte{3}, []byte(strings.Repeat("\x40", 128<<10))...))
+			}
+			select {
+			case <-client.Context().Done():
+			case <-ctx.Done():
+				t.Fatal("control flood did not close connection")
+			}
+			var application *quic.ApplicationError
+			if !errors.As(context.Cause(client.Context()), &application) || uint64(application.ErrorCode) != 0x107 {
+				t.Fatalf("close reason: %v", context.Cause(client.Context()))
+			}
+		})
+	}
+}
+
+// 最終応答を受理した後も、peerの受信窓が開かなければ期限でbufferを解放する。
+func TestBufferedFinalResponseExpires(t *testing.T) {
+	_, origin := nativeServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = io.WriteString(w, strings.Repeat("response", 128))
+	}), 50*time.Millisecond)
+	ctx, cancel := context.WithTimeout(t.Context(), 2*time.Second)
+	defer cancel()
+	client, err := quic.DialAddr(ctx, strings.TrimPrefix(origin, "https://"), &tls.Config{InsecureSkipVerify: true, NextProtos: []string{"h3"}}, &quic.Config{InitialStreamReceiveWindow: 32, MaxStreamReceiveWindow: 32})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer client.CloseWithError(0, "")
+	stream, err := client.OpenStreamSync(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	block, err := newQPACK(nil, nil).encode(uint64(stream.StreamID()), []Field{{":method", "GET"}, {":scheme", "https"}, {":authority", "localhost"}, {":path", "/"}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = stream.Write(frame(1, block)); err != nil {
+		t.Fatal(err)
+	}
+	_ = stream.Close()
+	// アプリが読み始めるまで32byteの受信窓を固定する。
+	time.Sleep(150 * time.Millisecond)
+	_ = stream.SetReadDeadline(time.Now().Add(time.Second))
+	_, err = io.ReadAll(stream)
+	var reset *quic.StreamError
+	if !errors.As(err, &reset) || uint64(reset.ErrorCode) != 0x10c || !reset.Remote {
+		t.Fatalf("response expiry: %v", err)
+	}
+}
+
+// TLSの動的設定が別ALPNを選んでもHTTP/3として処理・記録しない。
+func TestWrongALPNDoesNotReachHTTP(t *testing.T) {
+	cert := httptest.NewTLSServer(nil)
+	cfg := cert.TLS.Clone()
+	cert.Close()
+	cfg.NextProtos = []string{"different-protocol"}
+	socket, err := net.ListenUDP("udp4", &net.UDPAddr{IP: net.ParseIP("127.0.0.1")})
+	if err != nil {
+		t.Fatal(err)
+	}
+	listener, err := quicv1.Listen(socket, quicv1.Config{TLSConfig: cfg, MaxConnections: 2})
+	if err != nil {
+		t.Fatal(err)
+	}
+	server := &Server{HTTP: &http.Server{Handler: http.HandlerFunc(func(http.ResponseWriter, *http.Request) { t.Error("wrong ALPN reached HTTP") })}}
+	go server.Serve(listener)
+	defer server.Close()
+	ctx, cancel := context.WithTimeout(t.Context(), time.Second)
+	defer cancel()
+	client, err := quic.DialAddr(ctx, listener.Addr().String(), &tls.Config{InsecureSkipVerify: true, NextProtos: []string{"different-protocol"}}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer client.CloseWithError(0, "")
+	select {
+	case <-client.Context().Done():
+	case <-ctx.Done():
+		t.Fatal("wrong ALPN not rejected")
+	}
+	var closed *quic.ApplicationError
+	if !errors.As(context.Cause(client.Context()), &closed) || uint64(closed.ErrorCode) != errGeneral {
+		t.Fatal(context.Cause(client.Context()))
+	}
+}

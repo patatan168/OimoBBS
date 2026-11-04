@@ -88,7 +88,7 @@ func TestAdminBoardMetadataURLsPostingAndRecovery(t *testing.T) {
 	for _, key := range []string{"original", "renamed"} {
 		for _, suffix := range []string{"/", "/subject.txt", "/SETTING.TXT", "/dat/" + strconv.FormatUint(first.Key, 10) + ".dat"} {
 			w := httptest.NewRecorder()
-			public.Handler.ServeHTTP(w, webReadTestRequest("GET", cfg.Public.BaseURL+"/"+key+suffix, nil))
+			public.Handler.ServeHTTP(w, modernWebReadTestRequest("GET", cfg.Public.BaseURL+"/"+key+suffix, nil))
 			if w.Code != 200 {
 				t.Fatalf("%s%s: %d %s", key, suffix, w.Code, w.Body.String())
 			}
@@ -100,7 +100,7 @@ func TestAdminBoardMetadataURLsPostingAndRecovery(t *testing.T) {
 			}
 		}
 		w := httptest.NewRecorder()
-		public.Handler.ServeHTTP(w, webReadTestRequest("GET", cfg.Public.BaseURL+"/test/read.cgi/"+key+"/"+strconv.FormatUint(first.Key, 10)+"/", nil))
+		public.Handler.ServeHTTP(w, modernWebReadTestRequest("GET", cfg.Public.BaseURL+"/test/read.cgi/"+key+"/"+strconv.FormatUint(first.Key, 10)+"/", nil))
 		if w.Code != 200 || !strings.Contains(w.Body.String(), "/test/read.cgi/renamed/") {
 			t.Fatal("thread", key, w.Code, w.Body.String())
 		}

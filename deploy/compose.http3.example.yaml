@@ -1,0 +1,6 @@
+# 直結HTTPS専用。ルーターUDP 443の転送とpublic.http3=trueを確認してから既存構成へ追加する。
+# 公開入口oimoedgeのある構成では、その入口側へ同等のUDP portを設定する。
+services:
+  bbs:
+    ports:
+      - "443:8443/udp"

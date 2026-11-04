@@ -1,0 +1,490 @@
+// Command httptransportbench は隔離環境で同一DATのHTTP/1・2・3を比較する。
+package main
+
+import (
+	"bytes"
+	"context"
+	"crypto/ecdsa"
+	"crypto/ed25519"
+	"crypto/elliptic"
+	"crypto/rand"
+	"crypto/sha256"
+	"crypto/tls"
+	"crypto/x509"
+	"crypto/x509/pkix"
+	"encoding/json"
+	"flag"
+	"fmt"
+	"io"
+	"math/big"
+	"net"
+	"net/http"
+	"os"
+	"os/signal"
+	"path/filepath"
+	"runtime"
+	"runtime/pprof"
+	"sort"
+	"strconv"
+	"strings"
+	"sync"
+	"sync/atomic"
+	"syscall"
+	"time"
+
+	"github.com/quic-go/quic-go"
+	"github.com/quic-go/quic-go/http3"
+	"github.com/quic-go/quic-go/qlogwriter"
+	"oimobbs/internal/compat"
+	"oimobbs/internal/delivery"
+	"oimobbs/internal/httptransport"
+	"oimobbs/internal/quicv1"
+	"oimobbs/tools/httptransportbench/reference"
+)
+
+type counters struct {
+	Native    *quicv1.Stats `json:"native,omitempty"`
+	CPU       float64       `json:"cpu_ms"`
+	SystemCPU float64       `json:"system_cpu_ms"`
+	Throttled float64       `json:"cpu_throttled_ms"`
+	GoProcs   int           `json:"go_procs"`
+	TX        uint64        `json:"tx_bytes"`
+	RX        uint64        `json:"rx_bytes"`
+	TXPackets uint64        `json:"tx_packets"`
+	RXPackets uint64        `json:"rx_packets"`
+}
+type result struct {
+	Native          *quicv1.Stats `json:"native,omitempty"`
+	Protocol        string        `json:"protocol"`
+	Name            string        `json:"name"`
+	Issued          int           `json:"issued"`
+	Success         int           `json:"success"`
+	Errors          int           `json:"errors"`
+	FirstError      string        `json:"first_error,omitempty"`
+	Seconds         float64       `json:"seconds"`
+	Rate            float64       `json:"requests_per_second"`
+	P50             float64       `json:"p50_ms"`
+	P95             float64       `json:"p95_ms"`
+	Body            int           `json:"body_bytes_per_request"`
+	SHA             string        `json:"body_sha256"`
+	ServerCPU       float64       `json:"server_cpu_ms"`
+	ClientCPU       float64       `json:"client_cpu_ms"`
+	ServerSystemCPU float64       `json:"server_system_cpu_ms"`
+	ClientSystemCPU float64       `json:"client_system_cpu_ms"`
+	ServerThrottled float64       `json:"server_cpu_throttled_ms"`
+	ClientThrottled float64       `json:"client_cpu_throttled_ms"`
+	ServerGoProcs   int           `json:"server_go_procs"`
+	ClientGoProcs   int           `json:"client_go_procs"`
+	TX              uint64        `json:"server_tx_bytes"`
+	RX              uint64        `json:"server_rx_bytes"`
+	TXPackets       uint64        `json:"server_tx_packets"`
+	RXPackets       uint64        `json:"server_rx_packets"`
+}
+
+func main() {
+	serve := flag.Bool("serve", false, "隔離DATサーバーを起動")
+	origin := flag.String("origin", "https://127.0.0.1:8443", "隔離サーバーorigin")
+	protocol := flag.String("protocol", "h2", "h1/h2/h3")
+	count := flag.Int("requests", 1000, "各warm負荷の要求数")
+	selected := flag.String("workloads", "", "比較する用途をカンマ区切りで指定（省略時は全用途）")
+	workers := flag.Int("workers", 8, "warm負荷の同時要求数（1〜32）")
+	profile := flag.String("cpu-profile", "", "診断専用CPU profileの保存先（測定結果とは分離）")
+	native := flag.Bool("native-http3", true, "隔離サーバーで独自QUIC/HTTP3を使う")
+	referenceBackend := flag.Bool("reference-http3", false, "比較専用の既存QUIC/HTTP3 backendを使う")
+	certificate := flag.String("certificate", "ed25519", "隔離証明書の署名方式（ed25519/ecdsa）")
+	identityOnly := flag.Bool("identity-only", false, "ブラウザー比較用に合成DATの無圧縮配信を固定")
+	trace := flag.String("trace-dir", "", "隔離HTTP/3 clientのqlog保存先（性能測定とは分離）")
+	flag.Parse()
+	traceDir = *trace
+	var err error
+	if *serve {
+		if *profile != "" {
+			f, e := os.Create(*profile)
+			if e != nil {
+				panic(e)
+			}
+			if e = pprof.StartCPUProfile(f); e != nil {
+				panic(e)
+			}
+			ch := make(chan os.Signal, 1)
+			signal.Notify(ch, syscall.SIGINT, syscall.SIGTERM)
+			go func() {
+				<-ch
+				pprof.StopCPUProfile()
+				if heap, e := os.Create(*profile + ".heap"); e == nil {
+					_ = pprof.WriteHeapProfile(heap)
+					_ = heap.Close()
+				}
+				_ = f.Close()
+				os.Exit(0)
+			}()
+			defer pprof.StopCPUProfile()
+		}
+		err = server(*native && !*referenceBackend, *certificate, *identityOnly, *origin)
+	} else {
+		if *profile != "" {
+			f, e := os.Create(*profile)
+			if e != nil {
+				panic(e)
+			}
+			defer f.Close()
+			if e = pprof.StartCPUProfile(f); e != nil {
+				panic(e)
+			}
+			defer pprof.StopCPUProfile()
+		}
+		err = client(*origin, *protocol, *count, *selected, *workers)
+		traceWait.Wait()
+	}
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+}
+
+// server は同じ圧縮・Range・帯域制御を三つのHTTPへ公開する。公開portは隔離ネットワーク内だけで使う。
+func server(native bool, certificate string, identityOnly bool, publicOrigin string) error {
+	var pub, key any
+	var err error
+	switch certificate {
+	case "ed25519":
+		pub, key, err = ed25519.GenerateKey(rand.Reader)
+	case "ecdsa":
+		var private *ecdsa.PrivateKey
+		private, err = ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+		if err == nil {
+			pub, key = &private.PublicKey, private
+		}
+	default:
+		return fmt.Errorf("unsupported isolated certificate: %s", certificate)
+	}
+	if err != nil {
+		return err
+	}
+	template := &x509.Certificate{SerialNumber: big.NewInt(1), Subject: pkix.Name{CommonName: "isolated-http3"}, DNSNames: []string{"localhost"}, IPAddresses: []net.IP{net.ParseIP("127.0.0.1")}, NotBefore: time.Now().Add(-time.Minute), NotAfter: time.Now().Add(time.Hour), ExtKeyUsage: []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth}, KeyUsage: x509.KeyUsageDigitalSignature}
+	der, err := x509.CreateCertificate(rand.Reader, template, template, pub, key)
+	if err != nil {
+		return err
+	}
+	tlsConfig := &tls.Config{MinVersion: tls.VersionTLS12, Certificates: []tls.Certificate{{Certificate: [][]byte{der}, PrivateKey: key}}}
+	var raw []byte
+	for i := 0; len(raw) < 64<<10; i++ {
+		sum := sha256.Sum256([]byte(strconv.Itoa(i)))
+		raw = fmt.Appendf(raw, "anonymous<>sage<>2026/11/03 ID:%08d<>HTTP transport test %x<>thread\n", i, sum[:12])
+	}
+	raw = raw[:64<<10]
+	cache := compat.NewCompressionCache(16<<20, 2)
+	scheduler, _ := delivery.New(delivery.MaxBudgetBits)
+	gate, _ := delivery.NewRequestGate(512, 32)
+	data := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if identityOnly {
+			r.Header.Set("Accept-Encoding", "identity")
+		}
+		body := raw
+		if r.URL.Path == "/small" {
+			body = raw[:1024]
+		}
+		w.Header().Set("X-Content-Type-Options", "nosniff")
+		w.Header().Set("Strict-Transport-Security", "max-age=31536000")
+		compat.ServeDAT(w, r, compat.Representation{DAT: body, ETagIdentity: `"bench-identity"`, ETagGzip: `"bench-gzip"`, ETagZstd: `"bench-zstd"`, Compress: cache.Compress})
+	})
+	var transportStats func() *quicv1.Stats
+	mux := http.NewServeMux()
+	mux.HandleFunc("/metrics", func(w http.ResponseWriter, r *http.Request) {
+		value := readCounters()
+		if transportStats != nil {
+			value.Native = transportStats()
+		}
+		json.NewEncoder(w).Encode(value)
+	})
+	mux.Handle("/", scheduler.Wrap(gate.Wrap(data)))
+	tcp := &http.Server{Addr: ":8443", Handler: mux, TLSConfig: tlsConfig, ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 10 * time.Second, WriteTimeout: 30 * time.Second, IdleTimeout: 30 * time.Second, MaxHeaderBytes: 16 << 10, HTTP2: &http.HTTP2Config{MaxConcurrentStreams: 32, MaxReadFrameSize: 16 << 10, MaxReceiveBufferPerConnection: 256 << 10, MaxReceiveBufferPerStream: 64 << 10}}
+	listener, err := net.Listen("tcp", tcp.Addr)
+	if err != nil {
+		return err
+	}
+	listener, err = delivery.LimitListenerBySource(listener, 256, 16)
+	if err != nil {
+		return err
+	}
+	listener, err = delivery.LimitConnectionRate(listener, delivery.PublicConnectionRate())
+	if err != nil {
+		return err
+	}
+	defer listener.Close()
+	var h3 interface {
+		Serve() error
+		Close() error
+		NativeStats() *quicv1.Stats
+	}
+	var reason string
+	if native {
+		var nativeServer *httptransport.HTTP3
+		nativeServer, reason, err = httptransport.Prepare(tcp, listener.Addr(), publicOrigin, true, 256, 16)
+		if nativeServer != nil {
+			h3 = nativeServer
+		}
+	} else {
+		var referenceServer *reference.HTTP3
+		referenceServer, reason, err = reference.Prepare(tcp, listener.Addr(), publicOrigin, true, 256, 16)
+		if referenceServer != nil {
+			h3 = referenceServer
+		}
+	}
+	if err != nil || h3 == nil {
+		return fmt.Errorf("HTTP/3 unavailable: %s: %v", reason, err)
+	}
+	transportStats = h3.NativeStats
+	defer h3.Close()
+	go h3.Serve()
+	fmt.Println("ready")
+	return tcp.ServeTLS(listener, "", "")
+}
+
+// readCounters はプロセスCPUと、コンテナの仮想NICが数えた通信量を返す。
+func readCounters() counters {
+	var usage syscall.Rusage
+	_ = syscall.Getrusage(syscall.RUSAGE_SELF, &usage)
+	read := func(name string) uint64 {
+		b, _ := os.ReadFile("/sys/class/net/eth0/statistics/" + name)
+		v, _ := strconv.ParseUint(strings.TrimSpace(string(b)), 10, 64)
+		return v
+	}
+	var throttled float64
+	if raw, err := os.ReadFile("/sys/fs/cgroup/cpu.stat"); err == nil {
+		for _, line := range strings.Split(string(raw), "\n") {
+			fields := strings.Fields(line)
+			if len(fields) == 2 && fields[0] == "throttled_usec" {
+				value, _ := strconv.ParseUint(fields[1], 10, 64)
+				throttled = float64(value) / 1000
+			}
+		}
+	}
+	return counters{CPU: float64(usage.Utime.Nano()+usage.Stime.Nano()) / 1e6, SystemCPU: float64(usage.Stime.Nano()) / 1e6, Throttled: throttled, GoProcs: runtime.GOMAXPROCS(0), TX: read("tx_bytes"), RX: read("rx_bytes"), TXPackets: read("tx_packets"), RXPackets: read("rx_packets")}
+}
+
+// newClient は指定protocolだけを使い、本文の自動展開と再試行の追加を行わない。
+func newClient(protocol string) (*http.Client, func(), error) {
+	config := &tls.Config{InsecureSkipVerify: true, MinVersion: tls.VersionTLS13} // 隔離用の短命証明書だけを扱う。
+	if protocol == "h3" {
+		tr := &http3.Transport{TLSClientConfig: config, DisableCompression: true}
+		if traceDir != "" {
+			tr.QUICConfig = &quic.Config{Tracer: clientTrace}
+		}
+		return &http.Client{Transport: tr, Timeout: 10 * time.Second}, func() { tr.Close() }, nil
+	}
+	if protocol != "h1" && protocol != "h2" {
+		return nil, nil, fmt.Errorf("unknown protocol: %s", protocol)
+	}
+	protocols := new(http.Protocols)
+	protocols.SetHTTP1(true)
+	protocols.SetHTTP2(protocol == "h2")
+	tr := &http.Transport{TLSClientConfig: config, Protocols: protocols, ForceAttemptHTTP2: protocol == "h2", DisableCompression: true, MaxConnsPerHost: 8, MaxIdleConnsPerHost: 8}
+	return &http.Client{Transport: tr, Timeout: 10 * time.Second}, tr.CloseIdleConnections, nil
+}
+
+type workload struct {
+	name, path, coding, condition, span string
+	status, count, workers              int
+	cold                                bool
+}
+
+// client は本文hash・status・protocolを全件照合し、失敗もJSONへ残す。
+func client(origin, protocol string, count int, selected string, workers int) error {
+	if count < 1 || workers < 1 || workers > 32 {
+		return fmt.Errorf("requests must be positive and workers must be 1..32")
+	}
+	control, closeControl, err := newClient("h1")
+	if err != nil {
+		return err
+	}
+	defer closeControl()
+	metric := func() (counters, error) {
+		res, err := control.Get(origin + "/metrics")
+		if err != nil {
+			return counters{}, err
+		}
+		defer res.Body.Close()
+		var value counters
+		err = json.NewDecoder(res.Body).Decode(&value)
+		return value, err
+	}
+	workloads := []workload{
+		{name: "304", path: "/dat", coding: "identity", condition: `"bench-identity"`, status: 304, count: count, workers: 8},
+		{name: "identity64k", path: "/dat", coding: "identity", status: 200, count: count, workers: 8},
+		{name: "zstd64k", path: "/dat", coding: "zstd", status: 200, count: count, workers: 8},
+		{name: "range1k", path: "/dat", coding: "identity", span: "bytes=64512-", status: 206, count: count, workers: 8},
+		{name: "cold1k", path: "/small", coding: "identity", status: 200, count: 20, workers: 1, cold: true},
+	}
+	if selected != "" {
+		wanted := strings.Split(selected, ",")
+		filtered := make([]workload, 0, len(wanted))
+		for _, name := range wanted {
+			found := false
+			for _, work := range workloads {
+				if work.name == name {
+					filtered = append(filtered, work)
+					found = true
+					break
+				}
+			}
+			if !found {
+				return fmt.Errorf("unknown workload: %s", name)
+			}
+		}
+		workloads = filtered
+	}
+	for _, work := range workloads {
+		if !work.cold {
+			work.workers = workers
+		}
+		value, err := measure(origin, protocol, work, metric)
+		if err != nil {
+			return err
+		}
+		if err = json.NewEncoder(os.Stdout).Encode(value); err != nil {
+			return err
+		}
+		if value.Errors != 0 {
+			return fmt.Errorf("workload failed: %s", work.name)
+		}
+	}
+	return nil
+}
+
+// request は圧縮表現も展開せず、指定protocolとstatusを検査する。
+func request(client *http.Client, origin, protocol string, work workload) ([]byte, error) {
+	req, err := http.NewRequestWithContext(context.Background(), "GET", origin+work.path, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Accept-Encoding", work.coding)
+	req.Header.Set("User-Agent", "OimoBBS isolated transport benchmark")
+	if work.condition != "" {
+		req.Header.Set("If-None-Match", work.condition)
+	}
+	if work.span != "" {
+		req.Header.Set("Range", work.span)
+		req.Header.Set("If-Range", `"bench-identity"`)
+	}
+	res, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
+	want := map[string]int{"h1": 1, "h2": 2, "h3": 3}[protocol]
+	if res.ProtoMajor != want || res.StatusCode != work.status {
+		return nil, fmt.Errorf("unexpected response: %s %s", res.Proto, res.Status)
+	}
+	return body, nil
+}
+
+// measure はwarm接続と要求ごとの再接続を分け、同じ本文をCPU・NIC差分と照合する。
+func measure(origin, protocol string, work workload, metric func() (counters, error)) (result, error) {
+	client, closeClient, err := newClient(protocol)
+	if err != nil {
+		return result{}, err
+	}
+	defer closeClient()
+	expected, err := request(client, origin, protocol, work)
+	if err != nil {
+		return result{}, err
+	}
+	if work.cold {
+		closeClient()
+	}
+	before, err := metric()
+	if err != nil {
+		return result{}, err
+	}
+	ownBefore := readCounters()
+	started := time.Now()
+	var next atomic.Int64
+	var lock sync.Mutex
+	var wg sync.WaitGroup
+	samples := make([]float64, 0, work.count)
+	value := result{Protocol: protocol, Name: work.name, Issued: work.count, Body: len(expected), SHA: fmt.Sprintf("%x", sha256.Sum256(expected))}
+	for range work.workers {
+		wg.Go(func() {
+			for {
+				i := int(next.Add(1)) - 1
+				if i >= work.count {
+					return
+				}
+				sender, stop := client, func() {}
+				if work.cold {
+					sender, stop, _ = newClient(protocol)
+				}
+				begin := time.Now()
+				body, err := request(sender, origin, protocol, work)
+				elapsed := float64(time.Since(begin)) / 1e6
+				stop()
+				if err == nil && !bytes.Equal(body, expected) {
+					err = fmt.Errorf("body mismatch")
+				}
+				lock.Lock()
+				samples = append(samples, elapsed)
+				if err != nil {
+					value.Errors++
+					if value.FirstError == "" {
+						value.FirstError = err.Error()
+					}
+				} else {
+					value.Success++
+				}
+				lock.Unlock()
+			}
+		})
+	}
+	wg.Wait()
+	value.Seconds = time.Since(started).Seconds()
+	ownAfter := readCounters()
+	value.ClientCPU = ownAfter.CPU - ownBefore.CPU
+	value.ClientSystemCPU = ownAfter.SystemCPU - ownBefore.SystemCPU
+	value.ClientThrottled = ownAfter.Throttled - ownBefore.Throttled
+	value.ClientGoProcs = ownAfter.GoProcs
+	after, err := metric()
+	if err != nil {
+		return value, err
+	}
+	sort.Float64s(samples)
+	value.P50 = samples[len(samples)/2]
+	value.P95 = samples[(len(samples)-1)*95/100]
+	value.Rate = float64(value.Success) / value.Seconds
+	value.Native = after.Native
+	value.ServerCPU = after.CPU - before.CPU
+	value.ServerSystemCPU = after.SystemCPU - before.SystemCPU
+	value.ServerThrottled = after.Throttled - before.Throttled
+	value.ServerGoProcs = after.GoProcs
+	value.TX = after.TX - before.TX
+	value.RX = after.RX - before.RX
+	value.TXPackets = after.TXPackets - before.TXPackets
+	value.RXPackets = after.RXPackets - before.RXPackets
+	return value, nil
+}
+
+var traceDir string
+var traceNumber atomic.Uint64
+var traceWait sync.WaitGroup
+
+// clientTrace は隔離用の合成要求だけをqlogへ保存する。性能比較では使用しない。
+func clientTrace(ctx context.Context, isClient bool, id quic.ConnectionID) qlogwriter.Trace {
+	name := filepath.Join(traceDir, fmt.Sprintf("client-%d.qlog", traceNumber.Add(1)))
+	file, err := os.Create(name)
+	if err != nil {
+		panic(err)
+	}
+	traceWait.Add(1)
+	trace := qlogwriter.NewConnectionFileSeq(&traceFile{File: file}, isClient, id)
+	go trace.Run()
+	return trace
+}
+
+// traceFile は最後のproducerが出力を閉じたことを、診断clientの終了へ伝える。
+type traceFile struct{ *os.File }
+
+func (file *traceFile) Close() error { err := file.File.Close(); traceWait.Done(); return err }

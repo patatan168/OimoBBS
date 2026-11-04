@@ -1,0 +1,185 @@
+// 独立clientと実UDPを使い、暗号認証後の経路応答とPTOを検査する。秘密値は試験内だけで保持する。
+package quicv1
+
+import (
+	"bytes"
+	"context"
+	"crypto/tls"
+	"encoding/hex"
+	"net"
+	"net/http/httptest"
+	"strings"
+	"sync"
+	"sync/atomic"
+	"testing"
+	"time"
+
+	external "github.com/quic-go/quic-go"
+)
+
+type pathTestKeyLog struct {
+	mu   sync.Mutex
+	data bytes.Buffer
+}
+
+// Write は短命TLS接続の秘密値を試験用メモリ内にだけ記録する。
+func (l *pathTestKeyLog) Write(data []byte) (int, error) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	return l.data.Write(data)
+}
+
+// trafficKey は短命TLS接続の指定方向だけを検証用AEADへ変換し、秘密値を出力しない。
+func (l *pathTestKeyLog) trafficKey(t *testing.T, label string, suite uint16) *packetKeys {
+	t.Helper()
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	for _, line := range strings.Split(l.data.String(), "\n") {
+		fields := strings.Fields(line)
+		if len(fields) != 3 || fields[0] != label {
+			continue
+		}
+		secret, err := hex.DecodeString(fields[2])
+		if err != nil {
+			t.Fatal("invalid ephemeral TLS key log")
+		}
+		key, err := trafficKeys(secret, suite)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return key
+	}
+	t.Fatal("missing ephemeral TLS traffic key", label)
+	return nil
+}
+
+func TestQUICPathResponseOverRealUDP(t *testing.T) {
+	for _, flood := range []bool{false, true} {
+		t.Run(map[bool]string{false: "pto", true: "flood"}[flood], func(t *testing.T) { testQUICPathResponseOverRealUDP(t, flood) })
+	}
+}
+
+// testQUICPathResponseOverRealUDP は同じ暗号化経路で通常の経路検証と過剰入力の終了を確認する。
+func testQUICPathResponseOverRealUDP(t *testing.T, flood bool) {
+	cert := httptest.NewTLSServer(nil)
+	cfg := cert.TLS.Clone()
+	cert.Close()
+	cfg.NextProtos = []string{"oimo-path-security"}
+	socket, err := net.ListenUDP("udp4", &net.UDPAddr{IP: net.ParseIP("127.0.0.1")})
+	if err != nil {
+		t.Fatal(err)
+	}
+	l, err := Listen(socket, Config{TLSConfig: cfg, MaxConnections: 4})
+	if err != nil {
+		socket.Close()
+		t.Fatal(err)
+	}
+	defer l.Close()
+	relay, err := net.ListenUDP("udp4", &net.UDPAddr{IP: net.ParseIP("127.0.0.1")})
+	if err != nil {
+		t.Fatal(err)
+	}
+	var paused atomic.Bool
+	observed := make(chan []byte, 32)
+	done := make(chan struct{})
+	server := l.Addr().(*net.UDPAddr)
+	go func() {
+		defer close(done)
+		var peer *net.UDPAddr
+		var data [4096]byte
+		for {
+			n, from, err := relay.ReadFromUDP(data[:])
+			if err != nil {
+				return
+			}
+			if from.Port == server.Port && from.IP.Equal(server.IP) {
+				if paused.Load() {
+					select {
+					case observed <- bytes.Clone(data[:n]):
+					default:
+					}
+					continue
+				}
+				if peer != nil {
+					_, _ = relay.WriteToUDP(data[:n], peer)
+				}
+			} else {
+				peer = from
+				_, _ = relay.WriteToUDP(data[:n], server)
+			}
+		}
+	}()
+	defer func() { relay.Close(); <-done }()
+	ctx, cancel := context.WithTimeout(t.Context(), 3*time.Second)
+	defer cancel()
+	var secrets pathTestKeyLog
+	client, err := external.DialAddr(ctx, relay.LocalAddr().String(), &tls.Config{InsecureSkipVerify: true, NextProtos: []string{"oimo-path-security"}, KeyLogWriter: &secrets}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer client.CloseWithError(0, "")
+	native, err := l.Accept(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = native.Drain(ctx); err != nil {
+		t.Fatal("handshake ACK did not drain", err)
+	}
+	suite := client.ConnectionState().TLS.CipherSuite
+	read := secrets.trafficKey(t, "CLIENT_TRAFFIC_SECRET_0", suite)
+	write := secrets.trafficKey(t, "SERVER_TRAFFIC_SECRET_0", suite)
+	paused.Store(true)
+	challenge := []byte("pathUDP1")
+	body := append([]byte{0x1a}, challenge...)
+	if flood {
+		body = bytes.Repeat(body, 9)
+	}
+	pn := uint64(1 << 20)
+	header, offset := makePacketHeader(spaceApplication, native.id, nil, pn, len(body), false, 4)
+	packet, err := read.sealPacket(header, body, pn, offset)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = relay.WriteToUDP(packet, server); err != nil {
+		t.Fatal(err)
+	}
+	response := false
+	for {
+		select {
+		case packet := <-observed:
+			if packet[0]&0x80 != 0 {
+				continue
+			}
+			body, _, _, err := write.openPacket(packet, 1+len(native.peerID), 0)
+			if err != nil {
+				t.Fatal("failed to authenticate server packet", err)
+			}
+			if len(body) > 0 && body[0] == 0x1c {
+				r := wireReader{data: body[1:]}
+				code, err := r.integer()
+				if !flood || err != nil || code != 1 {
+					t.Fatal("unexpected path validation close", code, err)
+				}
+				return
+			}
+			if flood {
+				continue
+			}
+			if bytes.Contains(body, append([]byte{0x1b}, challenge...)) {
+				if response {
+					t.Fatal("PATH_RESPONSE retransmitted after ACK was withheld")
+				}
+				response = true
+				if len(packet) < 1200 {
+					t.Fatal("path response below minimum datagram size", len(packet))
+				}
+				continue
+			}
+			if response && len(body) > 0 && body[0] == 1 {
+				return
+			}
+		case <-ctx.Done():
+			t.Fatal("path response or PTO PING was not observed")
+		}
+	}
+}

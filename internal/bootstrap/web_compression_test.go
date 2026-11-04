@@ -154,6 +154,20 @@ func TestWebCompressionTLS(t *testing.T) {
 				}
 				return response, body
 			}
+			if !h2 {
+				for _, path := range []string{"/", "/admin/login", "/admin/web/assets/ui.js", "/admin/SETTING.TXT", "/admin/dat/1.dat", "/web/post", "/search?q=x", "/missing"} {
+					for _, method := range []string{"GET", "HEAD", "POST", "PATCH", "OPTIONS"} {
+						response, body := request(method, path, http.Header{"Accept-Encoding": {"gzip"}, "Range": {"bytes=0-1"}, "If-None-Match": {"*"}, "User-Agent": {"専ブラ"}})
+						if response.StatusCode != 505 || len(body) != 0 || len(response.Cookies()) != 0 || response.Header.Get("Cache-Control") != "no-store" {
+							t.Fatal("HTTP/1 Web accepted", method, path, response.Status, response.Header)
+						}
+					}
+				}
+				if response, _ := request("GET", "/bbsmenu.json", nil); response.StatusCode != 200 {
+					t.Fatal("legacy menu denied", response.Status)
+				}
+				return
+			}
 			for _, path := range []string{"/", "/admin/login", "/admin/web/assets/ui.js"} {
 				for _, method := range []string{"GET", "HEAD"} {
 					response, body := request(method, path, nil)

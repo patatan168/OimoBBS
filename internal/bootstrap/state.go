@@ -14,7 +14,7 @@ import (
 	"oimobbs/internal/strictjson"
 )
 
-const readerVersion = 106
+const readerVersion = 107
 
 // storageFormatVersion は旧サイトの読み込み・移行を拒否する初期化完了印の版。
 const storageFormatVersion = 5

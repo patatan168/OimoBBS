@@ -92,8 +92,12 @@ func TestWAFTransportRouteCoverage(t *testing.T) {
 						}
 						io.Copy(io.Discard, res.Body)
 						res.Body.Close()
-						if res.StatusCode != 403 || h2 && res.ProtoMajor != 2 || len(res.Cookies()) != 0 {
-							t.Fatalf("WAF route escaped: %s %s status=%d proto=%s", method, path, res.StatusCode, res.Proto)
+						wantStatus := 403
+						if !h2 && base != "" && (req.URL.Path == base || strings.HasPrefix(req.URL.Path, base+"/")) {
+							wantStatus = 505
+						}
+						if res.StatusCode != wantStatus || h2 && res.ProtoMajor != 2 || len(res.Cookies()) != 0 {
+							t.Fatalf("rejected route escaped: %s %s status=%d proto=%s", method, path, res.StatusCode, res.Proto)
 						}
 					}
 					if i == 0 {
@@ -108,7 +112,11 @@ func TestWAFTransportRouteCoverage(t *testing.T) {
 						}
 						io.Copy(io.Discard, res.Body)
 						res.Body.Close()
-						if res.StatusCode != 200 || len(res.Cookies()) != 1 {
+						wantStatus, wantCookies := 200, 1
+						if !h2 && mode != "loopback_tunnel" {
+							wantStatus, wantCookies = 505, 0
+						}
+						if res.StatusCode != wantStatus || len(res.Cookies()) != wantCookies {
 							t.Fatal("valid login page control", res.StatusCode)
 						}
 					}

@@ -1,0 +1,390 @@
+// 実QUICで不正な要求・trailer・取消の反復を送り、parserと処理数の制限を検査する。
+package http3native
+
+import (
+	"bytes"
+	"compress/gzip"
+	"context"
+	"crypto/tls"
+	"errors"
+	"io"
+	"net/http"
+	"strconv"
+	"strings"
+	"testing"
+	"time"
+
+	quic "github.com/quic-go/quic-go"
+)
+
+// hardeningClient は使い捨て証明書の試験serverへ独立したQUIC接続を開く。
+func hardeningClient(t *testing.T, origin string) *quic.Conn {
+	t.Helper()
+	ctx, cancel := context.WithTimeout(t.Context(), 3*time.Second)
+	defer cancel()
+	client, err := quic.DialAddr(ctx, strings.TrimPrefix(origin, "https://"), &tls.Config{InsecureSkipVerify: true, NextProtos: []string{"h3"}}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = client.CloseWithError(0, "") })
+	return client
+}
+
+func TestHTTP3ValidTrailerAndCookieAfterMalformedRequest(t *testing.T) {
+	_, origin := nativeServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			http.Error(w, "invalid body", 400)
+			return
+		}
+		cookie, err := r.Cookie("session")
+		if err != nil || cookie.Value != "token" || r.Header.Get("Cookie") != "session=token; theme=dark" ||
+			r.Header.Get("Range") != "bytes=0-2" || r.Header.Get("Accept-Encoding") != "gzip" ||
+			r.Trailer.Get("X-Check") != "done" || string(body) != "body" {
+			t.Error("valid fields or body changed", r.Header, r.Trailer, string(body))
+			http.Error(w, "invalid fields", 400)
+			return
+		}
+		var compressed bytes.Buffer
+		zip := gzip.NewWriter(&compressed)
+		_, _ = zip.Write(body[:3])
+		_ = zip.Close()
+		w.Header().Set("Content-Encoding", "gzip")
+		w.Header().Set("Content-Range", "bytes 0-2/4")
+		w.Header().Set("Content-Length", strconv.Itoa(compressed.Len()))
+		w.WriteHeader(206)
+		_, _ = w.Write(compressed.Bytes())
+	}))
+	client := hardeningClient(t, origin)
+	for _, valid := range []bool{false, true} {
+		stream, err := client.OpenStreamSync(t.Context())
+		if err != nil {
+			t.Fatal(err)
+		}
+		_ = stream.SetDeadline(time.Now().Add(3 * time.Second))
+		fields := []Field{{":method", "POST"}, {":scheme", "https"}, {":authority", "localhost"}, {":path", "/"},
+			{"content-length", "4"}, {"cookie", "session=token"}, {"cookie", "theme=dark"}, {"range", "bytes=0-2"}, {"accept-encoding", "gzip"}}
+		block, err := newQPACK(nil, nil).encode(uint64(stream.StreamID()), fields)
+		if err != nil {
+			t.Fatal(err)
+		}
+		trailer := []Field{{"x-check", "done"}}
+		if !valid {
+			trailer = []Field{{"authorization", "bad"}}
+		}
+		tail, err := newQPACK(nil, nil).encode(uint64(stream.StreamID()), trailer)
+		if err != nil {
+			t.Fatal(err)
+		}
+		wire := append(frame(1, block), frame(0, []byte("body"))...)
+		wire = append(wire, frame(1, tail)...)
+		if _, err = stream.Write(wire); err != nil {
+			t.Fatal(err)
+		}
+		_ = stream.Close()
+		kind, size, err := readFrame(stream)
+		if err != nil || kind != 1 {
+			t.Fatal("missing response", kind, err)
+		}
+		data, err := bounded(stream, size, 16<<10)
+		if err != nil {
+			t.Fatal(err)
+		}
+		response, err := newQPACK(nil, nil).decode(t.Context(), uint64(stream.StreamID()), data)
+		want := "400"
+		if valid {
+			want = "206"
+		}
+		if err != nil || len(response) == 0 || response[0] != (Field{":status", want}) {
+			t.Fatal(response, err)
+		}
+		var payload []byte
+		for {
+			kind, size, err = readFrame(stream)
+			if err == io.EOF {
+				break
+			}
+			if err != nil || kind != 0 {
+				t.Fatal(kind, err)
+			}
+			data, err = bounded(stream, size, 4096)
+			if err != nil {
+				t.Fatal(err)
+			}
+			payload = append(payload, data...)
+		}
+		if valid {
+			zip, err := gzip.NewReader(bytes.NewReader(payload))
+			if err != nil {
+				t.Fatal(err)
+			}
+			plain, err := io.ReadAll(zip)
+			_ = zip.Close()
+			if err != nil || string(plain) != "bod" {
+				t.Fatal(string(plain), err)
+			}
+		}
+	}
+}
+
+// hardeningRequest は静的QPACKの要求headerを作り、不正な後続frameを直接付加できるようにする。
+func hardeningRequest(t *testing.T, id uint64) []byte {
+	t.Helper()
+	block, err := newQPACK(nil, nil).encode(id, []Field{{":method", "POST"}, {":scheme", "https"}, {":authority", "localhost"}, {":path", "/"}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	return frame(1, block)
+}
+
+func TestHTTP3ForbiddenTrailersAndStickyBodyError(t *testing.T) {
+	for _, name := range []string{"connection", "transfer-encoding", "authorization", "te", "trailer", "host", "content-length", "upgrade"} {
+		t.Run(name, func(t *testing.T) {
+			result := make(chan [2]error, 1)
+			_, origin := nativeServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				_, first := io.ReadAll(r.Body)
+				_, second := r.Body.Read(make([]byte, 1))
+				result <- [2]error{first, second}
+			}))
+			client := hardeningClient(t, origin)
+			stream, err := client.OpenStreamSync(t.Context())
+			if err != nil {
+				t.Fatal(err)
+			}
+			block, err := newQPACK(nil, nil).encode(uint64(stream.StreamID()), []Field{{name, "bad"}})
+			if err != nil {
+				t.Fatal(err)
+			}
+			_, _ = stream.Write(append(hardeningRequest(t, uint64(stream.StreamID())), frame(1, block)...))
+			_ = stream.Close()
+			select {
+			case got := <-result:
+				if got[0] == nil || got[1] == nil || got[1] == io.EOF {
+					t.Fatalf("invalid trailer accepted or error lost: %v", got)
+				}
+			case <-time.After(3 * time.Second):
+				t.Fatal("handler did not finish")
+			}
+		})
+	}
+}
+
+func TestHTTP3ReservedFramesCloseConnection(t *testing.T) {
+	for _, kind := range []uint64{2, 6, 8, 9} {
+		for _, location := range []string{"before", "body", "control"} {
+			t.Run(location+string(rune('0'+kind)), func(t *testing.T) {
+				_, origin := nativeServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { _, _ = io.Copy(io.Discard, r.Body) }))
+				client := hardeningClient(t, origin)
+				if location == "control" {
+					stream, err := client.OpenUniStreamSync(t.Context())
+					if err != nil {
+						t.Fatal(err)
+					}
+					_, _ = stream.Write(append(append([]byte{0}, frame(4, nil)...), frame(kind, nil)...))
+				} else {
+					stream, err := client.OpenStreamSync(t.Context())
+					if err != nil {
+						t.Fatal(err)
+					}
+					wire := hardeningRequest(t, uint64(stream.StreamID()))
+					if location == "before" {
+						wire = append(frame(kind, nil), wire...)
+					} else {
+						wire = append(wire, frame(kind, nil)...)
+					}
+					_, _ = stream.Write(wire)
+					_ = stream.Close()
+				}
+				select {
+				case <-client.Context().Done():
+					var app *quic.ApplicationError
+					if !errors.As(context.Cause(client.Context()), &app) || uint64(app.ErrorCode) != errFrameUnexpected {
+						t.Fatal(context.Cause(client.Context()))
+					}
+				case <-time.After(time.Second):
+					t.Fatal("reserved frame was accepted")
+				}
+			})
+		}
+	}
+}
+
+func TestHTTP3RapidResetKeepsHandlerBudget(t *testing.T) {
+	entered := make(chan struct{}, 64)
+	release := make(chan struct{})
+	defer close(release)
+	_, origin := nativeServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		entered <- struct{}{}
+		<-release
+	}))
+	client := hardeningClient(t, origin)
+	ctx, cancel := context.WithTimeout(t.Context(), 4*time.Second)
+	defer cancel()
+	for i := range 33 {
+		stream, err := client.OpenStreamSync(ctx)
+		if err != nil {
+			t.Fatal(i, err)
+		}
+		_, err = stream.Write(hardeningRequest(t, uint64(stream.StreamID())))
+		if err != nil {
+			t.Fatal(i, err)
+		}
+		select {
+		case <-entered:
+			if i == 32 {
+				t.Fatal("cancelled handlers escaped the 32 request budget")
+			}
+		case <-client.Context().Done():
+			var app *quic.ApplicationError
+			if i != 32 || !errors.As(context.Cause(client.Context()), &app) || uint64(app.ErrorCode) != 0x107 {
+				t.Fatal(i, context.Cause(client.Context()))
+			}
+			return
+		case <-ctx.Done():
+			t.Fatal(i, "request budget was not enforced")
+		}
+		stream.CancelWrite(0x10c)
+		stream.CancelRead(0x10c)
+	}
+}
+
+func TestHTTP3ConcurrentAtStreamLimit(t *testing.T) {
+	_, origin := nativeServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(204) }))
+	client := hardeningClient(t, origin)
+	ctx, cancel := context.WithTimeout(t.Context(), 8*time.Second)
+	defer cancel()
+	results := make(chan error, 32)
+	for range 32 {
+		go func() {
+			for range 10 {
+				stream, err := client.OpenStreamSync(ctx)
+				if err != nil {
+					results <- err
+					return
+				}
+				_ = stream.SetDeadline(time.Now().Add(3 * time.Second))
+				block, err := newQPACK(nil, nil).encode(uint64(stream.StreamID()), []Field{{":method", "GET"}, {":scheme", "https"}, {":authority", "localhost"}, {":path", "/"}})
+				if err == nil {
+					_, err = stream.Write(frame(1, block))
+				}
+				if err == nil {
+					err = stream.Close()
+				}
+				if err != nil {
+					results <- err
+					return
+				}
+				kind, size, err := readFrame(stream)
+				if err != nil {
+					results <- err
+					return
+				}
+				if kind != 1 {
+					results <- errors.New("missing response headers")
+					return
+				}
+				data, err := bounded(stream, size, 16<<10)
+				if err != nil {
+					results <- err
+					return
+				}
+				fields, err := newQPACK(nil, nil).decode(ctx, uint64(stream.StreamID()), data)
+				if err != nil {
+					results <- err
+					return
+				}
+				if len(fields) == 0 || fields[0] != (Field{":status", "204"}) {
+					results <- errors.New("wrong response status")
+					return
+				}
+				if _, err = io.Copy(io.Discard, stream); err != nil {
+					results <- err
+					return
+				}
+			}
+			results <- nil
+		}()
+	}
+	for range 32 {
+		select {
+		case err := <-results:
+			if err != nil {
+				t.Error(err)
+			}
+		case <-ctx.Done():
+			t.Fatal("normal requests did not finish")
+		}
+	}
+}
+
+func TestHTTP3ClosedConnectionsKeepGlobalHandlerBudget(t *testing.T) {
+	entered := make(chan context.Context, 1)
+	release := make(chan struct{})
+	defer close(release)
+	_, origin := nativeServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		entered <- r.Context()
+		<-release
+	}))
+	ctx, cancel := context.WithTimeout(t.Context(), 8*time.Second)
+	defer cancel()
+	for range 8 {
+		client := hardeningClient(t, origin)
+		var last context.Context
+		for range 32 {
+			stream, err := client.OpenStreamSync(ctx)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if _, err = stream.Write(hardeningRequest(t, uint64(stream.StreamID()))); err != nil {
+				t.Fatal(err)
+			}
+			select {
+			case last = <-entered:
+			case <-ctx.Done():
+				t.Fatal("handler did not start")
+			}
+		}
+		_ = client.CloseWithError(0, "")
+		select {
+		case <-last.Done():
+		case <-ctx.Done():
+			t.Fatal("closed connection was not cancelled")
+		}
+	}
+	client := hardeningClient(t, origin)
+	stream, err := client.OpenStreamSync(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, _ = stream.Write(hardeningRequest(t, uint64(stream.StreamID())))
+	select {
+	case <-entered:
+		t.Fatal("closed connections escaped the global 256 handler budget")
+	case <-client.Context().Done():
+		var app *quic.ApplicationError
+		if !errors.As(context.Cause(client.Context()), &app) || uint64(app.ErrorCode) != 0x107 {
+			t.Fatal(context.Cause(client.Context()))
+		}
+	case <-ctx.Done():
+		t.Fatal("global handler budget was not enforced")
+	}
+}
+
+func TestHTTP3ClientPushStreamIsRejected(t *testing.T) {
+	_, origin := nativeServer(t, http.HandlerFunc(func(http.ResponseWriter, *http.Request) { t.Error("unexpected request") }))
+	client := hardeningClient(t, origin)
+	stream, err := client.OpenUniStreamSync(t.Context())
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, _ = stream.Write([]byte{1, 0})
+	select {
+	case <-client.Context().Done():
+		var app *quic.ApplicationError
+		if !errors.As(context.Cause(client.Context()), &app) || uint64(app.ErrorCode) != 0x103 {
+			t.Fatal(context.Cause(client.Context()))
+		}
+	case <-time.After(time.Second):
+		t.Fatal("client push stream was accepted")
+	}
+}

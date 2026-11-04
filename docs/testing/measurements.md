@@ -65,6 +65,14 @@
 
 ## HTTP配信と圧縮
 
+[304のHTTP/2・HTTP/3差の内訳](http3-304-20261103.md)・[全試行](http3-304-20261103.json)：実ヘッダーフレーム、2,000,000要求の比較、調整候補の不採用判断。
+
+[HTTP/3の起動選択と通信量比較](http3-20261103.md)・[全試行](http3-20261103.json)：UDP未開放時のHTTP/2継続、直結/公開入口の実HTTP/3、36万180要求の通信量・CPU・応答時間比較。
+
+[独自QUIC/HTTP/3の採用と検証](native-quic-20261103.md)・[全試行](native-quic-20261103.json)：製品依存の削除、64KiB/304/zstdの比較、実ChromiumでのUDP遮断後のHTTP/2切り替え。
+
+[HTTP/3のUDP送信と受信領域の改善](http3-perf-20261104.md)・[全試行](http3-perf-20261104.json)：変更前後を交互に96万160要求で比較。64KiB配信の速度・CPUとACK同梱による小幅な通信量削減。
+
 現在の受付条件は[Webの取得条件](../features/reading.md#webの取得条件)、実装は[Zstandardの符号化](../encoding.md#zstandardの符号化)を参照してください。以下は各変更時点の検証記録です。
 
 | 記録 | 測定対象 |
@@ -170,6 +178,10 @@ codec単体の値には、実ディスクのWrite/Syncや通信時間を含み�
 
 | 記録 | 確認範囲 |
 | --- | --- |
+| [HTTP/3の送信失敗・経路応答の追加防御（2026-11-04）](http3-send-security-20261104.md) | nonceと送信番号、経路応答のpadding・再送・頻度枠、旧鍵のtimer。障害注入と実UDPの修正前後検証 |
+| [HTTP/3の追加性能・鍵管理強化（2026-11-04）](http3-more-20261104.md)・[全試行](http3-more-20261104.json) | 旧鍵の期限・ACK処理枠・受信領域。前回強化版との168万要求の交互比較、Rangeの初回悪化と追加比較 |
+| [独自HTTP/3の追加強化（2026-11-04）](http3-hardening-20261104.md) | 不正field・trailer・禁止frame・取消後の処理数・受信再構成。修正前の再現、実QUIC、race・fuzz |
+| [HTTP/3のWAF・DoS対策（2026-11-04）](http3-security-20261104.md) | Retry前の入力頻度、frame処理量、制御枠、直結・mTLS中継での403・429・503 |
 | [認可・WAF・ドメイン規制の境界修正（2026-10-26）](security-boundary-fixes-2026-10-26.md) | 4件の修正、未認証2,800要求、接続方式別WAF、Chromiumの改変認証・再認証、race・fuzz |
 | [Webセキュリティ診断（2026-10-23）](security-review-2026-10-23.md)・[検証結果](security-review-2026-10-23.json) | OWASPに沿った隔離HTTP・Chromium・race・fuzz・依存検査。実施済みと未検証の項目を記録 |
 | [投稿形式と稼働設定（2026-10-24）](post-boundary-settings-audit.md) | 投稿形式の早期拒否と隔離HTTPの回帰検査。稼働設定・公開経路の読取り確認と未確認範囲 |

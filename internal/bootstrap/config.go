@@ -36,6 +36,7 @@ type Config struct {
 
 // PublicConfig は公開originとTLS終端を指定する。
 type PublicConfig struct {
+	HTTP3   bool   `json:"http3"`
 	Listen  string `json:"listen"`
 	BaseURL string `json:"base_url"`
 	TLSCert string `json:"tls_cert_file"`
@@ -50,7 +51,7 @@ type AdminConfig struct {
 }
 
 // LoadConfig は64KiB以内の厳格JSONを読み、相対pathを設定ファイルの場所から解決する。
-// 全項目を必須とし、未使用の設定は明示nullで指定する。旧項目の欠落を補完しない。
+// http3の省略はfalse。その他の項目は必須とし、未使用の設定は明示nullで指定する。
 func LoadConfig(path string) (Config, error) {
 	var cfg Config
 	f, err := os.Open(path)

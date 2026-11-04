@@ -15,9 +15,13 @@ import (
 
 type responseBodyWriter struct {
 	*httptest.ResponseRecorder
-	sizes []int
-	short bool
+	sizes    []int
+	short    bool
+	prepared []int
 }
+
+// PrepareBody は長さの通知だけを記録し、権限検査前には本文を書かない。
+func (w *responseBodyWriter) PrepareBody(size int) { w.prepared = append(w.prepared, size) }
 
 func (w *responseBodyWriter) Write(body []byte) (int, error) {
 	w.sizes = append(w.sizes, len(body))
@@ -41,6 +45,9 @@ func TestCompleteResponseAccountingAndBounds(t *testing.T) {
 		n, err := w.WriteResponse(206, body)
 		if n != size || err != nil || out.Code != 206 || !bytes.Equal(out.Body.Bytes(), body) {
 			t.Fatal("incomplete response", n, err)
+		}
+		if len(out.prepared) != 1 || out.prepared[0] != size {
+			t.Fatal("complete body hint lost")
 		}
 		var want uint64
 		for i, chunk := range out.sizes {
@@ -85,6 +92,9 @@ func TestCompleteResponseRevocationAndShortWrite(t *testing.T) {
 			}
 			if !errors.Is(err, want) || n >= Chunk {
 				t.Fatal("revocation/fault ignored", n, err)
+			}
+			if len(out.prepared) != 0 {
+				t.Fatal("checked response must preserve each send boundary")
 			}
 			if (mode == "before-header" || mode == "after-header") && len(out.sizes) != 0 {
 				t.Fatal("revoked body sent")

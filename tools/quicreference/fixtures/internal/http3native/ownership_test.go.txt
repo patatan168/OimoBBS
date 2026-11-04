@@ -1,0 +1,92 @@
+// 小応答の作業領域を再利用しても、別要求のheader・Cookie・本文が混ざらないことを実通信で検査する。
+package http3native
+
+import (
+	"bytes"
+	"crypto/tls"
+	"fmt"
+	"io"
+	"net/http"
+	"strconv"
+	"strings"
+	"sync"
+	"testing"
+	"time"
+
+	external "github.com/quic-go/quic-go/http3"
+)
+
+func TestConcurrentSmallResponsesKeepPrivateData(t *testing.T) {
+	_, origin := nativeServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		id := r.URL.Query().Get("id")
+		w.Header().Set("X-Request", id)
+		w.Header().Set("Set-Cookie", "session="+id)
+		w.WriteHeader(200)
+		w.Header().Set("X-Request", "changed-after-WriteHeader")
+		_, _ = io.WriteString(w, strings.Repeat(id+"\n", 64))
+	}))
+	transport := &external.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}}
+	defer transport.Close()
+	client := &http.Client{Transport: transport, Timeout: 5 * time.Second}
+	var workers sync.WaitGroup
+	for worker := range 8 {
+		workers.Go(func() {
+			for request := range 50 {
+				id := fmt.Sprintf("private-%d-%d", worker, request)
+				response, err := client.Get(origin + "/?id=" + id)
+				if err != nil {
+					t.Error(err)
+					return
+				}
+				body, err := io.ReadAll(response.Body)
+				response.Body.Close()
+				if err != nil || response.Header.Get("X-Request") != id || response.Header.Get("Set-Cookie") != "session="+id || string(body) != strings.Repeat(id+"\n", 64) {
+					t.Errorf("request %s mixed private data or failed: %v", id, err)
+					return
+				}
+			}
+		})
+	}
+	workers.Wait()
+}
+
+func TestFirstDataCoalescingPreservesHTTPBody(t *testing.T) {
+	body := bytes.Repeat([]byte("body-content\n"), 5500)
+	for _, mode := range []string{"known", "buffered-known", "unknown", "buffered-unknown", "partial-known", "flushed"} {
+		t.Run(mode, func(t *testing.T) {
+			_, origin := nativeServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if !strings.Contains(mode, "unknown") {
+					w.Header().Set("Content-Length", strconv.Itoa(len(body)))
+				}
+				split := 0
+				if strings.HasPrefix(mode, "buffered") {
+					split = 127
+				} else if mode == "partial-known" {
+					split = len(body) / 2
+				} else if mode == "flushed" {
+					w.(http.Flusher).Flush()
+				}
+				if split > 0 {
+					if _, err := w.Write(body[:split]); err != nil {
+						t.Error(err)
+					}
+				}
+				if _, err := w.Write(body[split:]); err != nil {
+					t.Error(err)
+				}
+			}))
+			transport := &external.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}}
+			defer transport.Close()
+			client := &http.Client{Transport: transport, Timeout: 5 * time.Second}
+			response, err := client.Get(origin)
+			if err != nil {
+				t.Fatal(err)
+			}
+			got, err := io.ReadAll(response.Body)
+			response.Body.Close()
+			if err != nil || !bytes.Equal(got, body) {
+				t.Fatalf("body=%d error=%v", len(got), err)
+			}
+		})
+	}
+}

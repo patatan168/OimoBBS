@@ -22,16 +22,30 @@ type HostResolver interface {
 // HostRule はサービス固有のホスト名と表示の対応。ASN全体の固定/携帯分類には使わない。
 type HostRule struct{ Pattern, Kind, Label, Suffix, Description, Provider string }
 
-// hostRules は携帯・公衆Wi-Fi・固定アクセスの既知名前空間に限定する。
+// hostRules は用途を確認できるサービス固有の名前空間に限定する。追加根拠はdocs/networks.mdを参照。
 var hostRules = []HostRule{
 	{`^[a-z0-9.-]+\.ac\.jp$`, "academic", "ｶﾞｯｸｼ", "6", "確認済みAC.JPの大学・学術機関（所属は保証しない）", ""},
 	{`^[a-z0-9.-]+\.ed\.jp$`, "school", "ﾎﾞﾝﾎﾞﾝ", "7", "確認済みED.JPの教育機関（所属は保証しない）", ""},
 	{`^[a-z0-9.-]+\.go\.jp$`, "government", "ｺﾑｲｰﾝ", "G", "確認済みGO.JPの政府機関（所属は保証しない）", ""},
 	{`^[a-z0-9.-]+\.ftth\.ucom\.ne\.jp$`, "fixed", "ﾜｯﾁｮｲ", "0", "UCOM / アルテリア FTTH", "arteria"},
 	{`^p[0-9]+-ipngn[0-9]+\.[a-z0-9.-]+\.ocn\.ne\.jp$`, "fixed", "ﾜｯﾁｮｲ", "0", "OCN 光ネクスト", "ocn"},
+	{`^[a-z0-9.-]+\.ppp\.ocn\.ne\.jp$`, "fixed", "ﾜｯﾁｮｲ", "0", "OCN系 フレッツPPPoE（契約ブランドは未確定）", "ocn"},
+	{`^[0-9]{1,3}(\.[0-9]{1,3}){3}\.bf\.2iij\.net$`, "fixed", "ﾜｯﾁｮｲ", "0", "IIJ FiberAccess/F", "iij"},
+	{`^[0-9]{1,3}(\.[0-9]{1,3}){3}\.dy\.iij4u\.or\.jp$`, "fixed", "ﾜｯﾁｮｲ", "0", "IIJmio フレッツ接続（IIJ4U統合）", "iij"},
+	{`^[a-z0-9-]+\.v6connect\.net$`, "fixed", "ﾜｯﾁｮｲ", "0", "ASAHIネット v6コネクト系（契約ブランドは未確定）", "asahi-net"},
+	{`^[0-9]{1,3}(-[0-9]{1,3}){3}\.[a-z0-9-]+\.ap\.gmo-isp\.jp$`, "fixed", "ﾜｯﾁｮｲ", "0", "GMOとくとくBB フレッツ接続", "gmobb"},
+	{`^[0-9]{1,3}(\.[0-9]{1,3}){3}\.ap\.gmobb-fix\.jp$`, "fixed", "ﾜｯﾁｮｲ", "0", "GMOとくとくBB フレッツ固定IP", "gmobb"},
 	{`^[a-z0-9.-]+\.ppp-bb\.dion\.ne\.jp$`, "fixed", "ﾜｯﾁｮｲ", "0", "au one net ブロードバンド", "kddi"},
 	{`^[a-z0-9.-]+\.ap\.so-net\.ne\.jp$`, "fixed", "ﾜｯﾁｮｲ", "0", "So-net 固定アクセス", "sonet"},
 	{`^[a-z0-9.-]+\.ap\.nuro\.jp$`, "fixed", "ﾜｯﾁｮｲ", "0", "NURO 光", "sonet"},
+	{`^v-[0-9]{1,3}(-[0-9]{1,3}){3}\.ub-freebit\.net$`, "hosting", "ｸﾓﾉｳｴ", "V", "ServersMan@VPS", "freebit"},
+	{`^ec2-[0-9]{1,3}(-[0-9]{1,3}){3}\.(compute-1|[a-z0-9-]+\.compute)\.amazonaws\.com$`, "hosting", "ｸﾓﾉｳｴ", "V", "Amazon EC2 標準ホスト", "aws"},
+	{`^([a-z0-9-]+\.[a-z0-9-]+\.cloudapp\.azure\.com|[a-z0-9-]+\.cloudapp\.net)$`, "hosting", "ｸﾓﾉｳｴ", "V", "Microsoft Azure 公開ホスト", "microsoft"},
+	{`^[0-9]{1,3}(\.[0-9]{1,3}){3}\.bc\.googleusercontent\.com$`, "hosting", "ｸﾓﾉｳｴ", "V", "Google Cloud 標準ホスト", "gcp"},
+	{`^[a-z0-9-]+\.vs\.sakura\.ne\.jp$`, "hosting", "ｸﾓﾉｳｴ", "V", "さくらのVPS 標準ホスト", "sakura"},
+	{`^static\.[0-9]{1,3}(\.[0-9]{1,3}){3}\.clients\.your-server\.de$`, "hosting", "ｸﾓﾉｳｴ", "V", "Hetzner 標準逆引き", "hetzner"},
+	{`^[a-z0-9-]+\.members\.linode\.com$`, "hosting", "ｸﾓﾉｳｴ", "V", "Akamai / Linode 従来標準ホスト", "linode"},
+	{`^[0-9]{1,3}(-[0-9]{1,3}){3}\.ip\.linodeusercontent\.com$`, "hosting", "ｸﾓﾉｳｴ", "V", "Akamai / Linode 標準IPv4ホスト", "linode"},
 	{`^[a-z0-9.-]+\.wi-fi\.wi2\.ne\.jp$`, "wifi", "ﾜｲﾜｲ", "F", "Wi2", ""},
 	{`^[a-z0-9.-]+\.m-zone\.jp$`, "wifi", "ｴﾑｿﾞﾈ", "F", "docomo Wi-Fi", ""},
 	{`^p[0-9]+-omed[0-9]+\.[a-z0-9-]+\.ocn\.ne\.jp$`, "mvno", "ﾜﾝﾄﾝｷﾝ", "M", "OCNモバイルONE", ""},
@@ -39,6 +53,7 @@ var hostRules = []HostRule{
 	{`^[a-z0-9.-]+\.mineo\.jp$`, "mvno", "ｵｲｺﾗﾐﾈｵ", "M", "mineo", ""},
 	{`^[a-z0-9.-]+\.bmobile\.ne\.jp$`, "mvno", "ﾍﾞｰｲﾓ", "M", "b-mobile系", ""},
 	{`^[a-z0-9.-]+\.spmode\.ne\.jp$`, "mobile", "ｽﾌﾟｯｯ", "d", "ドコモ spモード", ""},
+	{`^[a-z0-9.-]+\.dcmisp\.ne\.jp$`, "mobile", "ｽﾌﾟｯｯ", "d", "ドコモ spモード（新ドメイン・ahamo等を含む）", "docomo"},
 	{`^[a-z0-9.-]+\.mopera\.net$`, "mobile", "ﾍﾟﾗﾍﾟﾗ", "D", "ドコモ mopera", ""},
 	{`^[a-z0-9.-]+\.au-net\.ne\.jp$`, "mobile", "ｱｳｱｳ", "a", "au", ""},
 	{`^[a-z0-9.-]+\.panda-world\.ne\.jp$`, "mobile", "ｻｻｸｯﾃﾛ", "p", "SoftBank iPhone系", ""},
@@ -323,7 +338,7 @@ func hostProvider(label string) string {
 	return ""
 }
 
-// hostRuleProvider は固定回線の共通表示でもサービス固有の運営分類を保持する。
+// hostRuleProvider は共通の表示名でもサービス固有の運営分類を保持する。
 func hostRuleProvider(rule HostRule) string {
 	if rule.Provider != "" {
 		return rule.Provider

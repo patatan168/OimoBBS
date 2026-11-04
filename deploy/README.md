@@ -24,6 +24,20 @@ Dockerなしの起動は[セットアップ](../docs/setup.md)、構成の目安
 
 DNSをサーバーへ向け、TCP 80・443の到達性を用意します。80は証明書取得用、443はアプリの直結HTTPSです。証明書はDocker volumeへ保存し、ホストの証明書を自動流用しません。
 
+## HTTP/3を使う場合
+
+HTTP/2はHTTPS起動時にALPNで自動選択され、HTTP/1.1も継続します。OSの種類を見て片方だけへ切り替えません。
+
+HTTP/3はUDPを使います。OSの待受成功からルーター・ファイアウォール・Dockerの外部到達性は判定できないため、`public.http3` の省略時は `false` です。UDPが開いていない環境ではこの既定値を維持します。UPnPによるルーター変更は行いません。
+
+直結構成でUDP 443の到達性を用意した場合は、起動設定の `public.http3` を `true` にし、[UDP用Compose例](compose.http3.example.yaml)を現在のCompose指定へ追加します。TCPと同じ内部portへUDPを転送してください。起動時にOSが同じUDP portを確保できた場合だけ、TCP応答へ公開URLのportを使った `Alt-Svc` を付けます。待受失敗時は理由を一度表示し、HTTP/2を継続します。
+
+公開入口 `oimoedge` を使う場合は保存側の `public.http3` を変更せず、入口へ `--http3` とUDPの公開portを追加します。保存側へのmTLS通信はHTTP/2です。管理用の別待受はTCPを維持し、同じ公開パスの管理画面は公開入口のprotocolを共有します。
+
+直結でHTTP/3が起動したサイトにはreader107以降が必要です。既定のHTTP/2起動ではこの保存形式更新を行いません。実装と比較結果は[HTTP/3検証記録](../docs/testing/http3-20261103.md)を参照してください。
+
+HTTP/3は独自QUIC/HTTP/3実装を使用します。選択用の追加設定は不要です。稼働中にUDP待受が停止してもTCPのHTTP/2は継続し、以後のTCP応答は `Alt-Svc: clear` でHTTP/3の広告を解除します。ネットワーク上でUDPが遮断された場合の切り替えはクライアントが行い、到達不能の検出まで待ち時間が生じることがあります。対応範囲・比較条件・未達の性能項目は[独自実装の検証記録](../docs/testing/native-quic-20261103.md)を参照してください。
+
 ## 既存の稼働環境を扱う場合
 
 既存サイトは `.env` の `COMPOSE_FILE` とvolume指定を維持します。`compose.slip.yaml` は外部データvolume・使用イメージ・公開入口を指定する、その環境専用の上書き設定です。Gitには含めず、稼働ホストで管理・退避してください。

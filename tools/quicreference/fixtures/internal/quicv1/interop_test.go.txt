@@ -1,0 +1,304 @@
+// 独自実装のTLS・QUIC streamを既存quic-go clientで実UDP相互接続する。
+package quicv1
+
+import (
+	"bytes"
+	"context"
+	"crypto/tls"
+	"io"
+	"net"
+	"net/http/httptest"
+	"sync/atomic"
+	"testing"
+	"time"
+
+	external "github.com/quic-go/quic-go"
+)
+
+func TestQUICGoClientHandshakeAndStreams(t *testing.T) {
+	t.Run("default", func(t *testing.T) { testQUICGoHandshake(t, nil, false) })
+	t.Run("small-credit", func(t *testing.T) {
+		testQUICGoHandshake(t, &external.Config{InitialStreamReceiveWindow: 1024, MaxStreamReceiveWindow: 1024, InitialConnectionReceiveWindow: 2048, MaxConnectionReceiveWindow: 2048}, false)
+	})
+	t.Run("queued-small-credit", func(t *testing.T) {
+		testQUICGoHandshake(t, &external.Config{InitialStreamReceiveWindow: 1024, MaxStreamReceiveWindow: 1024, InitialConnectionReceiveWindow: 2048, MaxConnectionReceiveWindow: 2048}, true)
+	})
+}
+func testQUICGoHandshake(t *testing.T, clientConfig *external.Config, queued bool) {
+	cert := httptest.NewTLSServer(nil)
+	cfg := cert.TLS.Clone()
+	cert.Close()
+	cfg.NextProtos = []string{"oimo-quic-v1"}
+	socket, err := net.ListenUDP("udp", &net.UDPAddr{IP: net.ParseIP("127.0.0.1")})
+	if err != nil {
+		t.Fatal(err)
+	}
+	listener, err := Listen(socket, Config{TLSConfig: cfg, MaxConnections: 8, KeyUpdateAfter: 32})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer listener.Close()
+	ctx, cancel := context.WithTimeout(t.Context(), 5*time.Second)
+	defer cancel()
+	accepted := make(chan error, 1)
+	go func() {
+		conn, err := listener.Accept(ctx)
+		if err != nil {
+			accepted <- err
+			return
+		}
+		if !conn.ConnectionState().HandshakeComplete {
+			accepted <- errWire
+			return
+		}
+		stream, err := conn.AcceptStream(ctx)
+		if err != nil {
+			accepted <- err
+			return
+		}
+		data, err := io.ReadAll(stream)
+		if err != nil {
+			accepted <- err
+			return
+		}
+		response := append([]byte("echo:"), data...)
+		if queued {
+			for len(response) > 0 {
+				n := min(len(response), 4096)
+				buffer := append([]byte(nil), response[:n]...)
+				if _, err = stream.WriteQueued(buffer); err != nil {
+					break
+				}
+				clear(buffer)
+				response = response[n:]
+			}
+		} else {
+			_, err = stream.Write(response)
+		}
+		if err == nil {
+			err = stream.Close()
+		}
+		stream.CancelRead(0)
+		accepted <- err
+	}()
+	client, err := external.DialAddr(ctx, listener.Addr().String(), &tls.Config{InsecureSkipVerify: true, NextProtos: []string{"oimo-quic-v1"}}, clientConfig)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer client.CloseWithError(0, "")
+	stream, err := client.OpenStreamSync(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	stream.SetDeadline(time.Now().Add(4 * time.Second))
+	body := bytes.Repeat([]byte("independent QUIC implementation\n"), 3000)
+	if _, err = stream.Write(body); err != nil {
+		t.Fatal(err)
+	}
+	stream.Close()
+	got, err := io.ReadAll(stream)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(got, append([]byte("echo:"), body...)) {
+		t.Fatalf("body mismatch %d", len(got))
+	}
+	if err := <-accepted; err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestQUICGoSequentialStreamsReleaseCredit(t *testing.T) {
+	cert := httptest.NewTLSServer(nil)
+	cfg := cert.TLS.Clone()
+	cert.Close()
+	cfg.NextProtos = []string{"oimo-quic-v1"}
+	socket, err := net.ListenUDP("udp", &net.UDPAddr{IP: net.ParseIP("127.0.0.1")})
+	if err != nil {
+		t.Fatal(err)
+	}
+	listener, err := Listen(socket, Config{TLSConfig: cfg, MaxConnections: 8})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer listener.Close()
+	ctx, cancel := context.WithTimeout(t.Context(), 10*time.Second)
+	defer cancel()
+	completed := make(chan error, 1)
+	contexts := make(chan context.Context, 200)
+	go func() {
+		conn, err := listener.Accept(ctx)
+		if err != nil {
+			completed <- err
+			return
+		}
+		for range 200 {
+			stream, err := conn.AcceptStream(ctx)
+			if err != nil {
+				completed <- err
+				return
+			}
+			contexts <- stream.Context()
+			got, err := io.ReadAll(stream)
+			if err != nil || string(got) != "hello" {
+				completed <- errWire
+				return
+			}
+			if _, err = stream.Write([]byte("ok")); err != nil {
+				completed <- err
+				return
+			}
+			stream.Close()
+			stream.CancelRead(0)
+		}
+		completed <- nil
+	}()
+	client, err := external.DialAddr(ctx, listener.Addr().String(), &tls.Config{InsecureSkipVerify: true, NextProtos: []string{"oimo-quic-v1"}}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer client.CloseWithError(0, "")
+	for range 200 {
+		stream, err := client.OpenStreamSync(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+		stream.SetDeadline(time.Now().Add(3 * time.Second))
+		if _, err = stream.Write([]byte("hello")); err != nil {
+			t.Fatal(err)
+		}
+		stream.Close()
+		got, err := io.ReadAll(stream)
+		if err != nil || string(got) != "ok" {
+			t.Fatal(string(got), err)
+		}
+	}
+	if err := <-completed; err != nil {
+		t.Fatal(err)
+	}
+	close(contexts)
+	released, stop := context.WithTimeout(t.Context(), time.Second)
+	defer stop()
+	for streamContext := range contexts {
+		select {
+		case <-streamContext.Done():
+		case <-released.Done():
+			t.Fatal("completed stream context retained by connection")
+		}
+	}
+}
+
+func TestQUICGoPacketLossAndDuplicates(t *testing.T) {
+	for _, mode := range []string{"loss", "mtu", "shrink"} {
+		t.Run(mode, func(t *testing.T) { testQUICGoPacketLoss(t, mode) })
+	}
+}
+func testQUICGoPacketLoss(t *testing.T, mode string) {
+	cert := httptest.NewTLSServer(nil)
+	cfg := cert.TLS.Clone()
+	cert.Close()
+	cfg.NextProtos = []string{"oimo-quic-v1"}
+	socket, err := net.ListenUDP("udp", &net.UDPAddr{IP: net.ParseIP("127.0.0.1")})
+	if err != nil {
+		t.Fatal(err)
+	}
+	listener, err := Listen(socket, Config{TLSConfig: cfg, MaxConnections: 8})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer listener.Close()
+	proxy, err := net.ListenUDP("udp", &net.UDPAddr{IP: net.ParseIP("127.0.0.1")})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer proxy.Close()
+	var large, dropped atomic.Int64
+	go func() {
+		var client *net.UDPAddr
+		buffer := make([]byte, 65535)
+		count := 0
+		for {
+			n, from, err := proxy.ReadFromUDP(buffer)
+			if err != nil {
+				return
+			}
+			to := socket.LocalAddr().(*net.UDPAddr)
+			fromServer := from.String() == to.String()
+			if fromServer && n > 1200 {
+				seen := large.Add(1)
+				if mode == "mtu" || mode == "shrink" && seen > 10 {
+					dropped.Add(1)
+					continue
+				}
+			}
+			if fromServer {
+				if client == nil {
+					continue
+				}
+				to = client
+			} else {
+				client = from
+			}
+			count++
+			if mode == "loss" && count%7 == 0 {
+				continue
+			}
+			proxy.WriteToUDP(buffer[:n], to)
+			if mode == "loss" && count%11 == 0 {
+				proxy.WriteToUDP(buffer[:n], to)
+			}
+		}
+	}()
+	ctx, cancel := context.WithTimeout(t.Context(), 12*time.Second)
+	defer cancel()
+	result := make(chan error, 1)
+	go func() {
+		conn, err := listener.Accept(ctx)
+		if err != nil {
+			result <- err
+			return
+		}
+		stream, err := conn.AcceptStream(ctx)
+		if err != nil {
+			result <- err
+			return
+		}
+		data, err := io.ReadAll(stream)
+		if err == nil {
+			_, err = stream.Write(data)
+		}
+		stream.Close()
+		stream.CancelRead(0)
+		result <- err
+	}()
+	client, err := external.DialAddr(ctx, proxy.LocalAddr().String(), &tls.Config{InsecureSkipVerify: true, NextProtos: []string{"oimo-quic-v1"}}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer client.CloseWithError(0, "")
+	stream, err := client.OpenStreamSync(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	stream.SetDeadline(time.Now().Add(10 * time.Second))
+	repeats := 5000
+	if mode == "shrink" {
+		repeats = 100000
+	}
+	body := bytes.Repeat([]byte("loss and duplicate packet\n"), repeats)
+	if _, err = stream.Write(body); err != nil {
+		t.Fatal(err)
+	}
+	stream.Close()
+	got, err := io.ReadAll(stream)
+	if err != nil || !bytes.Equal(got, body) {
+		t.Fatal("loss recovery", len(got), err)
+	}
+	if err := <-result; err != nil {
+		t.Fatal(err)
+	}
+	if mode != "loss" && dropped.Load() == 0 {
+		t.Fatal("MTU impairment not exercised", large.Load())
+	}
+	t.Logf("large datagrams=%d dropped=%d", large.Load(), dropped.Load())
+}

@@ -22,9 +22,7 @@ func wafPublicServer(t *testing.T, repo *Repository) *httptest.Server {
 	if err != nil {
 		t.Fatal(err)
 	}
-	server := httptest.NewUnstartedServer(configured.Handler)
-	server.Config.ConnContext = configured.ConnContext
-	server.Start()
+	server := modernHTTPTestServer(t, configured)
 	t.Cleanup(server.Close)
 	return server
 }

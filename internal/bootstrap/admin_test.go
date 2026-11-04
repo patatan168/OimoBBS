@@ -224,14 +224,14 @@ func TestAdminHTTPPersistenceAndIsolation(t *testing.T) {
 	}
 	for _, path := range []string{"/api/v1/site", "/login"} {
 		w := httptest.NewRecorder()
-		req := webReadTestRequest("GET", cfg.Public.BaseURL+path, nil)
+		req := modernWebReadTestRequest("GET", cfg.Public.BaseURL+path, nil)
 		public.Handler.ServeHTTP(w, req)
 		if w.Code != 404 {
 			t.Fatal("public admin route", path, w.Code)
 		}
 	}
 	w := httptest.NewRecorder()
-	public.Handler.ServeHTTP(w, webReadTestRequest("GET", cfg.Public.BaseURL+"/", nil))
+	public.Handler.ServeHTTP(w, modernWebReadTestRequest("GET", cfg.Public.BaseURL+"/", nil))
 	if !strings.Contains(w.Body.String(), "管理済み&lt;script&gt;") {
 		t.Fatal("public setting not reflected")
 	}

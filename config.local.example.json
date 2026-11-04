@@ -2,6 +2,7 @@
   "schema_version": 1,
   "data_dir": "./var/site",
   "public": {
+    "http3": false,
     "listen": "127.0.0.1:80",
     "base_url": "http://127.0.0.1",
     "tls_cert_file": "",

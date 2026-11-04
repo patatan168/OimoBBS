@@ -50,7 +50,7 @@ func run(args []string) error {
 		if err != nil || u.Scheme != "https" || u.Host == "" || f.NArg() != 0 {
 			return errors.New("HTTPS probe origin required")
 		}
-		tr := &http.Transport{Proxy: nil, TLSClientConfig: &tls.Config{MinVersion: tls.VersionTLS12, ServerName: u.Hostname()}, DialContext: func(ctx context.Context, network, _ string) (net.Conn, error) {
+		tr := &http.Transport{ForceAttemptHTTP2: true, Proxy: nil, TLSClientConfig: &tls.Config{MinVersion: tls.VersionTLS12, ServerName: u.Hostname()}, DialContext: func(ctx context.Context, network, _ string) (net.Conn, error) {
 			return (&net.Dialer{Timeout: 3 * time.Second}).DialContext(ctx, network, *address)
 		}}
 		defer tr.CloseIdleConnections()
@@ -79,6 +79,7 @@ func run(args []string) error {
 		return errors.New("unknown edge action")
 	}
 	var c publicedge.Config
+	f.BoolVar(&c.HTTP3, "http3", false, "外部UDP到達性を確認済みの場合にHTTP/3待受を試行")
 	f.StringVar(&c.Listen, "listen", "0.0.0.0:8443", "公開待受")
 	f.StringVar(&c.Origin, "origin", "", "公開HTTPS origin")
 	f.StringVar(&c.Upstream, "upstream", "", "固定保存サーバーHTTPS origin")

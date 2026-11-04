@@ -3,6 +3,7 @@ package evidence
 
 import (
 	"context"
+	"crypto/tls"
 	"errors"
 	"math"
 	"net/http"
@@ -69,10 +70,13 @@ func (r OptionalRecord) Validate() error {
 	if r.Schema != "optional-http-v1" || r.ID == (domain.ID{}) || r.Site == (domain.ID{}) || r.Boot == (domain.ID{}) || r.Connection == (domain.ID{}) || r.Request == (domain.ID{}) || r.Received <= 0 || r.Finished <= 0 || r.Received > domain.Time(math.MaxInt64-int64(OptionalRetention)) || r.Until != r.Received+domain.Time(OptionalRetention) || !validEndpoint(r.Peer) || !validEndpoint(r.Local) {
 		return ErrHTTPObservation
 	}
-	if !slices.Contains([]string{http.MethodGet, http.MethodHead, http.MethodPost, http.MethodPut, http.MethodDelete, http.MethodOptions, http.MethodPatch, http.MethodConnect, http.MethodTrace, "OTHER"}, r.Method) || !slices.Contains([]string{"home", "board", "thread", "dat", "settings", "bbsmenu", "search", "asset", "legacy_post", "web_post", "other"}, r.Route) || !slices.Contains([]string{"attempt", "response", "access"}, r.Kind) || !slices.Contains([]string{"accepted", "duplicate", "confirmation", "rejected", "uncertain", "served", "interrupted"}, r.Outcome) || r.Status != 0 && (r.Status < 100 || r.Status > 599) || !slices.Contains([]string{"HTTP/1.0", "HTTP/1.1", "HTTP/2.0"}, r.HTTPVersion) {
+	if !slices.Contains([]string{http.MethodGet, http.MethodHead, http.MethodPost, http.MethodPut, http.MethodDelete, http.MethodOptions, http.MethodPatch, http.MethodConnect, http.MethodTrace, "OTHER"}, r.Method) || !slices.Contains([]string{"home", "board", "thread", "dat", "settings", "bbsmenu", "search", "asset", "legacy_post", "web_post", "other"}, r.Route) || !slices.Contains([]string{"attempt", "response", "access"}, r.Kind) || !slices.Contains([]string{"accepted", "duplicate", "confirmation", "rejected", "uncertain", "served", "interrupted"}, r.Outcome) || r.Status != 0 && (r.Status < 100 || r.Status > 599) || !slices.Contains([]string{"HTTP/1.0", "HTTP/1.1", "HTTP/2.0", "HTTP/3.0"}, r.HTTPVersion) {
 		return ErrHTTPObservation
 	}
 	if r.Board != nil && *r.Board == (domain.ID{}) || r.Operation != nil && (*r.Operation == (domain.ID{}) || !slices.Contains([]string{"accepted", "duplicate", "interrupted"}, r.Outcome)) || (r.TLSVersion == nil) != (r.TLSCipher == nil) {
+		return ErrHTTPObservation
+	}
+	if r.HTTPVersion == "HTTP/3.0" && (r.TLSVersion == nil || *r.TLSVersion != tls.VersionTLS13) {
 		return ErrHTTPObservation
 	}
 	if r.UserAgent != nil {

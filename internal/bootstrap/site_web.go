@@ -66,7 +66,7 @@ func (repo *Repository) SiteWebHandler(observer *evidence.HTTPObserver) http.Han
 			threadError(w, r, 400, "URLを確認してください。")
 			return
 		}
-		if !legacyUncompressedPath(r.URL.Path) && !compat.RequireCompressedRead(w, r) {
+		if !compat.LegacyClientPath(r.URL.Path) && !compat.RequireCompressedRead(w, r) {
 			return
 		}
 		if webui.ServePublicAsset(w, r) {

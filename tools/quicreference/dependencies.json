@@ -1,0 +1,4 @@
+{
+  "github.com/quic-go/qpack": "v0.6.0",
+  "github.com/quic-go/quic-go": "v0.65.0"
+}

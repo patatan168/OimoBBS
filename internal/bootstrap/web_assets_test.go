@@ -57,13 +57,13 @@ func TestWebAssetsAndAdminBoundary(t *testing.T) {
 		t.Fatal(e)
 	}
 	w := httptest.NewRecorder()
-	public.Handler.ServeHTTP(w, webReadTestRequest("GET", cfg.Public.BaseURL+"/assets/", nil))
+	public.Handler.ServeHTTP(w, modernWebReadTestRequest("GET", cfg.Public.BaseURL+"/assets/", nil))
 	if w.Code != 200 {
 		t.Fatal("board path shadowed", w.Code)
 	}
 	for _, path := range []string{"/web/assets/ui.css", "/web/assets/ui.js", "/web/assets/favicon.svg"} {
 		w := httptest.NewRecorder()
-		public.Handler.ServeHTTP(w, webReadTestRequest("GET", cfg.Public.BaseURL+path, nil))
+		public.Handler.ServeHTTP(w, modernWebReadTestRequest("GET", cfg.Public.BaseURL+path, nil))
 		if w.Code != http.StatusOK || w.Body.Len() == 0 {
 			t.Fatal("public asset", path, w.Code)
 		}
@@ -71,13 +71,13 @@ func TestWebAssetsAndAdminBoundary(t *testing.T) {
 			t.Fatal("favicon content type", w.Header())
 		}
 		w = httptest.NewRecorder()
-		public.Handler.ServeHTTP(w, webReadTestRequest("HEAD", cfg.Public.BaseURL+path, nil))
+		public.Handler.ServeHTTP(w, modernWebReadTestRequest("HEAD", cfg.Public.BaseURL+path, nil))
 		if w.Code != 200 || w.Body.Len() != 0 {
 			t.Fatal("asset HEAD", w.Code)
 		}
 	}
 	w = httptest.NewRecorder()
-	public.Handler.ServeHTTP(w, webReadTestRequest("GET", cfg.Public.BaseURL+"/", nil))
+	public.Handler.ServeHTTP(w, modernWebReadTestRequest("GET", cfg.Public.BaseURL+"/", nil))
 	if w.Code != 200 || strings.Contains(w.Body.String(), "/admin.js") || !regexp.MustCompile(`src="/web/assets/[a-f0-9]{64}/ui.js"`).Match(w.Body.Bytes()) {
 		t.Fatal("public page assets", w.Code)
 	}
@@ -135,7 +135,7 @@ func TestAdminPrivateAssets(t *testing.T) {
 				t.Fatal("authenticated conditional asset", method, path, res.StatusCode, res.Header)
 			}
 			w := httptest.NewRecorder()
-			req := webReadTestRequest(method, cfg.Public.BaseURL+path, nil)
+			req := modernWebReadTestRequest(method, cfg.Public.BaseURL+path, nil)
 			req.Header = headers
 			public.Handler.ServeHTTP(w, req)
 			if w.Code != 404 {
@@ -147,7 +147,7 @@ func TestAdminPrivateAssets(t *testing.T) {
 	for _, name := range []string{"admin.css", "admin.js", "admin-auth.css", "admin-auth.js", "countries.js", "countries.css", "protection.css", "admin-settings.css"} {
 		path := "/web/assets/" + name
 		w := httptest.NewRecorder()
-		public.Handler.ServeHTTP(w, webReadTestRequest("GET", cfg.Public.BaseURL+path, nil))
+		public.Handler.ServeHTTP(w, modernWebReadTestRequest("GET", cfg.Public.BaseURL+path, nil))
 		if w.Code != 404 {
 			t.Fatal("public admin asset", path, w.Code)
 		}
@@ -177,7 +177,7 @@ func TestAdminHTMLBoundary(t *testing.T) {
 	}
 	for _, path := range []string{"/audit", "/waf", "/operations", "/templates/admin.html", "/web/templates/admin.html", "/web/assets/templates/admin.html", "/internal/webui/templates/admin.html"} {
 		w := httptest.NewRecorder()
-		public.Handler.ServeHTTP(w, webReadTestRequest("GET", cfg.Public.BaseURL+path, nil))
+		public.Handler.ServeHTTP(w, modernWebReadTestRequest("GET", cfg.Public.BaseURL+path, nil))
 		if w.Code != 404 {
 			t.Fatal("public admin HTML", path, w.Code)
 		}

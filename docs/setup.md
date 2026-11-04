@@ -226,13 +226,13 @@ HTTPSセットアップ例での接続先です。実際のドメインと板キ
 | 専ブラ登録用の板メニュー | https://bbs.example.com/bbsmenu.json |
 
 ```sh
-curl --fail --compressed https://bbs.example.com/
+curl --fail --http2 --compressed https://bbs.example.com/
 curl --fail https://bbs.example.com/bbsmenu.json
 curl --fail https://bbs.example.com/operate/subject.txt
 ./bin/oimobbs healthcheck --config config.json
 ```
 
-Webと管理画面のGET/HEADにはgzip/zstdの受け入れ宣言が必要です。curlでは `--compressed` を指定します。専ブラ用URLとhealthcheckの扱いは[Webの取得条件](features/reading.md#webの取得条件)を参照してください。
+公開Webと直接HTTPS・公開パスの管理画面にはHTTP/2またはHTTP/3が必要です。Webと管理画面のGET/HEADにはgzip/zstdの受け入れ宣言も必要です。curlでは `--http2 --compressed` を指定します。専ブラ用URLとhealthcheckの扱いは[Webの取得条件](features/reading.md#webの取得条件)を参照してください。
 
 次の順に確認します。ローカル検証ではURLを `http://127.0.0.1:8080` に置き換えます。
 

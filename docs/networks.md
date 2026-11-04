@@ -1,4 +1,4 @@
-# 国内回線・VPN業者の標準カタログ
+# 回線分類と標準カタログ
 
 国内の携帯・固定系、地域ISP、CATV、IPoE・企業アクセス網の204 ASN、VPN関連7 ASNに、クラウド16・衛星1・学術8・政府機関1を加えた237 ASNを対象にします。固定回線の投稿表示は `ﾜｯﾁｮｲ` です。
 
@@ -8,8 +8,11 @@
 | 自動取得と既存設定の扱い | [初回と既存サイト](#初回と既存サイト) |
 | 分類が示す範囲・誤判定への対応 | [判定の範囲](#判定の範囲) |
 | 学術・企業・クラウド・衛星の表示 | [特殊な分類と表示](#特殊な分類と表示) |
+| DNS補完の条件・優先順位・照会上限 | [DNS補完の共通条件](#dns補完の共通条件) |
 | DNSが逆引き不能・不整合な場合 | [逆引きの特殊表示](#逆引きの特殊表示) |
 | 固定回線のホスト名による補完 | [固定回線のDNS補完](#固定回線のdns補完) |
+| 携帯・公衆Wi-Fiのホスト名による補完 | [携帯・公衆Wi-FiのDNS補完](#携帯公衆wi-fiのdns補完) |
+| クラウド・VPSのホスト名による補完 | [クラウド・VPSのDNS補完](#クラウドvpsのdns補完) |
 | 登録済みの事業者とASN | [取得元一覧](#取得元一覧)・[VPN事業者](#vpn事業者共有基盤) |
 
 ## 初回と既存サイト
@@ -48,12 +51,12 @@ VPN業者は[X4BNetのVPN向けASN一覧](https://github.com/X4BNet/lists_vpn/bl
 | 学校 | `ﾎﾞﾝﾎﾞﾝ` | `7` | 正引き確認済みのED.JPホスト |
 | 官公庁 | `ｺﾑｲｰﾝ` | `G` | 対象ASN、正引き確認済みのGO.JPホスト |
 | 企業内回線 | `ｼｬﾁｰｸ` | `C` | 管理者が確認した範囲の手動上書き |
-| クラウド・VPS | `ｸﾓﾉｳｴ` | `V` | 対象事業者ASN。Virtual/VPSのV |
+| クラウド・VPS | `ｸﾓﾉｳｴ` | `V` | 対象事業者ASN、正引き確認済みの専用ホスト。Virtual/VPSのV |
 | 衛星回線 | `ｳﾁｭｰ` | `U` | Starlink ASN。UniverseのU |
 
 学術・学校・官公庁・企業内の呼称と末尾は[5ch公式WikiのBBS_SLIP](https://info.5ch.io/index.php/BBS_SLIP)を参照しています。`ｸﾓﾉｳｴ`と`ｳﾁｭｰ`はOimoBBS独自の5ch風呼称です。企業のCO.JPドメイン全体を企業内回線とは判定しません。機関の網・確認済みドメインを推定する区分で、投稿者の所属・職業・所在地を証明するものではありません。DNSの対象は[JPRSの属性型ドメインの対象](https://jprs.jp/about/jp-dom/spec/)に従います。
 
-既知VPN・板別および共通の手動上書きは、特殊用途の自動表示より優先します。特殊用途が判明した回線は、国外でも`ｸﾓﾉｳｴ / V`などを表示します。国コードによる接続許可・拒否は独立して有効です。通常の国外回線は国コード、既知VPNは`ｺﾝﾆﾁﾜ / 8`を使い、事業者キーを補完します。
+既知VPN・板別および共通の手動上書きは、特殊用途の自動表示より優先します。自動取得表で特殊用途が判明した回線は、国外でも`ｸﾓﾉｳｴ / V`などを表示します。国コードによる接続許可・拒否は独立して有効です。通常の国外回線は国コード、既知VPNは`ｺﾝﾆﾁﾜ / 8`を使い、事業者キーを補完します。
 
 自動取得表の同一prefixが複数の取得元に含まれる場合、種別・呼称・末尾が一致すればその分類を保ち、異なる事業者キーは空にします。種別・呼称・末尾のいずれかが食い違う場合は、そのprefixを「回線種別が不明」（`ﾜｯﾁｮｲ / 0`・事業者キーなし）として保持します。取得順で一方を採用したり、より広いprefixの分類で埋めたりせず、他の正常な範囲も更新します。不明化した範囲の回線規制は「回線種別が不明」の許可設定に従います。国・既知VPNの判定と手動上書きは独立して維持します。形式不正・空集合・容量超過では従来どおり更新全体を中止します。
 
@@ -61,36 +64,114 @@ NifMo・LIBMO・LinksMate・SORACOM・トーンモバイル・ワイヤレスゲ
 
 追加したASNは、Starlink、さくらインターネット、Hetzner、OVHcloud、DigitalOcean、Vultr、Akamai/Linode、Scaleway、Contabo、AWS、Google Cloud、Microsoft、Oracle、Alibaba、SINET、東京大学、NCA5、HEPNET-J、SuperCSI、九州大学、APAN-JP、WIDE/AI3、科学技術振興機構です。同一事業者の複数ASNは一つのプロバイダキーへ束ねます。
 
+## DNS補完の共通条件
+
+逆引きしたホスト名を正引きし、接続元と同じIPが返った場合だけ、下記の専用ホスト名から回線種別を補完します。ISPや親ドメイン全体の用途を推測する処理ではありません。共有上流・IPoEでは、プロバイダキーが同じでも契約ブランドは確定しません。
+
+分類と表示は、次の順で採用します。国・既知VPNによる許可・拒否は独立して判定します。
+
+1. 板別の手動上書き
+2. 共通の手動上書き
+3. 既知VPN
+4. 自動取得表の特殊用途（クラウド・衛星・学術網など）
+5. 登録国による国外表示
+6. 逆引き・正引きで確認したサービス
+7. 通常の自動取得表
+8. 回線種別が不明
+
+自動取得表の用途が「不明」でも、専用ホスト名が確認できれば個々のIPを補完できます。取得元一覧の区分はASN全体を示すため、この補完で一覧の「不明」が変わることはありません。
+
+### 照会とキャッシュ
+
+| 項目 | 動作・上限 |
+| --- | --- |
+| 取得方式 | OS標準DNS、または固定のGoogle Public DNS over HTTPS。Googleから別取得先へ切り替えない |
+| 正引きの種類 | IPv4はA、IPv6はAAAAだけ。IPv4-mapped IPv6はIPv4として扱う |
+| 複数のPTR | 既知サービスを先に確認。各区分内は回答順を維持し、同じ名前は大文字小文字・末尾ドットを正規化して1回だけ照会 |
+| 照会の上限 | 全体1秒、初回の呼出元待機750ms、同時4照会、処理待ちを含め64件 |
+| 回答の上限 | PTR16名、正引き結果32件 |
+| キャッシュ | 最大1024 IP。確認済み名は10分、確認できなかった結果は30秒 |
+| 実行場所 | 投稿ワーカーの外で取得。判定時は有効なキャッシュだけを参照 |
+
+必要な側の正引きが失敗・不一致なら、サービス分類には採用しません。不要なA/AAAAへの照会や、無関係なPTRへの照会待ちで、確認可能なサービスを取りこぼすことを防ぎます。有効なPTR名は、照会順と別に重複のない一覧として観測記録へ残します。
+
+補完はDNS結果を取得した新規投稿・IP確認から適用します。過去のDATは再生成しません。管理画面の「IP確認」で、回線区分・判定根拠・DNS確認結果を確認できます。
+
 ## 逆引きの特殊表示
 
-「回線種別が未分類」と「DNSが逆引き不能・不整合」は分けます。[5ch公式Wiki](https://info.5ch.io/index.php/BBS_SLIP)の呼称と詳細ID末尾に合わせ、次の条件で新規投稿へ表示します。
+回線種別の「不明」と、DNSの不存在・不整合は別の判定です。[5ch公式Wiki](https://info.5ch.io/index.php/BBS_SLIP)の呼称と詳細ID末尾を参照し、通常の分類へ次の表示を適用します。
 
 | DNSの結果 | 表示 | 詳細ID末尾 |
 | --- | --- | --- |
-| PTRが存在しない（正常な空回答・NXDOMAIN） | `ｱﾝﾀﾀﾞﾚ` | `h` |
-| PTR名が不正、または正引きが元のIPに一致しない | 登録国コード（不明は`ZZ`） | `H` |
-| 逆引きと正引きが一致 | 従来のサービス・ASN・未分類表示 | 従来どおり |
+| PTRなし（正常な空回答・NXDOMAIN） | `ｱﾝﾀﾀﾞﾚ` | `h` |
+| PTR名が不正、または正引きが元IPに不一致 | 登録国コード（不明は`ZZ`） | `H` |
+| 逆引きと正引きが一致 | サービス・ASN・未分類の表示 | 分類どおり |
 | 取得待ち・タイムアウト・SERVFAIL・未取得・期限切れ | 従来の表示を維持 | 未分類なら`0` |
 
-手動上書き・既知VPN・クラウドや衛星などの特殊用途を優先し、その他の通常分類へDNS特殊表示を適用します。`h/H`は名前欄と末尾だけを変更し、規制用の回線種別・プロバイダキー・国・VPN属性は変えません。逆引き不能を拒否する設定は従来どおりPTR取得の成否で判定し、正引き不一致を同じ拒否条件へ追加しません。
+手動上書き・既知VPN・自動取得表の特殊用途を優先します。`h/H`は呼称と末尾だけを変更し、規制用の回線種別・プロバイダキー・国・VPN属性は変えません。逆引き不能を拒否する設定はPTR取得の成否で判定し、正引き不一致を同じ拒否条件には含めません。
 
-`none`では末尾なし、従来端末区分の`checked`では通常`0`です。`h/H`は詳細な回線表示とワッチョイに反映します。過去のDATは再生成しません。
-
-Google Public DNSとOS標準DNSのどちらでも、確定した不存在と一時障害を区別します。判定は既存の有界DNSキャッシュを参照し、投稿ワーカー内で新たに外部照会しません。管理画面のIP確認には「DNS確認結果」を表示し、PTR取得と正引き一致を別々に確認できます。公開5chの内部判定アルゴリズムは保証せず、上記の確認可能な条件を本システムの判定基準とします。
+`h/H`は詳細な回線表示とワッチョイに反映します。`none`は末尾なし、従来端末区分の`checked`は通常`0`です。公開5chの内部判定アルゴリズムではなく、上記の確認可能な条件を本システムの判定基準とします。
 
 ## 固定回線のDNS補完
 
-逆引きしたホスト名を正引きし、元のIPとの一致を確認した場合だけ、次の固定回線分類を補完します。
+共通の確認条件で、以下を`fixed / ﾜｯﾁｮｲ / 0`に分類します。表の「数字」は数値部分、「ホスト」はドメイン直下の1ラベル、`*`はホスト名の残り部分です。正確なパターンは管理画面のサービス判定対応表で確認できます。
 
-| サービス | ホスト名の対象 |
-| --- | --- |
-| UCOM | `*.ftth.ucom.ne.jp` |
-| OCN | `p数字-ipngn数字.*.ocn.ne.jp` |
-| au one net | `*.ppp-bb.dion.ne.jp` |
-| So-net | `*.ap.so-net.ne.jp` |
-| NURO | `*.ap.nuro.jp` |
+| サービス | プロバイダキー | 対象のホスト名 |
+| --- | --- | --- |
+| UCOM / アルテリア | `arteria` | `*.ftth.ucom.ne.jp` |
+| OCN 光ネクスト | `ocn` | `p数字-ipngn数字.*.ocn.ne.jp` |
+| OCN系 フレッツPPPoE | `ocn` | `*.ppp.ocn.ne.jp` |
+| IIJ FiberAccess/F | `iij` | `数字.数字.数字.数字.bf.2iij.net` |
+| IIJmio フレッツ接続（IIJ4U統合） | `iij` | `数字.数字.数字.数字.dy.iij4u.or.jp` |
+| ASAHIネット v6コネクト系 | `asahi-net` | `ホスト.v6connect.net` |
+| GMOとくとくBB フレッツ接続 | `gmobb` | `数字-数字-数字-数字.接続先.ap.gmo-isp.jp` |
+| GMOとくとくBB フレッツ固定IP | `gmobb` | `数字.数字.数字.数字.ap.gmobb-fix.jp` |
+| au one net | `kddi` | `*.ppp-bb.dion.ne.jp` |
+| So-net | `sonet` | `*.ap.so-net.ne.jp` |
+| NURO 光 | `sonet` | `*.ap.nuro.jp` |
 
-携帯・公衆Wi-Fiと混在するISP全体を固定回線に変更する処理ではありません。共通・板別の明示上書きと、国・既知VPNの判定を優先します。
+追加判定の根拠と適用範囲：
+
+- OCN系PPPoE：[@niftyの逆引き名変更案内](https://support.nifty.com/cs/suptopics/detail/210318480133/1.htm)。他社ブランドも同じ上流網を使うため、キーは`ocn`とします。
+- IIJ FiberAccess/F：[公式Q&A](https://www.iij.ad.jp/biz/faf/)の数値4ラベル形式に限定します。
+- IIJmio：[IIJ4U統合時の公式FAQ・項目40](https://www.iijmio.jp/4uunity/qa/)と[数値4ラベル形式の公式例](https://order.partner.iij.jp/static/extrapartnerinfo/hikari-connect/faq/index.html)を参照します。後者のLaITサービスは終了済みで、現在の契約サービス名は確定しません。
+- ASAHIネット：[公式設定ガイド](https://asahi-net.jp/support/guide/fixedip/)がIPIP用と案内する`v6connect.net`に限定します。モバイルと共有する`asahi-net.or.jp`全体は対象外です。公式には正引きを登録しない旨もあるため、正引きが一致しないIPには適用しません。
+- GMOとくとくBB：[フレッツ接続の変更案内](https://gmobb.jp/news/details/77/)と[固定IPの公式FAQ](https://help.gmobb.jp/faq/faq_detail.html?id=1095)を参照します。前者は2011年の案内のため、現在もその形式が逆引き・正引きで確認できるIPだけに適用します。
+
+## 携帯・公衆Wi-FiのDNS補完
+
+| サービス | 対象のホスト名 | 回線種別 | 呼称・末尾 |
+| --- | --- | --- | --- |
+| OCNモバイルONE | `p数字-omed数字.地域.ocn.ne.jp` | `mvno` | `ﾜﾝﾄﾝｷﾝ / M` |
+| IIJmio系 | `*.vmobile.jp` | `mvno` | `ﾌﾞｰｲﾓ / M` |
+| mineo | `*.mineo.jp` | `mvno` | `ｵｲｺﾗﾐﾈｵ / M` |
+| b-mobile系 | `*.bmobile.ne.jp` | `mvno` | `ﾍﾞｰｲﾓ / M` |
+| ドコモ spモード系 | `*.spmode.ne.jp`、`*.dcmisp.ne.jp` | `mobile` | `ｽﾌﾟｯｯ / d` |
+| ドコモ mopera | `*.mopera.net` | `mobile` | `ﾍﾟﾗﾍﾟﾗ / D` |
+| au | `*.au-net.ne.jp` | `mobile` | `ｱｳｱｳ / a` |
+| SoftBank iPhone系 | `*.panda-world.ne.jp` | `mobile` | `ｻｻｸｯﾃﾛ / p` |
+| SoftBank / Y!mobile系 | `*.openmobile.ne.jp` | `mobile` | `ｵｯﾍﾟｹ / r` |
+| SoftBank データ通信系 | `*.access-internet.ne.jp` | `mobile` | `ｱ-ｸｾ- / x` |
+| Wi2 | `*.wi-fi.wi2.ne.jp` | `wifi` | `ﾜｲﾜｲ / F` |
+| docomo Wi-Fi | `*.m-zone.jp` | `wifi` | `ｴﾑｿﾞﾈ / F` |
+
+ドコモの新しい`dcmisp.ne.jp`は[開発者向け公式情報](https://www.docomo.ne.jp/service/developer/smart_phone/spmode/)に基づきます。ahamo・IoT NETも同じドメインを使うため、契約ブランドは確定しません。従来の`spmode.ne.jp`も対象です。
+
+## クラウド・VPSのDNS補完
+
+共通の確認条件で、以下を`hosting / ｸﾓﾉｳｴ / V`に分類します。任意ドメインへ逆引きを変更したIPは、この専用ホスト名による補完の対象外です。
+
+| サービス・キー | 対象のホスト名 | 根拠 |
+| --- | --- | --- |
+| ServersMan@VPS・`freebit` | `v-数字-数字-数字-数字.ub-freebit.net` | [DTIの逆引き設定案内](https://www-wp.dream.jp/search.php/?cat=39&paged=7) |
+| Amazon EC2・`aws` | `ec2-数字-数字-数字-数字.リージョン.compute.amazonaws.com`、`ec2-数字-数字-数字-数字.compute-1.amazonaws.com` | [公式の公開DNS形式](https://docs.aws.amazon.com/whitepapers/latest/aws-fault-isolation-boundaries/globally-scoped-operations-best-practices.html) |
+| Microsoft Azure・`microsoft` | `ホスト.リージョン.cloudapp.azure.com`、`ホスト.cloudapp.net` | [公式の逆引き設定](https://learn.microsoft.com/en-us/azure/dns/dns-reverse-dns-for-azure-services) |
+| Google Cloud・`gcp` | `数字.数字.数字.数字.bc.googleusercontent.com` | [公式の標準逆引き案内](https://docs.cloud.google.com/compute/docs/instances/create-ptr-record)、[公式サンプルの形式](https://docs.cloud.google.com/chronicle/docs/soar/marketplace-integrations/ssl-labs) |
+| さくらのVPS・`sakura` | `ホスト.vs.sakura.ne.jp` | [公式の標準逆引き設定](https://manual.sakura.ad.jp/vps/controlpanel/reverse-hostname.html)、[公式設定例の専用ドメイン](https://manual.sakura.ad.jp/vps/os-reinstall/iso-install/alpine.html) |
+| Hetzner・`hetzner` | `static.数字.数字.数字.数字.clients.your-server.de` | [公式の標準PTR形式](https://docs.hetzner.com/networking/dns/record-types/ptr-record/) |
+| Akamai / Linode・`linode` | `ホスト.members.linode.com`、`数字-数字-数字-数字.ip.linodeusercontent.com` | [公式の新旧標準逆引き形式](https://techdocs.akamai.com/cloud-computing/docs/configure-rdns-reverse-dns-on-a-compute-instance) |
+
+Google Cloud・さくらは、設定案内と専用ドメインの公式例を組み合わせた判定です。回線用途の分類であり、接続者の本人性・安全性やVPN利用の有無を保証しません。
 
 ## 容量と互換性
 

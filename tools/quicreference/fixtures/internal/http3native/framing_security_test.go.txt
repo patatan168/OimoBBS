@@ -1,0 +1,131 @@
+// 実UDPで空frameの反復を送り、本文上限やWAFの前段で処理量が有界になることを確認する。
+package http3native
+
+import (
+	"bytes"
+	"context"
+	"crypto/tls"
+	"errors"
+	"io"
+	"net/http"
+	"strings"
+	"testing"
+	"time"
+
+	quic "github.com/quic-go/quic-go"
+)
+
+func TestHTTP3EmptyFrameFloodIsBounded(t *testing.T) {
+	for _, mode := range []string{"before-headers", "empty-data", "unknown-body"} {
+		t.Run(mode, func(t *testing.T) {
+			_, origin := nativeServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if mode == "before-headers" {
+					t.Error("frame flood reached HTTP handler")
+				}
+				if _, err := io.Copy(io.Discard, r.Body); err != nil {
+					http.Error(w, "bounded", 400)
+					return
+				}
+				w.WriteHeader(204)
+			}))
+			ctx, cancel := context.WithTimeout(t.Context(), 2*time.Second)
+			defer cancel()
+			client, err := quic.DialAddr(ctx, strings.TrimPrefix(origin, "https://"), &tls.Config{InsecureSkipVerify: true, NextProtos: []string{"h3"}}, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer client.CloseWithError(0, "")
+			stream, err := client.OpenStreamSync(ctx)
+			if err != nil {
+				t.Fatal(err)
+			}
+			fields := []Field{{":method", "POST"}, {":scheme", "https"}, {":authority", "localhost"}, {":path", "/"}, {"content-length", "0"}}
+			block, err := newQPACK(nil, nil).encode(uint64(stream.StreamID()), fields)
+			if err != nil {
+				t.Fatal(err)
+			}
+			kind := uint64(0x21)
+			if mode == "empty-data" {
+				kind = 0
+			}
+			flood := bytes.Repeat(frame(kind, nil), 1025)
+			wire := frame(1, block)
+			if mode == "before-headers" {
+				wire = append(flood, wire...)
+			} else {
+				wire = append(wire, flood...)
+			}
+			_, _ = stream.Write(wire)
+			_ = stream.Close()
+			_ = stream.SetReadDeadline(time.Now().Add(time.Second))
+			if mode == "before-headers" {
+				select {
+				case <-client.Context().Done():
+				case <-ctx.Done():
+					t.Fatal("pre-header flood did not close connection")
+				}
+				var application *quic.ApplicationError
+				if !errors.As(context.Cause(client.Context()), &application) || uint64(application.ErrorCode) != 0x107 {
+					t.Fatal("wrong flood close", context.Cause(client.Context()))
+				}
+				return
+			}
+			kind, size, err := readFrame(stream)
+			if err != nil || kind != 1 {
+				t.Fatal("missing response headers", kind, err)
+			}
+			data, err := bounded(stream, size, 16<<10)
+			if err != nil {
+				t.Fatal(err)
+			}
+			response, err := newQPACK(nil, nil).decode(ctx, uint64(stream.StreamID()), data)
+			if err != nil || len(response) == 0 || response[0] != (Field{":status", "400"}) {
+				t.Fatalf("body flood escaped budget: %+v %v", response, err)
+			}
+		})
+	}
+}
+
+// 不正要求を開閉しても、要求を伴わないQPACK制御入力の枠を補充させない。
+func TestHTTP3InvalidRequestsDoNotRefillControl(t *testing.T) {
+	_, origin := nativeServer(t, http.HandlerFunc(func(http.ResponseWriter, *http.Request) { t.Error("invalid request reached handler") }))
+	ctx, cancel := context.WithTimeout(t.Context(), 2*time.Second)
+	defer cancel()
+	client, err := quic.DialAddr(ctx, strings.TrimPrefix(origin, "https://"), &tls.Config{InsecureSkipVerify: true, NextProtos: []string{"h3"}}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer client.CloseWithError(0, "")
+	for range 32 {
+		stream, err := client.OpenStreamSync(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+		block, err := newQPACK(nil, nil).encode(uint64(stream.StreamID()), []Field{{":method", "GET"}, {":scheme", "http"}, {":authority", "localhost"}, {":path", "/"}})
+		if err != nil {
+			t.Fatal(err)
+		}
+		_, _ = stream.Write(frame(1, block))
+		_ = stream.Close()
+		_ = stream.SetReadDeadline(time.Now().Add(time.Second))
+		_, err = io.ReadAll(stream)
+		var reset *quic.StreamError
+		if !errors.As(err, &reset) || uint64(reset.ErrorCode) != errMessage {
+			t.Fatal("invalid request was not rejected", err)
+		}
+	}
+	decoder, err := client.OpenUniStreamSync(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, _ = decoder.Write(append([]byte{3}, bytes.Repeat([]byte{0x40}, 128<<10)...))
+	select {
+	case <-client.Context().Done():
+	case <-ctx.Done():
+		t.Fatal("invalid requests replenished control flood quota")
+	}
+	var application *quic.ApplicationError
+	if !errors.As(context.Cause(client.Context()), &application) || uint64(application.ErrorCode) != 0x107 {
+		t.Fatal("wrong control flood close", context.Cause(client.Context()))
+	}
+}

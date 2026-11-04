@@ -109,7 +109,7 @@ func TestBoardClosureHTTPAndRecovery(t *testing.T) {
 	}
 	for _, route := range []string{"/closing/", "/closing/subject.txt", "/closing/SETTING.TXT", "/closed_new/", "/closed_new/subject.txt", "/closed_new/SETTING.TXT", fmt.Sprintf("/closing/dat/%d.dat", posted.Key), fmt.Sprintf("/test/read.cgi/closing/%d/", posted.Key), "/web/post?bbs=closing", "/web/post?bbs=closed_new", fmt.Sprintf("/closed_new/dat/%d.dat", posted.Key), fmt.Sprintf("/test/read.cgi/closed_new/%d/", posted.Key)} {
 		w := httptest.NewRecorder()
-		public.Handler.ServeHTTP(w, webReadTestRequest("GET", cfg.Public.BaseURL+route, nil))
+		public.Handler.ServeHTTP(w, modernWebReadTestRequest("GET", cfg.Public.BaseURL+route, nil))
 		if w.Code != 410 || strings.Contains(w.Body.String(), "保持する本文") {
 			t.Fatal(route, w.Code, w.Body.String())
 		}
@@ -433,11 +433,11 @@ func TestBoardClosureStopsOnlySelectedStreams(t *testing.T) {
 		defer writer.Close()
 		writers = append(writers, writer)
 	}
-	menu, denied := repo.readingGate(httptest.NewRecorder(), webReadTestRequest("GET", "/bbsmenu.html", nil), "site")
+	menu, denied := repo.readingGate(httptest.NewRecorder(), modernWebReadTestRequest("GET", "/bbsmenu.html", nil), "site")
 	if denied {
 		t.Fatal("menu denied before closure")
 	}
-	otherResponse, denied := repo.readingGate(httptest.NewRecorder(), webReadTestRequest("GET", "/continuing/subject.txt", nil), "site")
+	otherResponse, denied := repo.readingGate(httptest.NewRecorder(), modernWebReadTestRequest("GET", "/continuing/subject.txt", nil), "site")
 	if denied {
 		t.Fatal("other board denied before closure")
 	}

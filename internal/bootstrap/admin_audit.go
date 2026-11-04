@@ -106,6 +106,7 @@ var auditActions = map[string][]string{
 	"report_update":                  {"report.state", "report.assignee", "report.answer"},
 	"case_retirement_register":       {"site.minimum_reader_version", "case_retirement"},
 	"case_export_cleanup_enable":     {"site.minimum_reader_version"},
+	"http3_enable":                   {"site.minimum_reader_version"},
 	"case_completion_tail_enable":    {"site.minimum_reader_version"},
 	"required_original_gc_enable":    {"site.minimum_reader_version"},
 	"required_original_gc_configure": {"required_gc.originals"},

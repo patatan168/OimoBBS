@@ -306,6 +306,17 @@ func TestHealthcheckTLSAndAuthenticatedEdge(t *testing.T) {
 					}
 					return response.StatusCode, string(body)
 				}
+				if !h2 {
+					for _, path := range []string{healthcheckTestPath, "/"} {
+						if status, body := request(path, "health-fixture"); status != 505 || body != "" {
+							t.Fatal("HTTP/1 public route accepted", path, status, body)
+						}
+					}
+					if status, _ := request("/news/subject.txt", "health-fixture"); status != 200 {
+						t.Fatal("HTTP/1 legacy feed denied", status)
+					}
+					return
+				}
 				if status, body := request(healthcheckTestPath, "health-fixture"); status != 200 || body != "ok\n" {
 					t.Fatal("healthy TLS route", status, body)
 				}

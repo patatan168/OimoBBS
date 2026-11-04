@@ -37,9 +37,10 @@ func TestSharedAdminEdgeUsesAuthenticatedClientIP(t *testing.T) {
 	}
 	s := httptest.NewUnstartedServer(server.Handler)
 	s.TLS = server.TLSConfig.Clone()
+	s.EnableHTTP2 = true
 	s.StartTLS()
 	defer s.Close()
-	transport := &http.Transport{TLSClientConfig: clientTLS}
+	transport := &http.Transport{ForceAttemptHTTP2: true, TLSClientConfig: clientTLS}
 	defer transport.CloseIdleConnections()
 	client := &http.Client{Transport: transport}
 	for _, ip := range []string{"127.0.0.1", "192.0.2.19"} {
@@ -100,7 +101,7 @@ func TestSharedAdminLoopbackHTTPWithoutSecondPort(t *testing.T) {
 		t.Fatal(e)
 	}
 	for _, ip := range []string{"127.0.0.1", "192.0.2.19"} {
-		req := webReadTestRequest("GET", repo.cfg.Public.BaseURL+base+"/login", nil)
+		req := modernWebReadTestRequest("GET", repo.cfg.Public.BaseURL+base+"/login", nil)
 		req.RemoteAddr = ip + ":45678"
 		w := httptest.NewRecorder()
 		server.Handler.ServeHTTP(w, req)

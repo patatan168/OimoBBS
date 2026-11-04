@@ -152,9 +152,10 @@ func TestWAFTrafficAuthenticatedEdgeAndAdmin(t *testing.T) {
 	server := httptest.NewUnstartedServer(configured.Handler)
 	server.Config.ConnContext = configured.ConnContext
 	server.TLS = configured.TLSConfig.Clone()
+	server.EnableHTTP2 = true
 	server.StartTLS()
 	defer server.Close()
-	transport := &http.Transport{TLSClientConfig: clientTLS}
+	transport := &http.Transport{ForceAttemptHTTP2: true, TLSClientConfig: clientTLS}
 	defer transport.CloseIdleConnections()
 	client := &http.Client{Transport: transport, CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}
 	call := func(ip, path, xff string) int {

@@ -97,6 +97,7 @@ var auditDescriptions = map[string]string{
 	"board_settings_update":             "対象の板の設定を保存しました。",
 	"board_close":                       "板を閉鎖し、公開閲覧と投稿を停止しました。ログは保持期限に従い、容量不足時には優先して回収します。",
 	"board_metadata_update":             "板の表示名・公開キーと、保持する旧キーを保存しました。",
+	"http3_enable":                      "HTTP/3の接続観測に対応する保存形式へ更新しました。",
 	"content_rate_enable":               "同一内容の投稿制限に対応する保存形式へ更新しました。",
 	"operations_update":                 "保存整理・通報・配信などの運用設定を保存しました。",
 	"reading_access_update":             "閲覧または管理画面の接続条件を保存しました。",

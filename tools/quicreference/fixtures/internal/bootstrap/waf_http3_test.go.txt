@@ -1,0 +1,174 @@
+// 製品ハンドラーを実HTTP/3で通し、直結とmTLS中継のWAF・頻度拒否・管理枠を検証する。
+package bootstrap
+
+import (
+	"context"
+	"crypto/tls"
+	"fmt"
+	"io"
+	"net/http"
+	"net/http/httptest"
+	"net/netip"
+	"net/url"
+	"strings"
+	"testing"
+	"time"
+
+	quic "github.com/quic-go/quic-go"
+	"github.com/quic-go/quic-go/http3"
+	"oimobbs/internal/httptransport"
+	"oimobbs/internal/publicedge"
+	"oimobbs/internal/waf"
+)
+
+// wafHTTP3Client はTCPと同じ製品設定をUDPへ渡し、再接続しない単一QUIC接続を返す。
+func wafHTTP3Client(t *testing.T, configured *http.Server, clientTLS *tls.Config) (string, *http.Client) {
+	t.Helper()
+	front := httptest.NewUnstartedServer(configured.Handler)
+	t.Cleanup(front.Close)
+	h3, reason, err := httptransport.Prepare(configured, front.Listener.Addr(), "https://"+front.Listener.Addr().String(), true, 64, 16)
+	if err != nil || h3 == nil {
+		t.Fatalf("HTTP/3: %s %v", reason, err)
+	}
+	t.Cleanup(func() { _ = h3.Close() })
+	go h3.Serve()
+	ctx, cancel := context.WithTimeout(t.Context(), 3*time.Second)
+	defer cancel()
+	clientTLS = clientTLS.Clone()
+	clientTLS.NextProtos = []string{"h3"}
+	conn, err := quic.DialAddr(ctx, front.Listener.Addr().String(), clientTLS, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = conn.CloseWithError(0, "") })
+	transport := &http3.Transport{}
+	t.Cleanup(func() { _ = transport.Close() })
+	client := &http.Client{Transport: transport.NewClientConn(conn), Timeout: 2 * time.Second, CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}
+	return "https://" + front.Listener.Addr().String(), client
+}
+
+func TestWAFHTTP3DirectAndAuthenticatedEdge(t *testing.T) {
+	for _, edge := range []bool{false, true} {
+		t.Run(fmt.Sprintf("edge=%t", edge), func(t *testing.T) {
+			cfg, repo := adminFixture(t)
+			defer repo.Close()
+			upstreamTLS, _ := proxyCertificates(t, &cfg)
+			if !edge {
+				cfg.Edge, cfg.TrustedProxies = nil, []string{}
+			}
+			cfg.Admin.Transport, cfg.Admin.Listen, cfg.Admin.Origin = "public_path", "", cfg.Public.BaseURL+"/admin"
+			repo.cfg = cfg
+			configured, err := repo.ValidationHTTPServer()
+			if err != nil {
+				t.Fatal(err)
+			}
+			clientTLS := upstreamTLS
+			if edge {
+				backend := httptest.NewUnstartedServer(configured.Handler)
+				backend.Config = configured
+				backend.EnableHTTP2 = true
+				configured.TLSConfig.NextProtos = []string{"h2", "http/1.1"}
+				backend.TLS = configured.TLSConfig.Clone()
+				backend.StartTLS()
+				defer backend.Close()
+				target, _ := url.Parse(backend.URL)
+				transport := &http.Transport{TLSClientConfig: upstreamTLS, ForceAttemptHTTP2: true}
+				defer transport.CloseIdleConnections()
+				handler, err := publicedge.Handler(cfg.Public.BaseURL, target, transport)
+				if err != nil {
+					t.Fatal(err)
+				}
+				cert := httptest.NewTLSServer(nil)
+				configured = &http.Server{Handler: handler, TLSConfig: cert.TLS.Clone(), ReadHeaderTimeout: time.Second, ReadTimeout: 10 * time.Second, WriteTimeout: 3 * time.Second, MaxHeaderBytes: 16 << 10}
+				cert.Close()
+				clientTLS = &tls.Config{InsecureSkipVerify: true}
+			}
+			origin, client := wafHTTP3Client(t, configured, clientTLS)
+			host, _ := url.Parse(cfg.Public.BaseURL)
+			request := func(method, path string, body io.Reader, agent string, want int) {
+				t.Helper()
+				req, err := http.NewRequest(method, origin+path, body)
+				if err != nil {
+					t.Fatal(err)
+				}
+				req.Host = host.Host
+				req.Header.Set("User-Agent", agent)
+				req.Header.Set("Accept-Encoding", "gzip")
+				// 自己申告で回線枠や中継認証を回避できないことも同時に検査する。
+				req.Header.Set("X-Forwarded-For", "192.0.2.99")
+				req.Header.Set("X-Oimo-Client-IP", "192.0.2.99")
+				if body != nil {
+					req.ContentLength = 65536
+				}
+				res, err := client.Do(req)
+				if err != nil {
+					t.Fatal(method, path, err)
+				}
+				_, err = io.Copy(io.Discard, res.Body)
+				res.Body.Close()
+				if err != nil || res.ProtoMajor != 3 || res.StatusCode != want {
+					t.Fatalf("%s %s: %s %s want=%d err=%v", method, path, res.Proto, res.Status, want, err)
+				}
+				if (want == 429 || want == 503) && (res.Header.Get("Retry-After") == "" || res.Header.Get("Cache-Control") != "no-store") {
+					t.Fatal("missing rejection headers", res.Header)
+				}
+			}
+			requestUnread := func(path, agent string, want int) {
+				t.Helper()
+				reader, writer := io.Pipe()
+				defer reader.Close()
+				defer writer.Close()
+				request("POST", path, reader, agent, want)
+			}
+			policy := WAFSettings{Enabled: true, Traffic: waf.DefaultTrafficSettings()}
+			policy.Traffic.Enabled = false
+			repo.publishWAF(policy)
+			for _, path := range []string{"/", "/test/bbs.cgi", "/web/post", "/search?q=normal", "/reports", "/missing", "/admin/login", "/admin/api/v1/waf", "/admin/web/assets/ui.css"} {
+				for _, method := range []string{"GET", "POST", "HEAD"} {
+					request(method, path, nil, strings.Repeat("a", 1025), 403)
+				}
+			}
+			requestUnread("/test/bbs.cgi", strings.Repeat("a", 1025), 403)
+			if repo.wafBlocked.Load() != 28 {
+				t.Fatal("WAF did not inspect all routes", repo.wafBlocked.Load())
+			}
+			for _, path := range []string{"/", "/web/assets/ui.js"} {
+				for _, method := range []string{"GET", "HEAD"} {
+					request(method, path, nil, "normal", 200)
+				}
+			}
+			request("GET", "/admin/login", nil, "normal", 200)
+			policy.Traffic.Enabled = true
+			policy.Traffic.ClientConcurrent, policy.Traffic.GlobalConcurrent = 2, 4
+			repo.publishWAF(policy)
+			for _, global := range []bool{false, true} {
+				releases := []func(){}
+				count, want := 2, 429
+				if global {
+					count, want = 4, 503
+				}
+				for i := 0; i < count; i++ {
+					ip := netip.MustParseAddr("127.0.0.1")
+					if global {
+						ip = netip.MustParseAddr(fmt.Sprintf("192.0.2.%d", i+1))
+					}
+					release, decision := repo.publicTraffic.AcquireOperation(ip, waf.Ordinary, trafficNow())
+					if decision.Status != 0 {
+						t.Fatal(decision)
+					}
+					releases = append(releases, release)
+				}
+				// 本文を一切送らず、10秒のReadTimeoutより短いclient期限で拒否応答を読む。
+				requestUnread("/missing", "normal", want)
+				request("GET", "/admin/login", nil, "normal", 200)
+				for _, release := range releases {
+					release()
+				}
+			}
+			if repo.publicTraffic.Stats().Active != 0 || repo.adminTraffic.Stats().Active != 0 {
+				t.Fatal("rejection leaked active request slots")
+			}
+			request("GET", "/admin/login", nil, "normal", 200)
+		})
+	}
+}

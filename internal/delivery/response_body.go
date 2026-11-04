@@ -27,6 +27,13 @@ func (w *Response) WriteResponseChecked(status int, body []byte, check func() er
 	if status < 200 || status > 599 || status == http.StatusNoContent || status == http.StatusNotModified {
 		return 0, errors.New("unsupported response body status")
 	}
+	// 公開・権限検査がある応答は16KiBごとのI/O待ち後にも再検査するため集約しない。
+	// 検査不要の確定本文だけ長さを通知する。下流はここでは確保・I/Oしない。
+	if check == nil {
+		if prepared, ok := w.ResponseWriter.(interface{ PrepareBody(int) }); ok {
+			prepared.PrepareBody(len(body))
+		}
+	}
 	if w.Header().Get("Content-Type") == "" {
 		w.Header().Set("Content-Type", http.DetectContentType(body))
 	}

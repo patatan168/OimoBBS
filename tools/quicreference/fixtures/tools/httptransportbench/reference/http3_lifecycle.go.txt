@@ -1,0 +1,150 @@
+// QUIC streamのヘッダー期限と、停止時に受理済み要求だけを完了させる寿命管理。
+package reference
+
+import (
+	"context"
+	"errors"
+	"net"
+	"net/http"
+	"sync"
+	"time"
+
+	"github.com/quic-go/quic-go"
+	"github.com/quic-go/quic-go/http3"
+)
+
+// Serve は確保済みUDPを処理する。HTTP/3のヘッダー読取前にも期限を設定する。
+func (h *HTTP3) Serve() error {
+	h.mu.Lock()
+	if h.closing {
+		h.mu.Unlock()
+		return http.ErrServerClosed
+	}
+	h.active.Store(true)
+	h.mu.Unlock()
+	defer h.active.Store(false)
+	for {
+		conn, err := h.listener.Accept(h.ctx)
+		if err != nil {
+			if h.ctx.Err() != nil {
+				return http.ErrServerClosed
+			}
+			return err
+		}
+		h.mu.Lock()
+		if h.closing {
+			h.mu.Unlock()
+			conn.CloseWithError(0, "")
+			continue
+		}
+		h.connections.Add(1)
+		h.mu.Unlock()
+		go h.serveConnection(conn)
+	}
+}
+
+// serveConnection はHTTP/3の解析をライブラリへ任せ、各要求streamへTCP相当の期限を設定する。
+func (h *HTTP3) serveConnection(conn *quic.Conn) {
+	defer h.connections.Done()
+	raw, err := h.server.NewRawServerConn(conn)
+	if err != nil {
+		conn.CloseWithError(quic.ApplicationErrorCode(http3.ErrCodeInternalError), "")
+		return
+	}
+	defer raw.CloseWithError(0, "")
+	var requests sync.WaitGroup
+	defer requests.Wait()
+	go func() {
+		for {
+			str, err := conn.AcceptUniStream(conn.Context())
+			if err != nil {
+				return
+			}
+			go raw.HandleUnidirectionalStream(str)
+		}
+	}()
+	streamContext := h.ctx
+	for {
+		str, err := conn.AcceptStream(streamContext)
+		if err != nil {
+			// Shutdown後も接続を残して未送信応答を届け、新しいstreamは明示的に拒否する。
+			// handler完了はQUICの送信完了やpeerの受領を意味しない。
+			if h.ctx.Err() != nil && conn.Context().Err() == nil {
+				streamContext = conn.Context()
+				continue
+			}
+			return
+		}
+		// 接続元を固定して証拠を記録するため、移動後の接続は再接続を要求する。
+		if conn.RemoteAddr().String() != conn.Context().Value(initialRemoteKey{}).(string) {
+			conn.CloseWithError(quic.ApplicationErrorCode(http3.ErrCodeRequestRejected), "reconnect after address change")
+			return
+		}
+		h.mu.Lock()
+		closing := h.closing
+		h.mu.Unlock()
+		if closing {
+			str.ReleaseStreamCredit()
+			str.CancelRead(quic.StreamErrorCode(http3.ErrCodeRequestRejected))
+			str.CancelWrite(quic.StreamErrorCode(http3.ErrCodeRequestRejected))
+			continue
+		}
+		if d := h.tcp.ReadHeaderTimeout; d > 0 {
+			_ = str.SetReadDeadline(time.Now().Add(d))
+		}
+		if d := h.tcp.WriteTimeout; d > 0 {
+			_ = str.SetWriteDeadline(time.Now().Add(d))
+		}
+		requests.Add(1)
+		go func() { defer requests.Done(); raw.HandleRequestStream(str) }()
+	}
+}
+
+type initialRemoteKey struct{}
+
+// Shutdown は新規受付を止め、受理済み要求を期限まで待つ。期限超過時は残存接続を中断する。
+func (h *HTTP3) Shutdown(ctx context.Context) error {
+	h.mu.Lock()
+	h.closing = true
+	h.active.Store(false)
+	h.cancel()
+	h.mu.Unlock()
+	_ = h.listener.Close()
+	done := make(chan struct{})
+	go func() { h.connections.Wait(); close(done) }()
+	select {
+	case <-done:
+		return nil
+	case <-ctx.Done():
+		_ = h.transport.Close()
+		return ctx.Err()
+	}
+}
+
+// Close は残存QUIC接続と、自身が所有するUDP socketを解放する。
+func (h *HTTP3) Close() error {
+	h.mu.Lock()
+	h.closing = true
+	h.active.Store(false)
+	h.cancel()
+	h.mu.Unlock()
+	err := errors.Join(h.listener.Close(), h.transport.Close())
+	h.connections.Wait()
+	socketErr := h.socket.Close()
+	if errors.Is(socketErr, net.ErrClosed) {
+		socketErr = nil
+	}
+	return errors.Join(err, socketErr)
+}
+
+// Shutdown はTCPとHTTP/3の新規受付を同時に止め、同じ期限で受理済み要求を待つ。
+// HTTP/3の接続終了待ちの間にTCPだけ新規受付を続けないようにする。
+func Shutdown(ctx context.Context, tcp *http.Server, h3 *HTTP3) error {
+	if h3 == nil {
+		return tcp.Shutdown(ctx)
+	}
+	done := make(chan error, 1)
+	go func() { done <- h3.Shutdown(ctx) }()
+	tcpErr := tcp.Shutdown(ctx)
+	return errors.Join(tcpErr, <-done)
+}

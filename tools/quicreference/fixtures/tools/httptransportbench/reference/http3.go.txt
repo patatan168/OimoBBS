@@ -1,0 +1,137 @@
+// Package httptransport はTCPの公開handlerを、起動時に利用可能なHTTP/3へ接続する。
+package reference
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"io"
+	"log/slog"
+	"net"
+	"net/http"
+	"net/url"
+	"strconv"
+	"sync"
+	"sync/atomic"
+	"time"
+
+	"github.com/quic-go/quic-go"
+	"github.com/quic-go/quic-go/http3"
+	"oimobbs/internal/delivery"
+)
+
+// HTTP3 はTCPとは別のUDP待受を所有し、同じhandler・証明書検証を使う。
+type HTTP3 struct {
+	server      *http3.Server
+	listener    *quic.Listener
+	transport   *quic.Transport
+	socket      net.PacketConn
+	active      atomic.Bool
+	tcp         *http.Server
+	mu          sync.Mutex
+	closing     bool
+	connections sync.WaitGroup
+	cancel      context.CancelFunc
+	ctx         context.Context
+}
+
+// Prepare は外部UDPを許可した場合だけ、TCPと同じ実portへUDPを確保する。
+// OSでUDPを使えなければ理由を返してHTTP/2を継続する。ルーターの到達性は推定しない。
+// TCPのServe開始前に呼び、返した所有者のServe/Shutdown/Closeを呼出元で管理する。
+func Prepare(tcp *http.Server, address net.Addr, origin string, enabled bool, total, perSource int) (*HTTP3, string, error) {
+	if !enabled {
+		return nil, "外部UDPの到達性が未設定", nil
+	}
+	if tcp.TLSConfig == nil {
+		return nil, "TLS待受なし", nil
+	}
+	u, err := url.Parse(origin)
+	if err != nil || u.Scheme != "https" || u.Hostname() == "" {
+		return nil, "", errors.New("HTTP/3 requires HTTPS origin")
+	}
+	port := 443
+	if u.Port() != "" {
+		port, err = strconv.Atoi(u.Port())
+	}
+	if err != nil || port < 1 || port > 65535 {
+		return nil, "", errors.New("invalid HTTP/3 public port")
+	}
+	guard, err := delivery.NewQUICAdmission(total, perSource)
+	if err != nil {
+		return nil, "", err
+	}
+	socket, err := net.ListenPacket("udp", address.String())
+	if err != nil {
+		return nil, fmt.Sprintf("OSのUDP待受を使用できません: %v", err), nil
+	}
+	tr := &quic.Transport{Conn: socket, VerifySourceAddress: func(net.Addr) bool { return true }, ConnContext: func(ctx context.Context, info *quic.ClientInfo) (context.Context, error) {
+		if !info.AddrVerified {
+			return nil, errors.New("QUIC source address not verified")
+		}
+		return context.WithValue(ctx, initialRemoteKey{}, info.RemoteAddr.String()), guard.Admit(ctx, info.RemoteAddr)
+	}}
+	cfg := &quic.Config{HandshakeIdleTimeout: 5 * time.Second, MaxIdleTimeout: 30 * time.Second, InitialStreamReceiveWindow: 64 << 10, MaxStreamReceiveWindow: 64 << 10, InitialConnectionReceiveWindow: 256 << 10, MaxConnectionReceiveWindow: 256 << 10, MaxIncomingStreams: 32, MaxIncomingUniStreams: 3, Allow0RTT: false, EnableDatagrams: false}
+	listener, err := tr.Listen(http3.ConfigureTLSConfig(tcp.TLSConfig.Clone()), cfg)
+	if err != nil {
+		tr.Close()
+		socket.Close()
+		return nil, fmt.Sprintf("OSのQUIC待受を使用できません: %v", err), nil
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	h := &HTTP3{listener: listener, transport: tr, socket: socket, tcp: tcp, ctx: ctx, cancel: cancel}
+	original := tcp.Handler
+	h.server = &http3.Server{Addr: socket.LocalAddr().String(), Port: port, Handler: withDeadlines(original, tcp), MaxHeaderBytes: tcp.MaxHeaderBytes, IdleTimeout: tcp.IdleTimeout, Logger: slog.New(slog.NewTextHandler(io.Discard, nil)), ConnContext: func(ctx context.Context, c *quic.Conn) context.Context {
+		if tcp.ConnContext != nil {
+			ctx = tcp.ConnContext(ctx, &addressConn{local: c.LocalAddr(), remote: c.RemoteAddr()})
+		}
+		return ctx
+	}}
+	// 短い有効期間にしてUDP障害後の再試行を長期間誘発しない。
+	tcp.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if h.active.Load() && r.TLS != nil && r.ProtoMajor < 3 {
+			w.Header().Set("Alt-Svc", fmt.Sprintf(`h3=":%d"; ma=60`, port))
+		}
+		original.ServeHTTP(w, r)
+	})
+	return h, "UDP待受の確保に成功", nil
+}
+
+// withDeadlines はHTTP/3 streamにもTCP相当の本文受信・応答期限を設定する。
+func withDeadlines(next http.Handler, tcp *http.Server) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		initial, _ := r.Context().Value(initialRemoteKey{}).(string)
+		if initial == "" || initial != r.RemoteAddr {
+			panic(http.ErrAbortHandler)
+		}
+		// 未確定の圧縮HEAD長をライブラリの自動Content-Length: 0で上書きさせない。
+		// 業務handlerが確定長をSetした場合はその値を送る。
+		if r.Method == http.MethodHead {
+			w.Header()["Content-Length"] = nil
+		}
+		control := http.NewResponseController(w)
+		if tcp.ReadTimeout > 0 {
+			if err := control.SetReadDeadline(time.Now().Add(tcp.ReadTimeout)); err != nil {
+				panic(http.ErrAbortHandler)
+			}
+		}
+		if tcp.WriteTimeout > 0 {
+			if err := control.SetWriteDeadline(time.Now().Add(tcp.WriteTimeout)); err != nil {
+				panic(http.ErrAbortHandler)
+			}
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
+// addressConn はConnContextへ実UDPのendpointだけを渡す読み書き不能な接続ビュー。
+// HTTPやTLSの入出力には使わず、UDPをTCPとして記録しない。
+type addressConn struct{ local, remote net.Addr }
+
+func (c *addressConn) LocalAddr() net.Addr              { return c.local }
+func (c *addressConn) RemoteAddr() net.Addr             { return c.remote }
+func (c *addressConn) Read([]byte) (int, error)         { return 0, errors.ErrUnsupported }
+func (c *addressConn) Write([]byte) (int, error)        { return 0, errors.ErrUnsupported }
+func (c *addressConn) Close() error                     { return errors.ErrUnsupported }
+func (c *addressConn) SetDeadline(time.Time) error      { return errors.ErrUnsupported }
+func (c *addressConn) SetReadDeadline(time.Time) error  { return errors.ErrUnsupported }
+func (c *addressConn) SetWriteDeadline(time.Time) error { return errors.ErrUnsupported }

@@ -1,0 +1,130 @@
+// 実HTTP/3の公開入口でendpoint上書き・非公開経路拒否・HTTP/2転送を検査する。
+package publicedge
+
+import (
+	"crypto/tls"
+	"io"
+	"net"
+	"net/http"
+	"net/http/httptest"
+	"net/url"
+	"strings"
+	"testing"
+	"time"
+
+	"github.com/quic-go/quic-go/http3"
+	"oimobbs/internal/delivery"
+	"oimobbs/internal/httptransport"
+)
+
+func TestPublicEdgeHTTP3ToHTTP2(t *testing.T) {
+	testpublicedgehttp3tohttp2(t, httptransport.Prepare)
+}
+func testpublicedgehttp3tohttp2(t *testing.T, prepare func(*http.Server, net.Addr, string, bool, int, int) (*httptransport.HTTP3, string, error)) {
+	seen := make(chan bool, 1)
+	backend := httptest.NewUnstartedServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ip := net.ParseIP(r.Header.Get("X-Oimo-Client-IP"))
+		good := r.ProtoMajor == 2 && ip != nil && ip.IsLoopback() && r.Header.Get("X-Oimo-Client-Port") != "" && r.Header.Get("X-Oimo-Dest-Port") != "" && r.Header.Get("Forwarded") == "" && r.Header.Get("X-Oimo-Edge-Request") != "spoof"
+		if r.Method == http.MethodPost {
+			if !good {
+				t.Error("HTTP/3 to HTTP/2 POST metadata changed")
+			}
+			delivery.RejectUnreadBody(w, r)
+			http.Error(w, "limited", 429)
+			return
+		}
+		seen <- good
+		io.WriteString(w, "original DAT")
+	}))
+	backend.EnableHTTP2 = true
+	backend.StartTLS()
+	defer backend.Close()
+	target, _ := url.Parse(backend.URL)
+	handler, err := Handler("https://bbs.example", target, backend.Client().Transport)
+	if err != nil {
+		t.Fatal(err)
+	}
+	front := httptest.NewUnstartedServer(handler)
+	defer front.Close()
+	cert := httptest.NewTLSServer(nil)
+	defer cert.Close()
+	front.Config.TLSConfig = cert.TLS.Clone()
+	front.Config.ReadHeaderTimeout = time.Second
+	front.Config.ReadTimeout = time.Second
+	front.Config.WriteTimeout = time.Second
+	h3, reason, err := prepare(front.Config, front.Listener.Addr(), "https://bbs.example", true, 256, 16)
+	if err != nil || h3 == nil {
+		t.Fatalf("%s %v", reason, err)
+	}
+	defer h3.Close()
+	go h3.Serve()
+	tr := &http3.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}}
+	defer tr.Close()
+	client := &http.Client{Transport: tr, Timeout: 3 * time.Second}
+	for _, path := range []string{"/login", "/api/v1/administrators", "/probe/dat/1.dat"} {
+		req, _ := http.NewRequest("GET", "https://"+front.Listener.Addr().String()+path, nil)
+		req.Host = "bbs.example"
+		req.Header.Set("Forwarded", "for=127.0.0.2")
+		req.Header.Set("X-Oimo-Client-IP", "127.0.0.2")
+		req.Header.Set("X-Oimo-Edge-Request", "spoof")
+		res, err := client.Do(req)
+		if err != nil {
+			t.Fatal(err)
+		}
+		body, err := io.ReadAll(res.Body)
+		res.Body.Close()
+		want := 404
+		if strings.Contains(path, "/dat/") {
+			want = 200
+		}
+		if err != nil || res.StatusCode != want || res.ProtoMajor != 3 {
+			t.Fatalf("%s: %s %s %v", path, res.Status, body, err)
+		}
+		if want == 200 {
+			if string(body) != "original DAT" || !<-seen {
+				t.Fatal("metadata/protocol/body changed")
+			}
+		}
+	}
+	// frontでの拒否と保存側からの拒否のどちらも、利用者の未送信本文を待たせない。
+	var res *http.Response
+	for _, test := range []struct {
+		length int64
+		status int
+	}{{65537, 413}, {65536, 429}} {
+		reader, writer := io.Pipe()
+		req, _ := http.NewRequest("POST", "https://"+front.Listener.Addr().String()+"/test/bbs.cgi", reader)
+		req.Host = "bbs.example"
+		req.ContentLength = test.length
+		var err error
+		res, err = client.Do(req)
+		if err != nil {
+			reader.Close()
+			writer.Close()
+			t.Fatal("unread HTTP/3 rejection", err)
+		}
+		_, err = io.Copy(io.Discard, res.Body)
+		res.Body.Close()
+		reader.Close()
+		writer.Close()
+		if err != nil || res.StatusCode != test.status {
+			t.Fatal("POST rejection", res.Status, err)
+		}
+	}
+	req, _ := http.NewRequest("GET", "https://"+front.Listener.Addr().String()+"/probe/dat/1.dat", nil)
+	req.Host = "bbs.example"
+	res, err = client.Do(req)
+	if err != nil {
+		t.Fatal("HTTP/3 after rejection", err)
+	}
+	io.Copy(io.Discard, res.Body)
+	res.Body.Close()
+	if res.StatusCode != 200 || !<-seen {
+		t.Fatal("GET after unread rejection failed")
+	}
+	select {
+	case <-seen:
+		t.Fatal("private route reached backend")
+	default:
+	}
+}

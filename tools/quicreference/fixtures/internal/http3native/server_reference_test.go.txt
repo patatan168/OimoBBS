@@ -1,0 +1,156 @@
+// 既存HTTP/3 clientから独自QUIC/HTTP/3を経由し、HTTPの実入出力を検証する。
+package http3native
+
+import (
+	"bytes"
+	"context"
+	"crypto/tls"
+	"fmt"
+	"io"
+	"net"
+	"net/http"
+	"net/http/httptest"
+
+	"sync"
+	"testing"
+	"time"
+
+	external "github.com/quic-go/quic-go/http3"
+	"oimobbs/internal/quicv1"
+)
+
+func nativeServer(t *testing.T, handler http.Handler, writeTimeout ...time.Duration) (*Server, string) {
+	t.Helper()
+	cert := httptest.NewTLSServer(nil)
+	cfg := cert.TLS.Clone()
+	cert.Close()
+	cfg.NextProtos = []string{"h3"}
+	socket, err := net.ListenUDP("udp", &net.UDPAddr{IP: net.ParseIP("127.0.0.1")})
+	if err != nil {
+		t.Fatal(err)
+	}
+	listener, err := quicv1.Listen(socket, quicv1.Config{TLSConfig: cfg, MaxConnections: 8})
+	if err != nil {
+		t.Fatal(err)
+	}
+	server := &Server{HTTP: &http.Server{Handler: handler, ReadHeaderTimeout: time.Second, ReadTimeout: 3 * time.Second, WriteTimeout: 3 * time.Second}}
+	if len(writeTimeout) > 0 {
+		server.HTTP.WriteTimeout = writeTimeout[0]
+	}
+	go server.Serve(listener)
+	t.Cleanup(func() { _ = server.Close() })
+	return server, "https://" + listener.Addr().String()
+}
+func TestHTTP3ClientRequests(t *testing.T) {
+	payload := bytes.Repeat([]byte("body"), 18000)
+	server, origin := nativeServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Proto != "HTTP/3.0" || r.TLS == nil || !r.TLS.HandshakeComplete {
+			t.Error("protocol/TLS")
+		}
+		switch r.URL.Path {
+		case "/304":
+			w.Header().Set("ETag", `"unchanged"`)
+			w.WriteHeader(304)
+		case "/echo":
+			body, err := io.ReadAll(r.Body)
+			if err != nil {
+				t.Error(err)
+				http.Error(w, "body", 400)
+				return
+			}
+			_, _ = w.Write(body)
+		case "/flush":
+			w.WriteHeader(200)
+			w.(http.Flusher).Flush()
+			_, _ = io.WriteString(w, "flushed")
+		default:
+			w.Header().Set("Content-Length", "6")
+			_, _ = io.WriteString(w, "abcdef")
+		}
+	}))
+	transport := &external.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}}
+	defer transport.Close()
+	client := &http.Client{Transport: transport, Timeout: 5 * time.Second}
+	for i := 0; i < 200; i++ {
+		response, err := client.Get(origin + "/304")
+		if err != nil {
+			t.Fatalf("request %d: %v", i, err)
+		}
+		body, err := io.ReadAll(response.Body)
+		response.Body.Close()
+		if err != nil || response.StatusCode != 304 || len(body) != 0 || response.Header.Get("ETag") != `"unchanged"` {
+			t.Fatalf("304: %v, %+v", err, response)
+		}
+	}
+	response, err := client.Post(origin+"/echo", "application/octet-stream", bytes.NewReader(payload))
+	if err != nil {
+		t.Fatal(err)
+	}
+	body, err := io.ReadAll(response.Body)
+	response.Body.Close()
+	if err != nil || !bytes.Equal(body, payload) {
+		t.Fatalf("echo %d: %v", len(body), err)
+	}
+	response, err = client.Head(origin)
+	if err != nil {
+		t.Fatal(err)
+	}
+	body, err = io.ReadAll(response.Body)
+	response.Body.Close()
+	if err != nil || len(body) != 0 || response.ContentLength != 6 {
+		t.Fatalf("HEAD: %v %+v", err, response)
+	}
+	response, err = client.Get(origin + "/flush")
+	if err != nil {
+		t.Fatal(err)
+	}
+	body, err = io.ReadAll(response.Body)
+	response.Body.Close()
+	if err != nil || string(body) != "flushed" {
+		t.Fatalf("flush: %q %v", body, err)
+	}
+	ctx, cancel := context.WithTimeout(t.Context(), 2*time.Second)
+	defer cancel()
+	if err = server.Shutdown(ctx); err != nil {
+		t.Fatal(err)
+	}
+}
+
+// 異なる本文の並行往復で、再利用bufferに前の送信内容が混入しないことを検査する。
+func TestConcurrentDifferentBodies(t *testing.T) {
+	_, origin := nativeServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if _, err := io.Copy(w, r.Body); err != nil {
+			t.Error(err)
+		}
+	}))
+	tr := &external.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}}
+	defer tr.Close()
+	client := &http.Client{Transport: tr, Timeout: 5 * time.Second}
+	var wg sync.WaitGroup
+	problems := make(chan error, 240)
+	for worker := range 8 {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for iteration := range 30 {
+				body := bytes.Repeat([]byte(fmt.Sprintf("worker=%d iteration=%02d;", worker, iteration)), 4096)
+				response, err := client.Post(origin, "application/octet-stream", bytes.NewReader(body))
+				if err != nil {
+					problems <- err
+					return
+				}
+				got, err := io.ReadAll(response.Body)
+				response.Body.Close()
+				if err != nil || !bytes.Equal(got, body) {
+					problems <- fmt.Errorf("body mismatch %d/%d: %v", len(got), len(body), err)
+					return
+				}
+			}
+		}()
+	}
+	wg.Wait()
+	close(problems)
+	for err := range problems {
+		t.Error(err)
+	}
+}

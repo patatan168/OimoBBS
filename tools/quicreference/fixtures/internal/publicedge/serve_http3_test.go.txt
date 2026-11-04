@@ -1,0 +1,100 @@
+// 公開入口の実起動でHTTP/2・HTTP/3の待受と、取消後のUDP解放を確認する。
+package publicedge
+
+import (
+	"context"
+	"crypto/tls"
+	"crypto/x509"
+	"encoding/pem"
+	"io"
+	"net"
+	"net/http"
+	"net/http/httptest"
+	"os"
+	"path/filepath"
+	"testing"
+	"time"
+
+	"github.com/quic-go/quic-go/http3"
+)
+
+func TestServeHTTP3Lifecycle(t *testing.T) {
+	cert := httptest.NewTLSServer(nil)
+	pair := cert.TLS.Certificates[0]
+	cert.Close()
+	key, err := x509.MarshalPKCS8PrivateKey(pair.PrivateKey)
+	if err != nil {
+		t.Fatal(err)
+	}
+	folder := t.TempDir()
+	certPath, keyPath := filepath.Join(folder, "cert.pem"), filepath.Join(folder, "key.pem")
+	if err = os.WriteFile(certPath, pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: pair.Certificate[0]}), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if err = os.WriteFile(keyPath, pem.EncodeToMemory(&pem.Block{Type: "PRIVATE KEY", Bytes: key}), 0600); err != nil {
+		t.Fatal(err)
+	}
+	listener, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	address := listener.Addr().String()
+	listener.Close()
+	cfg := Config{Listen: address, Origin: "https://" + address, Upstream: "https://127.0.0.1:1", ClientCert: certPath, ClientKey: keyPath, ServerCert: certPath, ServerKey: keyPath, HTTP3: true}
+	ctx, cancel := context.WithCancel(t.Context())
+	defer cancel()
+	done := make(chan error, 1)
+	go func() { done <- Serve(ctx, cfg) }()
+	tlsConfig := &tls.Config{InsecureSkipVerify: true}
+	tcp := &http.Transport{TLSClientConfig: tlsConfig, ForceAttemptHTTP2: true}
+	defer tcp.CloseIdleConnections()
+	client := &http.Client{Transport: tcp, Timeout: time.Second}
+	deadline := time.Now().Add(5 * time.Second)
+	for {
+		res, err := client.Get(cfg.Origin + "/_edge/health")
+		if err == nil {
+			res.Body.Close()
+			if res.StatusCode == 200 {
+				if res.ProtoMajor != 2 || res.Header.Get("Alt-Svc") == "" {
+					t.Fatalf("TCP: %s %v", res.Proto, res.Header)
+				}
+				break
+			}
+		}
+		if time.Now().After(deadline) {
+			t.Fatal("edge did not start", err)
+		}
+		select {
+		case err := <-done:
+			t.Fatal("edge exited", err)
+		case <-time.After(5 * time.Millisecond):
+		}
+	}
+	tr := &http3.Transport{TLSClientConfig: tlsConfig}
+	defer tr.Close()
+	h3client := &http.Client{Transport: tr, Timeout: time.Second}
+	res, err := h3client.Get(cfg.Origin + "/_edge/health")
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = io.Copy(io.Discard, res.Body)
+	res.Body.Close()
+	tr.Close()
+	if err != nil || res.StatusCode != 200 || res.ProtoMajor != 3 {
+		t.Fatalf("UDP health: %v %v", res, err)
+	}
+	cancel()
+	select {
+	case err := <-done:
+		if err != nil {
+			t.Fatal(err)
+		}
+	case <-time.After(5 * time.Second):
+		t.Fatal("edge shutdown did not finish")
+	}
+	socket, err := net.ListenPacket("udp", address)
+	if err != nil {
+		t.Fatal("UDP socket leaked", err)
+	}
+	socket.Close()
+}

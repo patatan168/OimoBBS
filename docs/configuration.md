@@ -33,6 +33,7 @@ JSONの例が「`maintenance` の値」などと説明されている場合は�
 | --- | --- |
 | `schema_version` | `1`。起動設定の形式 |
 | `data_dir` | `./var/site`。永続保存先 |
+| `public.http3` | 省略時 `false`。外部UDP到達性を確認した場合に `true` とし、起動時にUDP/QUIC待受を試行。OSで確保できなければHTTP/2を継続 |
 | `public.listen` | `0.0.0.0:443`。HTTPS公開待受 |
 | `public.base_url` | `https://bbs.example.com`。利用者から見えるOrigin |
 | `public.tls_cert_file` | HTTPSのPEM証明書チェーン。例 `./tls/fullchain.pem` |
@@ -158,4 +159,4 @@ APIの `allow_local_ip` と `allow_loopback_ip` はtrue＝許可、false＝拒�
 
 現在の実装で閲覧設定を保存・管理用制限を解除するとreader83を宣言します。reader82の旧設定は従来の条件を保って読み込みます。解除手順は[運用手順](operations.md#管理画面のアクセス制限を解除する)を参照してください。
 
-DNSによる固定回線の補完対象と判定順序は[回線カタログ](networks.md#固定回線のdns補完)を参照してください。
+DNS補完の判定順序・照会上限は[共通条件](networks.md#dns補完の共通条件)、対象のホスト名は[固定回線](networks.md#固定回線のdns補完)・[携帯と公衆Wi-Fi](networks.md#携帯公衆wi-fiのdns補完)・[クラウドとVPS](networks.md#クラウドvpsのdns補完)を参照してください。

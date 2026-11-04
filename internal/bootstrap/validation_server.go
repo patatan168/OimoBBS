@@ -5,6 +5,7 @@ import (
 	"context"
 	"crypto/tls"
 	"net/http"
+	"oimobbs/internal/compat"
 	"oimobbs/internal/delivery"
 	"oimobbs/internal/evidence"
 	"oimobbs/internal/store"
@@ -67,6 +68,7 @@ func (repo *Repository) publicHTTPServer(environment, build string) (*http.Serve
 		return nil, err
 	}
 	handler := repo.SiteWebHandler(observer)
+	handler = publicProtocolHandler(handler, true)
 	gate, _ := delivery.NewRequestGate(2048, 32)
 	server := &http.Server{Addr: repo.cfg.Public.Listen, ConnContext: observer.ConnContext, ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 10 * time.Second, WriteTimeout: 30 * time.Second, IdleTimeout: 60 * time.Second, MaxHeaderBytes: 16 << 10}
 	// 要求枠へ入る前のHTTP/2 streamと受信windowも有界にする。
@@ -88,7 +90,7 @@ func (repo *Repository) publicHTTPServer(environment, build string) (*http.Serve
 		}
 		_, base, _ := repo.cfg.adminEndpoint()
 		// 管理要求もmTLSと実peerを検査してから利用者IPへ解決する。公開HTTPログは通さない。
-		adminRoutes := repo.cfg.edgeHandler(admin.Handler)
+		adminRoutes := repo.cfg.edgeHandler(publicProtocolHandler(admin.Handler, false))
 		public := server.Handler
 		server.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if r.URL.Path == base || strings.HasPrefix(r.URL.Path, base+"/") {
@@ -101,6 +103,17 @@ func (repo *Repository) publicHTTPServer(environment, build string) (*http.Serve
 	}
 	server.Handler = securityTransportHeaders(server.Handler)
 	return server, nil
+}
+
+// publicProtocolHandler は公開待受のHTTP/1を拒否し、正規の専ブラURLだけを例外にする。
+// 管理マウント配下では専ブラに似たパスも例外にしない。
+func publicProtocolHandler(next http.Handler, legacy bool) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !(legacy && canonicalRequestPath(r) && compat.LegacyClientPath(r.URL.Path)) && !compat.RequireModernHTTP(w, r) {
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
 }
 
 // DeliveryStatus は公開/管理共通の送信枠を、主体を含まない集計で返す。

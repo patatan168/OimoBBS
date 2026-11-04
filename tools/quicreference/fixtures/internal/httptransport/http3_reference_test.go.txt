@@ -1,0 +1,64 @@
+// HTTP/3の実UDP応答、TCPとの共用、待受失敗時の継続を検査する。
+package httptransport
+
+import (
+	"context"
+	"crypto/tls"
+	"io"
+	"net"
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"testing"
+	"time"
+
+	"github.com/quic-go/quic-go/http3"
+)
+
+func TestHTTP3RealUDPAndFallback(t *testing.T) {
+	testhttp3realudpandfallback(t, Prepare)
+}
+func testhttp3realudpandfallback(t *testing.T, prepare func(*http.Server, net.Addr, string, bool, int, int) (*HTTP3, string, error)) {
+	tcp := httptest.NewUnstartedServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { io.WriteString(w, r.Proto) }))
+	tcp.EnableHTTP2 = true
+	// 証明書は試験サーバーと共通にし、TCP起動前にUDPを確保する。
+	certServer := httptest.NewTLSServer(nil)
+	defer certServer.Close()
+	tcp.TLS = certServer.TLS.Clone()
+	tcp.TLS.NextProtos = []string{"h2", "http/1.1"}
+	tcp.Config.TLSConfig = tcp.TLS
+	h3, reason, err := prepare(tcp.Config, tcp.Listener.Addr(), "https://"+tcp.Listener.Addr().String(), true, 16, 4)
+	if err != nil || h3 == nil {
+		t.Fatalf("prepare: %s %v", reason, err)
+	}
+	defer h3.Close()
+	go h3.Serve()
+	tcp.StartTLS()
+	defer tcp.Close()
+	tr := &http3.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}}
+	defer tr.Close()
+	client := &http.Client{Transport: tr, Timeout: 5 * time.Second}
+	res, err := client.Get(tcp.URL)
+	if err != nil {
+		t.Fatal(err)
+	}
+	body, err := io.ReadAll(res.Body)
+	res.Body.Close()
+	if err != nil || res.ProtoMajor != 3 || string(body) != "HTTP/3.0" {
+		t.Fatalf("HTTP/3: %s %s %v", res.Proto, body, err)
+	}
+	res, err = tcp.Client().Get(tcp.URL)
+	if err != nil {
+		t.Fatal(err)
+	}
+	res.Body.Close()
+	if res.ProtoMajor != 2 || !strings.Contains(res.Header.Get("Alt-Svc"), `h3=":`) {
+		t.Fatalf("TCP fallback: %s %v", res.Proto, res.Header)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	tr.Close()
+	if err := h3.Shutdown(ctx); err != nil {
+		t.Fatal(err)
+	}
+}

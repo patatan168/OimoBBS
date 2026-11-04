@@ -9,7 +9,6 @@ import (
 	"html"
 	"io"
 	"net/http"
-	"net/http/httptest"
 	"net/url"
 	"oimobbs/internal/disclosure"
 	"path/filepath"
@@ -303,7 +302,7 @@ func TestAdminPostsPermissionsAndPublicSeparation(t *testing.T) {
 	if e != nil {
 		t.Fatal(e)
 	}
-	server := httptest.NewServer(public.Handler)
+	server := modernHTTPTestServer(t, public)
 	defer server.Close()
 	req, _ := http.NewRequest("GET", server.URL+base+"/1", nil)
 	req.Host = "127.0.0.1:9080"

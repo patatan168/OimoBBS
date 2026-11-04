@@ -101,6 +101,10 @@ func (r *Repository) AdminHTTPServer() (*http.Server, error) {
 			handler.ServeHTTP(mounted, cloned)
 		})
 	}
+	// public_pathの世代制限は公開サーバーへのマウント時に適用する。
+	if r.cfg.Admin.Transport == "direct_https" {
+		routes = publicProtocolHandler(routes, false)
+	}
 	bounded := r.trafficHandler(r.egress.Wrap(gate.Wrap(r.wafHandler(withAdminTiming(routes)))), true)
 	bounded = r.wafIngressHandler(bounded, origin, wafAdminBodyLimit)
 	server.Handler = http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {

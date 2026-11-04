@@ -1,0 +1,6 @@
+// 比較専用の既存backendはネイティブ実装の内部統計を持たない。
+package reference
+
+import "oimobbs/internal/quicv1"
+
+func (h *HTTP3) NativeStats() *quicv1.Stats { return nil }

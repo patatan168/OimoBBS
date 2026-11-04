@@ -29,6 +29,7 @@ func TestPublicEdgePreservesAcceptEncoding(t *testing.T) {
 				t.Fatal(err)
 			}
 			request := httptest.NewRequest("GET", "https://bbs.example/", nil)
+			request.Proto, request.ProtoMajor, request.ProtoMinor = "HTTP/2.0", 2, 0
 			request.RemoteAddr = "192.0.2.10:12345"
 			request = request.WithContext(context.WithValue(request.Context(), http.LocalAddrContextKey, &net.TCPAddr{IP: net.ParseIP("198.51.100.1"), Port: 8443}))
 			for _, value := range values {
@@ -41,6 +42,7 @@ func TestPublicEdgePreservesAcceptEncoding(t *testing.T) {
 			}
 			called = false
 			request = httptest.NewRequest("GET", "https://bbs.example/_edge/health", nil)
+			request.Proto, request.ProtoMajor, request.ProtoMinor = "HTTP/2.0", 2, 0
 			response = httptest.NewRecorder()
 			handler.ServeHTTP(response, request)
 			if called || response.Code != 200 || response.Body.Len() != 0 {

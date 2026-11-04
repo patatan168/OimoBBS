@@ -63,6 +63,9 @@ func TestEdgeHealthcheckUsesPublicOrigin(t *testing.T) {
 	}
 	var served atomic.Uint32
 	front := httptest.NewUnstartedServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.ProtoMajor != 2 {
+			t.Error("edge healthcheck did not negotiate HTTP/2", r.Proto)
+		}
 		if r.Header.Get("Accept-Encoding") != "gzip" {
 			w.WriteHeader(http.StatusNotAcceptable)
 			return
@@ -82,6 +85,7 @@ func TestEdgeHealthcheckUsesPublicOrigin(t *testing.T) {
 		}
 	}))
 	front.TLS = &tls.Config{Certificates: []tls.Certificate{pair}, MinVersion: tls.VersionTLS12}
+	front.EnableHTTP2 = true
 	front.StartTLS()
 	defer front.Close()
 	cfg.Public.BaseURL = front.URL

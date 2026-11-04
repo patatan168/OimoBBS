@@ -1,0 +1,18 @@
+// 製品依存と分離したHTTP/3 clientで、同じ投稿・圧縮・再起動の試験本体を実行する。
+package bootstrap
+
+import (
+	"crypto/tls"
+	"net/http/httptest"
+	"testing"
+
+	"github.com/quic-go/quic-go/http3"
+)
+
+func TestSiteWebHTTP3BoardsAndIsolation(t *testing.T) {
+	testSiteWebBoardsAndIsolation(t, 3, func(server *httptest.Server) func() {
+		transport := &http3.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}}
+		server.Client().Transport = transport
+		return func() { _ = transport.Close() }
+	})
+}

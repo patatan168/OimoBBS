@@ -240,6 +240,7 @@ var auditLabels = map[string]string{
 	"network_fetch_failed":              "回線分類データの取得に失敗",
 	"network_refresh":                   "回線分類データを更新",
 	"posting_policies_enable":           "共通の投稿制限を有効化",
+	"http3_enable":                      "保存形式を更新：HTTP/3接続観測",
 	"content_rate_enable":               "保存形式を更新：同一内容の投稿制限",
 	"reports_interval_enable":           "保存形式を更新：削除依頼の送信間隔制限",
 	"report_update":                     "削除依頼・問い合わせの対応内容を更新",

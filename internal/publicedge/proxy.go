@@ -19,11 +19,16 @@ import (
 	"sync"
 	"time"
 
+	"oimobbs/internal/compat"
 	"oimobbs/internal/delivery"
+	"oimobbs/internal/httptransport"
 )
 
 // Config は公開origin、固定転送先、mTLS client鍵と公開TLS鍵だけを持つ。
-type Config struct{ Listen, Origin, Upstream, ClientCert, ClientKey, ServerCert, ServerKey, AdminPath string }
+type Config struct {
+	Listen, Origin, Upstream, ClientCert, ClientKey, ServerCert, ServerKey, AdminPath string
+	HTTP3                                                                             bool
+}
 
 // Handler は利用者endpointを実socketから生成し、申告headerを除去して転送する。
 // transportは通常の証明書検証とmTLSを備える。任意の転送先は要求から選択しない。
@@ -82,6 +87,10 @@ func handler(origin string, upstream *url.URL, transport http.RoundTripper, admi
 			http.Error(w, "要求を確認してください。", 400)
 			return
 		}
+		admin := adminPath != "" && (r.URL.Path == adminPath || strings.HasPrefix(r.URL.Path, adminPath+"/"))
+		if (admin || !compat.LegacyClientPath(r.URL.Path)) && !compat.RequireModernHTTP(w, r) {
+			return
+		}
 		if r.URL.Path == "/_edge/health" && r.Method == "GET" {
 			w.WriteHeader(200)
 			return
@@ -91,7 +100,6 @@ func handler(origin string, upstream *url.URL, transport http.RoundTripper, admi
 			http.NotFound(w, r)
 			return
 		}
-		admin := adminPath != "" && (r.URL.Path == adminPath || strings.HasPrefix(r.URL.Path, adminPath+"/"))
 		if r.Method != "GET" && r.Method != "HEAD" && r.Method != "POST" && !(admin && r.Method == "PATCH") {
 			allow := "GET, HEAD, POST"
 			if admin {
@@ -217,7 +225,7 @@ func Serve(ctx context.Context, c Config) error {
 	if err != nil {
 		return err
 	}
-	transport := &http.Transport{Proxy: nil, DisableCompression: true, MaxConnsPerHost: 64, MaxIdleConns: 64, MaxIdleConnsPerHost: 64, IdleConnTimeout: 30 * time.Second, TLSHandshakeTimeout: 5 * time.Second, ResponseHeaderTimeout: 10 * time.Second, TLSClientConfig: &tls.Config{MinVersion: tls.VersionTLS12, ServerName: base.Hostname(), Certificates: []tls.Certificate{client}}, DialContext: (&net.Dialer{Timeout: 5 * time.Second}).DialContext}
+	transport := upstreamTransport(base.Hostname(), client)
 	defer transport.CloseIdleConnections()
 	handler, err := handler(c.Origin, upstream, transport, c.AdminPath)
 	if err != nil {
@@ -243,20 +251,44 @@ func Serve(ctx context.Context, c Config) error {
 		return err
 	}
 	defer listener.Close()
+	h3, reason, err := httptransport.Prepare(server, listener.Addr(), c.Origin, c.HTTP3, 256, 16)
+	if err != nil {
+		return err
+	}
+	log.Printf("HTTP/3: %s", reason)
+	if h3 != nil {
+		defer h3.Close()
+		go func() {
+			if err := h3.Serve(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+				_ = h3.Close()
+				log.Printf("HTTP/3 stopped; HTTP/2 continues: %v", err)
+			}
+		}()
+	}
 	done := make(chan struct{})
+	stopped := make(chan error, 1)
 	defer close(done)
 	go func() {
 		select {
 		case <-ctx.Done():
 			stop, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 			defer cancel()
-			server.Shutdown(stop)
+			stopped <- httptransport.Shutdown(stop, server, h3)
 		case <-done:
 		}
 	}()
 	err = server.ServeTLS(listener, "", "")
 	if errors.Is(err, http.ErrServerClosed) {
+		if ctx.Err() != nil {
+			return <-stopped
+		}
 		return nil
 	}
 	return err
+}
+
+// upstreamTransport は固定保存先へのmTLSを維持し、HTTP/2をALPNで試行する。
+// HTTP/2非対応の保存先では標準TransportがHTTP/1.1へ戻る。
+func upstreamTransport(serverName string, client tls.Certificate) *http.Transport {
+	return &http.Transport{ForceAttemptHTTP2: true, Proxy: nil, DisableCompression: true, MaxConnsPerHost: 64, MaxIdleConns: 64, MaxIdleConnsPerHost: 64, IdleConnTimeout: 30 * time.Second, TLSHandshakeTimeout: 5 * time.Second, ResponseHeaderTimeout: 10 * time.Second, TLSClientConfig: &tls.Config{MinVersion: tls.VersionTLS12, ServerName: serverName, Certificates: []tls.Certificate{client}}, DialContext: (&net.Dialer{Timeout: 5 * time.Second}).DialContext}
 }

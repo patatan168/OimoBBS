@@ -91,6 +91,7 @@ type connectionObservation struct {
 	owner       *HTTPObserver
 	id          domain.ID
 	peer, local Endpoint
+	transport   string
 	err         error
 }
 type connectionContextKey struct{}
@@ -106,10 +107,14 @@ func NewHTTPObserver(site, instance domain.ID, build string) (*HTTPObserver, err
 // ConnContext は実接続からendpointを固定する。既存のConnContextがある場合は呼出元で合成する。
 func (o *HTTPObserver) ConnContext(ctx context.Context, conn net.Conn) context.Context {
 	c := connectionObservation{owner: o, id: domain.NewID()}
-	if conn == nil {
+	if conn == nil || conn.RemoteAddr() == nil || conn.LocalAddr() == nil {
 		c.err = ErrHTTPObservation
 	} else {
+		c.transport = conn.RemoteAddr().Network()
 		c.peer, c.err = socketEndpoint(conn.RemoteAddr())
+		if c.err == nil && conn.LocalAddr().Network() != c.transport {
+			c.err = ErrHTTPObservation
+		}
 		if c.err == nil {
 			c.local, c.err = socketEndpoint(conn.LocalAddr())
 		}
@@ -158,7 +163,7 @@ func (o *HTTPObserver) begin(r *http.Request, board domain.ID, route, host strin
 	if state, ok := r.Context().Value(optionalHTTPContextKey{}).(*optionalHTTPContext); ok && state.observer == o {
 		start, requestID = state.start, state.request
 	}
-	v := HTTPObservation{Schema: "http-observation-v4", SiteID: o.site, InstanceID: o.instance, BoardID: board, BootID: o.boot, ConnectionID: c.id, RequestID: requestID, Received: domain.Time(start.UnixNano()), Peer: c.peer, Local: c.local, Transport: "tcp", HTTPVersion: r.Proto, Resolved: c.peer, ClientSource: "direct", VerifiedProxyChain: []Endpoint{}, Method: r.Method, Route: route, CanonicalHost: host, SelectedHeaders: headers, ReportedHeaders: reported, HeaderCaptureStatus: "captured", ParsedHeaderBytes: domain.U64(size), ServerBuildID: o.build}
+	v := HTTPObservation{Schema: "http-observation-v4", SiteID: o.site, InstanceID: o.instance, BoardID: board, BootID: o.boot, ConnectionID: c.id, RequestID: requestID, Received: domain.Time(start.UnixNano()), Peer: c.peer, Local: c.local, Transport: c.transport, HTTPVersion: r.Proto, Resolved: c.peer, ClientSource: "direct", VerifiedProxyChain: []Endpoint{}, Method: r.Method, Route: route, CanonicalHost: host, SelectedHeaders: headers, ReportedHeaders: reported, HeaderCaptureStatus: "captured", ParsedHeaderBytes: domain.U64(size), ServerBuildID: o.build}
 	if r.TLS != nil {
 		version, cipher := r.TLS.Version, r.TLS.CipherSuite
 		v.TLSVersion = &version

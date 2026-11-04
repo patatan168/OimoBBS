@@ -1,0 +1,152 @@
+// 確定本文の集約でも、小さい受信窓・途中Flush・handler contextの寿命を保つことを実通信で検証する。
+package http3native
+
+import (
+	"bytes"
+	"crypto/tls"
+	"errors"
+	"io"
+	"net/http"
+	"strconv"
+	"sync"
+	"testing"
+	"time"
+
+	quic "github.com/quic-go/quic-go"
+	external "github.com/quic-go/quic-go/http3"
+	"oimobbs/internal/delivery"
+)
+
+func TestPreparedBodyThroughDeliveryWithSmallCredit(t *testing.T) {
+	body := bytes.Repeat([]byte("body"), 16384)
+	scheduler, err := delivery.New(delivery.MaxBudgetBits)
+	if err != nil {
+		t.Fatal(err)
+	}
+	server, origin := nativeServer(t, scheduler.Wrap(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Length", strconv.Itoa(len(body)))
+		writer := w.(interface {
+			WriteResponse(int, []byte) (int, error)
+		})
+		if _, err := writer.WriteResponse(200, body); err != nil {
+			t.Error(err)
+		}
+	})))
+	transport := &external.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, QUICConfig: &quic.Config{InitialStreamReceiveWindow: 1024, MaxStreamReceiveWindow: 1024, InitialConnectionReceiveWindow: 4096, MaxConnectionReceiveWindow: 4096}}
+	defer transport.Close()
+	client := &http.Client{Transport: transport, Timeout: 5 * time.Second}
+	for range 3 {
+		response, err := client.Get(origin)
+		if err != nil {
+			t.Fatal(err)
+		}
+		got, err := io.ReadAll(response.Body)
+		response.Body.Close()
+		if err != nil || !bytes.Equal(got, body) {
+			t.Fatalf("prepared body=%d error=%v", len(got), err)
+		}
+	}
+	if server.listener.Stats().PreparedWrites != 3 {
+		t.Fatal("actual delivery did not use prepared writes")
+	}
+}
+
+func TestPreparedBodyFlushKeepsFrameAndContext(t *testing.T) {
+	body := bytes.Repeat([]byte("body"), 16384)
+	release := make(chan struct{})
+	var once sync.Once
+	unblock := func() { once.Do(func() { close(release) }) }
+	defer unblock()
+	_, origin := nativeServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Length", strconv.Itoa(len(body)))
+		w.(*responseWriter).PrepareBody(len(body))
+		if _, err := w.Write(body[:16<<10]); err != nil {
+			t.Error(err)
+			return
+		}
+		if err := http.NewResponseController(w).Flush(); err != nil {
+			t.Error(err)
+			return
+		}
+		select {
+		case <-release:
+		case <-r.Context().Done():
+			t.Error("request context ended before handler completion")
+			return
+		}
+		if _, err := w.Write(body[16<<10:]); err != nil {
+			t.Error(err)
+		}
+	}))
+	transport := &external.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}}
+	defer transport.Close()
+	client := &http.Client{Transport: transport, Timeout: 5 * time.Second}
+	response, err := client.Get(origin)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer response.Body.Close()
+	first := make([]byte, 16<<10)
+	if _, err = io.ReadFull(response.Body, first); err != nil || !bytes.Equal(first, body[:16<<10]) {
+		t.Fatalf("Flush did not deliver the prefix: %v", err)
+	}
+	unblock()
+	rest, err := io.ReadAll(response.Body)
+	if err != nil || !bytes.Equal(rest, body[16<<10:]) {
+		t.Fatalf("data frame after Flush: %d %v", len(rest), err)
+	}
+}
+
+// 検査付き応答は集約せず、最初の送信片の後に失効した本文を追加しない。
+func TestPreparedBodyDoesNotMergePermissionChecks(t *testing.T) {
+	body := bytes.Repeat([]byte("private"), 8192)
+	scheduler, err := delivery.New(delivery.MaxBudgetBits)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer scheduler.Close()
+	gone := errors.New("revoked permission")
+	type outcome struct {
+		n   int
+		err error
+	}
+	done := make(chan outcome, 1)
+	server, origin := nativeServer(t, scheduler.Wrap(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Length", strconv.Itoa(len(body)))
+		calls := 0
+		check := func() error {
+			calls++
+			if calls > 2 {
+				return gone
+			}
+			return nil
+		}
+		writer := w.(interface {
+			WriteResponseChecked(int, []byte, func() error) (int, error)
+		})
+		n, err := writer.WriteResponseChecked(200, body, check)
+		done <- outcome{n, err}
+	})))
+	transport := &external.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}}
+	defer transport.Close()
+	client := &http.Client{Transport: transport, Timeout: 5 * time.Second}
+	response, err := client.Get(origin)
+	if err == nil {
+		got, readErr := io.ReadAll(response.Body)
+		response.Body.Close()
+		if readErr == nil || len(got) >= len(body) {
+			t.Fatal("revoked response completed")
+		}
+	}
+	select {
+	case result := <-done:
+		if !errors.Is(result.err, gone) || result.n >= delivery.Chunk {
+			t.Fatalf("permission boundary lost: %d %v", result.n, result.err)
+		}
+	case <-time.After(5 * time.Second):
+		t.Fatal("handler did not finish")
+	}
+	if server.listener.Stats().PreparedWrites != 0 {
+		t.Fatal("permission-checked body was merged")
+	}
+}

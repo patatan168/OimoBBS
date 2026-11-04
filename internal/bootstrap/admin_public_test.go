@@ -65,9 +65,10 @@ func TestPublicAdminHTTPS(t *testing.T) {
 	}
 	s := httptest.NewUnstartedServer(server.Handler)
 	s.TLS = server.TLSConfig.Clone()
+	s.EnableHTTP2 = true
 	s.StartTLS()
 	defer s.Close()
-	s.Client().Transport = &http.Transport{TLSClientConfig: &tls.Config{RootCAs: roots, ServerName: "localhost", MinVersion: tls.VersionTLS12}}
+	s.Client().Transport = &http.Transport{ForceAttemptHTTP2: true, TLSClientConfig: &tls.Config{RootCAs: roots, ServerName: "localhost", MinVersion: tls.VersionTLS12}}
 	defer s.Client().CloseIdleConnections()
 	s.Client().CheckRedirect = func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }
 	client := &adminClient{t, s, map[string]*http.Cookie{}, repo.cfg.Admin.Origin}
@@ -121,7 +122,7 @@ func TestPublicAdminHTTPS(t *testing.T) {
 		host   string
 		status int
 	}{{true, "localhost:9444", 200}, {false, "localhost:9444", 403}, {true, "other.invalid:9444", 403}} {
-		req := webReadTestRequest("GET", "https://"+tc.host+"/login", nil)
+		req := modernWebReadTestRequest("GET", "https://"+tc.host+"/login", nil)
 		req.RemoteAddr = "198.51.100.8:12345"
 		if !tc.tls {
 			req.TLS = nil

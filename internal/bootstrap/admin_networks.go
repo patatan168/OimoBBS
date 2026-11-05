@@ -106,6 +106,12 @@ func (r *Repository) changeNetworks(s adminauth.Session, config NetworkConfig, e
 	if config.DNSMode == "" {
 		config.DNSMode = next.Config.DNSMode
 	}
+	previousSchedule := next.Config.Schedule
+	if config.Enabled && !next.Config.Enabled {
+		// 停止中の未実行分を再開時に取得せず、次の指定日時から始める。
+		previousSchedule = nil
+	}
+	config.Schedule = savedNetworkSchedule(config.Schedule, previousSchedule, now)
 	next.Version++
 	next.Config = config
 	receipt := networkReceipt{Type: "network_change", ID: domain.NewID(), Admin: s.Admin, Key: requestKey, Request: request, Version: next.Version, Created: now, Expires: now + 86400e9}

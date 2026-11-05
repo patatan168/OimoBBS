@@ -84,14 +84,8 @@ func (r *Repository) refreshNetworks(ctx context.Context, force bool) error {
 		return nil
 	}
 	now := time.Now()
-	if !force && old.AttemptVersion == old.Version && old.LastAttempt != 0 {
-		interval := time.Duration(old.Config.IntervalHours) * time.Hour
-		if old.Error != "" {
-			interval = time.Hour
-		}
-		if now.UnixNano() < int64(old.LastAttempt) || now.Sub(time.Unix(0, int64(old.LastAttempt))) < interval {
-			return nil
-		}
+	if !force && now.Before(nextNetworkUpdate(old, now)) {
+		return nil
 	}
 	if e := ctx.Err(); e != nil {
 		return e
@@ -186,6 +180,9 @@ func (r *Repository) publishNetworks(next networkState, extra []store.Mutation, 
 		return e
 	}
 	site.MinimumReader = max(site.MinimumReader, 70)
+	if next.Config.Schedule != nil {
+		site.MinimumReader = max(site.MinimumReader, networkScheduleReader)
+	}
 	if networkRequiresZstdReader(next) {
 		site.MinimumReader = max(site.MinimumReader, networkZstdReader)
 	}

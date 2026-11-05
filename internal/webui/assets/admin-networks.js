@@ -40,5 +40,21 @@ async function watchNetworkUpdate(element) {
 for (const form of document.querySelectorAll("[data-network-source-form]")) enhanceNetworkSource(form);
 for (const status of document.querySelectorAll("[data-network-poll]")) watchNetworkUpdate(status);
 
-
+/** 更新方式に必要な入力だけを表示・送信し、非表示の入力エラーで保存を妨げない。 */
+function enhanceNetworkSchedule(form) {
+  const mode = form.querySelector("[data-network-schedule-mode]");
+  if (!mode) return;
+  function render() {
+    for (const field of form.querySelectorAll("[data-network-schedule-field]")) {
+      const kind = field.dataset.networkScheduleField;
+      const active = kind === "time" ? mode.value !== "interval" : mode.value === kind;
+      field.hidden = !active;
+      for (const input of field.querySelectorAll('input,select')) input.disabled = !active;
+      for (const input of field.querySelectorAll('input[type="number"],input[type="time"]')) input.required = active;
+    }
+  }
+  mode.addEventListener("change", render);
+  render();
+}
+for (const form of document.querySelectorAll("[data-network-schedule-form]")) enhanceNetworkSchedule(form);
 })();

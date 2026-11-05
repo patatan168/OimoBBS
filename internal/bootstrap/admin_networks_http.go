@@ -3,6 +3,7 @@ package bootstrap
 
 import (
 	"bytes"
+	"encoding/json"
 	"io"
 	"mime"
 	"net/http"
@@ -16,6 +17,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type networkProbe struct {
@@ -28,6 +30,7 @@ type networkProbe struct {
 	Origin          string                `json:"origin"`
 }
 type networkView struct {
+	NextUpdate     string        `json:"next_update"`
 	CountryCount   int           `json:"country_count"`
 	JapanCount     int           `json:"japan_count"`
 	VPN4Count      int           `json:"vpn4_count"`
@@ -82,6 +85,9 @@ func (r *Repository) networkView() (networkView, error) {
 		vpn6 = len(v.AccessData.VPN6)
 	}
 	view := networkView{CountryCount: countryCount, JapanCount: japan, VPN4Count: vpn4, VPN6Count: vpn6, Config: v.Config, Revision: state.Rows["network:active"].Revision, Version: v.Version, Count: len(v.Rows), LastAttempt: networkTime(int64(v.LastAttempt)), LastSuccess: networkTime(int64(v.LastSuccess)), Error: v.Error, Running: r.networkRunning.Load(), AppliedVersion: v.AppliedVersion, Attempt: v.LastAttempt}
+	if next := nextNetworkUpdate(v, time.Now()); !next.IsZero() {
+		view.NextUpdate = next.Format(time.RFC3339)
+	}
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	if e := r.available(); e != nil {
@@ -100,6 +106,10 @@ func (v networkView) copyForResponse(running bool) networkView {
 	v.Config.Categories = slices.Clone(v.Config.Categories)
 	v.Config.Sources = slices.Clone(v.Config.Sources)
 	v.Config.Overrides = slices.Clone(v.Config.Overrides)
+	if v.Config.Schedule != nil {
+		schedule := *v.Config.Schedule
+		v.Config.Schedule = &schedule
+	}
 	return v
 }
 
@@ -201,10 +211,10 @@ func (h *adminHandler) networksRoutes(w http.ResponseWriter, r *http.Request, s 
 	}
 	message := "設定を保存しました。手動の上書きは自動更新後も維持します。"
 	if action == "standard_setup" {
-		message = "無料の標準取得元を設定しました。取得が完了すると分類表が使われ、以後24時間ごとに自動更新します。"
+		message = "無料の標準取得元を設定しました。更新予定に従って分類データを取得します。"
 	}
 	if action == "domestic_setup" {
-		message = "未登録の標準取得元を追加し、取得を開始します。更新時に標準分類の見直しを反映します。手動上書き・更新間隔は維持します。"
+		message = "未登録の標準取得元を追加しました。更新予定に従って分類を反映します。手動上書き・更新設定は維持します。"
 	}
 	if action == "category_delete" {
 		message = "カテゴリーを削除しました。保存済みの回線割り当てと過去の投稿表示は保持しています。"
@@ -212,7 +222,7 @@ func (h *adminHandler) networksRoutes(w http.ResponseWriter, r *http.Request, s 
 	if duplicate {
 		message = "保存済みの操作を確認しました。"
 	}
-	h.networkPage(w, 200, s, message, nil, config.Enabled, nil, view.Attempt)
+	h.networkPage(w, 200, s, message, nil, config.Enabled && config.Schedule == nil, nil, view.Attempt)
 }
 
 func (h *adminHandler) networkAPI(w http.ResponseWriter, r *http.Request, s adminauth.Session, path string) {
@@ -287,6 +297,17 @@ func (h *adminHandler) networkAPI(w http.ResponseWriter, r *http.Request, s admi
 	if strictjson.Decode(raw, &config) != nil {
 		h.fail(w, r, 400, "INVALID_JSON")
 		return
+	}
+	var configFields map[string]json.RawMessage
+	if json.Unmarshal(raw, &configFields) == nil {
+		if _, supplied := configFields["schedule"]; !supplied {
+			current, err := h.repo.networkView()
+			if err != nil {
+				h.failure(w, r, err)
+				return
+			}
+			config.Schedule = current.Config.Schedule
+		}
 	}
 	key, _, e := singleRequestHeader(r.Header, "Idempotency-Key")
 	if e != nil {
@@ -367,6 +388,16 @@ func readNetworkForm(w http.ResponseWriter, r *http.Request) (url.Values, error)
 		}
 		more = legacy
 	}
+	if fields.Get("action") == "settings" {
+		if fields.Has("schedule_mode") && fields.Get("schedule_mode") != "interval" && !fields.Has("interval_hours") {
+			more = []string{"enabled"}
+		}
+		for _, name := range []string{"schedule_mode", "schedule_time", "schedule_weekday", "schedule_day"} {
+			if fields.Has(name) {
+				more = append(more, name)
+			}
+		}
+	}
 	if fields.Get("action") == "settings" && fields.Has("dns_mode") {
 		more = append(more, "dns_mode")
 	}
@@ -412,15 +443,24 @@ func networkFormConfig(config NetworkConfig, fields url.Values) (NetworkConfig, 
 		if e != nil {
 			return config, e
 		}
-		hours, e := strconv.ParseUint(fields.Get("interval_hours"), 10, 32)
-		if e != nil {
-			return config, e
+		if !fields.Has("schedule_mode") || fields.Get("schedule_mode") == "interval" {
+			hours, e := strconv.ParseUint(fields.Get("interval_hours"), 10, 32)
+			if e != nil {
+				return config, e
+			}
+			config.IntervalHours = uint32(hours)
 		}
 		if fields.Has("dns_mode") {
 			config.DNSMode = fields.Get("dns_mode")
 		}
+		if fields.Has("schedule_mode") {
+			schedule, err := networkFormSchedule(fields)
+			if err != nil {
+				return config, err
+			}
+			config.Schedule = schedule
+		}
 		config.Enabled = enabled
-		config.IntervalHours = uint32(hours)
 		return config, config.validate()
 	}
 	index, e := strconv.Atoi(fields.Get("index"))

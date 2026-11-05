@@ -123,7 +123,7 @@ mise exec -- go test ./internal/bootstrap -run 'TestAdmin(PostActionsBrowser|Rea
 
 ### 国内回線の初回取得と管理UI
 
-通常更新での標準分類の反映、手動上書きの保持、停止中・更新間隔前の動作、取得失敗時の旧表保持、並列数・厳密な圧縮表を、外部接続なしで検査します。
+通常更新での標準分類の反映、手動上書きの保持、停止中・更新予定前の動作、取得失敗時の旧表保持、並列数・厳密な圧縮表を、外部接続なしで検査します。毎日・毎週・毎月の日本時間での予定、月末・うるう年・年越し、旧設定の読込、保存・再起動後の保持、reader108の境界も検査します。日時の境界検査は時計待ちなしで行います。
 
 ```sh
 mise exec -- go test -race ./internal/bootstrap ./cmd/oimobbs -run 'Test(Network|DomesticNetwork|MixedNetwork|ServiceNetwork|SpecialNetwork|ValidationServerLifecycle)' -count=1
@@ -138,10 +138,10 @@ OIMO_NETWORK_LIVE=1 mise exec -- go test ./internal/bootstrap -run '^TestNetwork
 画面の確認は、[ブラウザー検査の準備](README.md#ブラウザー検査の準備)に従い、`OIMO_BROWSER_NODE`・`OIMO_PLAYWRIGHT`・`OIMO_CHROMIUM`を設定して実行します。Go試験が新しい隔離サイトと管理HTTPサーバーを用意します。
 
 ```sh
-mise exec -- go test ./internal/bootstrap -run '^TestNetworkCatalogueBrowser$' -count=1 -v -timeout=3m
+mise exec -- go test ./internal/bootstrap -run '^TestNetworkCatalogueBrowser$' -count=1 -v -timeout=5m
 ```
 
-実際にログインし、390/1280pxで「今すぐ更新」から取得・自動再表示・保存結果までを確認します。既存の標準取得元追加、手動上書きの保持、画面の警告・HTTPエラー・JavaScript例外がないことも検査します。通常は架空の取得データを使い、`OIMO_NETWORK_LIVE=1`を付けると公開データを実取得します。`OIMO_NETWORK_BROWSER_OUTPUT`を指定すると画面と`result.json`を保存します。
+実際にログインし、390/1280px・明暗の表示で毎日04:00・毎週月曜04:00・毎月31日/月末04:00を保存し、次回予定・不要な即時取得がないこと・再表示後の選択値を確認します。「今すぐ更新」から取得・自動再表示・保存結果までを確認し、予定と手動上書きの保持、標準取得元追加、JavaScript無効時の保存も検査します。画面の警告・HTTPエラー・JavaScript例外と横スクロールがないことを確認します。通常は架空の取得データを使い、`OIMO_NETWORK_LIVE=1`を付けると公開データを実取得します。`OIMO_NETWORK_BROWSER_OUTPUT`を指定すると画面と`result.json`を保存します。
 
 分類の根拠と実行結果は[標準カタログの見直しと検証](network-catalogue-review.md)を参照してください。本番の設定や動作を確認する試験ではありません。
 

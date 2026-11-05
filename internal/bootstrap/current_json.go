@@ -48,7 +48,7 @@ func (v NetworkConfig) MarshalJSON() ([]byte, error) {
 func (v *NetworkConfig) UnmarshalJSON(raw []byte) error {
 	type plain NetworkConfig
 	var next plain
-	if err := strictjson.Decode(raw, &next); err != nil {
+	if err := strictjson.Decode(withLegacyNetworkSchedule(raw), &next); err != nil {
 		return err
 	}
 	if len(next.AccessOverrides) == 0 {

@@ -32,6 +32,7 @@ type NetworkSource struct {
 
 // NetworkConfig は共通自動表の設定。Overridesは更新で消さない運営の修正。
 type NetworkConfig struct {
+	Schedule        *NetworkSchedule          `json:"schedule,omitempty"`
 	DNSMode         string                    `json:"dns_mode"`
 	AccessOverrides []identity.AccessOverride `json:"access_overrides"`
 	Categories      []NetworkCategory         `json:"categories"`
@@ -59,7 +60,7 @@ func defaultNetworkConfig() NetworkConfig {
 
 // validate は秘密付きURLや重複取得元、不正な回線表示を保存前に拒否する。
 func (v NetworkConfig) validate() error {
-	if (v.DNSMode != "" && v.DNSMode != "system" && v.DNSMode != "google_https") || identity.ValidateAccessOverrides(v.AccessOverrides) != nil || validateNetworkCategories(v.Categories) != nil || v.IntervalHours < 1 || v.IntervalHours > 168 || v.Sources == nil || len(v.Sources) > networkSourceLimit || v.Overrides == nil || identity.ValidateNetworks(v.Overrides) != nil || v.Enabled && len(v.Sources) == 0 {
+	if !validNetworkSchedule(v.Schedule) || (v.DNSMode != "" && v.DNSMode != "system" && v.DNSMode != "google_https") || identity.ValidateAccessOverrides(v.AccessOverrides) != nil || validateNetworkCategories(v.Categories) != nil || v.IntervalHours < 1 || v.IntervalHours > 168 || v.Sources == nil || len(v.Sources) > networkSourceLimit || v.Overrides == nil || identity.ValidateNetworks(v.Overrides) != nil || v.Enabled && len(v.Sources) == 0 {
 		return store.ErrCorrupt
 	}
 	seen := map[string]bool{}
@@ -103,6 +104,9 @@ func validNetworkURL(raw string) bool {
 }
 
 func (v networkState) validate() error {
+	if v.Config.Schedule != nil && v.Config.Schedule.StartsAt <= 0 {
+		return store.ErrCorrupt
+	}
 	if v.Version == 0 || v.Config.validate() != nil || v.Rows == nil || v.LastAttempt < 0 || v.LastSuccess < 0 || v.LastSuccess > v.LastAttempt || v.AttemptVersion > v.Version || v.AppliedVersion > v.Version || (v.LastAttempt == 0) != (v.AttemptVersion == 0) || (v.LastSuccess == 0) != (v.AppliedVersion == 0) || (v.LastSuccess == 0) != (len(v.Rows) == 0 && v.AccessData == nil) || !slices.Contains([]string{"", "fetch_failed", "invalid_data"}, v.Error) {
 		return store.ErrCorrupt
 	}

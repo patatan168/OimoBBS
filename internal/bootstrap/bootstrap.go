@@ -544,6 +544,9 @@ func inspectSiteState(state store.ControlState, owner domain.ID, baseURL string)
 		if network.Config.DNSMode != "" && site.MinimumReader < 37 {
 			return siteState{}, store.ErrCorrupt
 		}
+		if network.Config.Schedule != nil && site.MinimumReader < networkScheduleReader {
+			return siteState{}, store.ErrCorrupt
+		}
 		if networkStateZstd(state.Rows["network:active"].Value, network) && site.MinimumReader < networkZstdReader {
 			return siteState{}, store.ErrCorrupt
 		}

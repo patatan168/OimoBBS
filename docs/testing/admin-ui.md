@@ -141,6 +141,8 @@ OIMO_NETWORK_LIVE=1 mise exec -- go test ./internal/bootstrap -run '^TestNetwork
 mise exec -- go test ./internal/bootstrap -run '^TestNetworkCatalogueBrowser$' -count=1 -v -timeout=5m
 ```
 
+管理画面に「逆引きできない接続元」を拒否する制限がある場合は、同じブラウザー設定で`TestNetworkSettingsAccessBrowser`を実行します。隔離したHTTPSサーバーと固定DNS応答を使い、OS標準DNSの旧設定を保存した直後のHTML・CSS/JS・次回の画面表示が403にならないことを確認します。`TestNetworkSettingsPreserveDNSAccess`は修正前に「設定は保存されるが応答だけ403」を再現し、修正後は保存・再表示の成功と、明示したIP拒否が引き続き403になることを検査します。外部DNSへの照会は行いません。
+
 実際にログインし、390/1280px・明暗の表示で毎日04:00・毎週月曜04:00・毎月31日/月末04:00を保存し、次回予定・不要な即時取得がないこと・再表示後の選択値を確認します。「今すぐ更新」から取得・自動再表示・保存結果までを確認し、予定と手動上書きの保持、標準取得元追加、JavaScript無効時の保存も検査します。画面の警告・HTTPエラー・JavaScript例外と横スクロールがないことを確認します。通常は架空の取得データを使い、`OIMO_NETWORK_LIVE=1`を付けると公開データを実取得します。`OIMO_NETWORK_BROWSER_OUTPUT`を指定すると画面と`result.json`を保存します。
 
 分類の根拠と実行結果は[標準カタログの見直しと検証](network-catalogue-review.md)を参照してください。本番の設定や動作を確認する試験ではありません。

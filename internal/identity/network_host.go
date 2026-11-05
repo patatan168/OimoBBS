@@ -279,9 +279,13 @@ func (c *HostCache) ConfigureDNS(mode string) {
 	if c == nil {
 		return
 	}
+	// 旧設定の空文字もOS標準DNS。同じ方式の保存で、接続許可に必要な確認結果を失わない。
+	if mode == "" {
+		mode = "system"
+	}
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	if c.closed || c.mode == mode {
+	if c.closed || c.mode == mode || c.mode == "" && mode == "system" {
 		return
 	}
 	if closer, ok := c.resolver.(interface{ CloseIdleConnections() }); ok {

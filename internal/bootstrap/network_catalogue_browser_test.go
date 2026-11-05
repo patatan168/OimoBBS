@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"net/netip"
 	"oimobbs/internal/identity"
 	"os"
 	"os/exec"
@@ -16,6 +17,17 @@ import (
 // TestNetworkCatalogueBrowser は正常な旧標準設定から更新・再描画・手動上書きの保持まで検査する。
 // OIMO_NETWORK_LIVE=1の場合、ブラウザーのボタンから公開データを実取得する。
 func TestNetworkCatalogueBrowser(t *testing.T) {
+	runNetworkCatalogueBrowser(t, false)
+}
+
+// TestNetworkSettingsAccessBrowser は逆引き必須の管理接続でも、日時設定の保存後に403にならないことを検査する。
+func TestNetworkSettingsAccessBrowser(t *testing.T) {
+	runNetworkCatalogueBrowser(t, true)
+}
+
+// runNetworkCatalogueBrowser は実HTTP経路の通常操作と、DNS確認を必要とするHTTPS接続を同じ操作で検査する。
+func runNetworkCatalogueBrowser(t *testing.T, restrictedDNS bool) {
+	t.Helper()
 	node := os.Getenv("OIMO_BROWSER_NODE")
 	if node == "" {
 		t.Skip("OIMO_BROWSER_NODE/OIMO_PLAYWRIGHT/OIMO_CHROMIUMでブラウザー検証を有効化")
@@ -42,16 +54,46 @@ func TestNetworkCatalogueBrowser(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	ip := netip.MustParseAddr("8.8.8.8")
+	if restrictedDNS {
+		repo.networkHosts.Close()
+		repo.networkHosts = identity.NewHostCache(&settingsAccessResolver{ip: ip})
+		repo.networkHosts.Resolve(t.Context(), ip)
+		classifier := *repo.liveNetworks.Load()
+		classifier.Services = repo.networkHosts
+		repo.liveNetworks.Store(&classifier)
+		policy := defaultReadingPolicy()
+		policy.Enabled = true
+		policy.Network.DenyUnresolvedHost = reverseFlag(true)
+		compiled, err := compileReadingPolicy(policy)
+		if err != nil {
+			t.Fatal(err)
+		}
+		repo.liveReading.Store(&readingSnapshot{Policies: map[string]*compiledReadingPolicy{"admin": compiled}})
+	}
 	server := httptest.NewUnstartedServer(nil)
 	defer server.Close()
-	origin := "http://localhost:" + strings.Split(server.Listener.Addr().String(), ":")[1]
+	scheme := "http"
+	if restrictedDNS {
+		scheme = "https"
+		server.TLS = networkSettingsBrowserTLS(t, &repo.cfg)
+	}
+	origin := scheme + "://localhost:" + strings.Split(server.Listener.Addr().String(), ":")[1]
 	repo.cfg.Admin.Transport, repo.cfg.Admin.Origin, repo.cfg.Public.BaseURL = "public_path", origin+"/admin", origin
 	admin, err := repo.AdminHTTPServer()
 	if err != nil {
 		t.Fatal(err)
 	}
 	server.Config.Handler = admin.Handler
-	server.Start()
+	if restrictedDNS {
+		server.Config.Handler = http.HandlerFunc(func(w http.ResponseWriter, request *http.Request) {
+			request.RemoteAddr = netip.AddrPortFrom(ip, 12345).String()
+			admin.Handler.ServeHTTP(w, request)
+		})
+		server.StartTLS()
+	} else {
+		server.Start()
+	}
 	script, err := filepath.Abs("../../scripts/test-network-catalogue-browser.mjs")
 	if err != nil {
 		t.Fatal(err)

@@ -10,7 +10,7 @@ const base = process.env.OIMO_NETWORK_BROWSER_URL;
 const directory = process.env.OIMO_NETWORK_BROWSER_OUTPUT;
 const errors = [], failures = [], updates = [], schedules = [];
 try {
-  const page = await browser.newPage();
+  const page = await browser.newPage({ignoreHTTPSErrors: base.startsWith('https://localhost:')});
   page.setDefaultTimeout(60000);
   page.on('pageerror', error => errors.push(error.message));
   page.on('response', response => {
@@ -83,7 +83,7 @@ try {
     await page.waitForLoadState('load');
     await page.waitForFunction(() => !document.querySelector('[data-network-poll]'));
     assert.equal(await page.locator('[role="alert"]').count(), 0);
-    assert.ok((await page.locator('.site-footer').innerText()).includes('バージョン1.1.2'));
+    assert.ok((await page.locator('.site-footer').innerText()).includes('バージョン1.1.3'));
     const after = (await (await page.request.get(base + '/api/v1/networks')).json()).data;
     assert.equal(after.error_code, '');
     assert.ok(BigInt(after.attempt_ns) > BigInt(before.attempt_ns));
@@ -108,7 +108,7 @@ try {
     await updateFromScreen('今すぐ更新', 'refresh-' + width);
   }
   // JavaScriptなしでも同じ保存経路を使い、間隔方式へ戻せる。
-  const plain = await browser.newContext({javaScriptEnabled: false, storageState: await page.context().storageState()});
+  const plain = await browser.newContext({javaScriptEnabled: false, ignoreHTTPSErrors: base.startsWith('https://localhost:'), storageState: await page.context().storageState()});
   const plainPage = await plain.newPage();
   assert.equal((await plainPage.goto(base + '/networks')).status(), 200);
   const plainForm = plainPage.locator('[data-network-schedule-form]');

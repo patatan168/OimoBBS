@@ -1,6 +1,6 @@
 # 回線分類と標準カタログ
 
-国内の携帯・固定系、地域ISP、CATV、IPoE・企業アクセス網の204 ASN、VPN関連7 ASNに、クラウド16・衛星1・学術8・政府機関1を加えた237 ASNを対象にします。固定回線の投稿表示は `ﾜｯﾁｮｲ` です。
+国内の携帯・固定系、地域ISP、CATV、IPoE・企業アクセス網の203 ASN、VPN関連7 ASNに、クラウド16・衛星1・学術9・政府機関1を加えた237 ASNを対象にします。固定回線の投稿表示は `ﾜｯﾁｮｲ` です。
 
 | 調べたいこと | 参照先 |
 | --- | --- |
@@ -17,9 +17,25 @@
 
 ## 初回と既存サイト
 
-未設定サイトの初回起動で標準取得元を登録し、国コード・日本IP・既知VPNと合わせて自動取得します。APIキーは不要です。管理画面「回線分類」で取得状況を確認します。
+未設定サイトの初回起動で標準取得元を登録し、国コード・日本IP・既知VPNと合わせて自動取得します。登録・APIキーは不要です。管理画面「回線分類」で取得状況を確認できます。
 
-既存サイトでは「全業者の標準取得元を追加して更新」で不足分を追加します。手動設定と更新間隔を維持します。取得失敗時は前回成功表と手動上書きを保持し、停止した自動更新は再起動だけでは再開しません。
+既存サイトの分類は、通常の自動更新や「今すぐ更新」で見直しを反映します。専用の更新操作は不要です。
+
+| 操作・状態 | 更新の動作 |
+| --- | --- |
+| 自動更新が有効 | 保存済みの間隔に従って取得。間隔前の確認では設定も分類表も変更しない |
+| 今すぐ更新・管理APIの更新要求 | 自動更新の停止状態を維持したまま、今回だけ取得する |
+| 全業者の標準取得元を追加して更新 | 不足する標準取得元・カテゴリーを追加し、自動更新を有効にして取得する |
+| 自動更新が停止中 | 自動取得しない。再起動だけでは再開しない |
+| 取得に失敗 | 前回成功した分類表を使い続ける。手動上書きは保持する |
+
+### 標準分類の見直しと手動上書き
+
+取得を始める際に、見直し対象の28 ASNの取得元と標準の事業者カテゴリーを上書きします。対象の名前・回線区分・表示名・ID末尾・プロバイダ識別キー・カテゴリーの説明は、編集済みでも標準値に戻ります。対象外の取得元・カテゴリーと、サービス固有のカテゴリーは変更しません。
+
+**共通・板別の手動IP/CIDR上書きと、国・VPNの手動上書きは保持します。** 更新間隔と自動更新の停止状態も維持します。個別のIP範囲の誤判定を修正するときは、取得元の標準値を変更するのではなく、手動上書きを使ってください。
+
+標準設定の見直しを先に保存し、新しい分類表は取得成功後に閲覧・投稿制限へ反映します。取得失敗時は旧表を保持し、過去の投稿は再生成しません。回線区分が変わると、その区分に設定した許可・拒否条件も変わります。
 
 ## 国の重複
 
@@ -36,6 +52,8 @@
 重複を含む国表の保存後は最低reader101が必要です。保存済みの正常な表を変換する作業は不要です。
 
 ## 判定の範囲
+
+標準カタログの未分類は87 ASNです。見直しで補完した28 ASN（固定推定25・固定と携帯の混在2・学術網1）の根拠と、分類を見送った対象は[見直しと検証の記録](testing/network-catalogue-review.md)を参照してください。
 
 ASNの公開経路から推定します。同じ事業者の複数ASNには同じプロバイダ識別キーを使います。固定と携帯（MVNOを含む）の混在が確認済みのASNは「固定・携帯混在」（`mixed`）、用途が未確認の企業網は「不明」（`unknown`）です。共有上流・IPoEでは契約サービス名を確定できず、別ブランドでも同じ上流回線として表示する場合があります。確認できた範囲は共通または板別の上書きで修正してください。
 
@@ -198,11 +216,11 @@ Google Cloud・さくらは、設定案内と専用ドメインの公式例を�
 | 楽天モバイル | `rakuten` | AS138384, AS10012 | 携帯推定 / 不明 |
 | KDDI | `kddi` | AS2516 | 固定・携帯混在 |
 | SoftBank | `softbank` | AS17676, AS4725, AS18069 | 固定・携帯混在（AS17676）/ 不明 |
-| IIJ | `iij` | AS2497 | 不明 |
+| IIJ | `iij` | AS2497 | 固定・携帯混在 |
 | OPTAGE | `optage` | AS17511 | 固定・携帯混在 |
 | FUJITSU LIMITED | `infoweb` | AS2510 | 不明 |
 | NTTPC / InfoSphere | `nttpc` | AS2514 | 不明 |
-| BIGLOBE | `biglobe` | AS2518, AS45674 | 不明 |
+| BIGLOBE | `biglobe` | AS2518, AS45674 | 固定・携帯混在（AS2518）/ 不明（AS45674） |
 | アルテリア / VECTANT / UCOM | `arteria` | AS2519, AS17506, AS17699 | 不明 |
 | ソニー / So-net / NURO | `sonet` | AS2527, AS9600 | 固定推定 |
 | UNIADEX LTD. | `u-netsurf` | AS4675 | 不明 |
@@ -227,7 +245,7 @@ Google Cloud・さくらは、設定案内と専用ドメインの公式例を�
 | HOKKAIDO TELECOMMUNICATIONS NETWORK Co. Inc. | `hotnet` | AS7682 | 不明 |
 | TOYOTA SYSTEMS CORPORATION | `d-cruisenet` | AS7687 | 不明 |
 | Mirai Communication Network Inc. | `mirai` | AS7690 | 不明 |
-| ZTV CO. LTD | `zlan` | AS9351 | 不明 |
+| ZTV CO. LTD | `zlan` | AS9351 | 固定推定 |
 | Community Network Center Inc. | `tdnc` | AS9354 | 不明 |
 | NRI SecureTechnologies Ltd. | `fnc` | AS9357 | 不明 |
 | OPTAGE Inc. | `finder` | AS9358 | 不明 |
@@ -240,21 +258,21 @@ Google Cloud・さくらは、設定案内と専用ドメインの公式例を�
 | Kurashiki Cable TV | `kct` | AS9622 | 固定推定 |
 | Suzuka Cable Co. Ltd | `mecha` | AS9997 | 固定推定 |
 | Nagasaki Cable Media Inc. | `ncm` | AS10000 | 固定推定 |
-| Mics Network Corporation | `micsnet` | AS10001 | 不明 |
+| Mics Network Corporation | `micsnet` | AS10001 | 固定推定 |
 | IGAUENO CABLE TELEVISION CO. LTD | `ict` | AS10002 | 固定推定 |
 | Ogaki Cable Television Co. Inc. | `oct-net` | AS10003 | 固定推定 |
 | TOKAI / TNC | `tokai` | AS10010 | 不明 |
 | FreeBit / DTI / hi-ho系 | `freebit` | AS10013 | 不明 |
 | Minaminihon Information Processing Center Co Ltd | `minc` | AS10016 | 不明 |
 | Matsusaka Cable-TV Station Inc. | `mctv` | AS10019 | 固定推定 |
-| STARCAT Co . LTD. | `mediacat` | AS17529 | 不明 |
-| Nihon Network Service Co .Ltd. | `nns` | AS17530 | 不明 |
+| STARCAT Co . LTD. | `mediacat` | AS17529 | 固定推定 |
+| Nihon Network Service Co .Ltd. | `nns` | AS17530 | 固定推定 |
 | NSK Co. Ltd. | `nsk` | AS17534 | 不明 |
 | Gunma Internet Co .ltd | `wind` | AS17678 | 不明 |
-| 296 BROAD NET Com Inc | `cablenet296` | AS17682 | 不明 |
+| 296 BROAD NET Com Inc | `cablenet296` | AS17682 | 固定推定 |
 | Wingtechnology Communications Inc. | `wintech-com` | AS17683 | 不明 |
 | NDS Co. Ltd. | `tikitiki` | AS17691 | 不明 |
-| COMMUNITY NETWORK CENTER INCORPORATED | `ccnet-net` | AS17698 | 不明 |
+| COMMUNITY NETWORK CENTER INCORPORATED | `ccnet-net` | AS17698 | 固定推定 |
 | Netforest Inc. | `netforest` | AS17931 | 不明 |
 | Cable Television Kani Co. Inc. | `ctk` | AS17936 | 固定推定 |
 | miyazaki cabletelevision network Co. LTD | `mcn-net01` | AS17939 | 固定推定 |
@@ -269,13 +287,13 @@ Google Cloud・さくらは、設定案内と専用ドメインの公式例を�
 | Yamaguchi Cable Vision Co. Ltd | `c-able` | AS18077 | 固定推定 |
 | Kintetsu Cable Network Co. Ltd. | `kcn` | AS18081 | 固定推定 |
 | IMS Corporation | `magma` | AS18090 | 不明 |
-| Kyushu Tele Communications Company | `csf` | AS18092 | 不明 |
+| Kyushu Tele Communications Company | `csf` | AS18092 | 固定推定 |
 | Tokyo Cable Network. INC | `tcn-as` | AS18094 | 固定推定 |
 | D.C.N. Corporation | `dcn` | AS18097 | 不明 |
 | Ishikawa Computer Center Co. LTD. | `incl` | AS18121 | 不明 |
 | コミュファ / CTC | `ctc` | AS18126 | 固定推定 |
-| OKAYAMA NETWORK INC. | `oni` | AS18129 | 不明 |
-| BTV CO. LTD. | `btv` | AS18135 | 不明 |
+| OKAYAMA NETWORK INC. | `oni` | AS18129 | 固定推定 |
+| BTV CO. LTD. | `btv` | AS18135 | 固定推定 |
 | KISTEM Co. Ltd. | `biwalobe` | AS18142 | 不明 |
 | NetComBB Co. Ltd. | `sni-jp` | AS18150 | 不明 |
 | EHIME CATV CO. LTD. | `e-catv` | AS18260 | 固定推定 |
@@ -283,7 +301,7 @@ Google Cloud・さくらは、設定案内と専用ドメインの公式例を�
 | Naganoken Kyodou Densan Co.Ltd. | `janis` | AS18268 | 不明 |
 | Utsunomiya Cable TV Corporation | `ucatv` | AS18274 | 固定推定 |
 | ケーブルテレビ / CC9 | `cc9` | AS18278 | 固定推定 |
-| Tokoname New-TV Corporation | `tac-net` | AS18281 | 不明 |
+| Tokoname New-TV Corporation | `tac-net` | AS18281 | 固定推定 |
 | Tonami System Solutions Co. Ltd. | `coralnet` | AS18282 | 不明 |
 | Chukai Television Co .Ltd. | `chukai` | AS23624 | 固定推定 |
 | UEDA CABLE VISION CO. LTD. | `ucvnet` | AS23627 | 固定推定 |
@@ -295,41 +313,41 @@ Google Cloud・さくらは、設定案内と専用ドメインの公式例を�
 | TOSHIMA CABLE NETWORK CO. LTD | `toshima-net` | AS23808 | 固定推定 |
 | JETINTERNET Corporation | `jetinternet` | AS23818 | 不明 |
 | HAGI Television Co. Ltd. | `haginet` | AS23822 | 固定推定 |
-| Azumino Network Community TV | `anc-net` | AS23827 | 不明 |
+| Azumino Network Community TV | `anc-net` | AS23827 | 固定推定 |
 | NISIOWARI CATV CORPORATION | `clovernet` | AS23831 | 固定推定 |
 | Iwakuni Cable Network Corporation | `icntv-net` | AS24251 | 固定推定 |
-| Koshinomiyako Network Inc. | `t-catv` | AS24255 | 不明 |
+| Koshinomiyako Network Inc. | `t-catv` | AS24255 | 固定推定 |
 | JPIX / JPNE系 | `jpne` | AS24257 | 不明 |
 | kanuma cable television Corporation | `bc9` | AS24259 | 固定推定 |
 | Iruma CATV co. | `ictv` | AS24271 | 固定推定 |
 | Okinawa Cable Network Inc. | `nirai` | AS24277 | 固定推定 |
 | SENDAI CATV CO. LTD. | `cat-v` | AS24279 | 固定推定 |
-| Kagawa T.V Broadcast Network Co .Ltd | `kbn` | AS24289 | 不明 |
-| Heart Network Co. LTD | `heartnet` | AS24290 | 不明 |
+| Kagawa T.V Broadcast Network Co .Ltd | `kbn` | AS24289 | 固定推定 |
+| Heart Network Co. LTD | `heartnet` | AS24290 | 固定推定 |
 | Cable Media WAIWAI Co. Ltd. | `wai-net` | AS37892 | 固定推定 |
 | BBIX / BB.excite系 | `bbix` | AS37904 | 不明 |
 | KIBI Cable Television Co. Ltd. | `kbc` | AS37908 | 固定推定 |
 | HIMEJI CABLE TELEVISION CORPORATION | `wink-net` | AS38628 | 固定推定 |
-| transix / インターネットマルチフィード | `transix` | AS38644, AS55391, AS55392 | 不明 |
+| transix / インターネットマルチフィード | `transix` | AS38644, AS55391, AS55392 | 固定推定（AS55391・AS55392）/ 不明（AS38644） |
 | Koga Cable TV Co. Ltd. | `kgc-net` | AS45672 | 固定推定 |
 | Isahaya Cable Media Co. Ltd | `icv` | AS45677 | 固定推定 |
 | Minamikyusyu CableTV Net Inc. | `mct-internet` | AS45687 | 固定推定 |
-| KCV Communications Co. Ltd. | `kcv-hitanet` | AS55376 | 不明 |
+| KCV Communications Co. Ltd. | `kcv-hitanet` | AS55376 | 固定推定 |
 | CITY-CABLE SHUNAN Corporation | `ccsnet` | AS55381 | 固定推定 |
 | Japan Communication Inc. | `rmgr-mix` | AS55387 | 不明 |
 | Miyagi Cable TV Co. Ltd | `marinet` | AS58645 | 固定推定 |
 | Warabi Cable Vision Co. Ltd. | `catvwink` | AS58650 | 固定推定 |
 | IMABARI CATV CORPORATION | `icknet` | AS59093 | 固定推定 |
-| Soka University | `sokau-as` | AS59104 | 不明 |
+| Soka University | `sokau-as` | AS59104 | 大学・学術網 |
 | Hachinohe Cable Television Co. | `htv-net` | AS59107 | 固定推定 |
-| KATCH NETWORK INC. | `katch-net` | AS59108 | 不明 |
+| KATCH NETWORK INC. | `katch-net` | AS59108 | 固定推定 |
 | Tsukuba Internet Service Corporation | `tins-net` | AS59120 | 不明 |
 | YAKAGE CABLE TELEVISION | `yctnet` | AS63775 | 固定推定 |
 | Omaezaki Cable Television Co.Ltd | `maotv` | AS63782 | 固定推定 |
 | Iwami Cablevision Co. Ltd. | `iwami-net` | AS131907 | 固定推定 |
 | HONJYO CABLE VISION CO. LTD. | `hctv-net` | AS131911 | 固定推定 |
 | Hamamatsu Cable Television .Inc | `winde` | AS131915 | 固定推定 |
-| Tokyo Bay Network Co. Ltd. | `baynet` | AS131916 | 不明 |
+| Tokyo Bay Network Co. Ltd. | `baynet` | AS131916 | 固定推定 |
 | SHONAN CABLE NETWORK | `scn-net` | AS131918 | 固定推定 |
 | Cable Television Saiki Co. Ltd. | `cts-net` | AS131926 | 固定推定 |
 | Yamanashi CATV Co . ltd | `fruitsnet` | AS131929 | 固定推定 |
@@ -341,7 +359,7 @@ Google Cloud・さくらは、設定案内と専用ドメインの公式例を�
 | Kawaguchiko cable television Inc | `lcnet` | AS131954 | 固定推定 |
 | Kyoutou Cable Net Co Ltd | `kcnet` | AS131955 | 固定推定 |
 | Tama Cable Network Co. Ltd. | `t-net` | AS131958 | 固定推定 |
-| Uenohara Broadband Communications Inc. | `ubc` | AS131982 | 不明 |
+| Uenohara Broadband Communications Inc. | `ubc` | AS131982 | 固定推定 |
 | suo cablenet corporation | `scntv-net` | AS131983 | 固定推定 |
 | ITOCHU Cable Systems Corp. | `bb4u-net` | AS131986 | 固定推定 |
 | Takehara Cable Network Co Ltd | `tanet` | AS131988 | 固定推定 |
@@ -349,26 +367,26 @@ Google Cloud・さくらは、設定案内と専用ドメインの公式例を�
 | OMURA CABLE TELEVISION K.K. | `octp-net` | AS151387 | 固定推定 |
 | Takaoka cable network | `tcnet` | AS152867 | 固定推定 |
 | Air Internet Service Co. Ltd. | `air` | AS7503 | 不明 |
-| its communications Inc. | `itscom` | AS9365 | 不明 |
+| its communications Inc. | `itscom` | AS9365 | 固定推定 |
 | Phoenix Communications Inc. | `phoenix` | AS10004 | 不明 |
 | Global Network Core Co. Ltd. | `ndac` | AS18070 | 不明 |
 | Niigata Communication Service | `shibata` | AS23633 | 不明 |
 | OBIS | `obis` | AS23642 | 不明 |
-| CTB Media Inc. | `ctb` | AS23780 | 不明 |
+| CTB Media Inc. | `ctb` | AS23780 | 固定推定 |
 | SUN FIELD INTERNET LIMITED | `sunfield` | AS23785 | 不明 |
 | GMO NetIRD Inc. | `netird` | AS37906 | 不明 |
 | Value Core Inc. | `vciu-net` | AS38633 | 不明 |
 | DOVA Corporation | `dova` | AS45680 | 不明 |
 | DODO K.K. | `dodo` | AS45691 | 不明 |
 | DODO K.K. | `dodo` | AS49671 | 不明 |
-| FAMILY NET JAPAN INCORPORATED | `cyberhome` | AS59125 | 不明 |
-| NCT CO. LTD. | `nct` | AS59126 | 不明 |
+| FAMILY NET JAPAN INCORPORATED | `cyberhome` | AS59125 | 固定推定 |
+| NCT CO. LTD. | `nct` | AS59126 | 固定推定 |
 | Kamoike.net LLP | `kamoike-net` | AS63774 | 不明 |
 | DODO K.K. | `dodo` | AS63801 | 不明 |
 | DOVA Corporation | `dova` | AS63804 | 不明 |
 | Wire and Wireless Co. Ltd. | `wi2` | AS131160 | 不明 |
 | Oedo Telecom Inc | `oedo` | AS131913 | 不明 |
-| Goto tv | `goto-tv` | AS131943 | 不明 |
+| Goto tv | `goto-tv` | AS131943 | 固定推定 |
 | Super Godzilla Communications GK | `sgcom` | AS138652 | 不明 |
 | SUZUYO SHINWART CORPORATION | `ss` | AS146986 | 不明 |
 | SoftEther Corporation | `softether` | AS150363 | 不明 |

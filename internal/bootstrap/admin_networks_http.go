@@ -204,7 +204,7 @@ func (h *adminHandler) networksRoutes(w http.ResponseWriter, r *http.Request, s 
 		message = "無料の標準取得元を設定しました。取得が完了すると分類表が使われ、以後24時間ごとに自動更新します。"
 	}
 	if action == "domestic_setup" {
-		message = "未登録の国内・VPN・クラウド・衛星・学術網の取得元を追加しました。既存の分類・上書き・更新間隔を維持して取得を開始します。"
+		message = "未登録の標準取得元を追加し、取得を開始します。更新時に標準分類の見直しを反映します。手動上書き・更新間隔は維持します。"
 	}
 	if action == "category_delete" {
 		message = "カテゴリーを削除しました。保存済みの回線割り当てと過去の投稿表示は保持しています。"

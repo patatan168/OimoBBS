@@ -18,7 +18,7 @@ type networkPreset struct {
 	ASN                           uint32
 }
 
-var networkSourcePresets = append([]networkPreset{
+var networkBaseSourcePresets = append([]networkPreset{
 	{"ocn", "OCN（AS4713・固定/MVNO混在）", "mixed", "ﾜｯﾁｮｲ", "0", 4713},
 	{"docomo", "docomo（AS9605・携帯推定）", "mobile", "ｽﾌﾟｯｯ", "d", 9605},
 	{"rakuten", "楽天モバイル（AS138384・携帯推定）", "mobile", "ﾃﾃﾝﾃﾝﾃﾝ", "M", 138384},
@@ -28,12 +28,14 @@ var networkSourcePresets = append([]networkPreset{
 	{"optage", "OPTAGE（AS17511・固定/MVNO混在）", "mixed", "OPTAGE", "0", 17511},
 }, append(append(domesticNetworkPresets, vpnProviderPresets...), specialNetworkPresets...)...)
 
+var networkSourcePresets = reviewedNetworkPresets(networkBaseSourcePresets)
+
 // defaultNetworkSources は無料の共通ASNデータをそのまま使える標準取得元を返す。
 // 固定・携帯の混在が確認済みのASNはmixed、用途未確定はunknownを使う。
 func defaultNetworkSources() []NetworkSource {
 	rows := make([]NetworkSource, 0, len(networkSourcePresets))
 	for _, p := range networkSourcePresets {
-		rows = append(rows, NetworkSource{Name: p.Name, Type: "asn", ASN: p.ASN, Kind: p.Kind, Label: p.Label, Suffix: p.Suffix, Provider: presetProvider(p.ID)})
+		rows = append(rows, networkPresetSource(p))
 	}
 	return append(rows, defaultAccessSources()...)
 }
@@ -145,8 +147,7 @@ func defaultNetworkCategories() []NetworkCategory {
 			continue
 		}
 		seen[provider] = true
-		name, _, _ := strings.Cut(preset.Name, "（AS")
-		rows = append(rows, NetworkCategory{ID: provider, Provider: provider, Name: name, Kind: preset.Kind, Label: preset.Label, Suffix: preset.Suffix, Description: "事業者のASNから取得する推定です。共有する上流回線やIPoEでは契約サービスまで区別できない場合があります。"})
+		rows = append(rows, networkPresetCategory(preset))
 	}
 	return rows
 }

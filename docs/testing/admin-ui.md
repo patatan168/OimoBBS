@@ -123,10 +123,10 @@ mise exec -- go test ./internal/bootstrap -run 'TestAdmin(PostActionsBrowser|Rea
 
 ### 国内回線の初回取得と管理UI
 
-外部接続なしで並列数・全ASN要求・手動設定の保持・厳密な圧縮表・実フォームを検査します。
+通常更新での標準分類の反映、手動上書きの保持、停止中・更新間隔前の動作、取得失敗時の旧表保持、並列数・厳密な圧縮表を、外部接続なしで検査します。
 
 ```sh
-mise exec -- go test ./internal/bootstrap ./cmd/oimobbs -run 'Test(Network|DomesticNetwork|ValidationServerLifecycle)'
+mise exec -- go test -race ./internal/bootstrap ./cmd/oimobbs -run 'Test(Network|DomesticNetwork|MixedNetwork|ServiceNetwork|SpecialNetwork|ValidationServerLifecycle)' -count=1
 ```
 
 実際の公開取得先から、[標準カタログ](../networks.md)の全ASNと国/VPNを取得し、保存・再読込まで確認する場合：
@@ -135,14 +135,15 @@ mise exec -- go test ./internal/bootstrap ./cmd/oimobbs -run 'Test(Network|Domes
 OIMO_NETWORK_LIVE=1 mise exec -- go test ./internal/bootstrap -run '^TestNetworkDomesticLiveStartup$' -count=1 -v
 ```
 
-Node.js24以降とChromiumを使う隔離UI検査：
+画面の確認は、[ブラウザー検査の準備](README.md#ブラウザー検査の準備)に従い、`OIMO_BROWSER_NODE`・`OIMO_PLAYWRIGHT`・`OIMO_CHROMIUM`を設定して実行します。Go試験が新しい隔離サイトと管理HTTPサーバーを用意します。
 
 ```sh
-OIMO_NETWORK_PAGE_OUTPUT=/tmp/oimo-networks-page.html mise exec -- go test ./internal/bootstrap -run '^TestNetworkDomesticManagementPage$' -count=1
-OIMO_NETWORK_PAGE_OUTPUT=/tmp/oimo-networks-page.html node scripts/smoke-network-ui.mjs
+mise exec -- go test ./internal/bootstrap -run '^TestNetworkCatalogueBrowser$' -count=1 -v -timeout=3m
 ```
 
-Chromiumの場所は `OIMO_CHROME`、画像・結果の保存先は `OIMO_UI_OUTPUT` で指定できます。160/320/390/1280px、名前・ASN検索、区分フィルター、空結果、20件切替、保存失敗した行の表示、JavaScriptなしの概要・フォームを確認します。
+実際にログインし、390/1280pxで「今すぐ更新」から取得・自動再表示・保存結果までを確認します。既存の標準取得元追加、手動上書きの保持、画面の警告・HTTPエラー・JavaScript例外がないことも検査します。通常は架空の取得データを使い、`OIMO_NETWORK_LIVE=1`を付けると公開データを実取得します。`OIMO_NETWORK_BROWSER_OUTPUT`を指定すると画面と`result.json`を保存します。
+
+分類の根拠と実行結果は[標準カタログの見直しと検証](network-catalogue-review.md)を参照してください。本番の設定や動作を確認する試験ではありません。
 
 ### 閲覧制限の管理画面
 

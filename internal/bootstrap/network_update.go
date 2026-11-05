@@ -93,8 +93,15 @@ func (r *Repository) refreshNetworks(ctx context.Context, force bool) error {
 			return nil
 		}
 	}
+	if e := ctx.Err(); e != nil {
+		return e
+	}
 	r.networkRunning.Store(true)
 	defer r.networkRunning.Store(false)
+	fresh, e := r.prepareNetworkCatalogueRefresh(&snapshot, &old)
+	if e != nil || !fresh {
+		return e
+	}
 	fetchCtx, cancel := context.WithTimeout(ctx, 25*time.Second)
 	rows, accessData, fetchErr := fetchNetworkUpdate(fetchCtx, client, old.Config.Sources)
 	if fetchErr == nil {

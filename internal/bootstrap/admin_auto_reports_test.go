@@ -63,7 +63,7 @@ func TestAdminAutoReportsMixedVotesPermanentAndRecovery(t *testing.T) {
 		t.Fatal(err)
 	}
 	repo.Close()
-	cfg.AutoReports = &AutoReportConfig{"report", time.Now().Add(-24 * time.Hour).UTC().Format(time.RFC3339)}
+	cfg.AutoReports = &AutoReportConfig{Since: time.Now().Add(-24 * time.Hour).UTC().Format(time.RFC3339)}
 	repo, err = OpenPostingRepository(cfg, postcapture.Validate)
 	if err != nil {
 		t.Fatal(err)

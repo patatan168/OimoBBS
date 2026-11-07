@@ -30,7 +30,7 @@ func TestBoardAutoReportsHTTPRecovery(t *testing.T) {
 		t.Fatal(err)
 	}
 	repo.Close()
-	cfg.AutoReports = &AutoReportConfig{"report", time.Now().Add(-time.Minute).UTC().Format(time.RFC3339)}
+	cfg.AutoReports = &AutoReportConfig{Since: time.Now().Add(-time.Minute).UTC().Format(time.RFC3339)}
 	repo, err = OpenPostingRepository(cfg, postcapture.Validate)
 	if err != nil {
 		t.Fatal(err)
@@ -110,7 +110,7 @@ func TestBoardAutoReportsHTTPRecovery(t *testing.T) {
 	otherKey := strings.Split(reader.request(t, "/other/subject.txt", nil), ".dat<>")[0]
 	reference := "対象URL：" + cfg.Public.BaseURL + "/test/read.cgi/news/" + key + "/1/"
 	post("news", key, ">>1 !report old vote")
-	post("report", "1", reference)
+	post("news", "1", reference)
 	if voteCount(owner) != 2 {
 		t.Fatal("initial public/private votes")
 	}
@@ -146,8 +146,8 @@ func TestBoardAutoReportsHTTPRecovery(t *testing.T) {
 	if !strings.Contains(newReader().request(t, "/news/dat/1.dat", nil), "通報機能は現在無効") || before.Header().Get("ETag") == disabledGuide.Header().Get("ETag") {
 		t.Fatal("disabled guide/ETag")
 	}
-	if body := newReader().post(t, "report", "1", reference, domain.NewID().String()); !strings.Contains(body, "通報機能は現在無効") {
-		t.Fatal("central receipt bypass", body)
+	if body := newReader().post(t, "report", "1", reference, domain.NewID().String()); strings.Contains(body, "投稿を受け付けました") {
+		t.Fatal("cross-board receipt accepted", body)
 	}
 	if body := newReader().post(t, "news", "1", reference, domain.NewID().String()); !strings.Contains(body, "通報機能は現在無効") {
 		t.Fatal("board receipt bypass", body)
@@ -181,7 +181,7 @@ func TestBoardAutoReportsHTTPRecovery(t *testing.T) {
 	if voteCount(owner) != 1 || denialCount(owner) != 0 {
 		t.Fatal("new vote recovery")
 	}
-	post("report", "1", reference)
+	post("news", "1", reference)
 	post("news", key, ">>1 !report final vote")
 	if denialCount(owner) != 1 {
 		t.Fatal("new public/private quorum")

@@ -30,7 +30,7 @@ func TestOperationsHTTPPersistenceAndLiveLimits(t *testing.T) {
 		t.Fatal(e)
 	}
 	repo.Close()
-	cfg.AutoReports = &AutoReportConfig{"report", time.Now().Add(-time.Minute).UTC().Format(time.RFC3339)}
+	cfg.AutoReports = &AutoReportConfig{Since: time.Now().Add(-time.Minute).UTC().Format(time.RFC3339)}
 	var err error
 	repo, err = OpenPostingRepository(cfg, postcapture.Validate)
 	if err != nil {
@@ -216,7 +216,7 @@ func TestOperationsReportCommandAndPrivateReceipt(t *testing.T) {
 		t.Fatal(e)
 	}
 	repo.Close()
-	cfg.AutoReports = &AutoReportConfig{"report", time.Now().Add(-time.Minute).UTC().Format(time.RFC3339)}
+	cfg.AutoReports = &AutoReportConfig{Since: time.Now().Add(-time.Minute).UTC().Format(time.RFC3339)}
 	var err error
 	repo, err = OpenPostingRepository(cfg, postcapture.Validate)
 	if err != nil {
@@ -265,7 +265,7 @@ func TestOperationsReportCommandAndPrivateReceipt(t *testing.T) {
 	}
 	second := newAutoReportHTTPClient(t, public.URL, cfg.Public.BaseURL, "127.125.0.3")
 	message := "対象URL：" + cfg.Public.BaseURL + "/test/read.cgi/news/" + key + "/1/\n理由：迷惑投稿"
-	if body := second.post(t, "report", "1", message, "operations-private-vote"); !strings.Contains(body, "投稿を受け付けました") {
+	if body := second.post(t, "news", "1", message, "operations-private-vote"); !strings.Contains(body, "投稿を受け付けました") {
 		t.Fatal("private vote")
 	}
 	var before denialRule
@@ -382,7 +382,6 @@ func TestOperationsFixtureAndReceiptExpiry(t *testing.T) {
 // APIの表示用設定は保存形式の過去資源項目を持たないため、保存用の厳密復号器を使わない。
 type operationsTestSettings OperationSettings
 type operationsTestAPI struct {
-	Settings    operationsTestSettings `json:"settings"`
-	Revision    domain.U64             `json:"revision"`
-	ReportBoard string                 `json:"report_board"`
+	Settings operationsTestSettings `json:"settings"`
+	Revision domain.U64             `json:"revision"`
 }

@@ -89,9 +89,6 @@ func LoadConfig(path string) (Config, error) {
 
 func (c Config) validate() error {
 	if c.AutoReports != nil {
-		if !validBoardKey(c.AutoReports.BoardKey) {
-			return errors.New("invalid automatic report board")
-		}
 		if at, err := time.Parse(time.RFC3339, c.AutoReports.Since); err != nil || at.UnixNano() <= 0 || at.After(time.Now()) {
 			return errors.New("automatic reports require a past RFC3339 activation time")
 		}

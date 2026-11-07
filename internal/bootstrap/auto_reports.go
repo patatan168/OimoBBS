@@ -3,6 +3,7 @@ package bootstrap
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"html"
 	"net/netip"
@@ -17,6 +18,7 @@ import (
 	"oimobbs/internal/evidence"
 	"oimobbs/internal/identity"
 	"oimobbs/internal/store"
+	"oimobbs/internal/strictjson"
 )
 
 const autoReportWindow = 24 * time.Hour
@@ -27,11 +29,39 @@ const autoReportCapacity = 1024
 // ErrAutoReportInput は短い通報の対象番号が不正な場合に返す。
 var ErrAutoReportInput = errors.New("report requires a valid response number")
 
-// AutoReportConfig は専用通報板と受付開始時刻を指定する。省略時は自動停止しない。
+// AutoReportConfig は通報の受付開始時刻を指定する。省略時は自動停止しない。
 // Sinceは再起動時に変更せず、導入前の通報を新しい規制へ読み替えない。
 type AutoReportConfig struct {
-	BoardKey string `json:"board_key"`
-	Since    string `json:"since"`
+	Since string `json:"since"`
+}
+
+// UnmarshalJSON は旧起動設定のboard_keyを検証して読み飛ばし、板指定への依存を持たせない。
+func (v *AutoReportConfig) UnmarshalJSON(raw []byte) error {
+	if err := strictjson.Validate(raw); err != nil {
+		return err
+	}
+	var fields map[string]json.RawMessage
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	if legacy, ok := fields["board_key"]; ok {
+		var key *string
+		if err := json.Unmarshal(legacy, &key); err != nil || key == nil || *key != "" && !validBoardKey(*key) {
+			return errors.New("invalid legacy automatic report board")
+		}
+		delete(fields, "board_key")
+	}
+	normalized, err := json.Marshal(fields)
+	if err != nil {
+		return err
+	}
+	type plain AutoReportConfig
+	var next plain
+	if err := strictjson.Decode(normalized, &next); err != nil {
+		return err
+	}
+	*v = AutoReportConfig(next)
+	return nil
 }
 
 type autoReportTarget struct {
@@ -201,15 +231,6 @@ func (r *Repository) restoreAutoReports() error {
 	if r.cfg.AutoReports == nil {
 		return nil
 	}
-	for id, b := range r.posting {
-		if b.matchesKey(r.cfg.AutoReports.BoardKey) {
-			r.autoReportBoard = id
-			break
-		}
-	}
-	if r.autoReportBoard == (domain.ID{}) {
-		return errors.New("automatic report board does not exist")
-	}
 	if err := r.initReportReceipts(); err != nil {
 		return err
 	}
@@ -314,9 +335,6 @@ func (r *Repository) prepareAutoReport(row app.AcceptedEvidence, now domain.Time
 	}
 	body = html.UnescapeString(body)
 	ref, ok := parseAutoReport(body, r.cfg.Public.BaseURL)
-	if row.Board != r.autoReportBoard {
-		ok = false
-	}
 	if !ok && row.Thread != 0 {
 		if post, command := parseAutoReportCommand(body); command {
 			if source := r.posting[row.Board]; source != nil {
@@ -329,7 +347,7 @@ func (r *Repository) prepareAutoReport(row app.AcceptedEvidence, now domain.Time
 	}
 	known := false
 	for _, b := range r.posting {
-		if b.matchesKey(ref.Board) && b.owner != r.autoReportBoard {
+		if b.matchesKey(ref.Board) {
 			settings := b.autoReports.Load()
 			// 復旧時の候補上限を旧票で埋めず、新しい集計期間の票だけを残す。
 			known = boardAutoReportsEnabled(settings) && (settings == nil || row.Committed >= settings.Since)
@@ -367,7 +385,7 @@ func (r *Repository) applyAutoReport(message autoReportMessage, now domain.Time)
 			break
 		}
 	}
-	if target == nil || target.owner == r.autoReportBoard {
+	if target == nil {
 		return nil
 	}
 	value, err := target.worker.Submit(context.Background(), func() (any, error) {

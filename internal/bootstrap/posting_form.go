@@ -103,7 +103,7 @@ func (r *Repository) submitForm(ctx context.Context, owner domain.ID, body []byt
 	if privateReceipt {
 		var ok bool
 		receiptRef, ok = receiptReference(fields["MESSAGE"], r.cfg.Public.BaseURL)
-		if !ok || !b.matchesKey(r.cfg.AutoReports.BoardKey) && !b.matchesKey(receiptRef.Board) {
+		if !ok || !b.matchesKey(receiptRef.Board) {
 			return fail(errors.Join(postinput.ErrInput, ErrAutoReportInput))
 		}
 		r.mu.Lock()
@@ -132,13 +132,13 @@ func (r *Repository) submitForm(ctx context.Context, owner domain.ID, body []byt
 		if key != 0 {
 			_, reportCandidate = parseAutoReportCommand(fields["MESSAGE"])
 		}
-		if _, command := autoReportCommandTarget(fields["MESSAGE"]); command && (!reportCandidate || owner == r.autoReportBoard) {
+		if _, command := autoReportCommandTarget(fields["MESSAGE"]); command && !reportCandidate {
 			return fail(errors.Join(postinput.ErrInput, ErrAutoReportInput))
 		}
-		if owner == r.autoReportBoard {
-			_, link := parseAutoReport(fields["MESSAGE"], r.cfg.Public.BaseURL)
-			reportCandidate = reportCandidate || link
-		}
+	}
+	if r.cfg.AutoReports != nil && !privateReceipt {
+		_, link := parseAutoReport(fields["MESSAGE"], r.cfg.Public.BaseURL)
+		reportCandidate = reportCandidate || link
 	}
 	command, commandCandidate, commandErr := parseCapCommand(fields["MESSAGE"])
 	if commandErr != nil || commandCandidate && (key == 0 || privateReceipt) {

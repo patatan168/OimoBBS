@@ -61,7 +61,7 @@ type operationState struct {
 type AdminOperations struct {
 	Settings    OperationSettings `json:"settings"`
 	Revision    domain.U64        `json:"revision"`
-	ReportBoard string            `json:"report_board"`
+	ReportBoard string            `json:"report_board"` // 過去の保存済み再送結果の検証用。新規保存では空にする。
 }
 
 func (v AdminOperations) ETag() string { return fmt.Sprintf(`"operations:%d"`, v.Revision) }
@@ -137,11 +137,7 @@ func (r *Repository) reportSince() domain.Time {
 
 // operationsView はサイトmutex所有中に保存版と現在値を取得する。
 func (r *Repository) operationsView() AdminOperations {
-	board := ""
-	if r.cfg.AutoReports != nil {
-		board = r.cfg.AutoReports.BoardKey
-	}
-	return AdminOperations{r.operations(), r.site.State().Rows["operations:active"].Revision, board}
+	return AdminOperations{r.operations(), r.site.State().Rows["operations:active"].Revision, ""}
 }
 func (r *Repository) adminOperations(s adminauth.Session) (AdminOperations, error) {
 	r.mu.Lock()

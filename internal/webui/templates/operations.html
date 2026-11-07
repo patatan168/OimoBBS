@@ -21,7 +21,7 @@
 <p><label>同じCookieの許容投稿数<input type="number" name="content_cookie_posts" min="1" max="1000" value="{{.State.Settings.ContentRates.CookiePosts}}" required></label></p>
 </div><p>初期値はIPが60秒に20件、Cookieが60秒に1件です。直近の投稿を数え、上限を超えると待ち時間を返します。設定変更で履歴をリセットしません。再起動時は直近の公開投稿から履歴を復元します。明示的な要求IDによる受理済み投稿の再送は件数に加算しません。</p></section>
 <section class="admin-panel" id="report-interval"><h2>削除依頼の送信間隔</h2><p><label>同じブラウザーからの送信間隔（分）<input type="number" name="report_interval_minutes" min="1" max="1440" value="{{.State.Settings.ReportIntervalMinutes}}" required><small class="field-hint">初期値は10分です。同じ回線全体では、この期間に3件まで受け付けます。受付済み依頼の照会は別枠です。</small></label></p></section>
-<section class="admin-panel"><h2>通報による自動停止</h2>{{if .State.ReportBoard}}<p>通報受付板：{{.State.ReportBoard}}</p>{{else}}<p>自動通報は起動設定で無効になっています。以下の条件は有効化後に使います。</p>{{end}}<div class="field-grid">
+<section class="admin-panel"><h2>通報による自動停止</h2>{{if .AutoReportsEnabled}}<p>自動通報は有効です。各スレッドの !report で通報できます。</p>{{else}}<p>自動通報は起動設定で無効になっています。以下の条件は有効化後に使います。</p>{{end}}<div class="field-grid">
 <p><label>通報を集計する期間（分）<input type="number" name="window_minutes" min="1" max="10080" value="{{.State.Settings.Reports.WindowMinutes}}" required><small class="field-hint">この期間内に集まった票だけを数えます。例：1440分は24時間です。</small></label></p>
 <p><label>停止に必要な票数 <input type="number" name="quorum" min="1" max="20" value="{{.State.Settings.Reports.Quorum}}" required><small class="field-hint">同じ匿名ID・同じ接続元からの重複票は数えません。</small></label></p>
 <p><label>自動停止の期間（分）<input type="number" name="stop_minutes" min="1" max="1440" value="{{.State.Settings.Reports.StopMinutes}}" required><small class="field-hint">票が成立した対象者の、この板への投稿を止める時間です。</small></label></p>
@@ -32,7 +32,7 @@
 
 {{template "settings-review" .}}<div class="admin-form-actions"><button type="submit">運用設定を保存する</button><a class="tonal-link" href="{{adminBase}}/operations">最新の設定を読み直す</a></div>
 </form>
-<section class="admin-panel"><h2>ほかの設定</h2><p>板の投稿条件や匿名Cookie、回線分類は各管理画面で調整できます。</p><div class="action-group"><a class="tonal-link" href="{{adminBase}}/boards">板の投稿条件・表示・規制</a><a class="tonal-link" href="{{adminBase}}/anonymous">匿名Cookie</a><a class="tonal-link" href="{{adminBase}}/networks">回線分類</a></div><p>待受アドレス・公開URL・TLS証明書・保存先・通報受付板の指定は起動設定です。変更にはサーバーの再起動が必要です。CPU・メモリの割当はコンテナ設定で管理します。</p></section>
+<section class="admin-panel"><h2>ほかの設定</h2><p>板の投稿条件や匿名Cookie、回線分類は各管理画面で調整できます。</p><div class="action-group"><a class="tonal-link" href="{{adminBase}}/boards">板の投稿条件・表示・規制</a><a class="tonal-link" href="{{adminBase}}/anonymous">匿名Cookie</a><a class="tonal-link" href="{{adminBase}}/networks">回線分類</a></div><p>待受アドレス・公開URL・TLS証明書・保存先・自動通報の有効化は起動設定です。変更にはサーバーの再起動が必要です。CPU・メモリの割当はコンテナ設定で管理します。</p></section>
 <p><a class="tonal-link" href="{{adminBase}}/maintenance">稼働状況を確認する</a></p></main>{{template "footer" .}}</body></html>
 
 {{define "page-assets"}}{{template "stylesheet" "admin-settings.css"}}{{template "javascript" "admin-settings.js"}}{{end}}

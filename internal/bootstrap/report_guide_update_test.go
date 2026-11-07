@@ -21,7 +21,7 @@ func TestOperationsRefreshesPublicReportGuides(t *testing.T) {
 		}
 	}
 	repo.Close()
-	cfg.AutoReports = &AutoReportConfig{"report", time.Now().Add(-time.Minute).UTC().Format(time.RFC3339)}
+	cfg.AutoReports = &AutoReportConfig{Since: time.Now().Add(-time.Minute).UTC().Format(time.RFC3339)}
 	var err error
 	repo, err = OpenPostingRepository(cfg, postcapture.Validate)
 	if err != nil {

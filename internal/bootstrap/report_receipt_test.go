@@ -26,7 +26,7 @@ func TestPrivateReportReceiptHTTP(t *testing.T) {
 		t.Fatal(err)
 	}
 	repo.Close()
-	cfg.AutoReports = &AutoReportConfig{"report", time.Now().Add(-time.Second).UTC().Format(time.RFC3339)}
+	cfg.AutoReports = &AutoReportConfig{Since: time.Now().Add(-time.Second).UTC().Format(time.RFC3339)}
 	var err error
 	repo, err = OpenPostingRepository(cfg, postcapture.Validate)
 	if err != nil {

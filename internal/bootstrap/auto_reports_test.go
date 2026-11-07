@@ -55,16 +55,16 @@ func TestAutoReportReference(t *testing.T) {
 func TestAutoReportConfiguration(t *testing.T) {
 	cfg := testConfig(t)
 	for _, policy := range []*AutoReportConfig{
-		{"", time.Now().Add(-time.Minute).UTC().Format(time.RFC3339)},
-		{"report", ""},
-		{"report", time.Now().Add(time.Hour).UTC().Format(time.RFC3339)},
+		{Since: ""},
+		{Since: "not-a-time"},
+		{Since: time.Now().Add(time.Hour).UTC().Format(time.RFC3339)},
 	} {
 		cfg.AutoReports = policy
 		if cfg.validate() == nil {
 			t.Fatal("invalid automatic reporting configuration")
 		}
 	}
-	cfg.AutoReports = &AutoReportConfig{"report", time.Now().Add(-time.Minute).UTC().Format(time.RFC3339)}
+	cfg.AutoReports = &AutoReportConfig{Since: time.Now().Add(-time.Minute).UTC().Format(time.RFC3339)}
 	if err := cfg.validate(); err != nil {
 		t.Fatal(err)
 	}
@@ -184,7 +184,7 @@ func TestAutoReportHTTPRecoveryAndTemporaryStop(t *testing.T) {
 		t.Fatal(err)
 	}
 	repo.Close()
-	cfg.AutoReports = &AutoReportConfig{"report", time.Now().Add(-time.Second).UTC().Format(time.RFC3339)}
+	cfg.AutoReports = &AutoReportConfig{Since: time.Now().Add(-time.Second).UTC().Format(time.RFC3339)}
 	var err error
 	repo, err = OpenPostingRepository(cfg, postcapture.Validate)
 	if err != nil {
@@ -247,7 +247,7 @@ func TestAutoReportHTTPRecoveryAndTemporaryStop(t *testing.T) {
 	victim.server = server.URL
 	third := newAutoReportHTTPClient(t, server.URL, cfg.Public.BaseURL, "127.85.0.1")
 	// 受理原本だけ保存され、判定へ進めなかった状態を作る。
-	repo.autoReportBoard = domain.ID{}
+	repo.cfg.AutoReports = nil
 	if body := third.post(t, "report", reportKey, message, "auto-report-third-vote"); !strings.Contains(body, "投稿を受け付けました") {
 		t.Fatal("third vote")
 	}

@@ -71,7 +71,7 @@ def main():
             run('docker', 'stop', '-t', '60', name);run('docker', 'rm', name)
         try:
             start();stop()
-            settings['auto_reports'] = {'board_key': 'probe', 'since': datetime.datetime.now(datetime.timezone.utc).isoformat(timespec='seconds').replace('+00:00', 'Z')}
+            settings['auto_reports'] = {'since': datetime.datetime.now(datetime.timezone.utc).isoformat(timespec='seconds').replace('+00:00', 'Z')}
             config.write_text(json.dumps(settings))
             cli('admin', 'init', '--login', 'owner', '--password-stdin', data=(secret+'\n').encode())
             cli('pack', 'enable')

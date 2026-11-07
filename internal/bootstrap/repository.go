@@ -50,7 +50,6 @@ type Repository struct {
 	liveReadingBoards            atomic.Pointer[readingBoardIndex]
 	maintenanceWake              chan struct{}
 	reportMu                     sync.Mutex
-	autoReportBoard              domain.ID
 	autoReportVotes              map[autoReportTarget][]autoReportVote
 	optionalStore                *evidence.OptionalStore
 	optionalLoss                 *evidence.OptionalLossStore

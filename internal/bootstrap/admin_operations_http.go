@@ -13,10 +13,11 @@ import (
 )
 
 type operationsPage struct {
-	State             AdminOperations
-	CSRF, RequestID   string
-	CacheLimitMiB     uint64
-	GenerationWorkers int
+	State              AdminOperations
+	AutoReportsEnabled bool
+	CSRF, RequestID    string
+	CacheLimitMiB      uint64
+	GenerationWorkers  int
 }
 
 // editableOperationSettings は手動で変更できる項目だけを受け付けるAPI境界。
@@ -36,13 +37,12 @@ func (v OperationSettings) editable() editableOperationSettings {
 
 // operationsResponse は保存形式に含まれる過去の手動資源値をAPIへ公開しない。
 type operationsResponse struct {
-	Settings    editableOperationSettings `json:"settings"`
-	Revision    domain.U64                `json:"revision"`
-	ReportBoard string                    `json:"report_board"`
+	Settings editableOperationSettings `json:"settings"`
+	Revision domain.U64                `json:"revision"`
 }
 
 func operationsAPI(v AdminOperations) operationsResponse {
-	return operationsResponse{v.Settings.editable(), v.Revision, v.ReportBoard}
+	return operationsResponse{v.Settings.editable(), v.Revision}
 }
 
 var operationsTemplate = webui.Template("operations")
@@ -64,7 +64,7 @@ func (h *adminHandler) operationsRoutes(w http.ResponseWriter, r *http.Request, 
 		}
 		w.Header().Set("Content-Type", "text/html; charset=UTF-8")
 		cache := h.repo.feedCompression.Status()
-		_ = executeAdminTemplate(w, w, operationsTemplate, operationsPage{State: v, CSRF: s.CSRF(route), RequestID: domain.NewID().String(), CacheLimitMiB: cache.Limit >> 20, GenerationWorkers: cache.Workers})
+		_ = executeAdminTemplate(w, w, operationsTemplate, operationsPage{State: v, AutoReportsEnabled: h.repo.cfg.AutoReports != nil, CSRF: s.CSRF(route), RequestID: domain.NewID().String(), CacheLimitMiB: cache.Limit >> 20, GenerationWorkers: cache.Workers})
 		return
 	}
 	if r.Method != "POST" {

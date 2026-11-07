@@ -53,17 +53,30 @@ func TestReportCommand(t *testing.T) {
 }
 
 func TestReportShortcutHTTP(t *testing.T) {
+	for _, slug := range []string{"news", "report"} {
+		t.Run(slug, func(t *testing.T) { testReportShortcutHTTP(t, slug) })
+	}
+}
+
+// testReportShortcutHTTP は任意の板で通報・復旧・規制が同じように働くことを確認する。
+func testReportShortcutHTTP(t *testing.T, slug string) {
 	cfg, repo, site, owner := anonymousFixture(t, "required")
 	defer func() {
 		if repo != nil {
 			repo.Close()
 		}
 	}()
-	if _, err := repo.CreateBoard(t.Context(), "report", "通報"); err != nil {
-		t.Fatal(err)
+	wantBoards := 1
+	if slug != "news" {
+		info, err := repo.CreateBoard(t.Context(), slug, "通常の板")
+		if err != nil {
+			t.Fatal(err)
+		}
+		owner = info.ID
+		wantBoards++
 	}
 	repo.Close()
-	cfg.AutoReports = &AutoReportConfig{"report", time.Now().Add(-time.Second).UTC().Format(time.RFC3339)}
+	cfg.AutoReports = &AutoReportConfig{Since: time.Now().Add(-time.Second).UTC().Format(time.RFC3339)}
 	var err error
 	repo, err = OpenPostingRepository(cfg, postcapture.Validate)
 	if err != nil {
@@ -82,25 +95,25 @@ func TestReportShortcutHTTP(t *testing.T) {
 	server := start()
 	defer func() { server.Close() }()
 	victim := newAutoReportHTTPClient(t, server.URL, cfg.Public.BaseURL, "127.101.0.1")
-	if body := victim.post(t, "news", "", "TARGET", "shortcut-target-create"); !strings.Contains(body, "投稿を受け付けました") {
+	if body := victim.post(t, slug, "", "TARGET", "shortcut-target-create"); !strings.Contains(body, "投稿を受け付けました") {
 		t.Fatal("target creation")
 	}
-	key := strings.Split(victim.request(t, "/news/subject.txt", nil), ".dat<>")[0]
+	key := strings.Split(victim.request(t, "/"+slug+"/subject.txt", nil), ".dat<>")[0]
 	reader := newAutoReportHTTPClient(t, server.URL, cfg.Public.BaseURL, "127.102.0.1")
-	if body := reader.post(t, "news", key, ">>1-2\n!report", "shortcut-invalid-target"); !strings.Contains(body, "!report") || strings.Contains(body, "投稿を受け付けました") {
+	if body := reader.post(t, slug, key, ">>1-2\n!report", "shortcut-invalid-target"); !strings.Contains(body, "!report") || strings.Contains(body, "投稿を受け付けました") {
 		t.Fatal("invalid target accepted")
 	}
 	if len(repo.autoReportVotes) != 0 {
 		t.Fatal("invalid report changed votes")
 	}
-	if body := reader.post(t, "news", key, ">>1\n!report 広告の連投", "shortcut-first-report"); !strings.Contains(body, "投稿を受け付けました") {
+	if body := reader.post(t, slug, key, ">>1\n!report 広告の連投", "shortcut-first-report"); !strings.Contains(body, "投稿を受け付けました") {
 		t.Fatal("first command")
 	}
-	if body := reader.post(t, "news", key, ">>1\n!report 広告の連投", "shortcut-first-report"); !strings.Contains(body, "同一内容を受理済み") {
+	if body := reader.post(t, slug, key, ">>1\n!report 広告の連投", "shortcut-first-report"); !strings.Contains(body, "同一内容を受理済み") {
 		t.Fatal("command retry")
 	}
 	second := newAutoReportHTTPClient(t, server.URL, cfg.Public.BaseURL, "127.103.0.1")
-	if body := second.post(t, "news", key, ">>1\n!report", "shortcut-second-report"); !strings.Contains(body, "投稿を受け付けました") {
+	if body := second.post(t, slug, key, ">>1\n!report", "shortcut-second-report"); !strings.Contains(body, "投稿を受け付けました") {
 		t.Fatal("second command")
 	}
 	if len(repo.posting[owner].denials) != 0 {
@@ -116,7 +129,7 @@ func TestReportShortcutHTTP(t *testing.T) {
 	server = start()
 	victim.server = server.URL
 	third := newAutoReportHTTPClient(t, server.URL, cfg.Public.BaseURL, "127.104.0.1")
-	if body := third.post(t, "news", key, ">>1 !report   ", "shortcut-third-report"); !strings.Contains(body, "投稿を受け付けました") {
+	if body := third.post(t, slug, key, ">>1 !report   ", "shortcut-third-report"); !strings.Contains(body, "投稿を受け付けました") {
 		t.Fatal("third command")
 	}
 	if len(repo.posting[owner].denials) != 1 {
@@ -127,14 +140,14 @@ func TestReportShortcutHTTP(t *testing.T) {
 			t.Fatal("stop must be ten minutes")
 		}
 	}
-	if body := victim.post(t, "news", key, "STOPPED", "shortcut-target-blocked"); !strings.Contains(body, "規制されています") {
+	if body := victim.post(t, slug, key, "STOPPED", "shortcut-target-blocked"); !strings.Contains(body, "規制されています") {
 		t.Fatal("target not stopped")
 	}
-	dat := third.request(t, "/news/dat/"+key+".dat", nil)
+	dat := third.request(t, "/"+slug+"/dat/"+key+".dat", nil)
 	if strings.Count(dat, "\n") != 4 || !strings.Contains(dat, "&gt;&gt;1<br>!report") {
 		t.Fatal("ordinary reply publication or invalid/retry count")
 	}
-	if subject := third.request(t, "/report/subject.txt", nil); !strings.HasPrefix(subject, "1.dat<>") {
-		t.Fatal("unexpected report-board copy")
+	if len(repo.posting) != wantBoards {
+		t.Fatal("reporting required an additional board")
 	}
 }

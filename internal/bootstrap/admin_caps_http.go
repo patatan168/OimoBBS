@@ -193,6 +193,9 @@ func (h *adminHandler) capsRoutes(w http.ResponseWriter, r *http.Request, s admi
 		h.failure(w, r, e)
 		return
 	}
+	if secret != "" {
+		w = h.checkedSecretResponse(w, func() error { return h.repo.authorizeCap(s, view.Boards) })
+	}
 	w.Header().Set("ETag", view.ETag())
 	if api {
 		adminJSON(w, 200, map[string]any{"data": capHTTPValue(view), "secret": secret, "secret_available": secret != ""})

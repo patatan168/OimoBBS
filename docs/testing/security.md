@@ -41,7 +41,29 @@ mise exec -- go test -race ./internal/bootstrap -run '^TestWSTG' -count=1
 
 [ブラウザー検査の準備](README.md#ブラウザー検査の準備)で示す環境変数を指定すると、`TestWSTGBrowser` がChromiumで投稿・確認画面・通報管理画面の保存型XSSと、別Originからの管理フォーム送信を検査します。環境変数を省略した場合、ブラウザ検査はスキップされます。
 
-実施範囲・証跡・未検証項目は[2026-10-23の診断記録](security-review-2026-10-23.md)を参照してください。
+実施範囲・証跡・未検証項目は[2026-11-07の診断記録](pentest-20261107.md)と[2026-10-23の診断記録](security-review-2026-10-23.md)を参照してください。
+
+### 実HTTP/3の管理境界と外部取得データ
+
+```sh
+mise exec -- python3 scripts/quic-reference.py test -- -race -count=1 -timeout=5m \
+  ./internal/bootstrap -run 'TestAdminHTTP3SecurityBoundaries|TestWAFHTTP3DirectAndAuthenticatedEdge'
+mise exec -- go test -race ./internal/bootstrap \
+  -run 'TestNetworkFeedRowBoundaries|TestNetworkOversizedFeedPreservesPublishedState' -count=1
+```
+
+外部QUICクライアントは一時moduleだけへ追加します。製品と共通のハンドラーへ実UDPで接続し、HTTP/3の応答であること、WAFのON/OFF、管理ログイン・再認証・更新、偽造・重複Cookie、CSRF、Origin、失効を検査します。拒否時の保存状態と正常更新も照合します。
+
+回線分類のASN・VPN取得は4万件の境界を検査します。件数過多の実TLS応答を拒否した後も前回成功表を保持し、再起動後に同じ分類を返すことを確認します。拒否までの総割当ては `go test ./internal/bootstrap -run '^$' -bench '^BenchmarkNetworkOversizedFeeds$' -benchmem -benchtime=3x -count=3` で測定できます。
+
+### 応答待機と共有ロック
+
+```sh
+mise exec -- go test -race ./internal/bootstrap \
+  -run 'TestPublicReportResponseReleasesSiteMutex|TestEvidenceAPIResponse' -count=1
+```
+
+削除依頼の受付・照会・入力拒否と、提出用記録の管理APIの実HTTP応答で、送信前にサイト共通ロックが解放されることを検査します。案件APIは帯域待機中のログアウト・担当変更も検査し、本文を送らず中断することを確認します。[追加診断記録](pentest-extra-20261107.md)に修正前後の再現範囲を記載しています。
 
 ### WAFの入力境界と管理画面
 

@@ -1,0 +1,191 @@
+// 製品の管理入口へ実HTTP/3で接続し、認証・CSRF・失効と正常更新を検査する。
+package bootstrap
+
+import (
+	"bytes"
+	"compress/gzip"
+	"encoding/json"
+	"image/png"
+	"io"
+	"net/http"
+	"net/url"
+	"strings"
+	"testing"
+	"time"
+
+	"oimobbs/internal/domain"
+	"oimobbs/internal/waf"
+)
+
+// TestAdminHTTP3SecurityBoundaries はWAFの有無にかかわらず管理境界が働くことを確認する。
+func TestAdminHTTP3SecurityBoundaries(t *testing.T) {
+	for _, enabled := range []bool{false, true} {
+		name := "waf_off"
+		if enabled {
+			name = "waf_on"
+		}
+		t.Run(name, func(t *testing.T) {
+			cfg, repo := adminFixture(t)
+			defer repo.Close()
+			clientTLS, _ := proxyCertificates(t, &cfg)
+			cfg.Edge, cfg.TrustedProxies = nil, []string{}
+			cfg.Admin.Transport, cfg.Admin.Listen, cfg.Admin.Origin = "public_path", "", cfg.Public.BaseURL+"/admin"
+			repo.cfg = cfg
+			policy := WAFSettings{Enabled: enabled, Traffic: waf.DefaultTrafficSettings()}
+			policy.Traffic.Enabled = false
+			repo.publishWAF(policy)
+			configured, err := repo.ValidationHTTPServer()
+			if err != nil {
+				t.Fatal(err)
+			}
+			origin, client := wafHTTP3Client(t, configured, clientTLS)
+			host, _ := url.Parse(cfg.Public.BaseURL)
+			siteSequence := func() domain.U64 {
+				repo.mu.Lock()
+				defer repo.mu.Unlock()
+				return repo.site.State().Seq
+			}
+			// 実socketと設定済みHostを分け、製品のHost・Origin検査は維持する。
+			request := func(t *testing.T, method, path, body, cookie string, headers http.Header, want int) (*http.Response, string) {
+				t.Helper()
+				req, err := http.NewRequest(method, origin+"/admin"+path, strings.NewReader(body))
+				if err != nil {
+					t.Fatal(err)
+				}
+				req.Host = host.Host
+				req.Header.Set("Accept-Encoding", "gzip")
+				req.Header.Set("Origin", cfg.Public.BaseURL)
+				if cookie != "" {
+					req.Header.Set("Cookie", cookie)
+				}
+				for key, values := range headers {
+					req.Header[key] = values
+				}
+				res, err := client.Do(req)
+				if err != nil {
+					t.Fatal(err)
+				}
+				defer res.Body.Close()
+				var reader io.Reader = res.Body
+				if res.Header.Get("Content-Encoding") == "gzip" {
+					decoded, err := gzip.NewReader(res.Body)
+					if err != nil {
+						t.Fatal(err)
+					}
+					defer decoded.Close()
+					reader = decoded
+				}
+				raw, err := io.ReadAll(reader)
+				if err != nil || res.ProtoMajor != 3 || res.StatusCode != want || res.Header.Get("Cache-Control") != "no-store" {
+					t.Fatalf("%s %s: proto=%s status=%d want=%d err=%v", method, path, res.Proto, res.StatusCode, want, err)
+				}
+				return res, string(raw)
+			}
+			login, page := request(t, "GET", "/login", "", "", nil, 200)
+			fields := pageFields(page)
+			fields.Set("login", "owner")
+			fields.Set("password", adminTestSecret)
+			nonce := login.Cookies()[0].Name + "=" + login.Cookies()[0].Value
+			loggedIn, _ := request(t, "POST", "/login", fields.Encode(), nonce, http.Header{"Content-Type": {"application/x-www-form-urlencoded"}}, 303)
+			var cookie string
+			for _, issued := range loggedIn.Cookies() {
+				if issued.Name == "oimo_admin" {
+					if !issued.Secure || !issued.HttpOnly || issued.SameSite != http.SameSiteStrictMode || issued.Path != "/admin/" {
+						t.Fatal("insecure session cookie", issued.Name)
+					}
+					cookie = issued.Name + "=" + issued.Value
+				}
+			}
+			if cookie == "" {
+				t.Fatal("HTTP/3 login did not issue a session")
+			}
+			reauth, _ := request(t, "GET", "/api/v1/reauth", "", cookie, nil, 200)
+			reauthenticated, _ := request(t, "POST", "/api/v1/reauth", `{"password":"`+adminTestSecret+`"}`, cookie, http.Header{"Content-Type": {"application/json"}, "X-Csrf-Token": {reauth.Header.Get("X-CSRF-Token")}}, 200)
+			// 再認証は旧セッションを失効させるため、再発行されたCookieへ切り替える。
+			for _, issued := range reauthenticated.Cookies() {
+				if issued.Name == "oimo_admin" {
+					cookie = issued.Name + "=" + issued.Value
+				}
+			}
+			_, cases := request(t, "GET", "/api/v1/evidence/cases", "", cookie, nil, 200)
+			if !strings.Contains(cases, `"data":[]`) {
+				t.Fatal("HTTP/3 evidence API response is incomplete")
+			}
+			session, err := repo.adminAuth.Lookup(strings.TrimPrefix(cookie, "oimo_admin="), time.Now())
+			if err != nil {
+				t.Fatal(err)
+			}
+			setup, enrollment := request(t, "POST", otpRoute+"register/begin", "{}", cookie, http.Header{"Content-Type": {"application/json"}, "X-Csrf-Token": {session.CSRF(otpRoute)}}, 200)
+			var enrollmentData struct {
+				Secret string `json:"secret"`
+			}
+			if json.Unmarshal([]byte(enrollment), &enrollmentData) != nil || len(enrollmentData.Secret) < 32 {
+				t.Fatal("HTTP/3 OTP enrollment secret missing")
+			}
+			qrCookie := cookie
+			for _, issued := range setup.Cookies() {
+				if issued.Name == "oimo_admin_otp" {
+					qrCookie += "; " + issued.Name + "=" + issued.Value
+				}
+			}
+			_, image := request(t, "GET", otpRoute+"register/qr", "", qrCookie, nil, 200)
+			if _, err := png.Decode(bytes.NewReader([]byte(image))); err != nil {
+				t.Fatal("HTTP/3 OTP QR", err)
+			}
+			board, err := repo.CreateBoard(t.Context(), "http3secret", "資格検証")
+			if err != nil {
+				t.Fatal(err)
+			}
+			caps, _ := request(t, "GET", "/api/v1/caps", "", cookie, nil, 200)
+			capInputRaw, err := json.Marshal(capInput{Name: "HTTP3検証", Boards: []domain.ID{board.ID}, Permissions: []string{"post"}})
+			if err != nil {
+				t.Fatal(err)
+			}
+			_, credential := request(t, "POST", "/api/v1/caps", string(capInputRaw), cookie, http.Header{"Content-Type": {"application/json"}, "X-Csrf-Token": {caps.Header.Get("X-CSRF-Token")}, "If-Match": {caps.Header.Get("ETag")}, "Idempotency-Key": {domain.NewID().String()}}, 200)
+			var capData struct {
+				Secret string `json:"secret"`
+			}
+			if json.Unmarshal([]byte(credential), &capData) != nil || len(capData.Secret) != 43 {
+				t.Fatal("HTTP/3 cap secret missing")
+			}
+			site, _ := request(t, "GET", "/api/v1/site", "", cookie, nil, 200)
+			before := siteSequence()
+			base := http.Header{"Content-Type": {"application/json"}, "X-Csrf-Token": {site.Header.Get("X-CSRF-Token")}, "If-Match": {site.Header.Get("ETag")}, "Idempotency-Key": {"http3-security-control"}}
+			for _, tc := range []struct {
+				name, cookie, header string
+				values               []string
+				want                 int
+			}{
+				{"missing-session", "", "", nil, 401},
+				{"forged-session", "oimo_admin=" + strings.Repeat("A", 43), "", nil, 401},
+				{"duplicate-session", cookie + "; " + cookie, "", nil, 401},
+				{"missing-csrf", cookie, "X-Csrf-Token", nil, 403},
+				{"duplicate-csrf", cookie, "X-Csrf-Token", []string{site.Header.Get("X-CSRF-Token"), site.Header.Get("X-CSRF-Token")}, 403},
+				{"foreign-origin", cookie, "Origin", []string{"https://attacker.invalid"}, 403},
+				{"null-origin", cookie, "Origin", []string{"null"}, 403},
+				{"cross-site", cookie, "Sec-Fetch-Site", []string{"cross-site"}, 403},
+				{"duplicate-revision", cookie, "If-Match", []string{site.Header.Get("ETag"), site.Header.Get("ETag")}, 400},
+			} {
+				t.Run(tc.name, func(t *testing.T) {
+					headers := base.Clone()
+					if tc.header != "" {
+						headers[tc.header] = tc.values
+					}
+					request(t, "PATCH", "/api/v1/site", `{"name":"rejected"}`, tc.cookie, headers, tc.want)
+					if siteSequence() != before {
+						t.Fatal("rejected input changed durable state")
+					}
+				})
+			}
+			request(t, "PATCH", "/api/v1/site", `{"name":"HTTP3 accepted control"}`, cookie, base, 200)
+			if siteSequence() <= before {
+				t.Fatal("valid update did not persist")
+			}
+			repo.adminAuth.Delete(strings.TrimPrefix(cookie, "oimo_admin="))
+			request(t, "GET", "/api/v1/site", "", cookie, nil, 401)
+			request(t, "GET", "/api/v1/evidence/cases", "", cookie, nil, 401)
+			request(t, "GET", otpRoute+"register/qr", "", qrCookie, nil, 401)
+			request(t, "POST", otpRoute+"register/begin", "{}", cookie, http.Header{"Content-Type": {"application/json"}, "X-Csrf-Token": {session.CSRF(otpRoute)}}, 401)
+		})
+	}
+}

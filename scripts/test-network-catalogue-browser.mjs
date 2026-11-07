@@ -83,7 +83,7 @@ try {
     await page.waitForLoadState('load');
     await page.waitForFunction(() => !document.querySelector('[data-network-poll]'));
     assert.equal(await page.locator('[role="alert"]').count(), 0);
-    assert.ok((await page.locator('.site-footer').innerText()).includes('バージョン1.1.3'));
+    assert.ok((await page.locator('.site-footer').innerText()).includes('バージョン1.1.4'));
     const after = (await (await page.request.get(base + '/api/v1/networks')).json()).data;
     assert.equal(after.error_code, '');
     assert.ok(BigInt(after.attempt_ns) > BigInt(before.attempt_ns));

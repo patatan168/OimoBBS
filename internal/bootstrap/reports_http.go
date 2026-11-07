@@ -4,7 +4,6 @@ package bootstrap
 import (
 	"bytes"
 	"crypto/rand"
-	"crypto/sha256"
 	"encoding/base64"
 	"net"
 	"net/http"
@@ -101,85 +100,8 @@ func (repo *Repository) reportsHTTP(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "入力を確認してください。", 400)
 		return
 	}
-	repo.mu.Lock()
-	defer repo.mu.Unlock()
-	if e = repo.available(); e != nil {
-		http.Error(w, "現在受付できません。", 503)
-		return
-	}
-	key, e := reportKey(repo.cfg.DataDir)
-	if e != nil {
-		http.Error(w, "現在受付できません。", 503)
-		return
-	}
-	defer clear(key[:])
-	cookie, e := singlePostingCookie(r.Header, "oimo_reports", 43)
-	if e != nil || abuse.VerifyWebCSRF(cookie, fields.Get("csrf"), "reports", key[:], 6, time.Now()) != nil {
-		http.Error(w, "フォームを開き直してください。", 403)
-		return
-	}
-	page := reportsPage{Title: "削除依頼・照会", CSRF: fields.Get("csrf"), IntervalMinutes: repo.operations().reportIntervalMinutes(), Form: reportForm{fields.Get("board"), fields.Get("thread"), fields.Get("ranges"), fields.Get("category"), fields.Get("reason"), fields.Get("contact")}}
-	if e = repo.reportRate(r, lookup, key); e != nil {
-		if lookup {
-			w.Header().Set("Retry-After", "60")
-			http.Error(w, "間隔を空けて再照会してください。", 429)
-		} else {
-			writeReportRateError(w, page, e)
-		}
-		return
-	}
-	if lookup {
-		id, e := parseReportID(fields.Get("id"))
-		v, readErr := readReport(repo.cfg.DataDir, id, key)
-		if e != nil || readErr != nil || !reportSecretMatches(v, fields.Get("secret")) || v.Expires <= domain.Time(time.Now().UnixNano()) {
-			http.NotFound(w, r)
-			return
-		}
-		writeReportsPage(w, 200, reportsPage{Title: "依頼の照会", Lookup: &reportLookup{v.ID, v.Board, v.Thread, v.Ranges, v.State, v.Answer}})
-		return
-	}
-	v, e := repo.newReport(r, fields.Get("board"), fields.Get("thread"), fields.Get("ranges"), fields.Get("category"), fields.Get("reason"), fields.Get("contact"))
-	if e != nil {
-		page.Message = "入力と自サイトの対象を確認してください。"
-		writeReportsPage(w, 400, page)
-		return
-	}
-	repo.reportMu.Lock()
-	defer repo.reportMu.Unlock()
-	if e = repo.ensureReports(); e != nil {
-		http.Error(w, "現在受付できません。", 503)
-		return
-	}
-	ids, e := reportFiles(repo.cfg.DataDir)
-	if e != nil || len(ids) >= reportLimit {
-		http.Error(w, "現在受付できません。", 503)
-		return
-	}
-	actor := reportActorHash(key, cookie)
-	v.ReporterHash = &actor
-	if e = repo.reportSubmissionRate(ids, v, key, time.Now()); e != nil {
-		if _, limited := e.(*abuse.RateLimited); limited {
-			writeReportRateError(w, page, e)
-		} else {
-			http.Error(w, "現在受付できません。", 503)
-		}
-		return
-	}
-	secretBytes := make([]byte, 32)
-	if _, e = rand.Read(secretBytes); e != nil {
-		http.Error(w, "現在受付できません。", 503)
-		return
-	}
-	secret := base64.RawURLEncoding.EncodeToString(secretBytes)
-	clear(secretBytes)
-	v.LookupHash = sha256.Sum256([]byte(secret))
-	if e = writeReport(repo.cfg.DataDir, v, key); e != nil {
-		repo.stopped = true
-		http.Error(w, "保存結果を確認できません。", 503)
-		return
-	}
-	// 受付画面に私情報や秘密hashを渡さない。
-	writeReportsPage(w, 201, reportsPage{Title: "依頼を受け付けました", Secret: secret, Accepted: &deletionReport{ID: v.ID}})
+	reply := repo.prepareReportSubmission(r, fields, lookup)
+	reply.write(w, r)
 }
 
 func reportSameOrigin(r *http.Request, base string) bool {

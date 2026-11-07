@@ -173,6 +173,7 @@ func (h *adminHandler) temporaryPasswordRoute(w http.ResponseWriter, r *http.Req
 		h.failure(w, r, err)
 		return
 	}
+	w = h.checkedSecretResponse(w, func() error { return h.repo.authorizeAccountChange(s) })
 	if strings.HasPrefix(r.URL.Path, "/api/") {
 		adminJSON(w, 200, map[string]any{"temporary_password": temporary, "expires_in": 3600, "password_change_required": true})
 	} else {

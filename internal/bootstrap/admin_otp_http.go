@@ -128,6 +128,7 @@ func (h *adminHandler) otpRoutes(w http.ResponseWriter, r *http.Request, s admin
 	}
 	if result.SetupToken != "" {
 		http.SetCookie(w, h.adminCookie("oimo_admin_otp", result.SetupToken, 120))
+		w = h.checkedOTPEnrollmentResponse(w, s, result.SetupToken, raw)
 	}
 	if result.Logout {
 		http.SetCookie(w, h.adminCookie("oimo_admin", "", -1))
@@ -274,6 +275,8 @@ func (h *adminHandler) otpQR(w http.ResponseWriter, r *http.Request, s adminauth
 		h.failure(w, r, err)
 		return
 	}
+	defer clear(encoded)
+	w = h.checkedOTPEnrollmentResponse(w, s, token, binding)
 	w.Header().Set("Cross-Origin-Resource-Policy", "same-origin")
 	w.Header().Set("Content-Type", "image/png")
 	w.WriteHeader(http.StatusOK)

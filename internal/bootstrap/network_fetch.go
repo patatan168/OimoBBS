@@ -113,6 +113,7 @@ func mergeNetworkBatches(batches []networkBatch, sources []NetworkSource) ([]ide
 	return rows, nil
 }
 
+// parseASNNetworks はASN・family合計の件数を確認してから分類行を構築する。
 func parseASNNetworks(raw []byte, s NetworkSource) ([]identity.NetworkClass, error) {
 	var fields map[string]json.RawMessage
 	if strictjson.Decode(raw, &fields) != nil {
@@ -129,7 +130,10 @@ func parseASNNetworks(raw []byte, s NetworkSource) ([]identity.NetworkClass, err
 	if strictjson.Decode(fields["prefixes"], &prefixes) != nil || prefixes.IPv4 == nil || prefixes.IPv6 == nil {
 		return nil, errNetworkData
 	}
-	rows := []identity.NetworkClass{}
+	if len(prefixes.IPv4) > networkRowLimit || len(prefixes.IPv6) > networkRowLimit-len(prefixes.IPv4) {
+		return nil, errNetworkData
+	}
+	rows := make([]identity.NetworkClass, 0, len(prefixes.IPv4)+len(prefixes.IPv6))
 	for _, family := range []struct {
 		values []string
 		v4     bool

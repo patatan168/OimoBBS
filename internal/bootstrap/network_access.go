@@ -225,7 +225,7 @@ func fetchJapanPrefixes(ctx context.Context, client *http.Client) ([]string, err
 	return append(prefixes.IPv4, prefixes.IPv6...), nil
 }
 
-// fetchVPNPrefixes は一familyのVPN専用表だけを取得し、不正prefixを拒否する。
+// fetchVPNPrefixes は一familyのVPN専用表だけを取得し、件数超過を蓄積前に拒否する。
 func fetchVPNPrefixes(ctx context.Context, client *http.Client, v4 bool) ([]string, error) {
 	family := "ipv6"
 	if v4 {
@@ -239,6 +239,9 @@ func fetchVPNPrefixes(ctx context.Context, client *http.Client, v4 bool) ([]stri
 	for line := range strings.SplitSeq(string(raw), "\n") {
 		line = strings.TrimSpace(line)
 		if line != "" && !strings.HasPrefix(line, "#") {
+			if len(values) >= networkRowLimit {
+				return nil, errNetworkData
+			}
 			values = append(values, line)
 		}
 	}

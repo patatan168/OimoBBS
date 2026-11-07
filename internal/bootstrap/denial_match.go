@@ -9,7 +9,6 @@ import (
 	"oimobbs/internal/evidence"
 	"oimobbs/internal/identity"
 	"oimobbs/internal/postinput"
-	"oimobbs/internal/urlhost"
 	"regexp"
 	"strings"
 	"unicode/utf8"
@@ -107,8 +106,6 @@ func validRuleDomain(raw string) bool {
 	}
 	return true
 }
-
-var ruleURLs = regexp.MustCompile(`(?i)https?:[^\s<>"']+`)
 
 // matches は秘密除去済みの入力・認証済み主体・観測UAを事前構築した全条件へ照合する。
 func (c compiledDenial) matches(ip netip.Addr, in postinput.Input, token domain.Hash, hosts, agents []string, classes ...string) bool {
@@ -250,18 +247,4 @@ func (b *postingBoard) matchedRules(ip netip.Addr, in postinput.Input, token dom
 		}
 	}
 	return matched, nil
-}
-
-// postingURLHosts はブラウザーと同じURL規則で宛先を正規化する。DNS/HTTP照会は行わない。
-// Unicodeドット・国際化ドメイン・percent符号化・特殊なIPv4表記も同じ宛先として照合する。
-func postingURLHosts(body string) []string {
-	hosts := []string{}
-	for _, raw := range ruleURLs.FindAllString(body, -1) {
-		host, ok := urlhost.HTTP(strings.TrimRight(raw, ".,;!?)]}。、）】」』"))
-		if !ok || host == "" {
-			continue
-		}
-		hosts = append(hosts, host)
-	}
-	return hosts
 }

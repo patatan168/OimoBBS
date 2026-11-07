@@ -343,69 +343,15 @@ func (h *adminHandler) evidenceGET(w http.ResponseWriter, r *http.Request, s adm
 		h.renderEvidence(w, r, s)
 		return
 	}
-	h.repo.mu.Lock()
-	defer h.repo.mu.Unlock()
-	if e := h.repo.authorizeEvidence(s, "evidence.manage", domain.ID{}, true); e != nil {
-		h.failure(w, r, e)
+	reply, err := h.repo.evidenceCaseResponse(s, r, path)
+	if err != nil {
+		h.failure(w, r, err)
 		return
 	}
-	rows, e := h.repo.evidenceCases.Cases()
-	if e != nil {
-		h.failure(w, r, e)
-		return
-	}
-	selected := []disclosure.Case{}
-	var target domain.ID
-	if strings.HasPrefix(path, "/evidence/cases/") {
-		if target.UnmarshalJSON([]byte(strconv.Quote(strings.TrimPrefix(path, "/evidence/cases/")))) != nil {
-			h.fail(w, r, 404, "NOT_FOUND")
-			return
-		}
-	}
-	var window adminListWindow
-	var revision string
-	if target == (domain.ID{}) {
-		rows, window, revision, e = h.repo.evidenceCasePageLocked(rows, s, r)
-		if e != nil {
-			h.failure(w, r, e)
-			return
-		}
-	}
-	tokens := map[string]string{"/api/v1/evidence/cases": s.CSRF("/api/v1/evidence/cases"), "/api/v1/evidence/other-cases": s.CSRF("/api/v1/evidence/other-cases")}
-	for _, c := range rows {
-		if target != (domain.ID{}) && target != c.ID {
-			continue
-		}
-		if h.repo.authorizeEvidence(s, "evidence.manage", c.Scope.Board, true) != nil {
-			continue
-		}
-		selected = append(selected, c)
-		for _, action := range []string{"hold", "http-hold", "http-observation-hold", "extend", "release", "exports", "extract", "rejected-hold", "rejected-exports", "extract-rejected", "extract-http"} {
-			route := "/api/v1/evidence/cases/" + c.ID.String() + "/" + action
-			tokens[route] = s.CSRF(route)
-		}
-		for _, v := range c.Exports {
-			for _, action := range []string{"download", "resume"} {
-				route := "/api/v1/evidence/exports/" + v.ID.String() + "/" + action
-				tokens[route] = s.CSRF(route)
-			}
-		}
-	}
-	etag := `"evidence:new"`
-	if target != (domain.ID{}) {
-		if len(selected) == 0 {
-			h.fail(w, r, 404, "EVIDENCE_NOT_FOUND")
-			return
-		}
-		etag = selected[0].ETag()
-	}
-	w.Header().Set("ETag", etag)
+	w = h.checkedEvidenceCaseResponse(w, s, reply.boards)
+	w.Header().Set("ETag", reply.etag)
 	w.Header().Set("X-CSRF-Token", s.CSRF("/api/v1/evidence/cases"))
-	response := map[string]any{"data": selected, "dates": evidenceCaseHTTPValues(selected), "csrf_tokens": tokens, "cleanup_failed": h.repo.evidenceCleanupFailed}
-	if target == (domain.ID{}) {
-		response["limit"], response["next_cursor"], response["revision"], response["total"] = window.Limit, window.Next, revision, window.Total
-	}
-	adminJSON(w, 200, response)
+	adminJSON(w, 200, reply.data)
 }
 func (h *adminHandler) readEvidenceInput(w http.ResponseWriter, r *http.Request, s adminauth.Session, api bool) (evidenceInput, string, string, error) {
 	var input evidenceInput

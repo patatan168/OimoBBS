@@ -73,7 +73,11 @@ func TestDNSDisplayKeepsKindAndManualVPNSpecialPrecedence(t *testing.T) {
 		c.Resolve(t.Context(), ip)
 		classifier := &NetworkClassifier{Services: c, Access: &AccessIndex{Countries: countries}}
 		got := classifier.Classify(nil, ip)
-		if got.Label != tc.label || got.Suffix != tc.suffix || got.Kind != "unknown" {
+		unknownLabel := tc.label
+		if tc.suffix == "0" {
+			unknownLabel = "ﾜｶﾗﾝ"
+		}
+		if got.Label != unknownLabel || got.Suffix != tc.suffix || got.Kind != "unknown" {
 			t.Fatal("unknown classification", got)
 		}
 		row := NetworkClass{CIDR: p.String(), Kind: "fixed", Label: "ﾜｯﾁｮｲ", Suffix: "0", Provider: "test"}

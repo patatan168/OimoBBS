@@ -1,6 +1,19 @@
 # 回線分類と標準カタログ
 
-国内の携帯・固定系、地域ISP、CATV、IPoE・企業アクセス網の203 ASN、VPN関連7 ASNに、クラウド16・衛星1・学術9・政府機関1を加えた237 ASNを対象にします。固定回線の投稿表示は `ﾜｯﾁｮｲ` です。
+国内の携帯・固定系、地域ISP、CATV、IPoE・企業アクセス網の203 ASN、VPN関連7 ASNに、クラウド16・衛星1・学術9・政府機関1を加えた237 ASNを対象にします。自動分類の固定回線は `ﾜｯﾁｮｲ`、分類不明でも事業者キーが判明していれば事業者別の独自呼称、事業者キーが不明・呼称未登録なら `ﾜｶﾗﾝ` です。固定・携帯混在は以下の独自呼称です。
+
+| 混在回線の事業者 | 投稿の呼称 | ID末尾 |
+| --- | --- | --- |
+| OCN | `ｵｼﾏｾﾞ` | `0` |
+| KDDI | `ｱｳｱｳﾏｾﾞ` | `0` |
+| SoftBank | `ﾔﾜﾗｶﾏｾﾞ` | `0` |
+| IIJ | `ｲｲｼﾞｬﾝ` | `0` |
+| OPTAGE | `ｵﾌﾟﾏｾﾞ` | `0` |
+| BIGLOBE | `ﾃﾞｶﾁｷｭｰ` | `0` |
+
+これらはOimoBBS独自の掲示板風呼称です。事業者名そのものは投稿の呼称に使いません。混在で事業者キーが空、または対応する呼称が未登録なら `ﾜｯﾁｮﾏｾﾞ / 0` です。分類不明でも同じ事業者キーには同じ呼称を使います。固定回線は事業者によらず `ﾜｯﾁｮｲ` です。確認済みDNSによる携帯・MVNO等の分類と、DNS異常時の`h/H`表示を優先します。
+
+取得済みの旧自動表でも、新規投稿とIP確認には補正後の呼称を使います。標準取得元・カテゴリーの保存済み呼称は、次回の自動更新または「今すぐ更新」で補正します。独自取得元・カテゴリーの保存設定と、共通・板別の手動CIDR上書きは保持します。過去の投稿は再生成しません。
 
 | 調べたいこと | 参照先 |
 | --- | --- |
@@ -15,6 +28,92 @@
 | 携帯・公衆Wi-Fiのホスト名による補完 | [携帯・公衆Wi-FiのDNS補完](#携帯公衆wi-fiのdns補完) |
 | クラウド・VPSのホスト名による補完 | [クラウド・VPSのDNS補完](#クラウドvpsのdns補完) |
 | 登録済みの事業者とASN | [取得元一覧](#取得元一覧)・[VPN事業者](#vpn事業者共有基盤) |
+
+## 分類不明の事業者別呼称
+
+標準のunknown 87 ASNを79個の事業者キーで区別します。呼称はOimoBBS独自のもので、回線種別は `unknown` のままです。事業者名から固定・携帯・VPNなどを推測する変更ではありません。同じ事業者の複数ASNは同じ呼称になり、契約ブランドまでは確定しません。キーが空・呼称未登録の場合と、分類が衝突してキーを外した場合は `ﾜｶﾗﾝ / 0` です。
+
+| 事業者（管理用） | キー | 投稿の呼称 |
+| --- | --- | --- |
+| Dream Wave Shizuoka Co. Ltd. | `across` | `ﾕﾒﾉﾅﾐ` |
+| Air Internet Service Co. Ltd. | `air` | `ｿﾗﾉﾐﾁ` |
+| アルテリア / VECTANT / UCOM | `arteria` | `ｱﾙｱﾙ` |
+| Densan Co. Ltd. | `avisnet` | `ｱﾋﾞｱﾋﾞｰ` |
+| BBIX / BB.excite系 | `bbix` | `ﾋﾞﾋﾞｸｽ` |
+| BEKKOAME INTERNET INC. | `bekkoame` | `ｱﾒﾁｬﾝ` |
+| BIGLOBE | `biglobe` | `ﾃﾞｶﾁｷｭｰ` |
+| KISTEM Co. Ltd. | `biwalobe` | `ﾋﾞﾜﾋﾞﾜｰ` |
+| Check Point | `checkpoint` | `ﾐﾊﾘﾊﾞﾝ` |
+| Tonami System Solutions Co. Ltd. | `coralnet` | `ｻﾝｺﾞﾉﾜ` |
+| Cyberzone / Surfshark系 | `cyberzone` | `ｻｰﾌｧｰ` |
+| TOYOTA SYSTEMS CORPORATION | `d-cruisenet` | `ｸﾙｰｽﾞﾝ` |
+| D.C.N. Corporation | `dcn` | `ﾃﾞｼﾃﾞｼｰ` |
+| DODO K.K. | `dodo` | `ﾄﾞｰﾄﾞｰ` |
+| Dolphin | `dolphin` | `ｲﾙｶｰ` |
+| DOVA Corporation | `dova` | `ﾄﾞﾊﾞﾄﾞﾊﾞｰ` |
+| EDION Corporation | `edion` | `ｶﾃﾞﾝﾃﾞﾝ` |
+| EditNet Incorporated | `editnet` | `ｶｷｶｷｰ` |
+| OPTAGE Inc. | `finder` | `ﾐﾂｹﾀｰ` |
+| Canon IT Solutions Inc. | `fine` | `ｵｹﾞﾝｷｰ` |
+| Hokuden Information System Service Co. Ltd. | `fitweb` | `ﾌｨｯﾄｯﾄ` |
+| NRI SecureTechnologies Ltd. | `fnc` | `ｶｷﾞﾉﾓﾘ` |
+| FreeBit / DTI / hi-ho系 | `freebit` | `ﾀﾀﾞﾉｶｹﾗ` |
+| NTT DOCOMO BUSINESS Inc | `gofors` | `ﾐｶｶﾋﾞｼﾞ` |
+| ITEC HANKYU HANSHIN CO. LTD. | `hanshin` | `ﾄﾗﾄﾗｰ` |
+| HARENET INC. | `harenet` | `ﾊﾚﾊﾞﾚｰ` |
+| HOKKAIDO TELECOMMUNICATIONS NETWORK Co. Inc. | `hotnet` | `ﾎｶﾎｶﾈｯﾄ` |
+| Hokuriku Telecommunication Network Co. | `htcn` | `ﾎｸﾎｸﾂｳ` |
+| OTNet Co. Inc. | `ii-okinawa` | `ﾅﾝｸﾙｰ` |
+| Ishikawa Computer Center Co. LTD. | `incl` | `ｲｼﾉｶﾜ` |
+| FUJITSU LIMITED | `infoweb` | `ﾌｼﾞﾌｼﾞ` |
+| Advanced Software Technology & Management Research Institute of KYOTO | `ip-kyoto` | `ﾐﾔｺﾉﾐﾁ` |
+| Naganoken Kyodou Densan Co.Ltd. | `janis` | `ｼﾅﾉﾉﾜ` |
+| JETINTERNET Corporation | `jetinternet` | `ﾋﾞｭｰﾝ` |
+| JPIX / JPNE系 | `jpne` | `ｼﾞｪﾋﾟﾋﾟ` |
+| Kamoike.net LLP | `kamoike-net` | `ｶﾓﾉｲｹ` |
+| M247 | `m247` | `ﾆﾖﾅﾅ` |
+| IMS Corporation | `magma` | `ｸﾞﾂｸﾞﾂｰ` |
+| Fujitsu Systems Applications & Support Limited | `mediaweb` | `ﾒﾃﾞｨﾒﾃﾞｨ` |
+| Minaminihon Information Processing Center Co Ltd | `minc` | `ﾐﾅﾐﾅﾐ` |
+| Mirai Communication Network Inc. | `mirai` | `ﾐﾗｲﾍｺﾞｰ` |
+| mitene internet co. ltd. | `mitene` | `ﾐﾃﾐﾃｰ` |
+| Mullvad VPN | `mullvad` | `ﾓｸﾞﾗｰ` |
+| Global Network Core Co. Ltd. | `ndac` | `ｾｶｲﾉｼﾝ` |
+| Netforest Inc. | `netforest` | `ﾓﾘﾉﾅｶ` |
+| GMO NetIRD Inc. | `netird` | `ｸﾏﾉﾐﾁ` |
+| NSK Co. Ltd. | `nsk` | `ﾆｽｺﾆｽｺ` |
+| NTTPC / InfoSphere | `nttpc` | `ﾐｶｶﾋﾟｼｰ` |
+| OBIS | `obis` | `ｵﾋﾞｵﾋﾞｰ` |
+| Oedo Telecom Inc | `oedo` | `ｴﾄﾞｯｺｰ` |
+| PacketHub / NordVPN系 | `packethub` | `ﾊﾟｹﾓﾘ` |
+| Phoenix Communications Inc. | `phoenix` | `ﾌｼﾁｮｰ` |
+| Proton / Proton VPN系 | `proton` | `ﾖｳｼｸﾝ` |
+| 楽天 / FUSION / xpass | `rakuten` | `ﾗｸﾗｸﾃﾝ` |
+| Japan Communication Inc. | `rmgr-mix` | `ﾂｳｼﾝﾎﾞ` |
+| SaiNet | `sainet-as` | `ｻｲｻｲｰ` |
+| Super Godzilla Communications GK | `sgcom` | `ｶｲｼﾞｭｰ` |
+| Niigata Communication Service | `shibata` | `ｺﾒﾄﾞｺﾛ` |
+| NetComBB Co. Ltd. | `sni-jp` | `ﾈｺﾑｺﾑ` |
+| SoftBank / ODN | `softbank` | `ﾔﾜﾗｶﾏｾﾞ` |
+| SoftEther Corporation | `softether` | `ﾔﾜﾗｶﾄﾝﾈﾙ` |
+| SUZUYO SHINWART CORPORATION | `ss` | `ｽｽﾞﾉｵﾄ` |
+| STNet Incorporated | `stcn` | `ｼｺｸﾉﾜ` |
+| SUN FIELD INTERNET LIMITED | `sunfield` | `ﾋﾅﾀﾊﾞﾀｹ` |
+| SYNAPSE Co. Ltd. | `synapse` | `ｼﾅﾌﾟﾌﾟ` |
+| TAM Co. Ltd. | `tam` | `ﾀﾑﾀﾑｰ` |
+| Tokyo Broadcasting System Television Inc. | `tbs-net` | `ﾃﾚﾋﾞｯｺ` |
+| Community Network Center Inc. | `tdnc` | `ﾂﾅｶﾞﾙﾜ` |
+| NDS Co. Ltd. | `tikitiki` | `ﾁｷﾁｷｰ` |
+| Tsukuba Internet Service Corporation | `tins-net` | `ﾂｸﾂｸﾊﾞ` |
+| TOHKnet Co. Inc. | `tohknet` | `ﾄｰﾎｸﾎｸ` |
+| TOKAI / TNC | `tokai` | `ｳﾐﾉﾐﾁ` |
+| transix / インターネットマルチフィード | `transix` | `ﾄﾗﾝﾄﾗﾝ` |
+| UNIADEX LTD. | `u-netsurf` | `ﾅﾐﾉﾘﾕｰ` |
+| Value Core Inc. | `vciu-net` | `ﾈｳﾁﾉｼﾝ` |
+| Wire and Wireless Co. Ltd. | `wi2` | `ﾜｲﾜｲﾄﾞｺ` |
+| Gunma Internet Co .ltd | `wind` | `ｶｾﾞﾏｶｾ` |
+| Wingtechnology Communications Inc. | `wintech-com` | `ﾂﾊﾞｻﾉﾜ` |
+| NTT-ME Corporation | `xephion` | `ｾﾞﾌｨﾌｨ` |
 
 ## 初回と既存サイト
 
@@ -57,6 +156,8 @@
 
 ## 国の重複
 
+閲覧・投稿制限の国条件では、国内事業者と確認できるIPを登録国が国外・不明でもJPとして評価します。元の登録国データは変更しません。対象と他の拒否条件の扱いは[閲覧制限の判定](features/reading.md#条件と判定の優先順位)を参照してください。
+
 同じIP範囲が複数の国に登録されていても、分類表全体の更新は止めません。
 
 | 同じ範囲の登録内容 | 国判定 |
@@ -94,7 +195,7 @@ VPN業者は[X4BNetのVPN向けASN一覧](https://github.com/X4BNet/lists_vpn/bl
 
 既知VPN・板別および共通の手動上書きは、特殊用途の自動表示より優先します。自動取得表で特殊用途が判明した回線は、国外でも`ｸﾓﾉｳｴ / V`などを表示します。国コードによる接続許可・拒否は独立して有効です。通常の国外回線は国コード、既知VPNは`ｺﾝﾆﾁﾜ / 8`を使い、事業者キーを補完します。
 
-自動取得表の同一prefixが複数の取得元に含まれる場合、種別・呼称・末尾が一致すればその分類を保ち、異なる事業者キーは空にします。種別・呼称・末尾のいずれかが食い違う場合は、そのprefixを「回線種別が不明」（`ﾜｯﾁｮｲ / 0`・事業者キーなし）として保持します。取得順で一方を採用したり、より広いprefixの分類で埋めたりせず、他の正常な範囲も更新します。不明化した範囲の回線規制は「回線種別が不明」の許可設定に従います。国・既知VPNの判定と手動上書きは独立して維持します。形式不正・空集合・容量超過では従来どおり更新全体を中止します。
+自動取得表の同一prefixが複数の取得元に含まれる場合、種別・呼称・末尾が一致すればその分類を保ち、異なる事業者キーは空にします。種別・呼称・末尾のいずれかが食い違う場合は、そのprefixを「回線種別が不明」（`ﾜｶﾗﾝ / 0`・事業者キーなし）として保持します。取得順で一方を採用したり、より広いprefixの分類で埋めたりせず、他の正常な範囲も更新します。不明化した範囲の回線規制は「回線種別が不明」の許可設定に従います。国・既知VPNの判定と手動上書きは独立して維持します。形式不正・空集合・容量超過では従来どおり更新全体を中止します。
 
 NifMo・LIBMO・LinksMate・SORACOM・トーンモバイル・ワイヤレスゲート・公衆Wi-Fi・機内Wi-Fi・船舶用衛星などの5ch風プリセットも用意します。プリセット追加だけでは自動判定されません。専用のIP範囲などを確認してから上書きに使います。船舶用SafeComNetの既存呼称は`ﾀﾆｯｸ / S`です。
 
@@ -424,4 +525,4 @@ Google Cloud・さくらは、設定案内と専用ドメインの公式例を�
 
 ## 固定・携帯混在の設定
 
-回線分類の取得元・カテゴリー・CIDR上書きで「固定・携帯混在」を選べます。投稿・閲覧の回線許可と条件規制でも独立して指定でき、固定・携帯・不明の拒否には含まれません。既存の取得元・分類・上書きは自動で変更しません。保存済みの取得元を変更する場合は、その行の分類を編集してください。混在分類を保存するとreader85以降が必要です。投稿表示の標準ラベルは `ﾜｯﾁｮｲ`、ID末尾は `0` です。
+回線分類の取得元・カテゴリー・CIDR上書きで「固定・携帯混在」を選べます。投稿・閲覧の回線許可と条件規制でも独立して指定でき、固定・携帯・不明の拒否には含まれません。既存の取得元・分類・上書きは自動で変更しません。保存済みの取得元を変更する場合は、その行の分類を編集してください。混在分類を保存するとreader85以降が必要です。投稿表示は冒頭の事業者別呼称、事業者キーが不明・呼称未登録なら `ﾜｯﾁｮﾏｾﾞ`、ID末尾は `0` です。

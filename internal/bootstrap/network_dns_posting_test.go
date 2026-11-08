@@ -1,4 +1,4 @@
-// キャッシュ済みDNS確認結果から実HTTP投稿を行い、固定回線のh/H表示と再起動後のDATを確認する。
+// 旧自動表とDNS確認結果から実HTTP投稿を行い、呼称の補正と再起動後のDATを確認する。
 package bootstrap
 
 import (
@@ -26,7 +26,22 @@ func TestDNSNetworkPostingSuffixPersistence(t *testing.T) {
 	for _, tc := range []struct {
 		kind, label, suffix string
 		status              identity.HostDNSStatus
-	}{{"absent", "ｱﾝﾀﾀﾞﾚ", "h", identity.HostDNSAbsent}, {"mismatch", "ZZ", "H", identity.HostDNSMismatch}, {"confirmed", "ﾜｯﾁｮｲ", "0", identity.HostDNSConfirmed}} {
+		networkKind         string
+		provider            string
+	}{
+		{"absent", "ｱﾝﾀﾀﾞﾚ", "h", identity.HostDNSAbsent, "fixed", "biglobe"},
+		{"mismatch", "ZZ", "H", identity.HostDNSMismatch, "fixed", "biglobe"},
+		{"confirmed", "ﾜｯﾁｮｲ", "0", identity.HostDNSConfirmed, "fixed", "biglobe"},
+		{"mixed", "ﾃﾞｶﾁｷｭｰ", "0", identity.HostDNSConfirmed, "mixed", "biglobe"},
+		{"unknown", "ﾃﾞｶﾁｷｭｰ", "0", identity.HostDNSConfirmed, "unknown", "biglobe"},
+		{"unknown-freebit", "ﾀﾀﾞﾉｶｹﾗ", "0", identity.HostDNSConfirmed, "unknown", "freebit"},
+		{"unknown-no-provider", "ﾜｶﾗﾝ", "0", identity.HostDNSConfirmed, "unknown", ""},
+		{"unknown-other-provider", "ﾜｶﾗﾝ", "0", identity.HostDNSConfirmed, "unknown", "other"},
+		{"unknown-absent", "ｱﾝﾀﾀﾞﾚ", "h", identity.HostDNSAbsent, "unknown", "freebit"},
+		{"unknown-mismatch", "ZZ", "H", identity.HostDNSMismatch, "unknown", "freebit"},
+		{"mixed-no-provider", "ﾜｯﾁｮﾏｾﾞ", "0", identity.HostDNSConfirmed, "mixed", ""},
+		{"mixed-other-provider", "ﾜｯﾁｮﾏｾﾞ", "0", identity.HostDNSConfirmed, "mixed", "other"},
+	} {
 		t.Run(tc.kind, func(t *testing.T) {
 			cfg, r := adminFixture(t)
 			useHealthyPostingCapacity(t, r)
@@ -54,7 +69,7 @@ func TestDNSNetworkPostingSuffixPersistence(t *testing.T) {
 				t.Fatal(res.StatusCode, body)
 			}
 			classifier := *r.liveNetworks.Load()
-			classifier.Automatic, err = identity.CompileNetworks([]identity.NetworkClass{{CIDR: "127.0.0.1/32", Kind: "fixed", Label: "ﾜｯﾁｮｲ", Suffix: "0", Provider: "test"}}, 1)
+			classifier.Automatic, err = identity.CompileNetworks([]identity.NetworkClass{{CIDR: "127.0.0.1/32", Kind: tc.networkKind, Label: "BIGLOBE", Suffix: "0", Provider: tc.provider}}, 1)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -80,7 +95,7 @@ func TestDNSNetworkPostingSuffixPersistence(t *testing.T) {
 				t.Fatal(err)
 			}
 			dat, err := textcodec.Decode(snap.DAT)
-			if err != nil || !strings.Contains(dat, "("+tc.label+" ") || !strings.Contains(dat, tc.suffix+"<>") {
+			if err != nil || !strings.Contains(dat, "("+tc.label+" ") || !strings.Contains(dat, tc.suffix+"<>") || strings.Contains(dat, "BIGLOBE") {
 				t.Fatal(dat, err)
 			}
 			original := string(snap.DAT)

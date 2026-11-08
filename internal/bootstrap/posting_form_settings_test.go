@@ -5,7 +5,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"net/http"
+	"net/http/httptest"
+	"oimobbs/internal/domain"
+	"oimobbs/internal/identity"
 	"oimobbs/internal/store"
+	"strings"
 	"testing"
 )
 
@@ -51,5 +56,52 @@ func TestPostingFormSettingsFollowOriginalBytes(t *testing.T) {
 	})
 	if err != nil {
 		t.Fatal(err)
+	}
+}
+
+// TestLegacyFeedSettingsCacheRefresh はSETTING.TXTの読取共有が板設定の更新を隠さないことを確認する。
+func TestLegacyFeedSettingsCacheRefresh(t *testing.T) {
+	_, repo := adminFixture(t)
+	defer repo.Close()
+	board, err := repo.CreateBoard(t.Context(), "settingscache", "設定共有")
+	if err != nil {
+		t.Fatal(err)
+	}
+	get := func() string {
+		t.Helper()
+		req := modernWebReadTestRequest("GET", repo.cfg.Public.BaseURL+"/settingscache/SETTING.TXT", nil)
+		res := httptest.NewRecorder()
+		repo.SiteWebHandler(nil).ServeHTTP(res, req)
+		if res.Code != 200 {
+			t.Fatal(res.Code, res.Body.String())
+		}
+		return res.Body.String()
+	}
+	before := get()
+	if get() != before {
+		t.Fatal("unchanged settings response changed")
+	}
+	c := newAdminClient(t, repo)
+	defer c.server.Close()
+	if c.login(adminTestSecret) != 303 {
+		t.Fatal("login")
+	}
+	path := "/api/v1/boards/" + board.ID.String() + "/settings"
+	res, body := c.request("GET", path, "", nil)
+	var envelope struct {
+		Data AdminBoard `json:"data"`
+	}
+	if json.Unmarshal([]byte(body), &envelope) != nil {
+		t.Fatal(body)
+	}
+	edit := envelope.Data.Settings
+	edit.Identity = &AdminIdentitySettings{IDMode: "required", SlipMode: "verbose", Networks: []identity.NetworkClass{}}
+	raw, _ := json.Marshal(edit)
+	res, body = c.request("PATCH", path, string(raw), http.Header{"Content-Type": {"application/json"}, "X-CSRF-Token": {res.Header.Get("X-CSRF-Token")}, "If-Match": {res.Header.Get("ETag")}, "Idempotency-Key": {domain.NewID().String()}})
+	if res.StatusCode != 200 {
+		t.Fatal(res.StatusCode, body)
+	}
+	if after := get(); !strings.Contains(after, "BBS_SLIP=verbose") || after == before {
+		t.Fatal("cached settings did not refresh", after)
 	}
 }

@@ -87,8 +87,10 @@ func TestNetworkReclassificationOverwrite(t *testing.T) {
 	if err != nil || next.Enabled || next.IntervalHours != 72 || next.DNSMode != config.DNSMode || !reflect.DeepEqual(next.Overrides, config.Overrides) || !reflect.DeepEqual(next.AccessOverrides, config.AccessOverrides) || len(next.Sources) != len(config.Sources) {
 		t.Fatal("settings changed", err, next)
 	}
-	if next.Sources[0] != config.Sources[0] || next.Categories[0] != config.Categories[0] {
-		t.Fatal("non-target edit changed")
+	wantSource, wantCategory := config.Sources[0], config.Categories[0]
+	wantSource.Label, wantCategory.Label = "ｵｼﾏｾﾞ", "ｵｼﾏｾﾞ"
+	if next.Sources[0] != wantSource || next.Categories[0] != wantCategory {
+		t.Fatal("display repair changed other fields")
 	}
 	if next.Categories[1].Kind != "fixed" || next.Categories[1].Label != "ﾜｯﾁｮｲ" {
 		t.Fatal("standard category not updated", next.Categories)

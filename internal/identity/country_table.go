@@ -65,17 +65,26 @@ func CompileCountries(rows []CountryNetwork) (*CountryTable, error) {
 
 // Match は最長一致の国と範囲を返す。重複による不明は空コードとtrueで、広い範囲への再照合を止める。
 func (t *CountryTable) Match(ip netip.Addr) (string, string, bool) {
-	if t == nil || !ip.IsValid() || ip.Zone() != "" {
+	code, prefix, ok := t.matchPrefix(ip)
+	if !ok {
 		return "", "", false
+	}
+	return code, prefix.String(), true
+}
+
+// matchPrefix は許可判定で不要なCIDR文字列を生成せず、同じ最長一致と重複境界を返す。
+func (t *CountryTable) matchPrefix(ip netip.Addr) (string, netip.Prefix, bool) {
+	if t == nil || !ip.IsValid() || ip.Zone() != "" {
+		return "", netip.Prefix{}, false
 	}
 	ip = ip.Unmap()
 	for bits := ip.BitLen(); bits >= 0; bits-- {
 		p := netip.PrefixFrom(ip, bits).Masked()
 		if code, ok := t.rows[p]; ok {
-			return code, p.String(), true
+			return code, p, true
 		}
 	}
-	return "", "", false
+	return "", netip.Prefix{}, false
 }
 
 // Codes は構築時に集計した国・地域コードの複製を、重複なしの昇順で返す。

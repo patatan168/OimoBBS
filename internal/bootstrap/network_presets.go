@@ -18,15 +18,17 @@ type networkPreset struct {
 	ASN                           uint32
 }
 
-var networkBaseSourcePresets = append([]networkPreset{
+var networkDomesticSourcePresets = append([]networkPreset{
 	{"ocn", "OCN（AS4713・固定/MVNO混在）", "mixed", "ﾜｯﾁｮｲ", "0", 4713},
 	{"docomo", "docomo（AS9605・携帯推定）", "mobile", "ｽﾌﾟｯｯ", "d", 9605},
 	{"rakuten", "楽天モバイル（AS138384・携帯推定）", "mobile", "ﾃﾃﾝﾃﾝﾃﾝ", "M", 138384},
-	{"kddi", "KDDI（AS2516・固定/携帯混在）", "mixed", "KDDI", "0", 2516},
-	{"softbank", "SoftBank（AS17676・固定/携帯混在）", "mixed", "SoftBank", "0", 17676},
-	{"iij", "IIJ（AS2497・用途混在）", "unknown", "IIJ", "0", 2497},
-	{"optage", "OPTAGE（AS17511・固定/MVNO混在）", "mixed", "OPTAGE", "0", 17511},
-}, append(append(domesticNetworkPresets, vpnProviderPresets...), specialNetworkPresets...)...)
+	{"kddi", "KDDI（AS2516・固定/携帯混在）", "mixed", "ﾜｯﾁｮｲ", "0", 2516},
+	{"softbank", "SoftBank（AS17676・固定/携帯混在）", "mixed", "ﾜｯﾁｮｲ", "0", 17676},
+	{"iij", "IIJ（AS2497・用途混在）", "unknown", "ﾜｶﾗﾝ", "0", 2497},
+	{"optage", "OPTAGE（AS17511・固定/MVNO混在）", "mixed", "ﾜｯﾁｮｲ", "0", 17511},
+}, domesticNetworkPresets...)
+
+var networkBaseSourcePresets = append(append(networkDomesticSourcePresets, vpnProviderPresets...), specialNetworkPresets...)
 
 var networkSourcePresets = reviewedNetworkPresets(networkBaseSourcePresets)
 
@@ -69,7 +71,7 @@ var networkDisplayPresets = []networkPreset{
 	{"softbank-fixed", "SoftBank 固定回線", "fixed", "ﾜｯﾁｮｲ", "0", 0},
 	{"iij-fixed", "IIJ 固定回線", "fixed", "ﾜｯﾁｮｲ", "0", 0},
 	{"optage-fixed", "OPTAGE 固定回線", "fixed", "ﾜｯﾁｮｲ", "0", 0},
-	{"mixed", "固定・携帯混在", "mixed", "ﾜｯﾁｮｲ", "0", 0},
+	{"mixed", "固定・携帯混在", "mixed", "ﾜｯﾁｮﾏｾﾞ", "0", 0},
 	{"academic", "大学・学術網", "academic", "ｶﾞｯｸｼ", "6", 0},
 	{"school", "学校", "school", "ﾎﾞﾝﾎﾞﾝ", "7", 0},
 	{"government", "官公庁", "government", "ｺﾑｲｰﾝ", "G", 0},
@@ -91,6 +93,7 @@ var networkDisplayPresets = []networkPreset{
 	{"flets-spot", "FLET'S SPOT（確認済み範囲用）", "wifi", "ﾌﾟﾗｳｨﾌｨ", "F", 0},
 	{"inflight", "機内Wi-Fi（確認済み範囲用）", "wifi", "ｱﾅﾌｧｰｲ", "A", 0},
 	{"maritime", "船舶用衛星通信 SafeComNet（確認済み範囲用）", "satellite", "ﾀﾆｯｸ", "S", 0},
+	{"unknown", "回線種別が不明", "unknown", "ﾜｶﾗﾝ", "0", 0},
 }
 
 // NetworkCategory はワッチョイ表示を基準に追加できるカテゴリー。回線区分は規制との対応を表す。
@@ -212,7 +215,7 @@ func (p networksPage) NewCategoryForm() networkRowForm {
 // categoryProvider は標準カテゴリーの表示名と独立したプロバイダキーを返す。
 func categoryProvider(id string) string {
 	switch id {
-	case "fixed", "mixed", "foreign", "vpn", "academic", "school", "government", "business", "hosting", "satellite":
+	case "fixed", "mixed", "unknown", "foreign", "vpn", "academic", "school", "government", "business", "hosting", "satellite":
 		return ""
 	case "mopera", "docomo-wifi":
 		return "docomo"

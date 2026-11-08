@@ -18,7 +18,7 @@ func TestNetworkOriginConflictsAreOrderIndependent(t *testing.T) {
 		b := identity.NetworkClass{CIDR: cidr, Kind: "unknown", Label: "M247", Suffix: "0", Provider: "m247"}
 		c := a
 		c.Provider = "third"
-		want := identity.NetworkClass{CIDR: cidr, Kind: "unknown", Label: "ﾜｯﾁｮｲ", Suffix: "0"}
+		want := identity.NetworkClass{CIDR: cidr, Kind: "unknown", Label: "ﾜｶﾗﾝ", Suffix: "0"}
 		for _, order := range [][]identity.NetworkClass{{a, b, c}, {a, c, b}, {b, a, c}, {b, c, a}, {c, a, b}, {c, b, a}} {
 			seen := map[string]identity.NetworkClass{}
 			batches := []networkBatch{}
@@ -89,14 +89,14 @@ func TestNetworkOriginConflictRefreshRecovery(t *testing.T) {
 		t.Helper()
 		for ip, kind := range map[string]string{"151.245.164.2": "unknown", "2001:db8:1::1": "unknown", "192.0.2.1": "hosting", "151.245.165.1": "hosting", "151.245.164.1": "fixed"} {
 			got := r.liveNetworks.Load().Classify(nil, netip.MustParseAddr(ip))
-			if got.Kind != kind || kind == "unknown" && (got.Provider != "" || got.Label != "ﾜｯﾁｮｲ" || got.Suffix != "0") {
+			if got.Kind != kind || kind == "unknown" && (got.Provider != "" || got.Label != "ﾜｶﾗﾝ" || got.Suffix != "0") {
 				t.Fatalf("%s: %+v", ip, got)
 			}
 		}
 	}
 	check()
 	first, err := loadNetworkState(r.site.State())
-	if err != nil || first.Error != "" || first.LastSuccess == 0 {
+	if err != nil || first.Error != "" || first.LastSuccess == 0 || !reflect.DeepEqual(first.Config, reclassifyStandardNetworks(config)) {
 		t.Fatal("refresh not saved", err)
 	}
 	r.networkClient = originConflictClient(true)
@@ -104,7 +104,7 @@ func TestNetworkOriginConflictRefreshRecovery(t *testing.T) {
 		t.Fatal("malformed feed accepted")
 	}
 	failed, err := loadNetworkState(r.site.State())
-	if err != nil || failed.Error != "invalid_data" || failed.LastSuccess != first.LastSuccess || !reflect.DeepEqual(failed.Rows, first.Rows) || !reflect.DeepEqual(failed.Config, config) {
+	if err != nil || failed.Error != "invalid_data" || failed.LastSuccess != first.LastSuccess || !reflect.DeepEqual(failed.Rows, first.Rows) || !reflect.DeepEqual(failed.Config, first.Config) {
 		t.Fatal("failed refresh lost previous table or overrides", err)
 	}
 	check()

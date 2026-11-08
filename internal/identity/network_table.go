@@ -61,6 +61,7 @@ func (t *NetworkClassifier) Classify(board []NetworkClass, ip netip.Addr) Networ
 	var automatic NetworkClass
 	if t != nil {
 		automatic, _ = t.Automatic.Match(ip)
+		automatic = AutomaticNetworkDisplay(automatic)
 	}
 	r, diagnostic := t.classifyDisplay(board, ip, automatic)
 	if diagnostic && t != nil {
@@ -119,6 +120,10 @@ func (t *NetworkClassifier) classifyDisplay(board []NetworkClass, ip netip.Addr,
 // DefaultNetworkDisplay は入力省略時の回線名と末尾。IPから事業者を推測しない。
 func DefaultNetworkDisplay(kind string) (string, string) {
 	switch kind {
+	case "unknown":
+		return "ﾜｶﾗﾝ", "0"
+	case "mixed":
+		return "ﾜｯﾁｮﾏｾﾞ", "0"
 	case "mobile":
 		return "ﾓﾊﾞｲﾙ", "S"
 	case "mvno":

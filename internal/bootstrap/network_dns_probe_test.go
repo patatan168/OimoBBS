@@ -43,7 +43,7 @@ func TestDNSDiagnosticManagementProbe(t *testing.T) {
 	for _, tc := range []struct {
 		status, label, suffix, text string
 		resolver                    probeDNSResolver
-	}{{"absent", "ｱﾝﾀﾀﾞﾚ", "h", "PTRなし", probeDNSResolver{}}, {"mismatch", "ZZ", "H", "正引き不一致", probeDNSResolver{names: []string{"wrong.example."}, ips: []netip.Addr{netip.MustParseAddr("8.8.4.4")}}}, {"confirmed", "ﾜｯﾁｮｲ", "0", "逆引きと正引きが一致", probeDNSResolver{names: []string{"unknown.example."}, ips: []netip.Addr{ip}}}} {
+	}{{"absent", "ｱﾝﾀﾀﾞﾚ", "h", "PTRなし", probeDNSResolver{}}, {"mismatch", "ZZ", "H", "正引き不一致", probeDNSResolver{names: []string{"wrong.example."}, ips: []netip.Addr{netip.MustParseAddr("8.8.4.4")}}}, {"confirmed", "ﾜｶﾗﾝ", "0", "逆引きと正引きが一致", probeDNSResolver{names: []string{"unknown.example."}, ips: []netip.Addr{ip}}}} {
 		t.Run(tc.status, func(t *testing.T) {
 			_, r := adminFixture(t)
 			defer r.Close()

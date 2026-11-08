@@ -26,6 +26,11 @@ type AccessResult struct {
 	VPNOrigin     string `json:"vpn_origin"`
 }
 
+// AccessAttributes は許可判定に必要な属性だけを持つ。表示・記録用の判定根拠はAccessResultで取得する。
+type AccessAttributes struct {
+	CountryCode, Country, VPN string
+}
+
 // AccessIndex は成功済みの日本/VPN表と管理者上書きを保持する。
 type AccessIndex struct {
 	Countries            *CountryTable
@@ -52,6 +57,17 @@ func ValidateAccessOverrides(rows []AccessOverride) error {
 
 // ClassifyAccess は国とVPNを別々に照合する。各属性の明示上書きどうしは最長一致を優先する。
 func (t *NetworkClassifier) ClassifyAccess(ip netip.Addr) AccessResult {
+	return t.classifyAccess(ip, true)
+}
+
+// ClassifyAccessAttributes は国/VPNの優先順を維持し、根拠表示のCIDR・説明文字列を生成しない。
+func (t *NetworkClassifier) ClassifyAccessAttributes(ip netip.Addr) AccessAttributes {
+	out := t.classifyAccess(ip, false)
+	return AccessAttributes{CountryCode: out.CountryCode, Country: out.Country, VPN: out.VPN}
+}
+
+// classifyAccess は表示・記録と許可判定で、同じ国/VPN規則と上書き優先順位を使う。
+func (t *NetworkClassifier) classifyAccess(ip netip.Addr, details bool) AccessResult {
 	out := AccessResult{Country: "unknown", VPN: "unknown", CountryOrigin: "未取得・判定不能", VPNOrigin: "未取得・判定不能"}
 	if !ip.IsValid() || ip.Zone() != "" || t == nil || t.Access == nil {
 		return out
@@ -59,7 +75,7 @@ func (t *NetworkClassifier) ClassifyAccess(ip netip.Addr) AccessResult {
 	ip = ip.Unmap()
 	a := t.Access
 	if ip.IsGlobalUnicast() && !ip.IsPrivate() {
-		code, cidr, countryMatched := a.Countries.Match(ip)
+		code, prefix, countryMatched := a.Countries.matchPrefix(ip)
 		if countryMatched {
 			if code != "" {
 				out.Country = "foreign"
@@ -68,7 +84,9 @@ func (t *NetworkClassifier) ClassifyAccess(ip netip.Addr) AccessResult {
 				out.Country = "jp"
 			}
 			out.CountryCode = code
-			out.CountryCIDR = cidr
+			if details {
+				out.CountryCIDR = prefix.String()
+			}
 			out.CountryOrigin = "全世界の登録国表"
 			if code == "" {
 				out.CountryOrigin = "登録国の重複により不明"
@@ -110,7 +128,9 @@ func (t *NetworkClassifier) ClassifyAccess(ip netip.Addr) AccessResult {
 		if r.VPN != "auto" && p.Bits() > vpnBits {
 			out.VPNCIDR = r.CIDR
 			out.VPN = r.VPN
-			out.VPNOrigin = "管理者のVPN上書き（" + r.CIDR + "）"
+			if details {
+				out.VPNOrigin = "管理者のVPN上書き（" + r.CIDR + "）"
+			}
 			vpnBits = p.Bits()
 		}
 	}
@@ -126,7 +146,9 @@ func (t *NetworkClassifier) ClassifyAccess(ip netip.Addr) AccessResult {
 		if r.Country == "jp" {
 			out.CountryCode = "JP"
 		}
-		out.CountryOrigin = "管理者の国上書き（" + r.CIDR + "）"
+		if details {
+			out.CountryOrigin = "管理者の国上書き（" + r.CIDR + "）"
+		}
 	}
 
 	return out

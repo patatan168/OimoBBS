@@ -79,7 +79,8 @@ func validateNetworkClass(r NetworkClass) (netip.Prefix, error) {
 
 // ClassifyNetwork は最長prefix一致を返す。未分類を固定回線と断定せずunknownにする。
 func ClassifyNetwork(rows []NetworkClass, ip netip.Addr) NetworkClass {
-	out := NetworkClass{Kind: "unknown", Label: "ﾜｯﾁｮｲ", Suffix: "0"}
+	label, suffix := DefaultNetworkDisplay("unknown")
+	out := NetworkClass{Kind: "unknown", Label: label, Suffix: suffix}
 	if !ip.IsValid() || ip.Zone() != "" {
 		return out
 	}

@@ -64,12 +64,12 @@ func TestDisplayControls(t *testing.T) {
 	c.SlipNetKey = domain.Hash{2}
 	c.SlipUAKey = domain.Hash{3}
 	old, dat := applyInput(t, nil, map[string]string{"subject": "題", "MESSAGE": "!extend:checked:vvvvv::\n本文"}, c)
-	if old.Policy.SlipMode != "vvvvv" || old.Posts[0].Body != "本文" || !strings.Contains(dat, "</b>(ﾜｯﾁｮｲ ") {
+	if old.Policy.SlipMode != "vvvvv" || old.Posts[0].Body != "本文" || !strings.Contains(dat, "</b>(ﾜｶﾗﾝ ") {
 		t.Fatal(old, dat)
 	}
 	c.Now = c.Now.Add(time.Second)
 	next, dat := applyInput(t, old, map[string]string{"MESSAGE": "返信"}, c)
-	if next.Posts[1].Identity.Slip == "" || !strings.Contains(dat, "</b>(ﾜｯﾁｮｲ ") {
+	if next.Posts[1].Identity.Slip == "" || !strings.Contains(dat, "</b>(ﾜｶﾗﾝ ") {
 		t.Fatal(dat)
 	}
 	p := old.Policy

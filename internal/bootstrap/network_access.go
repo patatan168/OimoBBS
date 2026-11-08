@@ -69,7 +69,7 @@ func checkNetworkPermission(t *identity.NetworkClassifier, settings *NetworkAcce
 			return ErrUnresolvedHost
 		}
 	}
-	a := t.ClassifyAccess(ip)
+	a := networkPermissionAccess(t, settings, ip, boardNetworks...)
 	if settings.JapanOnly {
 		if a.Country == "unknown" {
 			return ErrNetworkUnavailable
@@ -124,7 +124,7 @@ func compileAccessPrefixes(values []string, v4 *bool) (*identity.NetworkTable, e
 		if e != nil || v4 != nil && p.Addr().Is4() != *v4 {
 			return nil, errNetworkData
 		}
-		rows = append(rows, identity.NetworkClass{CIDR: cidr, Kind: "unknown", Label: "ﾜｯﾁｮｲ", Suffix: "0"})
+		rows = append(rows, identity.NetworkClass{CIDR: cidr, Kind: "unknown", Label: "ﾜｶﾗﾝ", Suffix: "0"})
 	}
 	return identity.CompileNetworks(rows, networkRowLimit)
 }

@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"oimobbs/internal/compat"
 	"oimobbs/internal/domain"
-	"oimobbs/internal/strictjson"
 	"oimobbs/internal/textcodec"
 	"strconv"
 	"strings"
@@ -99,8 +98,8 @@ func (repo *Repository) legacyFeed(w http.ResponseWriter, r *http.Request, board
 		return
 	}
 	value, e := b.worker.Submit(r.Context(), func() (any, error) {
-		var state boardValue
-		if err := strictjson.Decode(b.control.State().Rows["board:state"].Value, &state); err != nil {
+		state, err := b.postingFormSettings()
+		if err != nil {
 			return nil, err
 		}
 		if strings.HasSuffix(r.URL.Path, "/head.txt") {

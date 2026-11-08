@@ -101,7 +101,7 @@
 <p class="field-hint">オフにすると、国別のチェックにかかわらず国外を拒否します。日本の許可は下のJPで設定します。</p>
 <details><summary>国ごとの許可を設定する</summary><p>初期状態は全て許可です。拒否したい国のチェックを外してください。コードはIPの登録国を表します。</p><div class="permission-grid country-options country-permissions" data-filter-list data-filter-empty="一致する国がありません。国名や2文字のコードで検索してください。">{{range .CountryCodes}}<label class="check-option" data-country-row><input type="checkbox" name="allow_country" value="{{.}}" {{if $.CountryAllowed .}}checked{{end}}><span class="country-label"><span class="country-name" data-country-code="{{.}}"></span><code class="country-code">{{.}}</code></span></label>{{end}}</div></details>
 <p>認証済みキャップは、この板全体の回線・国の制限を免除します。個別の本文規制などは適用されます。</p><p><a class="tonal-link" href="{{adminBase}}/networks#network-access">回線分類で判定データを確認</a></p>
-<p class="field-hint">国を制限しているときに登録国が不明の場合や、VPN判定データが未取得の場合は投稿を停止します。登録国は所在地の保証ではなく、VPN判定は既知リストに掲載された範囲が対象です。回線・国・VPNの全ての許可条件を満たす必要があります。</p>
+<p class="field-hint">国内事業者と確認できる接続元は、登録国が国外・不明でも日本として国条件を判定します。日本の拒否や、回線・VPNなどの拒否は引き続き適用します。国内事業者も国も確認できない場合や、VPN判定データが未取得の場合は、対応する制限を設定すると投稿を停止します。登録国は所在地の保証ではなく、VPN判定は既知リストに掲載された範囲が対象です。回線・国・VPNの全ての許可条件を満たす必要があります。</p>
 </fieldset></details>
 <fieldset class="settings-section" id="board-identity"><legend>4. ID・ワッチョイ（新規スレッドの既定）</legend><p>共通の自動取得表と運営の上書きは回線分類から操作できます。</p><p><a class="tonal-link" href="{{adminBase}}/networks">回線分類</a></p>
 {{$id := .Values.Get "id_mode"}}<label>ID表示<select name="id_mode">{{range choices "id"}}<option value="{{.Value}}" {{if eq $id .Value}}selected{{end}}>{{.Label}}</option>{{end}}</select></label>

@@ -127,7 +127,7 @@ func TestHostingMultipleOriginsAreOrderIndependent(t *testing.T) {
 			bad.Suffix = "8"
 		}
 		merged, ok := mergeAutomaticNetwork(a, bad)
-		if !ok || merged.Kind != "unknown" || merged.Provider != "" || merged.Label != "ﾜｯﾁｮｲ" || merged.Suffix != "0" {
+		if !ok || merged.Kind != "unknown" || merged.Provider != "" || merged.Label != "ﾜｶﾗﾝ" || merged.Suffix != "0" {
 			t.Fatal("conflicting classification was not made unknown", change, merged)
 		}
 	}

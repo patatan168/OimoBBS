@@ -23,6 +23,9 @@ func TestNetworkScheduleAutomaticFetch(t *testing.T) {
 		t.Run(map[bool]string{false: "success", true: "failure"}[failed], func(t *testing.T) {
 			_, repo := adminFixture(t)
 			defer repo.Close()
+			// 起動時の更新と競合させず、この試験から各予定の取得を明示的に実行する。
+			repo.networkCancel()
+			<-repo.networkDone
 			var requests atomic.Int32
 			now := time.Now().In(domain.JST)
 			// 直前の暦日に設定済みで、現在の分の予定は未実行。時計待ちは不要。

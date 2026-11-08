@@ -81,9 +81,9 @@ try {
     const response = await submitted;
     assert.equal(response.status(), 200, await response.text());
     await page.waitForLoadState('load');
-    await page.waitForFunction(() => !document.querySelector('[data-network-poll]'));
+    await page.locator('[data-network-poll]').waitFor({state: 'detached'});
     assert.equal(await page.locator('[role="alert"]').count(), 0);
-    assert.ok((await page.locator('.site-footer').innerText()).includes('バージョン1.2.0'));
+    assert.ok((await page.locator('.site-footer').innerText()).includes('バージョン1.2.1'));
     const after = (await (await page.request.get(base + '/api/v1/networks')).json()).data;
     assert.equal(after.error_code, '');
     assert.ok(BigInt(after.attempt_ns) > BigInt(before.attempt_ns));
@@ -95,6 +95,24 @@ try {
     for (const source of after.config.sources.filter(source => source.type === 'asn')) counts[source.kind] = (counts[source.kind] || 0) + 1;
     assert.equal(counts.unknown, 87); assert.equal(counts.fixed, 115);
     assert.equal(counts.mixed, 6); assert.equal(counts.academic, 9);
+    const mixedLabels = {ocn: 'ｵｼﾏｾﾞ', kddi: 'ｱｳｱｳﾏｾﾞ', softbank: 'ﾔﾜﾗｶﾏｾﾞ', iij: 'ｲｲｼﾞｬﾝ', optage: 'ｵﾌﾟﾏｾﾞ', biglobe: 'ﾃﾞｶﾁｷｭｰ'};
+    const displayedLabels = await page.locator('[data-network-source-form]').evaluateAll(forms => Object.fromEntries(forms.map(form => [form.elements.asn.value, form.elements.label.value])));
+    for (const source of after.config.sources.filter(source => source.type === 'asn')) {
+      if (['fixed', 'unknown', 'mixed'].includes(source.kind)) {
+        const expected = source.kind === 'mixed' ? mixedLabels[source.provider] : source.kind === 'unknown' ? source.label : 'ﾜｯﾁｮｲ';
+        if (source.kind === 'unknown') {
+          assert.match(source.label, /^[ｦ-ﾟ]{1,16}$/, source.name);
+          assert.notEqual(source.label, 'ﾜｶﾗﾝ', source.name);
+          if (source.provider === 'biglobe') assert.equal(source.label, 'ﾃﾞｶﾁｷｭｰ');
+          if (source.provider === 'freebit') assert.equal(source.label, 'ﾀﾀﾞﾉｶｹﾗ');
+        }
+        assert.equal(source.label, expected, source.name);
+        assert.equal(source.suffix, '0', source.name);
+        assert.equal(displayedLabels[source.asn], expected, source.name);
+      }
+    }
+    assert.equal(after.config.categories.find(category => category.id === 'mixed').label, 'ﾜｯﾁｮﾏｾﾞ');
+    assert.equal(after.config.categories.find(category => category.id === 'unknown').label, 'ﾜｶﾗﾝ');
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
     if (directory) {
       await page.locator('#network-status').scrollIntoViewIfNeeded();

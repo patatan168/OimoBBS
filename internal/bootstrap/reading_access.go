@@ -258,7 +258,7 @@ func (r *Repository) prepareReading(ctx context.Context, scope string, ip netip.
 	}
 	for _, key := range scopes {
 		p := snapshot.Policies[key]
-		if p != nil && p.Policy.Enabled && (p.Policy.Network.denyUnresolvedHost() || len(p.Policy.Network.DeniedKinds) > 0) {
+		if readingNeedsDNS(p, r.liveNetworks.Load(), ip) {
 			r.resolveNetworkHost(ctx, ip, true)
 			return
 		}

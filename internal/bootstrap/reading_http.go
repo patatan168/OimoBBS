@@ -61,7 +61,7 @@ func (repo *Repository) readableBoards(r *http.Request, boards []publicBoard) []
 	if snapshot := repo.liveReading.Load(); snapshot != nil {
 		for _, board := range boards {
 			p := snapshot.Policies[board.ID.String()]
-			if p != nil && p.Policy.Enabled && (p.Policy.Network.denyUnresolvedHost() || len(p.Policy.Network.DeniedKinds) > 0) {
+			if readingNeedsDNS(p, repo.liveNetworks.Load(), peer.Addr()) {
 				repo.prepareReading(r.Context(), board.ID.String(), peer.Addr())
 				break
 			}

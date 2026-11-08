@@ -226,7 +226,7 @@ func TestThreadSlipPolicyForm(t *testing.T) {
 	}
 	dat, e := textcodec.Decode(snap.DAT)
 	lines := strings.Split(strings.TrimSuffix(dat, "\n"), "\n")
-	if e != nil || len(lines) != 2 || strings.Contains(lines[0], "127.0.0.1") || !strings.Contains(lines[1], "</b>(ﾜｯﾁｮｲ ") || !strings.Contains(lines[1], "[127.0.0.1])<b>") {
+	if e != nil || len(lines) != 2 || strings.Contains(lines[0], "127.0.0.1") || !strings.Contains(lines[1], "</b>(ﾜｶﾗﾝ ") || !strings.Contains(lines[1], "[127.0.0.1])<b>") {
 		t.Fatal(dat, e)
 	}
 
@@ -258,7 +258,7 @@ func TestThreadSlipPolicyForm(t *testing.T) {
 	}
 	dat, e = textcodec.Decode(snap.DAT)
 	lines = strings.Split(strings.TrimSuffix(dat, "\n"), "\n")
-	if e != nil || len(lines) != 3 || !strings.Contains(lines[1], "[127.0.0.1])<b>") || strings.Contains(lines[2], "127.0.0.1") || !strings.Contains(lines[2], "</b>(ﾜｯﾁｮｲ ") {
+	if e != nil || len(lines) != 3 || !strings.Contains(lines[1], "[127.0.0.1])<b>") || strings.Contains(lines[2], "127.0.0.1") || !strings.Contains(lines[2], "</b>(ﾜｶﾗﾝ ") {
 		t.Fatal(dat, e)
 	}
 }

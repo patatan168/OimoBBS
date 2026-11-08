@@ -49,7 +49,7 @@ func (r *Repository) prepareNetworkCatalogueRefresh(snapshot *store.ControlState
 	return true, nil
 }
 
-// reviewedNetworkPresets は用途を確認した対象だけを変更し、未確認の事業者を推測しない。
+// reviewedNetworkPresets は確認済みの用途を反映し、自動分類の呼称を統一する。
 func reviewedNetworkPresets(previous []networkPreset) []networkPreset {
 	rows := append([]networkPreset(nil), previous...)
 	for i := range rows {
@@ -67,6 +67,10 @@ func reviewedNetworkPresets(previous []networkPreset) []networkPreset {
 			}
 		}
 		rows[i].Name = strings.NewReplacer("用途混在/未確定", description, "用途混在", description).Replace(rows[i].Name)
+	}
+	for i, row := range rows {
+		value := identity.AutomaticNetworkDisplay(identity.NetworkClass{Kind: row.Kind, Label: row.Label, Suffix: row.Suffix, Provider: presetProvider(row.ID)})
+		rows[i].Label, rows[i].Suffix = value.Label, value.Suffix
 	}
 	return rows
 }
@@ -99,6 +103,7 @@ func reclassifyStandardNetworks(config NetworkConfig) NetworkConfig {
 			config.Categories[i] = updated
 		}
 	}
+	repairStandardNetworkDisplays(&config)
 	return config
 }
 
